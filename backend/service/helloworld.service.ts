@@ -1,5 +1,5 @@
 export default {
-   async hello_world() {
+   async helloWorld() {
       return await "Hello world"
    }
 }

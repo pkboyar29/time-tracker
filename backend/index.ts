@@ -3,6 +3,7 @@ import mongoose from 'mongoose'
 import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
 import * as helloWorldRouter from './controller/helloworld.controller'
+import * as sessionRouter from './controller/session.controller'
 
 const app: Express = express()
 dotenv.config()
@@ -18,6 +19,7 @@ app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 
 app.use('/hello-world', helloWorldRouter.default)
+app.use('/sessions', sessionRouter.default)
 
 function startServer() {
    app.listen(PORT, () => {
