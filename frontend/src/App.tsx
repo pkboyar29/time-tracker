@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import audioUrl from './assets/audio.mp3'
 
 interface SessionFields {
   spentTimeSeconds: number
@@ -41,7 +42,10 @@ function App() {
 
   useEffect(() => {
     if (countDown === 0) {
-      alert('Count down')
+      const audio = new Audio(audioUrl)
+      audio.volume = 0.35
+      audio.play()
+      // alert('Count down')
       stopTimer()
     }
   }, [countDown])
