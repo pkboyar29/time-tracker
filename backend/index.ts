@@ -2,6 +2,7 @@ import express, { Express } from 'express'
 import mongoose from 'mongoose'
 import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
+import cors from 'cors'
 import * as helloWorldRouter from './controller/helloworld.controller'
 import * as sessionRouter from './controller/session.controller'
 
@@ -17,6 +18,7 @@ mongoose.connect(MONGO_URL).then(() => {
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cors())
 
 app.use('/hello-world', helloWorldRouter.default)
 app.use('/sessions', sessionRouter.default)
