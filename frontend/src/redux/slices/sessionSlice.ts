@@ -47,6 +47,8 @@ export const updateSession = createAsyncThunk(
    'sessions/updateSession',
    async (existingSession: Session) => {
       const response = await axios.put(`/sessions/${existingSession.id}`, existingSession)
+      console.log(response.data)
+      console.log(mapSessionFromResponse(response.data))
       return mapSessionFromResponse(response.data)
    }
 )
@@ -56,7 +58,15 @@ const sessionSlice = createSlice({
    initialState,
    reducers: {
       setCurrentSessionById(state, action: PayloadAction<string>) {
-         state.currentSession = findSessionById(state.sessions, action.payload);
+         state.currentSession = findSessionById(state.sessions, action.payload)
+      },
+      removeCurrentSession(state) {
+         state.currentSession = null
+      },
+      addSecond(state) {
+         if (state.currentSession) {
+            state.currentSession.spentTimeSeconds++
+         }
       }
    },
    extraReducers: (builder) => {
@@ -74,13 +84,31 @@ const sessionSlice = createSlice({
          })
          .addCase(createSession.fulfilled, (state, action) => {
             state.sessions.push(action.payload)
-            state.currentSession = findSessionById(state.sessions, action.payload.id);
+            state.currentSession = findSessionById(state.sessions, action.payload.id)
          })
          .addCase(updateSession.fulfilled, (state, action) => {
+            // массив то судя по UI нифига не меняется
+            state.sessions = state.sessions.map((session: Session) => {
+               if (session.id === action.payload.id) {
+                  console.log('триггер')
+                  return {
+                     ...session,
+                     totalTimeSeconds: action.payload.totalTimeSeconds,
+                     spentTimeSeconds: action.payload.spentTimeSeconds,
+                     completed: action.payload.completed
+                  }
+               }
+               return session
+            })
 
+            // если currentSession существует, то есть например при остановке таймера нам же скорее всего не нужно устанавливать текущую сессию, наверное это единственный способ понять это, хотя выглядит как костыль
+            // if (state.currentSession) {
+            // вот тут current session наверное надо пока просто менять, а не присваивать новое значение?
+            //    state.currentSession = findSessionById(state.sessions, action.payload.id)
+            // }
          })
    }
 })
 
-export const { setCurrentSessionById } = sessionSlice.actions
+export const { setCurrentSessionById, removeCurrentSession, addSecond } = sessionSlice.actions
 export default sessionSlice.reducer

@@ -24,15 +24,13 @@ export default {
       try {
          // проверить существование по id, иначе выкатить ошибку
          console.log(`id сессии в сервисе это ${sessionId}`)
-         const existingSession = Session.findById(sessionId)
-
-         const output = await existingSession.updateOne({
+         await Session.findById(sessionId).updateOne({
             totalTimeSeconds: sessionDTO.totalTimeSeconds,
             spentTimeSeconds: sessionDTO.spentTimeSeconds,
             completed: completed
          })
 
-         return await output
+         return await Session.findById(sessionId)
       } catch (e) {
          console.log(e)
       }
@@ -41,11 +39,9 @@ export default {
    async getSessions() {
       try {
          const sessions = Session.find({})
-         console.log('All sessions: ', sessions)
          return await sessions
       } catch (e) {
          console.log(e)
       }
    }
-
 }
