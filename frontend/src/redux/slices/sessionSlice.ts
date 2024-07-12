@@ -1,56 +1,64 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import axios from '../../axios'
 
 interface SessionState {
    sessions: Session[],
-   status: string
+   status: string,
+   currentSession: Session | null
 }
 
 const initialState: SessionState = {
    sessions: [],
-   status: 'idle' // 'idle' | 'loading' | 'succeeded' | 'failed'
+   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+   currentSession: null
+}
+
+const mapSessionFromResponse = (unmappedSession: any): Session => {
+   return {
+      id: unmappedSession._id,
+      totalTimeSeconds: unmappedSession.totalTimeSeconds,
+      spentTimeSeconds: unmappedSession.spentTimeSeconds,
+      completed: unmappedSession.completed,
+   }
+}
+
+const findSessionById = (sessions: Session[], id: string): Session | null => {
+   return sessions.find((session: Session) => session.id === id) || null
 }
 
 export const fetchSessions = createAsyncThunk(
    'sessions/fetchSessions',
    async () => {
-      const { data } = await axios.get('/sessions')
-      const mappedData = data.map((unmappedSession: any) => ({
-         id: unmappedSession._id,
-         ...unmappedSession
-      }))
+      const response = await axios.get('/sessions')
+      const mappedData = response.data.map((unmappedSession: any) => mapSessionFromResponse(unmappedSession))
       return mappedData
    }
 )
 
 export const createSession = createAsyncThunk(
    'sessions/createSession',
-   async (newSession: Session) => {
-      const { data } = await axios.post('/sessions', newSession)
-      const mappedData = {
-         id: data._id,
-         ...data
-      }
-      return mappedData
+   async (newSession: SessionCreateRequest) => {
+      const response = await axios.post('/sessions', newSession)
+      return mapSessionFromResponse(response.data)
    }
 )
 
 export const updateSession = createAsyncThunk(
    'sessions/updateSession',
    async (existingSession: Session) => {
-      const { data } = await axios.put(`/sessions/${existingSession.id}`, existingSession)
-      const mappedData = {
-         id: data._id,
-         ...data
-      }
-      return mappedData
+      const response = await axios.put(`/sessions/${existingSession.id}`, existingSession)
+      return mapSessionFromResponse(response.data)
    }
 )
 
 const sessionSlice = createSlice({
    name: 'sessions',
    initialState,
-   reducers: {},
+   reducers: {
+      setCurrentSessionById(state, action: PayloadAction<string>) {
+         state.currentSession = findSessionById(state.sessions, action.payload);
+      }
+   },
    extraReducers: (builder) => {
       builder
          .addCase(fetchSessions.pending, (state) => {
@@ -66,8 +74,13 @@ const sessionSlice = createSlice({
          })
          .addCase(createSession.fulfilled, (state, action) => {
             state.sessions.push(action.payload)
+            state.currentSession = findSessionById(state.sessions, action.payload.id);
+         })
+         .addCase(updateSession.fulfilled, (state, action) => {
+
          })
    }
 })
 
+export const { setCurrentSessionById } = sessionSlice.actions
 export default sessionSlice.reducer

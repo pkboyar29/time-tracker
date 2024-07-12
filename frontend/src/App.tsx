@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { get, useForm } from 'react-hook-form'
 import audioUrl from './assets/audio.mp3'
-import { fetchSessions, createSession } from './redux/slices/sessionSlice'
+import { fetchSessions, createSession, setCurrentSessionById } from './redux/slices/sessionSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState, AppDispatch } from './redux/store'
 import { PauseCircleIcon, PlayCircleIcon, StopCircleIcon, PlayPauseIcon } from '@heroicons/react/24/solid';
@@ -15,6 +15,7 @@ function App() {
   const [enabled, setEnabled] = useState<boolean>(false)
   const [countDown, setCountDown] = useState<number>(0)
   const sessions = useSelector((state: RootState) => state.sessions.sessions)
+  const currentSession = useSelector((state: RootState) => state.sessions.currentSession)
 
   const dispatch = useDispatch<AppDispatch>()
 
@@ -61,13 +62,29 @@ function App() {
     }
   }, [countDown])
 
+  const onSessionClick = (sessionId: string) => {
+    console.log(sessionId)
+    dispatch(setCurrentSessionById(sessionId))
+  }
+
+  const onCreateSessionClick = () => {
+    dispatch(createSession({
+      totalTimeSeconds: getValues('spentTimeSeconds'),
+      spentTimeSeconds: 0
+    }))
+  }
+
   return (
     <>
       <div>
         <div>Все сессии</div>
-        <div>
-          {sessions.map((session, index) => (
-            <div key={index} className='flex gap-3'>
+        <div className='mt-3 flex flex-col gap-2'>
+          {sessions.map((session: Session) => (
+            <div onClick={() => {
+              if (session.id) {
+                onSessionClick(session.id)
+              }
+            }} key={session.id} className='flex gap-3'>
               <div>{session.id}</div>
               <div>{session.totalTimeSeconds} сек</div>
               <div>{session.spentTimeSeconds} сек</div>
@@ -77,17 +94,19 @@ function App() {
         </div>
       </div>
 
-      <button onClick={() => {
-        dispatch(createSession({
-          totalTimeSeconds: 7200,
-          spentTimeSeconds: 0
-        }))
-      }}>Create session</button>
+      <div className='mt-8 flex flex-col items-start gap-3'>
+        <div>Creating a new session</div>
+        <input {...register('spentTimeSeconds')} type='number' placeholder='Enter seconds' className='p-1 rounded-md border border-sky-500 bg-red-500 text-white placeholder-white' />
+        <div>Choose an activity</div>
+        <div>Choose a task</div>
+        <button className='p-3 bg-red-500 text-white rounded-xl' onClick={onCreateSessionClick}
+        >Create session</button>
+      </div>
 
-      <div className='flex flex-col items-center gap-1 mt-10'>
-        <input {...register('spentTimeSeconds')} type='number' placeholder='Enter seconds' className='p-1 rounded-md border border-sky-500 bg-sky-200' />
-        <div className=''>{countDown}</div>
-        <div className='mt-3 flex gap-4'>
+      <div className='flex flex-col items-center gap-3 mt-10'>
+        <div>Сессия {currentSession?.totalTimeSeconds} секунд</div>
+        <div>Прошло: {currentSession?.spentTimeSeconds} секунд</div>
+        <div className='flex gap-4'>
           <button onClick={() => {
             if (!started)
               startTimer()

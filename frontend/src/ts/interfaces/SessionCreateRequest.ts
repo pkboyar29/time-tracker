@@ -1,6 +1,4 @@
-interface Session {
-   id: string,
+interface SessionCreateRequest {
    totalTimeSeconds: number,
    spentTimeSeconds: number,
-   completed: boolean
 }
