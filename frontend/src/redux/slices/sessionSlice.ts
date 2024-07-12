@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import axios from '../../axios'
 
 interface SessionState {
@@ -15,7 +15,11 @@ export const fetchSessions = createAsyncThunk(
    'sessions/fetchSessions',
    async () => {
       const { data } = await axios.get('/sessions')
-      return data
+      const mappedData = data.map((unmappedSession: any) => ({
+         id: unmappedSession._id,
+         ...unmappedSession
+      }))
+      return mappedData
    }
 )
 
@@ -23,15 +27,23 @@ export const createSession = createAsyncThunk(
    'sessions/createSession',
    async (newSession: Session) => {
       const { data } = await axios.post('/sessions', newSession)
-      return data
+      const mappedData = {
+         id: data._id,
+         ...data
+      }
+      return mappedData
    }
 )
 
 export const updateSession = createAsyncThunk(
    'sessions/updateSession',
    async (existingSession: Session) => {
-      const { data } = await axios.put(`/sessions/${existingSession._id}`, existingSession)
-      return data
+      const { data } = await axios.put(`/sessions/${existingSession.id}`, existingSession)
+      const mappedData = {
+         id: data._id,
+         ...data
+      }
+      return mappedData
    }
 )
 

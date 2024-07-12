@@ -43,11 +43,11 @@ function App() {
   useEffect(() => {
     if (!enabled)
       return
-    const i = setInterval(() => {
+    const intervalId = setInterval(() => {
       setCountDown((c) => Math.max(c - 1, 0))
     }, 1000)
     return () => {
-      clearInterval(i)
+      clearInterval(intervalId)
     }
   }, [enabled])
 
@@ -68,7 +68,7 @@ function App() {
         <div>
           {sessions.map((session, index) => (
             <div key={index} className='flex gap-3'>
-              <div>{session._id}</div>
+              <div>{session.id}</div>
               <div>{session.totalTimeSeconds} сек</div>
               <div>{session.spentTimeSeconds} сек</div>
               <div>{session.completed ? 'completed' : 'not completed'}</div>
