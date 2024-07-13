@@ -29,8 +29,8 @@ const findSessionById = (sessions: Session[], id: string): Session | null => {
 export const fetchSessions = createAsyncThunk(
    'sessions/fetchSessions',
    async () => {
-      const response = await axios.get('/sessions')
-      const mappedData = response.data.map((unmappedSession: any) => mapSessionFromResponse(unmappedSession))
+      const { data } = await axios.get('/sessions')
+      const mappedData = data.map((unmappedSession: any) => mapSessionFromResponse(unmappedSession))
       return mappedData
    }
 )
@@ -38,18 +38,18 @@ export const fetchSessions = createAsyncThunk(
 export const createSession = createAsyncThunk(
    'sessions/createSession',
    async (newSession: SessionCreateRequest) => {
-      const response = await axios.post('/sessions', newSession)
-      return mapSessionFromResponse(response.data)
+      const { data } = await axios.post('/sessions', newSession)
+      return mapSessionFromResponse(data)
    }
 )
 
 export const updateSession = createAsyncThunk(
    'sessions/updateSession',
    async (existingSession: Session) => {
-      const response = await axios.put(`/sessions/${existingSession.id}`, existingSession)
-      console.log(response.data)
-      console.log(mapSessionFromResponse(response.data))
-      return mapSessionFromResponse(response.data)
+      const { data } = await axios.put(`/sessions/${existingSession.id}`, existingSession)
+      console.log(data)
+      console.log(mapSessionFromResponse(data))
+      return mapSessionFromResponse(data)
    }
 )
 
