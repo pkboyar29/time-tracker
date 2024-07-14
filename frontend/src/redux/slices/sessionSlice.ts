@@ -47,9 +47,15 @@ export const updateSession = createAsyncThunk(
    'sessions/updateSession',
    async (existingSession: Session) => {
       const { data } = await axios.put(`/sessions/${existingSession.id}`, existingSession)
-      console.log(data)
-      console.log(mapSessionFromResponse(data))
       return mapSessionFromResponse(data)
+   }
+)
+
+export const deleteSession = createAsyncThunk(
+   'sessions/deleteSession',
+   async (sessionId: string) => {
+      let { data } = await axios.delete(`/sessions/${sessionId}`)
+      return data
    }
 )
 
@@ -90,7 +96,6 @@ const sessionSlice = createSlice({
             // массив то судя по UI нифига не меняется
             state.sessions = state.sessions.map((session: Session) => {
                if (session.id === action.payload.id) {
-                  console.log('триггер')
                   return {
                      ...session,
                      totalTimeSeconds: action.payload.totalTimeSeconds,
@@ -100,12 +105,9 @@ const sessionSlice = createSlice({
                }
                return session
             })
-
-            // если currentSession существует, то есть например при остановке таймера нам же скорее всего не нужно устанавливать текущую сессию, наверное это единственный способ понять это, хотя выглядит как костыль
-            // if (state.currentSession) {
-            // вот тут current session наверное надо пока просто менять, а не присваивать новое значение?
-            //    state.currentSession = findSessionById(state.sessions, action.payload.id)
-            // }
+         })
+         .addCase(deleteSession.fulfilled, (state, action) => {
+            state.sessions = state.sessions.filter((session: Session) => session.id !== action.meta.arg)
          })
    }
 })

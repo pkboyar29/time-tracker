@@ -23,7 +23,6 @@ export default {
 
       try {
          // проверить существование по id, иначе выкатить ошибку
-         console.log(`id сессии в сервисе это ${sessionId}`)
          await Session.findById(sessionId).updateOne({
             totalTimeSeconds: sessionDTO.totalTimeSeconds,
             spentTimeSeconds: sessionDTO.spentTimeSeconds,
@@ -31,6 +30,21 @@ export default {
          })
 
          return await Session.findById(sessionId)
+      } catch (e) {
+         console.log(e)
+      }
+   },
+
+   async deleteSession(sessionId: string) {
+      try {
+         // проверить существование по id, иначе выкатить ошибку
+         await Session.deleteOne({ _id: sessionId })
+
+         const message = {
+            message: 'Deleted successful'
+         }
+
+         return message
       } catch (e) {
          console.log(e)
       }

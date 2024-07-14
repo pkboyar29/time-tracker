@@ -18,4 +18,9 @@ router.put('/:id', async (req: Request, res: Response) => {
    res.json(data)
 })
 
+router.delete('/:id', async (req: Request, res: Response) => {
+   const data = await sessionService.deleteSession(req.params.id)
+   res.json(data)
+})
+
 export default router

@@ -7,16 +7,18 @@ import Sidebar from './components/Sidebar'
 
 const App: FC = () => {
   return (
-    <div className='flex h-full'>
-      <Sidebar />
+    <>
+      <div id='app' className='flex min-h-full h-full w-full'>
+        <Sidebar />
 
-      <div className='p-5'>
-        <Routes>
-          <Route path='/timer' element={<TimerPage />} />
-          <Route path='/' element={<Navigate to='/timer' />} />
-        </Routes>
+        <div className='p-5'>
+          <Routes>
+            <Route path='/timer' element={<TimerPage />} />
+            <Route path='/' element={<Navigate to='/timer' />} />
+          </Routes>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
