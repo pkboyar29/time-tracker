@@ -26,7 +26,8 @@ export default {
          await Session.findById(sessionId).updateOne({
             totalTimeSeconds: sessionDTO.totalTimeSeconds,
             spentTimeSeconds: sessionDTO.spentTimeSeconds,
-            completed: completed
+            completed: completed,
+            updatedDate: Date.now()
          })
 
          return await Session.findById(sessionId)
