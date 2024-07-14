@@ -4,6 +4,7 @@ import bodyParser from 'body-parser'
 import dotenv from 'dotenv'
 import cors from 'cors'
 import * as sessionRouter from './controller/session.controller'
+import * as activityRouter from './controller/activity.controller'
 
 const app: Express = express()
 dotenv.config()
@@ -20,6 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
 
 app.use('/sessions', sessionRouter.default)
+app.use('/activities', activityRouter.default)
 
 function startServer() {
    app.listen(PORT, () => {

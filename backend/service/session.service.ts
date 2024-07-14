@@ -3,6 +3,15 @@ import { SessionDTO } from '../dto/session.dto'
 
 export default {
 
+   async getSessions() {
+      try {
+         const sessions = Session.find({})
+         return await sessions
+      } catch (e) {
+         console.log(e)
+      }
+   },
+
    async createSession(sessionDTO: SessionDTO) {
       const newSession = new Session({
          totalTimeSeconds: sessionDTO.totalTimeSeconds,
@@ -44,17 +53,7 @@ export default {
          const message = {
             message: 'Deleted successful'
          }
-
          return message
-      } catch (e) {
-         console.log(e)
-      }
-   },
-
-   async getSessions() {
-      try {
-         const sessions = Session.find({})
-         return await sessions
       } catch (e) {
          console.log(e)
       }
