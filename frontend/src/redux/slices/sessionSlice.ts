@@ -93,7 +93,6 @@ const sessionSlice = createSlice({
             state.currentSession = findSessionById(state.sessions, action.payload.id)
          })
          .addCase(updateSession.fulfilled, (state, action) => {
-            // массив то судя по UI нифига не меняется
             state.sessions = state.sessions.map((session: Session) => {
                if (session.id === action.payload.id) {
                   return {

@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { fetchActivities, createActivity } from '../redux/slices/activitySlice'
+import { fetchActivities, createActivity, updateActivity } from '../redux/slices/activitySlice'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from '../redux/store'
 
@@ -11,16 +11,32 @@ interface ActivityFields {
 
 const ActivitiesPage: FC = () => {
    const activities = useSelector((state: RootState) => state.activities.activities)
+   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null)
+
    const dispatch = useDispatch<AppDispatch>()
 
-   const { register, handleSubmit } = useForm<ActivityFields>({ mode: 'onBlur' })
+   const { register, handleSubmit, setValue } = useForm<ActivityFields>({ mode: 'onBlur' })
 
    useEffect(() => {
       dispatch(fetchActivities())
    }, [])
 
+   const chooseCurrentActivity = (activity: Activity) => {
+      setCurrentActivity(activity)
+
+      setValue('name', activity.name)
+      setValue('descr', activity.descr)
+   }
+
    const onSubmit = (data: ActivityFields) => {
-      dispatch(createActivity(data))
+      if (!currentActivity) {
+         dispatch(createActivity(data))
+      } else {
+         dispatch(updateActivity({
+            id: currentActivity.id,
+            ...data
+         }))
+      }
    }
 
    return (
@@ -29,7 +45,7 @@ const ActivitiesPage: FC = () => {
             <div className='mb-5'>All activities</div>
             <div className='flex flex-col gap-4'>
                {activities.map((activity: Activity) => (
-                  <div className='flex gap-4' key={activity.id}>
+                  <div onClick={() => chooseCurrentActivity(activity)} className='flex gap-4' key={activity.id}>
                      <div>{activity.name}</div>
                      <div>{activity.descr}</div>
                   </div>
@@ -37,10 +53,10 @@ const ActivitiesPage: FC = () => {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className='mt-8 flex flex-col items-start gap-3'>
-               <div>Creating a new activity</div>
+               <div>{!currentActivity ? 'Creating a new activity' : 'Updating an activity'}</div>
                <input {...register('name')} type='text' placeholder='Enter name' className='w-full p-1 rounded-md bg-red-500 text-white placeholder-white' />
                <textarea {...register('descr')} placeholder='Enter description (optional)' className='w-full h-20 p-1 rounded-md bg-red-500 text-white placeholder-white' />
-               <button className='p-3 bg-red-500 text-white rounded-xl'>Create activity</button>
+               <button className='p-3 bg-red-500 text-white rounded-xl'>{!currentActivity ? 'Create activity' : 'Update activity'}</button>
             </form>
          </div>
       </>

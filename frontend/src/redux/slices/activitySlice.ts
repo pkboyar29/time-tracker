@@ -37,6 +37,15 @@ export const createActivity = createAsyncThunk(
    }
 )
 
+export const updateActivity = createAsyncThunk(
+   'activities/updateActivity',
+   async (existingActivityData: Activity) => {
+      const { data } = await axios.put(`/activities/${existingActivityData.id}`, existingActivityData)
+      const mappedData = mapActivityFromResponse(data)
+      return mappedData
+   }
+)
+
 const activitySlice = createSlice({
    name: 'activities',
    initialState,
@@ -58,6 +67,18 @@ const activitySlice = createSlice({
          })
          .addCase(createActivity.fulfilled, (state, action) => {
             state.activities.push(action.payload)
+         })
+         .addCase(updateActivity.fulfilled, (state, action) => {
+            state.activities = state.activities.map((activity: Activity) => {
+               if (activity.id === action.payload.id) {
+                  return {
+                     ...activity,
+                     name: action.payload.name,
+                     descr: action.payload.descr
+                  }
+               }
+               return activity
+            })
          })
    }
 })
