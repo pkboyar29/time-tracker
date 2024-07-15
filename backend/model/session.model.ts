@@ -23,6 +23,11 @@ const sessionSchema = new mongoose.Schema({
       type: Date,
       default: Date.now(),
       required: true
+   },
+   deleted: {
+      type: Boolean,
+      default: false,
+      required: true
    }
 })
 

@@ -5,7 +5,7 @@ export default {
 
    async getSessions() {
       try {
-         const sessions = Session.find({})
+         const sessions = Session.find({ deleted: false })
          return await sessions
       } catch (e) {
          console.log(e)
@@ -48,7 +48,9 @@ export default {
    async deleteSession(sessionId: string) {
       try {
          // проверить существование по id, иначе выкатить ошибку
-         await Session.deleteOne({ _id: sessionId })
+         await Session.findById(sessionId).updateOne({
+            deleted: true
+         })
 
          const message = {
             message: 'Deleted successful'
