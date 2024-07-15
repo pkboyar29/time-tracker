@@ -19,7 +19,7 @@ const TimerPage: FC = () => {
       dispatch(fetchSessions())
    }, [])
 
-   const { register, getValues } = useForm<SessionFields>({ mode: 'onBlur' })
+   const { register, handleSubmit } = useForm<SessionFields>({ mode: 'onBlur' })
 
    const toggleTimer = () => {
       setEnabled((e) => !e)
@@ -70,9 +70,9 @@ const TimerPage: FC = () => {
       setEnabled(true)
    }
 
-   const onCreateSessionClick = () => {
+   const onSubmit = (data: SessionFields) => {
       dispatch(createSession({
-         totalTimeSeconds: getValues('spentTimeMinutes') * 60,
+         totalTimeSeconds: data.spentTimeMinutes * 60,
          spentTimeSeconds: 0
       }))
       startTimer()
@@ -103,13 +103,13 @@ const TimerPage: FC = () => {
             </div>
          </div>
 
-         <div className='mt-8 flex flex-col items-start gap-3'>
+         <form onSubmit={handleSubmit(onSubmit)} className='mt-8 flex flex-col items-start gap-3'>
             <div>Creating a new session</div>
             <input {...register('spentTimeMinutes')} type='number' placeholder='Enter minutes' className='p-1 rounded-md border border-sky-500 bg-red-500 text-white placeholder-white' />
             <div>Choose an activity</div>
             <div>Choose a task</div>
-            <button className='p-3 bg-red-500 text-white rounded-xl' onClick={onCreateSessionClick}>Create session</button>
-         </div>
+            <button type='submit' className='p-3 bg-red-500 text-white rounded-xl'>Create session</button>
+         </form>
 
          <div className='flex justify-center mt-10'>
             {!currentSession
