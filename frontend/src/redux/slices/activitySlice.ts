@@ -46,6 +46,14 @@ export const updateActivity = createAsyncThunk(
    }
 )
 
+export const deleteActivity = createAsyncThunk(
+   'activities/deleteActivity',
+   async (activityId: string) => {
+      const { data } = await axios.delete(`/activities/${activityId}`)
+      return data
+   }
+)
+
 const activitySlice = createSlice({
    name: 'activities',
    initialState,
@@ -79,6 +87,9 @@ const activitySlice = createSlice({
                }
                return activity
             })
+         })
+         .addCase(deleteActivity.fulfilled, (state, action) => {
+            state.activities = state.activities.filter((activity: Activity) => activity.id !== action.meta.arg)
          })
    }
 })
