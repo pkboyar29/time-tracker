@@ -5,7 +5,7 @@ export default {
 
    async getActivities() {
       try {
-         const activities = Activity.find({})
+         const activities = Activity.find({ deleted: false })
          return await activities
       } catch (e) {
          console.log(e)
@@ -40,7 +40,9 @@ export default {
 
    async deleteActivity(activityId: string) {
       try {
-         await Activity.deleteOne({ _id: activityId })
+         await Activity.findById(activityId).updateOne({
+            deleted: true
+         })
 
          const message = {
             message: 'Deleted successful'
