@@ -37,16 +37,16 @@ export const fetchSessions = createAsyncThunk(
 
 export const createSession = createAsyncThunk(
    'sessions/createSession',
-   async (newSession: SessionCreateRequest) => {
-      const { data } = await axios.post('/sessions', newSession)
+   async (newSessionData: SessionCreateRequest) => {
+      const { data } = await axios.post('/sessions', newSessionData)
       return mapSessionFromResponse(data)
    }
 )
 
 export const updateSession = createAsyncThunk(
    'sessions/updateSession',
-   async (existingSession: Session) => {
-      const { data } = await axios.put(`/sessions/${existingSession.id}`, existingSession)
+   async (existingSessionData: Session) => {
+      const { data } = await axios.put(`/sessions/${existingSessionData.id}`, existingSessionData)
       return mapSessionFromResponse(data)
    }
 )

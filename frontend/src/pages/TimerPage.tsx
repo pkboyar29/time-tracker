@@ -105,7 +105,7 @@ const TimerPage: FC = () => {
 
          <form onSubmit={handleSubmit(onSubmit)} className='mt-8 flex flex-col items-start gap-3'>
             <div>Creating a new session</div>
-            <input {...register('spentTimeMinutes')} type='number' placeholder='Enter minutes' className='p-1 rounded-md border border-sky-500 bg-red-500 text-white placeholder-white' />
+            <input {...register('spentTimeMinutes')} type='number' placeholder='Enter minutes' className='p-1 rounded-md bg-red-500 text-white placeholder-white' />
             <div>Choose an activity</div>
             <div>Choose a task</div>
             <button type='submit' className='p-3 bg-red-500 text-white rounded-xl'>Create session</button>
