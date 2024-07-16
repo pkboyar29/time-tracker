@@ -14,6 +14,11 @@ const sessionSchema = new mongoose.Schema({
       default: false,
       required: true
    },
+   activity: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Activity',
+      required: false
+   },
    createdDate: {
       type: Date,
       default: Date.now(),

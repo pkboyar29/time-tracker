@@ -1,4 +1,5 @@
 export interface SessionDTO {
    totalTimeSeconds: number,
-   spentTimeSeconds: number
+   spentTimeSeconds: number,
+   activity?: string
 }

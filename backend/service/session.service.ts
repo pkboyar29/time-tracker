@@ -1,5 +1,7 @@
 import Session from '../model/session.model'
+import Activity from '../model/activity.model'
 import { SessionDTO } from '../dto/session.dto'
+import mongoose from 'mongoose'
 
 export default {
 
@@ -13,14 +15,20 @@ export default {
    },
 
    async createSession(sessionDTO: SessionDTO) {
-      const newSession = new Session({
-         totalTimeSeconds: sessionDTO.totalTimeSeconds,
-         spentTimeSeconds: 0
-      })
       try {
+         await Activity.exists({ _id: sessionDTO.activity });
+
+         const newSession = new Session({
+            totalTimeSeconds: sessionDTO.totalTimeSeconds,
+            spentTimeSeconds: 0,
+            activity: sessionDTO.activity
+         })
+
          return await newSession.save()
       } catch (e) {
-         console.log(e)
+         if (e instanceof mongoose.Error.CastError) {
+            throw new Error('Activity Not Found')
+         }
       }
    },
 
@@ -31,7 +39,8 @@ export default {
       }
 
       try {
-         // проверить существование по id, иначе выкатить ошибку
+         await Session.exists({ _id: sessionId });
+
          await Session.findById(sessionId).updateOne({
             totalTimeSeconds: sessionDTO.totalTimeSeconds,
             spentTimeSeconds: sessionDTO.spentTimeSeconds,
@@ -41,13 +50,16 @@ export default {
 
          return await Session.findById(sessionId)
       } catch (e) {
-         console.log(e)
+         if (e instanceof mongoose.Error.CastError) {
+            throw new Error('Session Not Found')
+         }
       }
    },
 
    async deleteSession(sessionId: string) {
       try {
-         // проверить существование по id, иначе выкатить ошибку
+         await Session.exists({ _id: sessionId });
+
          await Session.findById(sessionId).updateOne({
             deleted: true
          })
@@ -57,7 +69,9 @@ export default {
          }
          return message
       } catch (e) {
-         console.log(e)
+         if (e instanceof mongoose.Error.CastError) {
+            throw new Error('Session Not Found')
+         }
       }
    }
 }

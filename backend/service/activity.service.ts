@@ -1,5 +1,6 @@
 import Activity from '../model/activity.model'
 import { ActivityDTO } from '../dto/activity.dto'
+import mongoose from 'mongoose'
 
 export default {
 
@@ -13,11 +14,12 @@ export default {
    },
 
    async createActivity(activityDTO: ActivityDTO) {
-      const newActivity = new Activity({
-         name: activityDTO.name,
-         descr: activityDTO.descr
-      })
       try {
+         const newActivity = new Activity({
+            name: activityDTO.name,
+            descr: activityDTO.descr
+         })
+
          return await newActivity.save()
       } catch (e) {
          console.log(e)
@@ -26,6 +28,8 @@ export default {
 
    async updateActivity(activityId: string, activityDTO: ActivityDTO) {
       try {
+         await Activity.exists({ _id: activityId })
+
          await Activity.findById(activityId).updateOne({
             name: activityDTO.name,
             descr: activityDTO.descr,
@@ -34,12 +38,16 @@ export default {
 
          return await Activity.findById(activityId)
       } catch (e) {
-         console.log(e)
+         if (e instanceof mongoose.Error.CastError) {
+            throw new Error('Activity Not Found')
+         }
       }
    },
 
    async deleteActivity(activityId: string) {
       try {
+         await Activity.exists({ _id: activityId })
+
          await Activity.findById(activityId).updateOne({
             deleted: true
          })
@@ -49,7 +57,9 @@ export default {
          }
          return message
       } catch (e) {
-         console.log(e)
+         if (e instanceof mongoose.Error.CastError) {
+            throw new Error('Activity Not Found')
+         }
       }
    }
 }
