@@ -4,9 +4,12 @@ import audioUrl from '../assets/audio.mp3'
 import { fetchSessions, createSession, updateSession, deleteSession, setCurrentSessionById, removeCurrentSession, addSecond } from '../redux/slices/sessionSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState, AppDispatch } from '../redux/store'
+import axios from '../axios'
+import { mapActivityFromResponse } from '../utils/mappingHelpers'
 
 interface SessionFields {
-   spentTimeMinutes: number
+   spentTimeMinutes: number,
+   activity: string
 }
 
 const TimerPage: FC = () => {
@@ -14,9 +17,19 @@ const TimerPage: FC = () => {
    const sessions = useSelector((state: RootState) => state.sessions.sessions)
    const currentSession = useSelector((state: RootState) => state.sessions.currentSession)
    const dispatch = useDispatch<AppDispatch>()
+   const [activities, setActivities] = useState<Activity[]>([])
 
    useEffect(() => {
       dispatch(fetchSessions())
+   }, [])
+
+   useEffect(() => {
+      const fetchActivities = async () => {
+         const { data } = await axios.get('/activities')
+         const mappedData = data.map((unmappedActivity: any) => mapActivityFromResponse(unmappedActivity))
+         setActivities(mappedData)
+      }
+      fetchActivities()
    }, [])
 
    const { register, handleSubmit } = useForm<SessionFields>({ mode: 'onBlur' })
@@ -71,9 +84,11 @@ const TimerPage: FC = () => {
    }
 
    const onSubmit = (data: SessionFields) => {
+      console.log(data)
       dispatch(createSession({
          totalTimeSeconds: data.spentTimeMinutes * 60,
-         spentTimeSeconds: 0
+         spentTimeSeconds: 0,
+         activity: data.activity !== '' ? data.activity : undefined
       }))
       startTimer()
    }
@@ -95,6 +110,7 @@ const TimerPage: FC = () => {
                         <div>{session.id}</div>
                         <div>{Math.round(session.totalTimeSeconds / 60)} min</div>
                         <div>{Math.round(session.spentTimeSeconds / 60)} min</div>
+                        <div>{session.activity ? session.activity : 'without activity'}</div>
                         <div>{session.completed ? 'completed' : 'not completed'}</div>
                      </div>
                      <button onClick={() => onDeleteSessionClick(session.id)} className='ml-auto'><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg></button>
@@ -106,7 +122,14 @@ const TimerPage: FC = () => {
          <form onSubmit={handleSubmit(onSubmit)} className='mt-8 flex flex-col items-start gap-3'>
             <div>Creating a new session</div>
             <input {...register('spentTimeMinutes')} type='number' placeholder='Enter minutes' className='p-1 rounded-md bg-red-500 text-white placeholder-white' />
-            <div>Choose an activity</div>
+            <select {...register('activity')}>
+               <option value=''>Choose an activity</option>
+               {activities.map((activity: Activity) => (
+                  <option key={activity.id} value={activity.id}>
+                     {activity.name}
+                  </option>
+               ))}
+            </select>
             <div>Choose a task</div>
             <button type='submit' className='p-3 bg-red-500 text-white rounded-xl'>Create session</button>
          </form>

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import axios from '../../axios'
+import { mapSessionFromResponse } from '../../utils/mappingHelpers'
 
 interface SessionState {
    sessions: Session[],
@@ -11,15 +12,6 @@ const initialState: SessionState = {
    sessions: [],
    status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
    currentSession: null
-}
-
-const mapSessionFromResponse = (unmappedSession: any): Session => {
-   return {
-      id: unmappedSession._id,
-      totalTimeSeconds: unmappedSession.totalTimeSeconds,
-      spentTimeSeconds: unmappedSession.spentTimeSeconds,
-      completed: unmappedSession.completed,
-   }
 }
 
 const findSessionById = (sessions: Session[], id: string): Session | null => {

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
 import axios from '../../axios'
+import { mapActivityFromResponse } from '../../utils/mappingHelpers'
 
 interface ActivityState {
    activities: Activity[],
@@ -9,14 +10,6 @@ interface ActivityState {
 const initialState: ActivityState = {
    activities: [],
    status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
-}
-
-const mapActivityFromResponse = (unmappedActivity: any): Activity => {
-   return {
-      id: unmappedActivity._id,
-      name: unmappedActivity.name,
-      descr: unmappedActivity.descr
-   }
 }
 
 export const fetchActivities = createAsyncThunk(
