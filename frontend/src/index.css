@@ -15,6 +15,10 @@ body,
   height: 100% !important;
 }
 
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
 #app {
   min-height: 100vh !important;
   height: 100% !important;

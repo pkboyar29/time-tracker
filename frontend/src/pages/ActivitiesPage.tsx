@@ -67,9 +67,9 @@ const ActivitiesPage: FC = () => {
             </form>
          </Modal>}
 
-         <div className='flex justify-between'>
+         <div className='container flex justify-between'>
             <div>
-               <div className='mb-5'>All activities</div>
+               <div className='mb-5 text-xl font-bold'>All activities</div>
                <div className='flex flex-col gap-4'>
                   {activities.map((activity: Activity) => (
                      <div className='flex items-center gap-4' key={activity.id}>
@@ -86,7 +86,10 @@ const ActivitiesPage: FC = () => {
                </div>
             </div>
 
-            <Button onClick={() => setManageModal(true)}>Create new activity</Button>
+            <div className='flex gap-5 h-full'>
+               <Button onClick={() => { }}>Search...</Button>
+               <Button onClick={() => setManageModal(true)}>Create new activity</Button>
+            </div>
          </div>
       </>
    )
