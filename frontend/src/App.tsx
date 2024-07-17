@@ -13,7 +13,7 @@ const App: FC = () => {
       <div id='app' className='flex min-h-full h-full w-full'>
         <Sidebar />
 
-        <div className='p-5'>
+        <div className='p-5 w-full'>
           <Routes>
             <Route path='/timer' element={<TimerPage />} />
             <Route path='/activities' element={<ActivitiesPage />} />
