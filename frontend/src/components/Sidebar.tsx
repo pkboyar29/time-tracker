@@ -8,7 +8,7 @@ const Sidebar: FC = () => {
    const currentSession = useSelector((state: RootState) => state.sessions.currentSession)
 
    return (
-      <div className='h-full p-5 border-r border-r-gray-500 border-solid'>
+      <div className='h-full w-24 p-5 border-r border-r-gray-500 border-solid'>
          <ul className='flex flex-col items-center gap-5'>
             <li className='flex flex-col items-center gap-2'>
                {currentSession
