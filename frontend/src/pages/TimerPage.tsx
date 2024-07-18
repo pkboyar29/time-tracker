@@ -150,9 +150,15 @@ const TimerPage: FC = () => {
             {!currentSession
                ? (<div className='text-2xl font-semibold'>Choose existing session or create a new one</div>)
                : (<div className='flex flex-col items-center gap-3'>
-                  <div>id {currentSession?.id}</div>
-                  <div>Session {Math.round(currentSession?.totalTimeSeconds / 60)} minutes</div>
-                  <div>Passed: {currentSession?.spentTimeSeconds} seconds</div>
+                  <div>id {currentSession.id}</div>
+                  <div>Session {Math.round(currentSession.totalTimeSeconds / 60)} minutes</div>
+                  <div>
+                     Left: {Math.trunc((currentSession.totalTimeSeconds - currentSession.spentTimeSeconds) / 60)}
+                     :
+                     {((currentSession.totalTimeSeconds - currentSession.spentTimeSeconds) % 60) < 10
+                        ? '0' + (currentSession.totalTimeSeconds - currentSession.spentTimeSeconds) % 60
+                        : (currentSession.totalTimeSeconds - currentSession.spentTimeSeconds) % 60}
+                  </div>
                   <div className='flex gap-4'>
                      <button onClick={toggleTimer}>
                         {(enabled ? (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="size-6"><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" /></svg>)
