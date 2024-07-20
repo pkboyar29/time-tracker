@@ -7,8 +7,17 @@ export default {
 
    async getSessions() {
       try {
-         const sessions = Session.find({ deleted: false })
-         return await sessions
+         const sessions = await Session.find({ deleted: false })
+         return sessions
+      } catch (e) {
+         console.log(e)
+      }
+   },
+
+   async getSessionsForActivity(activityId: string) {
+      try {
+         const sessions = await Session.find({ activity: activityId, deleted: false }).exec()
+         return sessions
       } catch (e) {
          console.log(e)
       }

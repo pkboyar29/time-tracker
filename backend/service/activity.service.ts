@@ -1,13 +1,30 @@
 import Activity from '../model/activity.model'
 import { ActivityDTO } from '../dto/activity.dto'
 import mongoose from 'mongoose'
+import sessionService from './session.service'
 
 export default {
 
    async getActivities() {
       try {
-         const activities = Activity.find({ deleted: false })
-         return await activities
+         const activities = await Activity.find({ deleted: false })
+
+         const detailedActivitiesPromises = activities.map(async (activity: any, index: number) => {
+            const sessions = await sessionService.getSessionsForActivity(activity._id)
+
+            const spentTimeSeconds = sessions?.reduce((total: number, session: any) => total + session.spentTimeSeconds, 0)
+
+            return {
+               ...activity.toObject(),
+               sessionsAmount: sessions?.length,
+               spentTimeSeconds: spentTimeSeconds
+            }
+         })
+
+         // ждем выполнения всех промисов
+         const detailedActivities = await Promise.all(detailedActivitiesPromises)
+
+         return detailedActivities
       } catch (e) {
          console.log(e)
       }
