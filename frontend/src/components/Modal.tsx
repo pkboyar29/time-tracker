@@ -6,8 +6,8 @@ interface ModalProps {
    onCloseModal: () => void
 }
 
-const Modal: FC<ModalProps> = ({ children, title, onCloseModal }: ModalProps) => {
-   const handleOutsideClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
+   const handleOutsideClick = () => {
       onCloseModal()
    }
 

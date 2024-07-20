@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { RootState, AppDispatch } from '../redux/store'
 import axios from '../axios'
 import { mapActivityFromResponse } from '../utils/mappingHelpers'
+import { getRemainingTimeMinutesSeconds } from '../utils/timerHelpers'
 
 import Button from '../components/Button'
 import Modal from '../components/Modal'
@@ -162,11 +163,7 @@ const TimerPage: FC = () => {
                   <div>id {currentSession.id}</div>
                   <div>Session {Math.round(currentSession.totalTimeSeconds / 60)} minutes</div>
                   <div>
-                     Left: {Math.trunc((currentSession.totalTimeSeconds - currentSession.spentTimeSeconds) / 60)}
-                     :
-                     {((currentSession.totalTimeSeconds - currentSession.spentTimeSeconds) % 60) < 10
-                        ? '0' + (currentSession.totalTimeSeconds - currentSession.spentTimeSeconds) % 60
-                        : (currentSession.totalTimeSeconds - currentSession.spentTimeSeconds) % 60}
+                     Left: {getRemainingTimeMinutesSeconds(currentSession.totalTimeSeconds, currentSession.spentTimeSeconds)}
                   </div>
                   <div className='flex gap-4'>
                      <button onClick={toggleTimer}>

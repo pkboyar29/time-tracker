@@ -5,7 +5,7 @@ interface ButtonProps {
    onClick: () => void
 }
 
-const Button: FC<ButtonProps> = ({ children, onClick }: ButtonProps) => {
+const Button: FC<ButtonProps> = ({ children, onClick }) => {
    return (
       <button onClick={onClick} className='p-3 bg-red-500 text-white rounded-xl'>{children}</button>
    )

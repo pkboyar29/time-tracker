@@ -15,8 +15,9 @@ const initialState: ActivityState = {
 export const fetchActivities = createAsyncThunk(
    'activities/fetchActivities',
    async () => {
-      const { data } = await axios.get('/activities')
-      const mappedData = data.map((unmappedActivity: any) => mapActivityFromResponse(unmappedActivity))
+      const { data: unmappedData } = await axios.get('/activities')
+      console.log(unmappedData)
+      const mappedData = unmappedData.map((unmappedActivity: any) => mapActivityFromResponse(unmappedActivity))
       return mappedData
    }
 )
@@ -24,8 +25,8 @@ export const fetchActivities = createAsyncThunk(
 export const createActivity = createAsyncThunk(
    'activities/createActivity',
    async (newActivityData: ActivityCreateRequest) => {
-      const { data } = await axios.post('/activities', newActivityData)
-      const mappedData = mapActivityFromResponse(data)
+      const { data: unmappedData } = await axios.post('/activities', newActivityData)
+      const mappedData = mapActivityFromResponse(unmappedData)
       return mappedData
    }
 )
@@ -33,8 +34,8 @@ export const createActivity = createAsyncThunk(
 export const updateActivity = createAsyncThunk(
    'activities/updateActivity',
    async (existingActivityData: Activity) => {
-      const { data } = await axios.put(`/activities/${existingActivityData.id}`, existingActivityData)
-      const mappedData = mapActivityFromResponse(data)
+      const { data: unmappedData } = await axios.put(`/activities/${existingActivityData.id}`, existingActivityData)
+      const mappedData = mapActivityFromResponse(unmappedData)
       return mappedData
    }
 )
