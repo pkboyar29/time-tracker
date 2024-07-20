@@ -33,7 +33,7 @@ export const createActivity = createAsyncThunk(
 
 export const updateActivity = createAsyncThunk(
    'activities/updateActivity',
-   async (existingActivityData: Activity) => {
+   async (existingActivityData: ActivityUpdateRequest) => {
       const { data: unmappedData } = await axios.put(`/activities/${existingActivityData.id}`, existingActivityData)
       const mappedData = mapActivityFromResponse(unmappedData)
       return mappedData
