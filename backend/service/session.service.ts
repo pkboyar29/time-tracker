@@ -7,7 +7,7 @@ export default {
 
    async getSessions() {
       try {
-         const sessions = await Session.find({ deleted: false })
+         const sessions = await Session.find({ deleted: false }).populate('activity')
          return sessions
       } catch (e) {
          console.log(e)
@@ -25,7 +25,7 @@ export default {
 
    async createSession(sessionDTO: SessionDTO) {
       try {
-         await Activity.exists({ _id: sessionDTO.activity });
+         await Activity.exists({ _id: sessionDTO.activity })
 
          const newSession = new Session({
             totalTimeSeconds: sessionDTO.totalTimeSeconds,
@@ -33,7 +33,7 @@ export default {
             activity: sessionDTO.activity
          })
 
-         return await newSession.save()
+         return (await newSession.save()).populate('activity')
       } catch (e) {
          if (e instanceof mongoose.Error.CastError) {
             throw new Error('Activity Not Found')
