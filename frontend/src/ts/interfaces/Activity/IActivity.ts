@@ -1,4 +1,4 @@
-interface Activity {
+interface IActivity {
    id: string,
    name: string,
    descr?: string,

@@ -1,7 +1,7 @@
-interface Session {
+interface ISession {
    id: string,
    totalTimeSeconds: number,
    spentTimeSeconds: number,
-   activity?: string,
+   activity?: ISessionActivity,
    completed: boolean
 }

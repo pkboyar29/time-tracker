@@ -17,7 +17,7 @@ interface ActivityFields {
 
 const ActivitiesPage: FC = () => {
    const activities = useSelector((state: RootState) => state.activities.activities)
-   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null)
+   const [currentActivity, setCurrentActivity] = useState<IActivity | null>(null)
    const [manageModal, setManageModal] = useState<boolean>(false)
    const [deleteModal, setDeleteModal] = useState<string | null>(null) // we store here id of activity we want to delete or null
    const [createSessionModal, setCreateSessionModal] = useState<string | null>(null) // we store here id of activity we want to create session of or null
@@ -31,7 +31,7 @@ const ActivitiesPage: FC = () => {
       dispatch(fetchActivities())
    }, [])
 
-   const onEditActivityClick = (activity: Activity) => {
+   const onEditActivityClick = (activity: IActivity) => {
       setCurrentActivity(activity)
       setValue('name', activity.name)
       setValue('descr', activity.descr)
@@ -91,7 +91,7 @@ const ActivitiesPage: FC = () => {
             <div>
                <div className='mb-5 text-xl font-bold'>All activities</div>
                <div className='flex flex-col gap-4'>
-                  {activities.map((activity: Activity) => (
+                  {activities.map((activity: IActivity) => (
                      <ActivityItem key={activity.id} activity={activity} editHandler={onEditActivityClick}
                         deleteHandler={setDeleteModal} startSessionHandler={() => setCreateSessionModal(activity.id)} />
                   ))}

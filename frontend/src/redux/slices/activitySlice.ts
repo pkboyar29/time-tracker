@@ -3,7 +3,7 @@ import axios from '../../axios'
 import { mapActivityFromResponse } from '../../utils/mappingHelpers'
 
 interface ActivityState {
-   activities: Activity[],
+   activities: IActivity[],
    status: string
 }
 
@@ -24,7 +24,7 @@ export const fetchActivities = createAsyncThunk(
 
 export const createActivity = createAsyncThunk(
    'activities/createActivity',
-   async (newActivityData: ActivityCreateRequest) => {
+   async (newActivityData: IActivityCreate) => {
       const { data: unmappedData } = await axios.post('/activities', newActivityData)
       const mappedData = mapActivityFromResponse(unmappedData)
       return mappedData
@@ -33,7 +33,7 @@ export const createActivity = createAsyncThunk(
 
 export const updateActivity = createAsyncThunk(
    'activities/updateActivity',
-   async (existingActivityData: ActivityUpdateRequest) => {
+   async (existingActivityData: IActivityUpdate) => {
       const { data: unmappedData } = await axios.put(`/activities/${existingActivityData.id}`, existingActivityData)
       const mappedData = mapActivityFromResponse(unmappedData)
       return mappedData
@@ -71,7 +71,7 @@ const activitySlice = createSlice({
             state.activities.push(action.payload)
          })
          .addCase(updateActivity.fulfilled, (state, action) => {
-            state.activities = state.activities.map((activity: Activity) => {
+            state.activities = state.activities.map((activity: IActivity) => {
                if (activity.id === action.payload.id) {
                   return {
                      ...activity,
@@ -83,7 +83,7 @@ const activitySlice = createSlice({
             })
          })
          .addCase(deleteActivity.fulfilled, (state, action) => {
-            state.activities = state.activities.filter((activity: Activity) => activity.id !== action.meta.arg)
+            state.activities = state.activities.filter((activity: IActivity) => activity.id !== action.meta.arg)
          })
    }
 })

@@ -1,4 +1,4 @@
-interface ActivityCreateRequest {
+interface IActivityCreate {
    name: string,
    descr?: string
 }

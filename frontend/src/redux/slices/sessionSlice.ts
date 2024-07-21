@@ -3,9 +3,9 @@ import axios from '../../axios'
 import { mapSessionFromResponse } from '../../utils/mappingHelpers'
 
 interface SessionState {
-   sessions: Session[],
+   sessions: ISession[],
    status: string,
-   currentSession: Session | null
+   currentSession: ISession | null
 }
 
 const initialState: SessionState = {
@@ -14,8 +14,8 @@ const initialState: SessionState = {
    currentSession: null
 }
 
-const findSessionById = (sessions: Session[], id: string): Session | null => {
-   return sessions.find((session: Session) => session.id === id) || null
+const findSessionById = (sessions: ISession[], id: string): ISession | null => {
+   return sessions.find((session: ISession) => session.id === id) || null
 }
 
 export const fetchSessions = createAsyncThunk(
@@ -29,15 +29,16 @@ export const fetchSessions = createAsyncThunk(
 
 export const createSession = createAsyncThunk(
    'sessions/createSession',
-   async (newSessionData: SessionCreateRequest) => {
+   async (newSessionData: ISessionCreate) => {
       const { data: unmappedData } = await axios.post('/sessions', newSessionData)
+      console.log(unmappedData)
       return mapSessionFromResponse(unmappedData)
    }
 )
 
 export const updateSession = createAsyncThunk(
    'sessions/updateSession',
-   async (existingSessionData: Session) => {
+   async (existingSessionData: ISession) => {
       const { data: unmappedData } = await axios.put(`/sessions/${existingSessionData.id}`, existingSessionData)
       return mapSessionFromResponse(unmappedData)
    }
@@ -85,7 +86,7 @@ const sessionSlice = createSlice({
             state.currentSession = findSessionById(state.sessions, action.payload.id)
          })
          .addCase(updateSession.fulfilled, (state, action) => {
-            state.sessions = state.sessions.map((session: Session) => {
+            state.sessions = state.sessions.map((session: ISession) => {
                if (session.id === action.payload.id) {
                   return {
                      ...session,
@@ -98,7 +99,7 @@ const sessionSlice = createSlice({
             })
          })
          .addCase(deleteSession.fulfilled, (state, action) => {
-            state.sessions = state.sessions.filter((session: Session) => session.id !== action.meta.arg)
+            state.sessions = state.sessions.filter((session: ISession) => session.id !== action.meta.arg)
          })
    }
 })

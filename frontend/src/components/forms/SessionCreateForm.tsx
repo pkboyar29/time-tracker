@@ -18,7 +18,7 @@ interface SessionFields {
 }
 
 const SessionCreateForm: FC<SessionCreateFormProps> = ({ afterSubmitHandler, defaultActivity }) => {
-   const [selectActivities, setSelectActivities] = useState<Activity[]>([])
+   const [selectActivities, setSelectActivities] = useState<IActivity[]>([])
    const { register, handleSubmit, reset } = useForm<SessionFields>({
       defaultValues: {
          activity: defaultActivity,
@@ -43,6 +43,7 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({ afterSubmitHandler, def
    }, [defaultActivity, selectActivities])
 
    const onSubmit = (data: SessionFields) => {
+      console.log(data)
       dispatch(createSession({
          totalTimeSeconds: data.spentTimeMinutes * 60,
          spentTimeSeconds: 0,
@@ -56,7 +57,7 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({ afterSubmitHandler, def
          <input {...register('spentTimeMinutes')} type='number' placeholder='Enter minutes' className='p-1 rounded-md bg-red-500 text-white placeholder-white' />
          <select {...register('activity')}>
             <option value=''>Choose an activity</option>
-            {selectActivities.map((activity: Activity) => (
+            {selectActivities.map((activity: IActivity) => (
                <option key={activity.id} value={activity.id}>
                   {activity.name}
                </option>

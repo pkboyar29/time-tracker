@@ -3,8 +3,8 @@ import Button from './Button'
 import { getTimeHoursMinutesSeconds } from '../utils/timerHelpers'
 
 interface ActivityBoxProps {
-   activity: Activity,
-   editHandler: (activity: Activity) => void,
+   activity: IActivity,
+   editHandler: (activity: IActivity) => void,
    deleteHandler: (activityId: string) => void,
    startSessionHandler: (activityId: string) => void
 }
