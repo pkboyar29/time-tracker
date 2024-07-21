@@ -40,7 +40,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({ activity, editHandler, deleteHandl
             </div>
             <div className='text-center'>
                <div className='font-bold'>{getTimeHoursMinutesSeconds(activity.spentTimeSeconds)}</div>
-               <div className='text-[13px]'>time</div>
+               <div className='text-[13px]'>spent time</div>
             </div>
          </div>
       </div>

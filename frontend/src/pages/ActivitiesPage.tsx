@@ -1,9 +1,11 @@
 import { FC, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
-import { fetchActivities, createActivity, updateActivity, deleteActivity } from '../redux/slices/activitySlice'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState, AppDispatch } from '../redux/store'
+import { fetchActivities, createActivity, updateActivity, deleteActivity } from '../redux/slices/activitySlice'
 
+import SessionCreateForm from '../components/forms/SessionCreateForm'
 import ActivityItem from '../components/ActivityItem'
 import Button from '../components/Button'
 import Modal from '../components/Modal'
@@ -18,8 +20,10 @@ const ActivitiesPage: FC = () => {
    const [currentActivity, setCurrentActivity] = useState<Activity | null>(null)
    const [manageModal, setManageModal] = useState<boolean>(false)
    const [deleteModal, setDeleteModal] = useState<string | null>(null) // we store here id of activity we want to delete or null
+   const [createSessionModal, setCreateSessionModal] = useState<string | null>(null) // we store here id of activity we want to create session of or null
 
    const dispatch = useDispatch<AppDispatch>()
+   const navigate = useNavigate()
 
    const { register, handleSubmit, setValue, reset } = useForm<ActivityFields>({ mode: 'onBlur' })
 
@@ -76,12 +80,20 @@ const ActivitiesPage: FC = () => {
                <Button onClick={() => onDeleteActivityClick(deleteModal)}>Delete activity</Button>
             </Modal>}
 
+         {createSessionModal
+            && <Modal title='Starting new session' onCloseModal={() => setCreateSessionModal(null)}>
+               <SessionCreateForm defaultActivity={createSessionModal} afterSubmitHandler={() => {
+                  navigate('/timer')
+               }} />
+            </Modal>}
+
          <div className='container flex justify-between'>
             <div>
                <div className='mb-5 text-xl font-bold'>All activities</div>
                <div className='flex flex-col gap-4'>
                   {activities.map((activity: Activity) => (
-                     <ActivityItem key={activity.id} activity={activity} editHandler={onEditActivityClick} deleteHandler={setDeleteModal} startSessionHandler={() => console.log('заглушка')} />
+                     <ActivityItem key={activity.id} activity={activity} editHandler={onEditActivityClick}
+                        deleteHandler={setDeleteModal} startSessionHandler={() => setCreateSessionModal(activity.id)} />
                   ))}
                </div>
             </div>

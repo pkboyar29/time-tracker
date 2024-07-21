@@ -1,44 +1,26 @@
 import { FC, useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
 import audioUrl from '../assets/audio.mp3'
-import { fetchSessions, createSession, updateSession, deleteSession, setCurrentSessionById, removeCurrentSession, addSecond } from '../redux/slices/sessionSlice'
+import { fetchSessions, updateSession, deleteSession, setCurrentSessionById, removeCurrentSession, addSecond } from '../redux/slices/sessionSlice'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState, AppDispatch } from '../redux/store'
-import axios from '../axios'
-import { mapActivityFromResponse } from '../utils/mappingHelpers'
 import { getRemainingTimeMinutesSeconds } from '../utils/timerHelpers'
 
+import SessionCreateForm from '../components/forms/SessionCreateForm'
 import Button from '../components/Button'
 import Modal from '../components/Modal'
-
-interface SessionFields {
-   spentTimeMinutes: number,
-   activity: string
-}
 
 const TimerPage: FC = () => {
    const [enabled, setEnabled] = useState<boolean>(false)
    const sessions = useSelector((state: RootState) => state.sessions.sessions)
    const currentSession = useSelector((state: RootState) => state.sessions.currentSession)
    const dispatch = useDispatch<AppDispatch>()
-   const [selectActivities, setSelectActivities] = useState<Activity[]>([])
+
    const [createModal, setCreateModal] = useState<boolean>(false)
    const [deleteModal, setDeleteModal] = useState<string | null>(null) // we store here id of session we want to delete or null
 
    useEffect(() => {
       dispatch(fetchSessions())
    }, [])
-
-   useEffect(() => {
-      const fetchActivities = async () => {
-         const { data } = await axios.get('/activities')
-         const mappedData = data.map((unmappedActivity: any) => mapActivityFromResponse(unmappedActivity))
-         setSelectActivities(mappedData)
-      }
-      fetchActivities()
-   }, [])
-
-   const { register, handleSubmit } = useForm<SessionFields>({ mode: 'onBlur' })
 
    const toggleTimer = () => {
       setEnabled((e) => !e)
@@ -89,17 +71,6 @@ const TimerPage: FC = () => {
       setEnabled(true)
    }
 
-   const onSubmit = (data: SessionFields) => {
-      console.log(data)
-      dispatch(createSession({
-         totalTimeSeconds: data.spentTimeMinutes * 60,
-         spentTimeSeconds: 0,
-         activity: data.activity !== '' ? data.activity : undefined
-      }))
-      startTimer()
-      setCreateModal(false)
-   }
-
    const onDeleteSessionClick = (sessionId: string) => {
       if (currentSession?.id === sessionId) {
          dispatch(removeCurrentSession())
@@ -113,19 +84,10 @@ const TimerPage: FC = () => {
       <>
          {createModal &&
             <Modal title='Creating new session' onCloseModal={() => setCreateModal(false)}>
-               <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col items-start gap-3'>
-                  <input {...register('spentTimeMinutes')} type='number' placeholder='Enter minutes' className='p-1 rounded-md bg-red-500 text-white placeholder-white' />
-                  <select {...register('activity')}>
-                     <option value=''>Choose an activity</option>
-                     {selectActivities.map((activity: Activity) => (
-                        <option key={activity.id} value={activity.id}>
-                           {activity.name}
-                        </option>
-                     ))}
-                  </select>
-                  <div>Choose a task</div>
-                  <button type='submit' className='p-3 bg-red-500 text-white rounded-xl'>Create session</button>
-               </form>
+               <SessionCreateForm afterSubmitHandler={() => {
+                  startTimer()
+                  setCreateModal(false)
+               }} />
             </Modal>}
 
          {deleteModal &&

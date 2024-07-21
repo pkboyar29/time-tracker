@@ -13,6 +13,5 @@ export const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
    const formattedMinutes: string = minutes < 10 ? '0' + minutes : minutes.toString()
    const seconds: number = allSeconds % 60
    const formattedSeconds: string = seconds < 10 ? '0' + seconds % 60 : (seconds % 60).toString()
-   console.log(allSeconds)
    return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`
 }
