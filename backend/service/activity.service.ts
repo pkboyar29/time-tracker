@@ -9,22 +9,31 @@ export default {
       try {
          const activities = await Activity.find({ deleted: false })
 
-         const detailedActivitiesPromises = activities.map(async (activity: any, index: number) => {
-            const sessions = await sessionService.getSessionsForActivity(activity._id)
-
-            const spentTimeSeconds = sessions?.reduce((total: number, session: any) => total + session.spentTimeSeconds, 0)
-
-            return {
-               ...activity.toObject(),
-               sessionsAmount: sessions?.length,
-               spentTimeSeconds: spentTimeSeconds
-            }
+         const detailedActivitiesPromises = activities.map(async (activity: any) => {
+            return this.getActivity(activity._id)
          })
 
-         // ждем выполнения всех промисов
+         // wait for resolving all promises
          const detailedActivities = await Promise.all(detailedActivitiesPromises)
 
          return detailedActivities
+      } catch (e) {
+         console.log(e)
+      }
+   },
+
+   async getActivity(activityId: string) {
+      try {
+         const activity = await Activity.findById(activityId)
+
+         const sessions = await sessionService.getSessionsForActivity(activityId)
+         const spentTimeSeconds = sessions?.reduce((total: number, session: any) => total + session.spentTimeSeconds, 0)
+
+         return {
+            ...activity?.toObject(),
+            sessionsAmount: sessions?.length,
+            spentTimeSeconds: spentTimeSeconds
+         }
       } catch (e) {
          console.log(e)
       }
@@ -37,7 +46,9 @@ export default {
             descr: activityDTO.descr
          })
 
-         return await newActivity.save()
+         const newActivityWithId = await newActivity.save()
+
+         return this.getActivity(newActivityWithId._id.toString())
       } catch (e) {
          console.log(e)
       }
@@ -53,7 +64,7 @@ export default {
             updatedDate: Date.now()
          })
 
-         return await Activity.findById(activityId)
+         return this.getActivity(activityId)
       } catch (e) {
          if (e instanceof mongoose.Error.CastError) {
             throw new Error('Activity Not Found')
