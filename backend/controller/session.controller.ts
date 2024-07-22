@@ -16,6 +16,8 @@ router.post('/', async (req: Request, res: Response) => {
       if (e instanceof Error) {
          if (e.message === 'Activity Not Found') {
             res.status(404).send(e.message)
+         } else {
+            res.status(500).send(e.message)
          }
       }
    }
@@ -29,6 +31,8 @@ router.put('/:id', async (req: Request, res: Response) => {
       if (e instanceof Error) {
          if (e.message === 'Session Not Found') {
             res.status(404).send(e.message)
+         } else {
+            res.status(500).send(e.message)
          }
       }
    }
@@ -42,6 +46,8 @@ router.delete('/:id', async (req: Request, res: Response) => {
       if (e instanceof Error) {
          if (e.message === 'Session Not Found') {
             res.status(404).send(e.message)
+         } else {
+            res.status(500).send(e.message)
          }
       }
    }

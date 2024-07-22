@@ -13,17 +13,17 @@ interface SessionCreateFormProps {
 }
 
 interface SessionFields {
-   spentTimeMinutes: number,
+   totalTimeMinutes: number,
    activity: string
 }
 
 const SessionCreateForm: FC<SessionCreateFormProps> = ({ afterSubmitHandler, defaultActivity }) => {
    const [selectActivities, setSelectActivities] = useState<IActivity[]>([])
-   const { register, handleSubmit, reset } = useForm<SessionFields>({
+   const { register, handleSubmit, reset, formState: { errors, isValid } } = useForm<SessionFields>({
       defaultValues: {
-         activity: defaultActivity,
-         spentTimeMinutes: 0
-      }
+         activity: defaultActivity
+      },
+      mode: 'onBlur'
    })
    const dispatch = useDispatch<AppDispatch>()
 
@@ -45,7 +45,7 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({ afterSubmitHandler, def
    const onSubmit = (data: SessionFields) => {
       console.log(data)
       dispatch(createSession({
-         totalTimeSeconds: data.spentTimeMinutes * 60,
+         totalTimeSeconds: data.totalTimeMinutes * 60,
          spentTimeSeconds: 0,
          activity: data.activity !== '' ? data.activity : undefined
       }))
@@ -54,17 +54,30 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({ afterSubmitHandler, def
 
    return (
       <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col items-start gap-3'>
-         <input {...register('spentTimeMinutes')} type='number' placeholder='Enter minutes' className='p-1 rounded-md bg-red-500 text-white placeholder-white' />
+         <div>
+            <input {...register('totalTimeMinutes', {
+               required: 'Required!',
+               max: {
+                  value: 600,
+                  message: '10 hours - max!'
+               },
+               min: {
+                  value: 1,
+                  message: '1 min - min!'
+               }
+            })} type='number' placeholder='Enter minutes (max - 10 hours)' className='p-1 rounded-md bg-red-500 text-white placeholder-white' />
+            {errors.totalTimeMinutes && <p className='mt-2 text-red-500'>{errors.totalTimeMinutes.message || 'Error!'}</p>}
+         </div>
          <select {...register('activity')}>
-            <option value=''>Choose an activity</option>
+            <option value=''>Choose an activity (optional)</option>
             {selectActivities.map((activity: IActivity) => (
                <option key={activity.id} value={activity.id}>
                   {activity.name}
                </option>
             ))}
          </select>
-         <div>Choose a task</div>
-         <button type='submit' className='p-3 bg-red-500 text-white rounded-xl'>Create session</button>
+         <div>Choose a task (optional)</div>
+         <button type='submit' disabled={!isValid} className='p-3 bg-red-500 text-white rounded-xl'>Create session</button>
       </form>
    )
 }

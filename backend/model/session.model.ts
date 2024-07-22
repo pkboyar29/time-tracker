@@ -3,11 +3,15 @@ import mongoose from 'mongoose'
 const sessionSchema = new mongoose.Schema({
    totalTimeSeconds: {
       type: Number,
-      required: true
+      required: true,
+      min: [1, 'TotalTimeSeconds should be minimum 1 second'],
+      max: [36000, 'TotalTimeSeconds should be maximum 10 hours']
    },
    spentTimeSeconds: {
       type: Number,
-      required: true
+      required: true,
+      min: [0, 'TotalTimeSeconds should be minimum 1 second'],
+      max: [36000, 'TotalTimeSeconds should be maximum 10 hours']
    },
    completed: {
       type: Boolean,

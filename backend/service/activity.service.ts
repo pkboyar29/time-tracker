@@ -9,12 +9,8 @@ export default {
       try {
          const activities = await Activity.find({ deleted: false })
 
-         const detailedActivitiesPromises = activities.map(async (activity: any) => {
-            return this.getActivity(activity._id)
-         })
-
-         // wait for resolving all promises
-         const detailedActivities = await Promise.all(detailedActivitiesPromises)
+         const detailedActivitiesPromises = activities.map(async (activity: any) => this.getActivity(activity._id))
+         const detailedActivities = await Promise.all(detailedActivitiesPromises) // wait for resolving all promises
 
          return detailedActivities
       } catch (e) {

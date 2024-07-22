@@ -103,14 +103,14 @@ const TimerPage: FC = () => {
 
          <div className='container flex justify-between'>
             <div className='flex flex-col items-start'>
-               <button onClick={() => setUnompletedLess(!uncompletedLess)} className='my-5 text-xl font-bold flex items-center gap-1'>Uncompleted sessions {uncompletedLess ? <ExpandLessIcon /> : <ExpandMoreIcon />}</button>
+               <button onClick={() => setUnompletedLess(!uncompletedLess)} className='my-5 text-xl font-bold flex items-center gap-1'>Uncompleted sessions {uncompletedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}</button>
                {!uncompletedLess
                   && <div className='inline-flex flex-col gap-2'>
                      {sessions.filter((session: ISession) => !session.completed).map((session: ISession) => (
                         <SessionItem key={session.id} session={session} sessionClickHandler={onSessionClick} sessionDeleteHandler={onDeleteSessionClick} />
                      ))}
                   </div>}
-               <button onClick={() => setCompletedLess(!completedLess)} className='my-5 text-xl font-bold flex items-center gap-1'>Completed sessions {completedLess ? <ExpandLessIcon /> : <ExpandMoreIcon />}</button>
+               <button onClick={() => setCompletedLess(!completedLess)} className='my-5 text-xl font-bold flex items-center gap-1'>Completed sessions {completedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}</button>
                {!completedLess
                   && <div className='inline-flex flex-col gap-2'>
                      {sessions.filter((session: ISession) => session.completed).map((session: ISession) => (

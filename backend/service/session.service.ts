@@ -11,6 +11,9 @@ export default {
          return sessions
       } catch (e) {
          console.log(e)
+         if (e instanceof Error) {
+            throw new Error(e.message)
+         }
       }
    },
 
@@ -20,6 +23,9 @@ export default {
          return sessions
       } catch (e) {
          console.log(e)
+         if (e instanceof Error) {
+            throw new Error(e.message)
+         }
       }
    },
 
@@ -35,8 +41,12 @@ export default {
 
          return (await newSession.save()).populate('activity')
       } catch (e) {
+         console.log(e)
          if (e instanceof mongoose.Error.CastError) {
             throw new Error('Activity Not Found')
+         }
+         if (e instanceof Error) {
+            throw new Error(e.message)
          }
       }
    },
@@ -59,8 +69,12 @@ export default {
 
          return await Session.findById(sessionId)
       } catch (e) {
+         console.log(e)
          if (e instanceof mongoose.Error.CastError) {
             throw new Error('Session Not Found')
+         }
+         if (e instanceof Error) {
+            throw new Error(e.message)
          }
       }
    },
@@ -78,8 +92,12 @@ export default {
          }
          return message
       } catch (e) {
+         console.log(e)
          if (e instanceof mongoose.Error.CastError) {
             throw new Error('Session Not Found')
+         }
+         if (e instanceof Error) {
+            throw new Error(e.message)
          }
       }
    }
