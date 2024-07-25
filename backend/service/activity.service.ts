@@ -15,12 +15,18 @@ export default {
 
       return detailedActivities;
     } catch (e) {
-      console.log(e);
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
     }
   },
 
   async getActivity(activityId: string) {
     try {
+      if (!(await this.existsActivity(activityId))) {
+        throw new Error('Activity Not Found');
+      }
+
       const activity = await Activity.findById(activityId);
 
       const sessions = await sessionService.getSessionsForActivity(activityId);
@@ -36,7 +42,27 @@ export default {
       };
     } catch (e) {
       console.log(e);
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
     }
+  },
+
+  async existsActivity(activityId: string) {
+    if (!mongoose.Types.ObjectId.isValid(activityId)) {
+      return false;
+    }
+
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      return false;
+    }
+
+    if (activity.deleted) {
+      return false;
+    }
+
+    return true;
   },
 
   async createActivity(activityDTO: ActivityDTO) {
@@ -50,13 +76,17 @@ export default {
 
       return this.getActivity(newActivityWithId._id.toString());
     } catch (e) {
-      console.log(e);
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
     }
   },
 
   async updateActivity(activityId: string, activityDTO: ActivityDTO) {
     try {
-      await Activity.exists({ _id: activityId });
+      if (!(await this.existsActivity(activityId))) {
+        throw new Error('Activity Not Found');
+      }
 
       await Activity.findById(activityId).updateOne({
         name: activityDTO.name,
@@ -66,15 +96,26 @@ export default {
 
       return this.getActivity(activityId);
     } catch (e) {
-      if (e instanceof mongoose.Error.CastError) {
-        throw new Error('Activity Not Found');
+      if (e instanceof Error) {
+        throw new Error(e.message);
       }
     }
   },
 
   async deleteActivity(activityId: string) {
     try {
-      await Activity.exists({ _id: activityId });
+      if (!(await this.existsActivity(activityId))) {
+        throw new Error('Activity Not Found');
+      }
+
+      const sessions = await sessionService.getSessionsForActivity(activityId);
+      if (sessions && sessions.length > 0) {
+        await Promise.all(
+          sessions?.map(async (session) => {
+            await sessionService.deleteSession(session._id.toString());
+          })
+        );
+      }
 
       await Activity.findById(activityId).updateOne({
         deleted: true,
@@ -85,8 +126,8 @@ export default {
       };
       return message;
     } catch (e) {
-      if (e instanceof mongoose.Error.CastError) {
-        throw new Error('Activity Not Found');
+      if (e instanceof Error) {
+        throw new Error(e.message);
       }
     }
   },

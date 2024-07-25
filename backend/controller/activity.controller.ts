@@ -4,8 +4,33 @@ import activityService from '../service/activity.service';
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
-  const data = await activityService.getActivities();
-  res.json(data);
+  try {
+    const data = await activityService.getActivities();
+    res.status(200).json(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e.message === 'Activity Not Found') {
+        res.status(404).send(e.message);
+      } else {
+        res.status(500).send(e.message);
+      }
+    }
+  }
+});
+
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const data = await activityService.getActivity(req.params.id);
+    res.status(200).json(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e.message === 'Activity Not Found') {
+        res.status(404).send(e.message);
+      } else {
+        res.status(500).send(e.message);
+      }
+    }
+  }
 });
 
 router.post('/', async (req: Request, res: Response) => {
@@ -13,7 +38,9 @@ router.post('/', async (req: Request, res: Response) => {
     const data = await activityService.createActivity(req.body);
     res.status(200).json(data);
   } catch (e) {
-    console.log(e);
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    }
   }
 });
 
@@ -25,6 +52,8 @@ router.put('/:id', async (req: Request, res: Response) => {
     if (e instanceof Error) {
       if (e.message === 'Activity Not Found') {
         res.status(404).send(e.message);
+      } else {
+        res.status(500).send(e.message);
       }
     }
   }
@@ -38,6 +67,8 @@ router.delete('/:id', async (req: Request, res: Response) => {
     if (e instanceof Error) {
       if (e.message === 'Activity Not Found') {
         res.status(404).send(e.message);
+      } else {
+        res.status(500).send(e.message);
       }
     }
   }

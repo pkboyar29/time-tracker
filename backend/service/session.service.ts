@@ -1,5 +1,5 @@
 import Session from '../model/session.model';
-import Activity from '../model/activity.model';
+import activityService from './activity.service';
 import { SessionDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
@@ -9,9 +9,10 @@ export default {
       const sessions = await Session.find({ deleted: false }).populate(
         'activity'
       );
+
       return sessions;
     } catch (e) {
-      console.log(e);
+      // console.log(e);
       if (e instanceof Error) {
         throw new Error(e.message);
       }
@@ -20,6 +21,10 @@ export default {
 
   async getSessionsForActivity(activityId: string) {
     try {
+      if (!(await activityService.existsActivity(activityId))) {
+        throw new Error('Activity For Session Not Found');
+      }
+
       const sessions = await Session.find({
         activity: activityId,
         deleted: false,
@@ -33,9 +38,65 @@ export default {
     }
   },
 
+  async getSession(sessionId: string) {
+    try {
+      if (!(await this.existsSession(sessionId))) {
+        throw new Error('Session Not Found');
+      }
+
+      const session = await Session.findById(sessionId);
+
+      if (session?.activity) {
+        if (
+          !(await activityService.existsActivity(
+            session.activity._id.toString()
+          ))
+        ) {
+          throw new Error('Activity For Session Not Found');
+        }
+      }
+
+      return session;
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        throw new Error(e.message);
+      }
+    }
+  },
+
+  async existsSession(sessionId: string) {
+    if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+      return false;
+    }
+
+    const session = await Session.findById(sessionId);
+    if (!session) {
+      return false;
+    }
+
+    if (session.deleted) {
+      return false;
+    }
+
+    if (session.activity) {
+      if (
+        !(await activityService.existsActivity(session.activity.toString()))
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  },
+
   async createSession(sessionDTO: SessionDTO) {
     try {
-      await Activity.exists({ _id: sessionDTO.activity });
+      if (sessionDTO.activity) {
+        if (!(await activityService.existsActivity(sessionDTO.activity))) {
+          throw new Error('Activity Not Found');
+        }
+      }
 
       const newSession = new Session({
         totalTimeSeconds: sessionDTO.totalTimeSeconds,
@@ -46,9 +107,6 @@ export default {
       return (await newSession.save()).populate('activity');
     } catch (e) {
       console.log(e);
-      if (e instanceof mongoose.Error.CastError) {
-        throw new Error('Activity Not Found');
-      }
       if (e instanceof Error) {
         throw new Error(e.message);
       }
@@ -62,7 +120,9 @@ export default {
     }
 
     try {
-      await Session.exists({ _id: sessionId });
+      if (!(await this.existsSession(sessionId))) {
+        throw new Error('Session Not Found');
+      }
 
       await Session.findById(sessionId).updateOne({
         totalTimeSeconds: sessionDTO.totalTimeSeconds,
@@ -74,9 +134,6 @@ export default {
       return await Session.findById(sessionId);
     } catch (e) {
       console.log(e);
-      if (e instanceof mongoose.Error.CastError) {
-        throw new Error('Session Not Found');
-      }
       if (e instanceof Error) {
         throw new Error(e.message);
       }
@@ -85,7 +142,9 @@ export default {
 
   async deleteSession(sessionId: string) {
     try {
-      await Session.exists({ _id: sessionId });
+      if (!(await this.existsSession(sessionId))) {
+        throw new Error('Session Not Found');
+      }
 
       await Session.findById(sessionId).updateOne({
         deleted: true,
@@ -97,9 +156,6 @@ export default {
       return message;
     } catch (e) {
       console.log(e);
-      if (e instanceof mongoose.Error.CastError) {
-        throw new Error('Session Not Found');
-      }
       if (e instanceof Error) {
         throw new Error(e.message);
       }

@@ -8,6 +8,24 @@ router.get('/', async (req: Request, res: Response) => {
   res.json(data);
 });
 
+router.get('/:id', async (req: Request, res: Response) => {
+  try {
+    const data = await sessionService.getSession(req.params.id);
+    res.status(200).json(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      if (
+        e.message === 'Session Not Found' ||
+        e.message === 'Activity For Session Not Found'
+      ) {
+        res.status(404).send(e.message);
+      } else {
+        res.status(500).send(e.message);
+      }
+    }
+  }
+});
+
 router.post('/', async (req: Request, res: Response) => {
   try {
     const data = await sessionService.createSession(req.body);
