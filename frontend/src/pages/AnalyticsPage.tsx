@@ -1,11 +1,7 @@
-import { FC } from 'react'
+import { FC } from 'react';
 
 const AnalyticsPage: FC = () => {
-   return (
-      <>
-         Аналитика
-      </>
-   )
-}
+  return <>Аналитика</>;
+};
 
-export default AnalyticsPage
+export default AnalyticsPage;

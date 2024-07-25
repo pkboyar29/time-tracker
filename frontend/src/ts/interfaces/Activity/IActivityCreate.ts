@@ -1,4 +1,4 @@
 interface IActivityCreate {
-   name: string,
-   descr?: string
+  name: string;
+  descr?: string;
 }

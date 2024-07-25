@@ -1,5 +1,5 @@
 interface IActivityUpdate {
-   id: string,
-   name: string,
-   descr?: string
+  id: string;
+  name: string;
+  descr?: string;
 }

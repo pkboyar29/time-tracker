@@ -1,11 +1,7 @@
-import { FC } from 'react'
+import { FC } from 'react';
 
 const SettingsPage: FC = () => {
-   return (
-      <>
-         Настройки
-      </>
-   )
-}
+  return <>Настройки</>;
+};
 
-export default SettingsPage
+export default SettingsPage;

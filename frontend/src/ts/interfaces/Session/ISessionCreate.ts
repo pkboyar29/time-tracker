@@ -1,5 +1,5 @@
 interface ISessionCreate {
-   totalTimeSeconds: number,
-   spentTimeSeconds: number,
-   activity?: string
+  totalTimeSeconds: number;
+  spentTimeSeconds: number;
+  activity?: string;
 }

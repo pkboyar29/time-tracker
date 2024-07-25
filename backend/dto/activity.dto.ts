@@ -1,4 +1,4 @@
 export interface ActivityDTO {
-   name: string,
-   descr?: string
+  name: string;
+  descr?: string;
 }
