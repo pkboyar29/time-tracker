@@ -20,11 +20,11 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
   return (
     <div
       onClick={handleOutsideClick}
-      className="w-full h-full top-0 left-0 z-50 fixed bg-gray-rgba flex items-center justify-center"
+      className="fixed top-0 left-0 z-50 flex items-center justify-center w-full h-full bg-gray-rgba"
     >
       <div
         onClick={handleInsideClick}
-        className="overflow-hidden bg-white rounded-md px-3 py-5 basis-1/3"
+        className="px-3 py-5 overflow-hidden bg-white rounded-md basis-1/3"
       >
         <div className="flex items-center justify-between mb-5">
           <div>{title}</div>

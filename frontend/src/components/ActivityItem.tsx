@@ -16,21 +16,21 @@ const ActivityItem: FC<ActivityBoxProps> = ({
   startSessionHandler,
 }) => {
   return (
-    <div className="border border-black border-solid p-5 rounded-xl">
+    <div className="p-5 border border-black border-solid rounded-xl">
       <div className="flex items-start gap-[100px]">
         <div className="flex flex-col gap-3">
           <div className="flex flex-col gap-2">
-            <div className="font-bold text-lg">Name</div>
+            <div className="text-lg font-bold">Name</div>
             <div>{activity.name}</div>
           </div>
           <div className="flex flex-col gap-2">
-            <div className="font-bold text-lg">Description</div>
+            <div className="text-lg font-bold">Description</div>
             <div>
               {activity.descr !== '' ? activity.descr : 'Without description'}
             </div>
           </div>
         </div>
-        <div className="ml-auto flex flex-col gap-7 items-end">
+        <div className="flex flex-col items-end ml-auto gap-7">
           <div className="flex gap-4">
             <button onClick={() => editHandler(activity)}>
               <svg
@@ -88,7 +88,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           </div>
         </div>
       </div>
-      <div className="mt-6 flex gap-6 justify-center">
+      <div className="flex justify-center gap-6 mt-6">
         <div className="text-center">
           <div className="font-bold">{activity.sessionsAmount}</div>
           <div className="text-[13px]">sessions</div>

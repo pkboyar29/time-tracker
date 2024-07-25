@@ -84,7 +84,7 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({
           })}
           type="number"
           placeholder="Enter minutes (max - 10 hours)"
-          className="p-1 rounded-md bg-red-500 text-white placeholder-white"
+          className="p-1 text-white placeholder-white bg-red-500 rounded-md"
         />
         {errors.totalTimeMinutes && (
           <p className="mt-2 text-red-500">
@@ -104,7 +104,7 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({
       <button
         type="submit"
         disabled={!isValid}
-        className="p-3 bg-red-500 text-white rounded-xl"
+        className="p-3 text-white bg-red-500 rounded-xl"
       >
         Create session
       </button>

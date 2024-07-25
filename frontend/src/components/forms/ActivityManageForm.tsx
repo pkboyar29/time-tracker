@@ -54,15 +54,15 @@ const ActivityManageForm: FC<ActivityManageFormProps> = ({
         {...register('name')}
         type="text"
         placeholder="Enter name"
-        className="w-full p-1 rounded-md bg-red-500 text-white placeholder-white"
+        className="w-full p-1 text-white placeholder-white bg-red-500 rounded-md"
       />
       <textarea
         {...register('descr')}
         placeholder="Enter description (optional)"
-        className="w-full h-20 p-1 rounded-md bg-red-500 text-white placeholder-white"
+        className="w-full h-20 p-1 text-white placeholder-white bg-red-500 rounded-md"
       />
       <div className="flex gap-4">
-        <button type="submit" className="p-3 bg-red-500 text-white rounded-xl">
+        <button type="submit" className="p-3 text-white bg-red-500 rounded-xl">
           {!currentActivity ? 'Create activity' : 'Update activity'}
         </button>
       </div>

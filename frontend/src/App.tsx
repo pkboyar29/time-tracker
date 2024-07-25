@@ -10,10 +10,10 @@ import Sidebar from './components/Sidebar';
 const App: FC = () => {
   return (
     <>
-      <div id="app" className="flex min-h-full h-full w-full">
+      <div id="app" className="flex w-full h-full min-h-full">
         <Sidebar />
 
-        <div className="p-5 w-full">
+        <div className="w-full p-5">
           <Routes>
             <Route path="/timer" element={<TimerPage />} />
             <Route path="/activities" element={<ActivitiesPage />} />

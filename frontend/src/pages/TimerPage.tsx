@@ -117,7 +117,7 @@ const TimerPage: FC = () => {
         >
           <button
             onClick={() => onDeleteSessionClick(deleteModal)}
-            className="p-3 bg-red-500 text-white rounded-xl"
+            className="p-3 text-white bg-red-500 rounded-xl"
           >
             Delete session
           </button>
@@ -128,7 +128,7 @@ const TimerPage: FC = () => {
         <div className="flex flex-col items-start">
           <button
             onClick={() => setUnompletedLess(!uncompletedLess)}
-            className="my-5 text-xl font-bold flex items-center gap-1"
+            className="flex items-center gap-1 my-5 text-xl font-bold"
           >
             Uncompleted sessions{' '}
             {uncompletedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}
@@ -149,7 +149,7 @@ const TimerPage: FC = () => {
           )}
           <button
             onClick={() => setCompletedLess(!completedLess)}
-            className="my-5 text-xl font-bold flex items-center gap-1"
+            className="flex items-center gap-1 my-5 text-xl font-bold"
           >
             Completed sessions{' '}
             {completedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}

@@ -111,7 +111,7 @@ const ActivitiesPage: FC = () => {
           </div>
         </div>
 
-        <div className="flex gap-5 h-full">
+        <div className="flex h-full gap-5">
           <Button onClick={() => {}}>Search...</Button>
           <Button onClick={() => setManageModal(true)}>
             Create new activity
