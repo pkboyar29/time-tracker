@@ -10,10 +10,11 @@ import {
 } from '../redux/slices/sessionSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
-import { getRemainingTimeMinutesSeconds } from '../utils/timerHelpers';
+import { getRemainingTimeHoursMinutesSeconds } from '../utils/timerHelpers';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { CircularProgress } from '@mui/material';
 
 import SessionItem from '../components/SessionItem';
 import SessionCreateForm from '../components/forms/SessionCreateForm';
@@ -36,6 +37,15 @@ const TimerPage: FC = () => {
   useEffect(() => {
     dispatch(fetchSessions());
   }, []);
+
+  // useEffect(() => {
+  //   if (currentSession) {
+  //     console.log(
+  //       (currentSession.spentTimeSeconds / currentSession.totalTimeSeconds) *
+  //         100
+  //     );
+  //   }
+  // }, [currentSession?.spentTimeSeconds]);
 
   const toggleTimer = () => {
     setEnabled((e) => !e);
@@ -142,7 +152,7 @@ const TimerPage: FC = () => {
                     key={session.id}
                     session={session}
                     sessionClickHandler={onSessionClick}
-                    sessionDeleteHandler={onDeleteSessionClick}
+                    sessionDeleteHandler={setDeleteModal}
                   />
                 ))}
             </div>
@@ -162,7 +172,7 @@ const TimerPage: FC = () => {
                   <SessionItem
                     key={session.id}
                     session={session}
-                    sessionDeleteHandler={onDeleteSessionClick}
+                    sessionDeleteHandler={setDeleteModal}
                   />
                 ))}
             </div>
@@ -181,23 +191,33 @@ const TimerPage: FC = () => {
             Choose existing session or create a new one
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-3">
+          <div className="flex flex-col items-center gap-2 text-lg">
             <div>
-              Activity:{' '}
               {currentSession.activity
-                ? currentSession.activity.name
+                ? `Activity: ${currentSession.activity.name}`
                 : 'Without activity'}
             </div>
+
             <div>
               Session {Math.round(currentSession.totalTimeSeconds / 60)} minutes
             </div>
+
             <div>
-              Left:{' '}
-              {getRemainingTimeMinutesSeconds(
+              {`Left ${getRemainingTimeHoursMinutesSeconds(
                 currentSession.totalTimeSeconds,
                 currentSession.spentTimeSeconds
-              )}
+              )}`}
             </div>
+
+            <CircularProgress
+              variant="determinate"
+              value={
+                (currentSession.spentTimeSeconds /
+                  currentSession.totalTimeSeconds) *
+                100
+              }
+            ></CircularProgress>
+
             <div className="flex gap-4">
               <button onClick={toggleTimer}>
                 {enabled ? (

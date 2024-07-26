@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import TimerPage from './pages/TimerPage';

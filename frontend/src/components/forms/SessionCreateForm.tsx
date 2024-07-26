@@ -5,6 +5,8 @@ import { AppDispatch } from '../../redux/store';
 import axios from '../../axios';
 import { createSession } from '../../redux/slices/sessionSlice';
 
+import Button from '../Button';
+
 import { mapActivityFromResponse } from '../../utils/mappingHelpers';
 
 interface SessionCreateFormProps {
@@ -101,13 +103,9 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({
         ))}
       </select>
       <div>Choose a task (optional)</div>
-      <button
-        type="submit"
-        disabled={!isValid}
-        className="p-3 text-white bg-red-500 rounded-xl"
-      >
+      <Button type="submit" disabled={!isValid}>
         Create session
-      </button>
+      </Button>
     </form>
   );
 };

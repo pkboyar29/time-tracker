@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { getRemainingTimeMinutesSeconds } from '../utils/timerHelpers';
+import { getRemainingTimeHoursMinutesSeconds } from '../utils/timerHelpers';
 
 const Sidebar: FC = () => {
   const currentSession = useSelector(
@@ -11,13 +11,13 @@ const Sidebar: FC = () => {
 
   return (
     <div className="fixed w-24 h-full p-5 border-r border-solid border-r-gray-500">
-      <ul className="flex flex-col items-center justify-between h-full">
-        <div className="flex flex-col gap-5">
+      <ul className="flex flex-col justify-between h-full">
+        <div className="flex flex-col items-center gap-5">
           <li className="flex flex-col items-center gap-2">
             {currentSession && (
               <>
                 {' '}
-                {getRemainingTimeMinutesSeconds(
+                {getRemainingTimeHoursMinutesSeconds(
                   currentSession.totalTimeSeconds,
                   currentSession.spentTimeSeconds
                 )}{' '}

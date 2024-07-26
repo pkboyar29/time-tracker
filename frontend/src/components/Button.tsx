@@ -1,13 +1,24 @@
-import { FC, ReactNode } from 'react';
+import { ButtonHTMLAttributes, FC, ReactNode } from 'react';
 
-interface ButtonProps {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  onClick: () => void;
+  onClick?: () => void;
+  type?: 'button' | 'submit' | 'reset' | undefined;
 }
 
-const Button: FC<ButtonProps> = ({ children, onClick }) => {
+const Button: FC<ButtonProps> = ({
+  children,
+  onClick,
+  type = 'button',
+  ...otherProps
+}) => {
   return (
-    <button onClick={onClick} className="p-3 text-white bg-red-500 rounded-xl">
+    <button
+      type={type}
+      onClick={onClick}
+      className="p-3 text-white transition duration-300 bg-red-500 hover:bg-red-700 rounded-xl"
+      {...otherProps}
+    >
       {children}
     </button>
   );
