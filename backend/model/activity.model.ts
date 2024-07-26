@@ -3,10 +3,13 @@ import mongoose from 'mongoose';
 const activitySchema = new mongoose.Schema({
   name: {
     type: String,
+    maxLength: 50,
+    minLength: 1,
     required: true,
   },
   descr: {
     type: String,
+    maxLength: 500,
     required: false,
   },
   createdDate: {

@@ -1,6 +1,6 @@
 import Session from '../model/session.model';
 import activityService from './activity.service';
-import { SessionDTO } from '../dto/session.dto';
+import { SessionDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
 export default {
@@ -113,15 +113,19 @@ export default {
     }
   },
 
-  async updateSession(sessionId: string, sessionDTO: SessionDTO) {
-    let completed = false;
-    if (sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds) {
-      completed = true;
-    }
-
+  async updateSession(sessionId: string, sessionDTO: SessionUpdateDTO) {
     try {
       if (!(await this.existsSession(sessionId))) {
         throw new Error('Session Not Found');
+      }
+
+      if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
+        throw new Error('Total time must be greater or equal spent time');
+      }
+
+      let completed = false;
+      if (sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds) {
+        completed = true;
       }
 
       await Session.findById(sessionId).updateOne({
