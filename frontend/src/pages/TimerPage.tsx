@@ -14,8 +14,8 @@ import { getRemainingTimeHoursMinutesSeconds } from '../utils/timerHelpers';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { CircularProgress } from '@mui/material';
 
+import CustomCircularProgress from '../components/CustomCircularProgress';
 import SessionItem from '../components/SessionItem';
 import SessionCreateForm from '../components/forms/SessionCreateForm';
 import Button from '../components/Button';
@@ -37,15 +37,6 @@ const TimerPage: FC = () => {
   useEffect(() => {
     dispatch(fetchSessions());
   }, []);
-
-  // useEffect(() => {
-  //   if (currentSession) {
-  //     console.log(
-  //       (currentSession.spentTimeSeconds / currentSession.totalTimeSeconds) *
-  //         100
-  //     );
-  //   }
-  // }, [currentSession?.spentTimeSeconds]);
 
   const toggleTimer = () => {
     setEnabled((e) => !e);
@@ -157,26 +148,6 @@ const TimerPage: FC = () => {
                 ))}
             </div>
           )}
-          <button
-            onClick={() => setCompletedLess(!completedLess)}
-            className="flex items-center gap-1 my-5 text-xl font-bold"
-          >
-            Completed sessions{' '}
-            {completedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-          </button>
-          {!completedLess && (
-            <div className="inline-flex flex-col gap-2">
-              {sessions
-                .filter((session: ISession) => session.completed)
-                .map((session: ISession) => (
-                  <SessionItem
-                    key={session.id}
-                    session={session}
-                    sessionDeleteHandler={setDeleteModal}
-                  />
-                ))}
-            </div>
-          )}
         </div>
         <div>
           <Button onClick={() => setCreateModal(true)}>
@@ -202,21 +173,17 @@ const TimerPage: FC = () => {
               Session {Math.round(currentSession.totalTimeSeconds / 60)} minutes
             </div>
 
-            <div>
-              {`Left ${getRemainingTimeHoursMinutesSeconds(
-                currentSession.totalTimeSeconds,
-                currentSession.spentTimeSeconds
-              )}`}
-            </div>
-
-            <CircularProgress
-              variant="determinate"
+            <CustomCircularProgress
               value={
                 (currentSession.spentTimeSeconds /
                   currentSession.totalTimeSeconds) *
                 100
               }
-            ></CircularProgress>
+              label={`Left ${getRemainingTimeHoursMinutesSeconds(
+                currentSession.totalTimeSeconds,
+                currentSession.spentTimeSeconds
+              )}`}
+            />
 
             <div className="flex gap-4">
               <button onClick={toggleTimer}>
