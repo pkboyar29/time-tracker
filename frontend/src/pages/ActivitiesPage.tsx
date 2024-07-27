@@ -1,20 +1,15 @@
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
-import {
-  fetchActivities,
-  createActivity,
-  updateActivity,
-  deleteActivity,
-} from '../redux/slices/activitySlice';
+import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';
 
 import ActivityManageForm from '../components/forms/ActivityManageForm';
 import SessionCreateForm from '../components/forms/SessionCreateForm';
 import ActivityItem from '../components/ActivityItem';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
+import { IActivity } from '../ts/interfaces/Activity/IActivity';
 
 const ActivitiesPage: FC = () => {
   const activities = useSelector(

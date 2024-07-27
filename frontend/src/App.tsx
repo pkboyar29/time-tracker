@@ -1,5 +1,8 @@
 import { FC, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from './redux/store';
+import { loadSessionFromLocalStorage } from './redux/slices/sessionSlice';
 
 import TimerPage from './pages/TimerPage';
 import AnalyticsPage from './pages/AnalyticsPage';
@@ -8,6 +11,12 @@ import SettingsPage from './pages/SettingsPage';
 import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+
+  useEffect(() => {
+    dispatch(loadSessionFromLocalStorage());
+  }, []);
+
   return (
     <>
       <div id="app" className="flex w-full h-full min-h-full">

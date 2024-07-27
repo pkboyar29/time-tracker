@@ -1,6 +1,9 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from '../../axios';
 import { mapActivityFromResponse } from '../../utils/mappingHelpers';
+import { IActivity } from '../../ts/interfaces/Activity/IActivity';
+import { IActivityCreate } from '../../ts/interfaces/Activity/IActivityCreate';
+import { IActivityUpdate } from '../../ts/interfaces/Activity/IActivityUpdate';
 
 interface ActivityState {
   activities: IActivity[];

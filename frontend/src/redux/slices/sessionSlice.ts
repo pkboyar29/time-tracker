@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from '../../axios';
 import { mapSessionFromResponse } from '../../utils/mappingHelpers';
+import { ISession } from '../../ts/interfaces/Session/ISession';
+import { ISessionCreate } from '../../ts/interfaces/Session/ISessionCreate';
 
 interface SessionState {
   sessions: ISession[];
@@ -60,19 +62,49 @@ export const deleteSession = createAsyncThunk(
   }
 );
 
+const saveSessionToLocalStorage = (session: ISession) => {
+  const sessionJson = JSON.stringify(session);
+  console.log(sessionJson);
+  window.localStorage.setItem('session', sessionJson);
+};
+
+const removeSessionFromLocalStorage = () => {
+  if (window.localStorage.getItem('session')) {
+    window.localStorage.removeItem('session');
+  }
+};
+
 const sessionSlice = createSlice({
   name: 'sessions',
   initialState,
   reducers: {
-    setCurrentSessionById(state, action: PayloadAction<string>) {
-      state.currentSession = findSessionById(state.sessions, action.payload);
+    setCurrentSession(state, action: PayloadAction<string>) {
+      const currentSession: ISession | null = findSessionById(
+        state.sessions,
+        action.payload
+      );
+      if (currentSession) {
+        state.currentSession = currentSession;
+        saveSessionToLocalStorage(currentSession);
+      }
     },
     removeCurrentSession(state) {
       state.currentSession = null;
+      removeSessionFromLocalStorage();
     },
     addSecond(state) {
       if (state.currentSession) {
         state.currentSession.spentTimeSeconds++;
+      }
+    },
+    loadSessionFromLocalStorage(state) {
+      const sessionJson = window.localStorage.getItem('session');
+      if (sessionJson) {
+        const session = JSON.parse(sessionJson);
+        // TODO обработать ошибку когда в session хранится не сессия в формате json, а непонятно что
+        // да и вообще надо попытаться запретить изменение local storage, но по-моему это невозможно
+        // в любом случае, если десериализовать не получится, то очистить полностью local storage и в консоль можно вывести сообщение
+        state.currentSession = session;
       }
     },
   },
@@ -91,10 +123,15 @@ const sessionSlice = createSlice({
       })
       .addCase(createSession.fulfilled, (state, action) => {
         state.sessions.push(action.payload);
-        state.currentSession = findSessionById(
+        const currentSession: ISession | null = findSessionById(
           state.sessions,
           action.payload.id
         );
+
+        if (currentSession) {
+          state.currentSession = currentSession;
+          saveSessionToLocalStorage(currentSession);
+        }
       })
       .addCase(updateSession.fulfilled, (state, action) => {
         state.sessions = state.sessions.map((session: ISession) => {
@@ -106,6 +143,11 @@ const sessionSlice = createSlice({
               completed: action.payload.completed,
             };
           }
+
+          if (state.currentSession) {
+            saveSessionToLocalStorage(state.currentSession);
+          }
+
           return session;
         });
       })
@@ -113,10 +155,22 @@ const sessionSlice = createSlice({
         state.sessions = state.sessions.filter(
           (session: ISession) => session.id !== action.meta.arg
         );
+
+        const currentSessionJson = window.localStorage.getItem('session');
+        if (currentSessionJson) {
+          const currentSession: ISession = JSON.parse(currentSessionJson);
+          if (currentSession.id === action.meta.arg) {
+            removeSessionFromLocalStorage();
+          }
+        }
       });
   },
 });
 
-export const { setCurrentSessionById, removeCurrentSession, addSecond } =
-  sessionSlice.actions;
+export const {
+  setCurrentSession,
+  removeCurrentSession,
+  addSecond,
+  loadSessionFromLocalStorage,
+} = sessionSlice.actions;
 export default sessionSlice.reducer;

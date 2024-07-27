@@ -4,7 +4,7 @@ import {
   fetchSessions,
   updateSession,
   deleteSession,
-  setCurrentSessionById,
+  setCurrentSession,
   removeCurrentSession,
   addSecond,
 } from '../redux/slices/sessionSlice';
@@ -20,13 +20,13 @@ import SessionItem from '../components/SessionItem';
 import SessionCreateForm from '../components/forms/SessionCreateForm';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
+import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
   const [enabled, setEnabled] = useState<boolean>(false);
   const [createModal, setCreateModal] = useState<boolean>(false);
   const [deleteModal, setDeleteModal] = useState<string | null>(null); // we store here id of session we want to delete or null
   const [uncompletedLess, setUnompletedLess] = useState<boolean>(false); // less - true, more - false
-  const [completedLess, setCompletedLess] = useState<boolean>(false); // less - true, more - false
 
   const sessions = useSelector((state: RootState) => state.sessions.sessions);
   const currentSession = useSelector(
@@ -82,7 +82,7 @@ const TimerPage: FC = () => {
   }, [currentSession?.spentTimeSeconds]);
 
   const onSessionClick = (sessionId: string) => {
-    dispatch(setCurrentSessionById(sessionId));
+    dispatch(setCurrentSession(sessionId));
     setEnabled(true);
   };
 

@@ -1,3 +1,6 @@
+import { IActivity } from '../ts/interfaces/Activity/IActivity';
+import { ISession } from '../ts/interfaces/Session/ISession';
+
 export const mapActivityFromResponse = (unmappedActivity: any): IActivity => {
   return {
     id: unmappedActivity._id,
