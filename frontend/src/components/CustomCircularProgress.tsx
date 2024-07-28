@@ -4,11 +4,13 @@ import { FC } from 'react';
 interface CustomCircularProgressProps {
   value: number;
   label: string;
+  size?: 'small' | 'big';
 }
 
 const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
   value,
   label,
+  size = 'small',
 }) => {
   return (
     <Box sx={{ position: 'relative' }}>
@@ -18,8 +20,8 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
           color: (theme) =>
             theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
         }}
-        size={140}
-        thickness={4}
+        size={size === 'big' ? 140 : 60}
+        thickness={size === 'big' ? 4 : 2}
         value={100}
       />
 
@@ -30,8 +32,8 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
           position: 'absolute',
           left: 0,
         }}
-        size={140}
-        thickness={4}
+        size={size === 'big' ? 140 : 60}
+        thickness={size === 'big' ? 4 : 2}
         variant="determinate"
         value={value}
       ></CircularProgress>
@@ -48,7 +50,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
           justifyContent: 'center',
         }}
       >
-        <Typography variant="h6" component="div">
+        <Typography variant={size === 'big' ? 'h6' : 'inherit'} component="div">
           {label}
         </Typography>
       </Box>

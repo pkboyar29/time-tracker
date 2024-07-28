@@ -123,3 +123,7 @@ h6 {
 * {
   box-sizing: border-box;
 }
+
+.active svg {
+  stroke: rgb(239 68 68);
+}

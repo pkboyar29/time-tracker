@@ -10,7 +10,7 @@ const Sidebar: FC = () => {
   );
 
   return (
-    <div className="fixed w-24 h-full p-5 border-r border-solid border-r-gray-500">
+    <div className="w-24 h-full p-5 border-r border-solid border-r-gray-500">
       <ul className="flex flex-col items-center justify-between h-full">
         <div className="flex flex-col items-center gap-5">
           <li className="flex flex-col items-center gap-2">
@@ -28,8 +28,7 @@ const Sidebar: FC = () => {
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-7"
+                className="transition duration-300 size-7 stroke-black hover:stroke-red-500"
               >
                 <path
                   strokeLinecap="round"
@@ -46,8 +45,7 @@ const Sidebar: FC = () => {
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-7"
+                className="transition duration-300 size-7 stroke-black hover:stroke-red-500"
               >
                 <path
                   strokeLinecap="round"
@@ -64,8 +62,7 @@ const Sidebar: FC = () => {
                 fill="none"
                 viewBox="0 0 24 24"
                 strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-7"
+                className="transition duration-300 size-7 stroke-black hover:stroke-red-500"
               >
                 <path
                   strokeLinecap="round"
@@ -84,8 +81,7 @@ const Sidebar: FC = () => {
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="1.5"
-              stroke="currentColor"
-              className="size-7"
+              className="transition duration-300 size-7 stroke-black hover:stroke-red-500"
             >
               <path
                 strokeLinecap="round"
