@@ -38,6 +38,14 @@ const TimerPage: FC = () => {
     dispatch(fetchSessions());
   }, []);
 
+  useEffect(() => {
+    window.addEventListener('beforeunload', (e) => {
+      if (currentSession) {
+        dispatch(updateSession(currentSession));
+      }
+    });
+  }, []);
+
   const toggleTimer = () => {
     setEnabled((e) => !e);
     if (enabled) {
@@ -53,10 +61,10 @@ const TimerPage: FC = () => {
 
   const stopTimer = () => {
     setEnabled(false);
-    dispatch(removeCurrentSession());
     if (currentSession) {
       dispatch(updateSession(currentSession));
     }
+    dispatch(removeCurrentSession());
   };
 
   useEffect(() => {

@@ -64,7 +64,6 @@ export const deleteSession = createAsyncThunk(
 
 const saveSessionToLocalStorage = (session: ISession) => {
   const sessionJson = JSON.stringify(session);
-  console.log(sessionJson);
   window.localStorage.setItem('session', sessionJson);
 };
 
