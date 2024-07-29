@@ -4,31 +4,47 @@ import { SessionDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
 export default {
-  async getSessions() {
+  async getSessions(completed?: boolean) {
     try {
-      const sessions = await Session.find({ deleted: false }).populate(
-        'activity'
-      );
+      let sessions;
+      if (completed !== undefined) {
+        sessions = await Session.find({
+          deleted: false,
+          completed: completed,
+        }).populate('activity');
+      } else {
+        sessions = await Session.find({ deleted: false }).populate('activity');
+      }
 
       return sessions;
     } catch (e) {
-      // console.log(e);
+      console.log(e);
       if (e instanceof Error) {
         throw new Error(e.message);
       }
     }
   },
 
-  async getSessionsForActivity(activityId: string) {
+  async getSessionsForActivity(activityId: string, completed?: boolean) {
     try {
       if (!(await activityService.existsActivity(activityId))) {
         throw new Error('Activity For Session Not Found');
       }
+      let sessions;
 
-      const sessions = await Session.find({
-        activity: activityId,
-        deleted: false,
-      }).exec();
+      if (completed !== undefined) {
+        sessions = await Session.find({
+          activity: activityId,
+          deleted: false,
+          completed: completed,
+        }).exec();
+      } else {
+        sessions = await Session.find({
+          activity: activityId,
+          deleted: false,
+        }).exec();
+      }
+
       return sessions;
     } catch (e) {
       console.log(e);

@@ -4,7 +4,27 @@ import sessionService from '../service/session.service';
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
-  const data = await sessionService.getSessions();
+  let data;
+
+  const completedParam = req.query.completed;
+  let completed: boolean | undefined;
+  if (typeof completedParam === 'string') {
+    if (completedParam.toLowerCase() === 'true') {
+      completed = true;
+    } else if (completedParam.toLowerCase() === 'false') {
+      completed = false;
+    }
+  }
+
+  if (req.query.activityId) {
+    data = await sessionService.getSessionsForActivity(
+      req.query.activityId.toString(),
+      completed
+    );
+  } else {
+    data = await sessionService.getSessions(completed);
+  }
+
   res.json(data);
 });
 
