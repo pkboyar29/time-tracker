@@ -34,6 +34,8 @@ const ActivitiesPage: FC = () => {
   const onEditActivityClick = (activity: IActivity) => {
     setCurrentActivity(activity);
     setManageModal(true);
+
+    navigate(`${activity.id}`);
   };
 
   const onDeleteActivityClick = (activityId: string) => {

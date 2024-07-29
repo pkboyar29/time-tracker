@@ -5,13 +5,13 @@ import { ISession } from '../../ts/interfaces/Session/ISession';
 import { ISessionCreate } from '../../ts/interfaces/Session/ISessionCreate';
 
 interface SessionState {
-  sessions: ISession[];
+  uncompletedSessions: ISession[];
   status: string;
   currentSession: ISession | null;
 }
 
 const initialState: SessionState = {
-  sessions: [],
+  uncompletedSessions: [],
   status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
   currentSession: null,
 };
@@ -23,7 +23,11 @@ const findSessionById = (sessions: ISession[], id: string): ISession | null => {
 export const fetchSessions = createAsyncThunk(
   'sessions/fetchSessions',
   async () => {
-    const { data: unmappedData } = await axios.get('/sessions');
+    const { data: unmappedData } = await axios.get('/sessions', {
+      params: {
+        completed: false,
+      },
+    });
     const mappedData = unmappedData.map((unmappedSession: any) =>
       mapSessionFromResponse(unmappedSession)
     );
@@ -79,7 +83,7 @@ const sessionSlice = createSlice({
   reducers: {
     setCurrentSession(state, action: PayloadAction<string>) {
       const currentSession: ISession | null = findSessionById(
-        state.sessions,
+        state.uncompletedSessions,
         action.payload
       );
       if (currentSession) {
@@ -115,15 +119,15 @@ const sessionSlice = createSlice({
       })
       .addCase(fetchSessions.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.sessions = action.payload;
+        state.uncompletedSessions = action.payload;
       })
       .addCase(fetchSessions.rejected, (state) => {
         state.status = 'failed';
       })
       .addCase(createSession.fulfilled, (state, action) => {
-        state.sessions.push(action.payload);
+        state.uncompletedSessions.push(action.payload);
         const currentSession: ISession | null = findSessionById(
-          state.sessions,
+          state.uncompletedSessions,
           action.payload.id
         );
 
@@ -133,25 +137,27 @@ const sessionSlice = createSlice({
         }
       })
       .addCase(updateSession.fulfilled, (state, action) => {
-        state.sessions = state.sessions.map((session: ISession) => {
-          if (session.id === action.payload.id) {
-            return {
-              ...session,
-              totalTimeSeconds: action.payload.totalTimeSeconds,
-              spentTimeSeconds: action.payload.spentTimeSeconds,
-              completed: action.payload.completed,
-            };
-          }
+        state.uncompletedSessions = state.uncompletedSessions.map(
+          (session: ISession) => {
+            if (session.id === action.payload.id) {
+              return {
+                ...session,
+                totalTimeSeconds: action.payload.totalTimeSeconds,
+                spentTimeSeconds: action.payload.spentTimeSeconds,
+                completed: action.payload.completed,
+              };
+            }
 
-          if (state.currentSession) {
-            saveSessionToLocalStorage(state.currentSession);
-          }
+            if (state.currentSession) {
+              saveSessionToLocalStorage(state.currentSession);
+            }
 
-          return session;
-        });
+            return session;
+          }
+        );
       })
       .addCase(deleteSession.fulfilled, (state, action) => {
-        state.sessions = state.sessions.filter(
+        state.uncompletedSessions = state.uncompletedSessions.filter(
           (session: ISession) => session.id !== action.meta.arg
         );
 

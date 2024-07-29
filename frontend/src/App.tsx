@@ -7,6 +7,7 @@ import { loadSessionFromLocalStorage } from './redux/slices/sessionSlice';
 import TimerPage from './pages/TimerPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import ActivitiesPage from './pages/ActivitiesPage';
+import ActivityPage from './pages/ActivityPage';
 import SettingsPage from './pages/SettingsPage';
 import Sidebar from './components/Sidebar';
 
@@ -26,6 +27,7 @@ const App: FC = () => {
           <Routes>
             <Route path="/timer" element={<TimerPage />} />
             <Route path="/activities" element={<ActivitiesPage />} />
+            <Route path="/activities/:activityId" element={<ActivityPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/" element={<Navigate to="/timer" />} />

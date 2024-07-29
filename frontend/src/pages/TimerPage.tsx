@@ -28,7 +28,9 @@ const TimerPage: FC = () => {
   const [deleteModal, setDeleteModal] = useState<string | null>(null); // we store here id of session we want to delete or null
   const [uncompletedLess, setUnompletedLess] = useState<boolean>(false); // less - true, more - false
 
-  const sessions = useSelector((state: RootState) => state.sessions.sessions);
+  const uncompletedSessions = useSelector(
+    (state: RootState) => state.sessions.uncompletedSessions
+  );
   const currentSession = useSelector(
     (state: RootState) => state.sessions.currentSession
   );
@@ -244,16 +246,14 @@ const TimerPage: FC = () => {
           </button>
           {!uncompletedLess && (
             <div className="inline-flex flex-col gap-2">
-              {sessions
-                .filter((session: ISession) => !session.completed)
-                .map((session: ISession) => (
-                  <SessionItem
-                    key={session.id}
-                    session={session}
-                    sessionClickHandler={onSessionClick}
-                    sessionDeleteHandler={setDeleteModal}
-                  />
-                ))}
+              {uncompletedSessions.map((session: ISession) => (
+                <SessionItem
+                  key={session.id}
+                  session={session}
+                  sessionClickHandler={onSessionClick}
+                  sessionDeleteHandler={setDeleteModal}
+                />
+              ))}
             </div>
           )}
         </div>
