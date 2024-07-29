@@ -39,12 +39,19 @@ const TimerPage: FC = () => {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('beforeunload', (e) => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
       if (currentSession) {
         dispatch(updateSession(currentSession));
       }
-    });
-  }, []);
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [currentSession, dispatch]);
 
   const toggleTimer = () => {
     setEnabled((e) => !e);
@@ -90,6 +97,10 @@ const TimerPage: FC = () => {
   }, [currentSession?.spentTimeSeconds]);
 
   const onSessionClick = (sessionId: string) => {
+    if (currentSession) {
+      dispatch(updateSession(currentSession));
+    }
+
     dispatch(setCurrentSession(sessionId));
     setEnabled(true);
   };
@@ -112,6 +123,10 @@ const TimerPage: FC = () => {
         >
           <SessionCreateForm
             afterSubmitHandler={() => {
+              if (currentSession) {
+                dispatch(updateSession(currentSession));
+              }
+
               startTimer();
               setCreateModal(false);
             }}
