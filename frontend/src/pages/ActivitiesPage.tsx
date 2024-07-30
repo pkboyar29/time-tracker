@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';
+import CloseIcon from '@mui/icons-material/Close';
 
 import ActivityManageForm from '../components/forms/ActivityManageForm';
 import SessionCreateForm from '../components/forms/SessionCreateForm';
@@ -23,6 +24,7 @@ const ActivitiesPage: FC = () => {
   const [createSessionModal, setCreateSessionModal] = useState<string | null>(
     null
   ); // we store here id of activity we want to create session of or null
+  const [searchString, setSearchString] = useState<string>('');
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -96,20 +98,46 @@ const ActivitiesPage: FC = () => {
         <div>
           <div className="mb-5 text-xl font-bold">All activities</div>
           <div className="flex flex-col gap-4">
-            {activities.map((activity: IActivity) => (
-              <ActivityItem
-                key={activity.id}
-                activity={activity}
-                editHandler={onEditActivityClick}
-                deleteHandler={setDeleteModal}
-                startSessionHandler={() => setCreateSessionModal(activity.id)}
-              />
-            ))}
+            {activities.filter((activity) =>
+              activity.name.includes(searchString)
+            ).length !== 0 ? (
+              activities
+                .filter((activity) => activity.name.includes(searchString))
+                .map((activity) => (
+                  <ActivityItem
+                    key={activity.id}
+                    activity={activity}
+                    editHandler={onEditActivityClick}
+                    deleteHandler={setDeleteModal}
+                    startSessionHandler={() =>
+                      setCreateSessionModal(activity.id)
+                    }
+                  />
+                ))
+            ) : (
+              <>Not found</>
+            )}
           </div>
         </div>
 
         <div className="flex h-full gap-5">
-          <Button onClick={() => {}}>Search...</Button>
+          <div className="relative flex">
+            <input
+              value={searchString}
+              onChange={(e) => setSearchString(e.target.value)}
+              className="transition duration-300 border-b border-solid border-b-gray-500 focus:border-b-red-500"
+              type="text"
+              placeholder="Search..."
+            />
+            {searchString && (
+              <button
+                className="absolute right-0 z-10 top-[6px]"
+                onClick={() => setSearchString('')}
+              >
+                <CloseIcon />
+              </button>
+            )}
+          </div>
           <Button onClick={() => setManageModal(true)}>
             Create new activity
           </Button>
