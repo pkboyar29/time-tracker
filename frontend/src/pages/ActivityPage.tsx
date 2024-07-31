@@ -1,11 +1,21 @@
 import { FC, useEffect, useState } from 'react';
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { useParams } from 'react-router-dom';
+import { useTimer } from '../context/TimerContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../redux/store';
+import {
+  deleteSession,
+  removeCurrentSession,
+  setCurrentSession,
+  updateSession,
+} from '../redux/slices/sessionSlice';
 import axios from '../axios';
 import {
   mapActivityFromResponse,
   mapSessionFromResponse,
 } from '../utils/mappingHelpers';
+
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 import SessionItem from '../components/SessionItem';
@@ -16,6 +26,11 @@ const ActivityPage: FC = () => {
     []
   );
   const { activityId } = useParams();
+  const { startTimer, stopTimer } = useTimer();
+  const currentSession = useSelector(
+    (state: RootState) => state.sessions.currentSession
+  );
+  const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
     const fetchActivityInfo = async () => {
@@ -31,7 +46,6 @@ const ActivityPage: FC = () => {
             completed: false,
           },
         });
-        console.log(unmappedSessions);
         const mappedSessions: ISession[] = unmappedSessions.map(
           (unmappedSession: any) => mapSessionFromResponse(unmappedSession)
         );
@@ -59,11 +73,27 @@ const ActivityPage: FC = () => {
                 <SessionItem
                   key={session.id}
                   session={session}
-                  sessionClickHandler={() => {
-                    console.log('1');
+                  sessionClickHandler={(sessionId: string) => {
+                    if (currentSession) {
+                      dispatch(updateSession(currentSession));
+                    }
+
+                    dispatch(setCurrentSession(sessionId));
+                    startTimer();
                   }}
-                  sessionDeleteHandler={() => {
-                    console.log('2');
+                  sessionDeleteHandler={(sessionId: string) => {
+                    if (currentSession?.id === sessionId) {
+                      dispatch(removeCurrentSession());
+                      stopTimer();
+                    }
+                    dispatch(deleteSession(sessionId));
+
+                    const uncompletedSessionsUpdated =
+                      uncompletedSessions.filter(
+                        (uncompletedSession) =>
+                          uncompletedSession.id !== sessionId
+                      );
+                    setUncompletedSessions(uncompletedSessionsUpdated);
                   }}
                 />
               ))}

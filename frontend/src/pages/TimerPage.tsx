@@ -1,16 +1,15 @@
 import { FC, useEffect, useState } from 'react';
-import audioUrl from '../assets/audio.mp3';
 import {
   fetchSessions,
   updateSession,
   deleteSession,
   setCurrentSession,
   removeCurrentSession,
-  addSecond,
 } from '../redux/slices/sessionSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { getRemainingTimeHoursMinutesSeconds } from '../utils/timerHelpers';
+import { useTimer } from '../context/TimerContext';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -23,10 +22,10 @@ import Modal from '../components/Modal';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
-  const [enabled, setEnabled] = useState<boolean>(false);
   const [createModal, setCreateModal] = useState<boolean>(false);
   const [deleteModal, setDeleteModal] = useState<string | null>(null); // we store here id of session we want to delete or null
   const [uncompletedLess, setUnompletedLess] = useState<boolean>(false); // less - true, more - false
+  const { startTimer, toggleTimer, stopTimer, enabled } = useTimer();
 
   const uncompletedSessions = useSelector(
     (state: RootState) => state.sessions.uncompletedSessions
@@ -55,56 +54,13 @@ const TimerPage: FC = () => {
     };
   }, [currentSession, dispatch]);
 
-  const toggleTimer = () => {
-    setEnabled((e) => !e);
-    if (enabled) {
-      if (currentSession) {
-        dispatch(updateSession(currentSession));
-      }
-    }
-  };
-
-  const startTimer = () => {
-    setEnabled(true);
-  };
-
-  const stopTimer = () => {
-    setEnabled(false);
-    if (currentSession) {
-      dispatch(updateSession(currentSession));
-    }
-    dispatch(removeCurrentSession());
-  };
-
-  useEffect(() => {
-    if (!enabled) return;
-    const intervalId = setInterval(() => {
-      dispatch(addSecond());
-    }, 1000);
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [enabled]);
-
-  useEffect(() => {
-    if (currentSession) {
-      if (currentSession.spentTimeSeconds === currentSession.totalTimeSeconds) {
-        const audio = new Audio(audioUrl);
-        audio.volume = 0.35;
-        audio.play();
-        // alert('Count down')
-        stopTimer();
-      }
-    }
-  }, [currentSession?.spentTimeSeconds]);
-
   const onSessionClick = (sessionId: string) => {
     if (currentSession) {
       dispatch(updateSession(currentSession));
     }
 
     dispatch(setCurrentSession(sessionId));
-    setEnabled(true);
+    startTimer();
   };
 
   const onDeleteSessionClick = (sessionId: string) => {

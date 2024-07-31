@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';
+import { useTimer } from '../context/TimerContext';
 import CloseIcon from '@mui/icons-material/Close';
 
 import ActivityManageForm from '../components/forms/ActivityManageForm';
@@ -25,6 +26,7 @@ const ActivitiesPage: FC = () => {
     null
   ); // we store here id of activity we want to create session of or null
   const [searchString, setSearchString] = useState<string>('');
+  const { startTimer } = useTimer();
 
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -88,6 +90,7 @@ const ActivitiesPage: FC = () => {
           <SessionCreateForm
             defaultActivity={createSessionModal}
             afterSubmitHandler={() => {
+              startTimer();
               navigate('/timer');
             }}
           />

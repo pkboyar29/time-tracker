@@ -8,6 +8,7 @@ import {
 } from '../../redux/slices/activitySlice';
 
 import Button from '../Button';
+import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 
 interface ActivityManageFormProps {
   currentActivity: IActivity | null;

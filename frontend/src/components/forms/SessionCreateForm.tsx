@@ -8,6 +8,7 @@ import { createSession } from '../../redux/slices/sessionSlice';
 import Button from '../Button';
 
 import { mapActivityFromResponse } from '../../utils/mappingHelpers';
+import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 
 interface SessionCreateFormProps {
   afterSubmitHandler: () => void;
