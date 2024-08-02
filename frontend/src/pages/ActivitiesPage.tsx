@@ -12,6 +12,7 @@ import ActivityItem from '../components/ActivityItem';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
+import { updateSession } from '../redux/slices/sessionSlice';
 
 const ActivitiesPage: FC = () => {
   const activities = useSelector(
@@ -19,6 +20,9 @@ const ActivitiesPage: FC = () => {
   );
   const [currentActivity, setCurrentActivity] = useState<IActivity | null>(
     null
+  );
+  const currentSession = useSelector(
+    (state: RootState) => state.sessions.currentSession
   );
   const [manageModal, setManageModal] = useState<boolean>(false);
   const [deleteModal, setDeleteModal] = useState<string | null>(null); // we store here id of activity we want to delete or null
@@ -90,6 +94,10 @@ const ActivitiesPage: FC = () => {
           <SessionCreateForm
             defaultActivity={createSessionModal}
             afterSubmitHandler={() => {
+              if (currentSession) {
+                dispatch(updateSession(currentSession));
+              }
+
               startTimer();
               navigate('/timer');
             }}

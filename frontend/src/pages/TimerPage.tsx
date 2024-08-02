@@ -39,21 +39,6 @@ const TimerPage: FC = () => {
     dispatch(fetchSessions());
   }, []);
 
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      if (currentSession) {
-        dispatch(updateSession(currentSession));
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [currentSession, dispatch]);
-
   const onSessionClick = (sessionId: string) => {
     if (currentSession) {
       dispatch(updateSession(currentSession));
@@ -189,6 +174,7 @@ const TimerPage: FC = () => {
                   </svg>
                 </button>
               </div>
+              {!enabled && <div>Paused</div>}
             </div>
           )}
         </div>
