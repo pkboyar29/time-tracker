@@ -37,12 +37,16 @@ export default {
           activity: activityId,
           deleted: false,
           completed: completed,
-        }).exec();
+        })
+          .populate('activity')
+          .exec();
       } else {
         sessions = await Session.find({
           activity: activityId,
           deleted: false,
-        }).exec();
+        })
+          .populate('activity')
+          .exec();
       }
 
       return sessions;

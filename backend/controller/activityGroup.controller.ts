@@ -1,50 +1,22 @@
 import { Router, Request, Response } from 'express';
-import activityService from '../service/activity.service';
+import activityGroupService from '../service/activityGroup.service';
 
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    let data;
-
-    const activityGroupIdParam = req.query.activityGroupId;
-    if (activityGroupIdParam) {
-      data = await activityService.getActivitiesForActivityGroup(
-        activityGroupIdParam.toString()
-      );
-    } else {
-      data = await activityService.getActivities();
-    }
+    const data = await activityGroupService.getActivityGroups();
     res.status(200).json(data);
   } catch (e) {
     if (e instanceof Error) {
-      if (e.message === 'Activity Not Found') {
-        res.status(404).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
+      res.status(500).send(e.message);
     }
   }
 });
 
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await activityService.getActivity(req.params.id);
-    res.status(200).json(data);
-  } catch (e) {
-    if (e instanceof Error) {
-      if (e.message === 'Activity Not Found') {
-        res.status(404).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
-  }
-});
-
-router.post('/', async (req: Request, res: Response) => {
-  try {
-    const data = await activityService.createActivity(req.body);
+    const data = await activityGroupService.getActivityGroup(req.params.id);
     res.status(200).json(data);
   } catch (e) {
     if (e instanceof Error) {
@@ -57,13 +29,27 @@ router.post('/', async (req: Request, res: Response) => {
   }
 });
 
-router.put('/:id', async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
   try {
-    const data = await activityService.updateActivity(req.params.id, req.body);
+    const data = await activityGroupService.createActivityGroup(req.body);
     res.status(200).json(data);
   } catch (e) {
     if (e instanceof Error) {
-      if (e.message === 'Activity Not Found') {
+      res.status(500).send(e.message);
+    }
+  }
+});
+
+router.put('/:id', async (req: Request, res: Response) => {
+  try {
+    const data = await activityGroupService.updateActivityGroup(
+      req.params.id,
+      req.body
+    );
+    res.status(200).json(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      if (e.message === 'Activity Group Not Found') {
         res.status(404).send(e.message);
       } else {
         res.status(500).send(e.message);
@@ -74,11 +60,11 @@ router.put('/:id', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await activityService.deleteActivity(req.params.id);
+    const data = await activityGroupService.deleteActivityGroup(req.params.id);
     res.status(200).json(data);
   } catch (e) {
     if (e instanceof Error) {
-      if (e.message === 'Activity Not Found') {
+      if (e.message === 'Activity Group Not Found') {
         res.status(404).send(e.message);
       } else {
         res.status(500).send(e.message);

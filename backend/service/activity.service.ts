@@ -1,13 +1,35 @@
 import Activity from '../model/activity.model';
-import { ActivityDTO } from '../dto/activity.dto';
+import { ActivityCreateDTO, ActivityUpdateDTO } from '../dto/activity.dto';
 import mongoose from 'mongoose';
 import sessionService from './session.service';
+import activityGroupService from './activityGroup.service';
 
 export default {
   async getActivities() {
     try {
       const activities = await Activity.find({ deleted: false });
+      const detailedActivitiesPromises = activities.map(async (activity: any) =>
+        this.getActivity(activity._id)
+      );
+      const detailedActivities = await Promise.all(detailedActivitiesPromises); // wait for resolving all promises
 
+      return detailedActivities;
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
+    }
+  },
+
+  async getActivitiesForActivityGroup(activityGroupId: string) {
+    try {
+      if (!(await activityGroupService.existsActivityGroup(activityGroupId))) {
+        throw new Error('Activity Group Not Found');
+      }
+      const activities = await Activity.find({
+        deleted: false,
+        activityGroup: activityGroupId,
+      });
       const detailedActivitiesPromises = activities.map(async (activity: any) =>
         this.getActivity(activity._id)
       );
@@ -65,11 +87,20 @@ export default {
     return true;
   },
 
-  async createActivity(activityDTO: ActivityDTO) {
+  async createActivity(activityDTO: ActivityCreateDTO) {
     try {
+      if (
+        !(await activityGroupService.existsActivityGroup(
+          activityDTO.activityGroupId
+        ))
+      ) {
+        throw new Error('Activity Group Not Found');
+      }
+
       const newActivity = new Activity({
         name: activityDTO.name,
         descr: activityDTO.descr,
+        activityGroup: activityDTO.activityGroupId,
       });
 
       const newActivityWithId = await newActivity.save();
@@ -82,7 +113,7 @@ export default {
     }
   },
 
-  async updateActivity(activityId: string, activityDTO: ActivityDTO) {
+  async updateActivity(activityId: string, activityDTO: ActivityUpdateDTO) {
     try {
       if (!(await this.existsActivity(activityId))) {
         throw new Error('Activity Not Found');
