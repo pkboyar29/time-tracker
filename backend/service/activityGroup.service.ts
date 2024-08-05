@@ -8,7 +8,13 @@ export default {
     try {
       const activityGroups = await ActivityGroup.find({ deleted: false });
 
-      return activityGroups;
+      const detailedActivityGroups = await Promise.all(
+        activityGroups.map(async (activityGroup) => {
+          return this.getActivityGroup(activityGroup._id.toString());
+        })
+      );
+
+      return detailedActivityGroups;
     } catch (e) {
       console.log(e);
       if (e instanceof Error) {
@@ -24,8 +30,25 @@ export default {
       }
       const activityGroup = await ActivityGroup.findById(activityGroupId);
 
+      const activities = await activityService.getActivitiesForActivityGroup(
+        activityGroupId
+      );
+      let sessionsAmount = 0;
+      let spentTimeSeconds = 0;
+
+      if (activities) {
+        activities.forEach((activity) => {
+          if (activity?.sessionsAmount && activity.spentTimeSeconds) {
+            sessionsAmount += activity?.sessionsAmount;
+            spentTimeSeconds += activity?.spentTimeSeconds;
+          }
+        });
+      }
+
       return {
         ...activityGroup?.toObject(),
+        sessionsAmount,
+        spentTimeSeconds,
       };
     } catch (e) {
       console.log(e);

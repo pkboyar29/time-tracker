@@ -8,10 +8,11 @@ export default {
   async getActivities() {
     try {
       const activities = await Activity.find({ deleted: false });
-      const detailedActivitiesPromises = activities.map(async (activity: any) =>
-        this.getActivity(activity._id)
+      const detailedActivities = await Promise.all(
+        activities.map(async (activity) =>
+          this.getActivity(activity._id.toString())
+        )
       );
-      const detailedActivities = await Promise.all(detailedActivitiesPromises); // wait for resolving all promises
 
       return detailedActivities;
     } catch (e) {
@@ -30,8 +31,8 @@ export default {
         deleted: false,
         activityGroup: activityGroupId,
       });
-      const detailedActivitiesPromises = activities.map(async (activity: any) =>
-        this.getActivity(activity._id)
+      const detailedActivitiesPromises = activities.map(async (activity) =>
+        this.getActivity(activity._id.toString())
       );
       const detailedActivities = await Promise.all(detailedActivitiesPromises); // wait for resolving all promises
 
@@ -53,14 +54,14 @@ export default {
 
       const sessions = await sessionService.getSessionsForActivity(activityId);
       const spentTimeSeconds = sessions?.reduce(
-        (total: number, session: any) => total + session.spentTimeSeconds,
+        (total: number, session) => total + session.spentTimeSeconds,
         0
       );
 
       return {
         ...activity?.toObject(),
         sessionsAmount: sessions?.length,
-        spentTimeSeconds: spentTimeSeconds,
+        spentTimeSeconds,
       };
     } catch (e) {
       console.log(e);
