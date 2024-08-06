@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../axios';
 import { mapActivityFromResponse } from '../../utils/mappingHelpers';
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
@@ -7,19 +7,22 @@ import { IActivityUpdate } from '../../ts/interfaces/Activity/IActivityUpdate';
 
 interface ActivityState {
   activities: IActivity[];
-  status: string;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
 }
 
 const initialState: ActivityState = {
   activities: [],
-  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+  status: 'idle',
 };
 
 export const fetchActivities = createAsyncThunk(
   'activities/fetchActivities',
-  async () => {
-    const { data: unmappedData } = await axios.get('/activities');
-    console.log(unmappedData);
+  async (activityGroupId: string) => {
+    const { data: unmappedData } = await axios.get('/activities', {
+      params: {
+        activityGroupId: activityGroupId,
+      },
+    });
     const mappedData = unmappedData.map((unmappedActivity: any) =>
       mapActivityFromResponse(unmappedActivity)
     );
@@ -34,28 +37,28 @@ export const createActivity = createAsyncThunk(
       '/activities',
       newActivityData
     );
-    const mappedData = mapActivityFromResponse(unmappedData);
-    return mappedData;
+    const mappedActivity = mapActivityFromResponse(unmappedData);
+    return mappedActivity;
   }
 );
 
 export const updateActivity = createAsyncThunk(
   'activities/updateActivity',
-  async (existingActivityData: IActivityUpdate) => {
+  async (activityData: IActivityUpdate) => {
     const { data: unmappedData } = await axios.put(
-      `/activities/${existingActivityData.id}`,
-      existingActivityData
+      `/activities/${activityData.id}`,
+      activityData
     );
-    const mappedData = mapActivityFromResponse(unmappedData);
-    return mappedData;
+    const mappedActivity = mapActivityFromResponse(unmappedData);
+    return mappedActivity;
   }
 );
 
 export const deleteActivity = createAsyncThunk(
   'activities/deleteActivity',
   async (activityId: string) => {
-    const { data } = await axios.delete(`/activities/${activityId}`);
-    return data;
+    const { data: message } = await axios.delete(`/activities/${activityId}`);
+    return message;
   }
 );
 
@@ -66,12 +69,9 @@ const activitySlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchActivities.pending, (state) => {
-        console.log('fetchActivities.pending');
         state.status = 'loading';
       })
       .addCase(fetchActivities.fulfilled, (state, action) => {
-        console.log('fetchActivities.fulfilled');
-        console.log(action.payload);
         state.status = 'succeeded';
         state.activities = action.payload;
       })
@@ -82,20 +82,21 @@ const activitySlice = createSlice({
         state.activities.push(action.payload);
       })
       .addCase(updateActivity.fulfilled, (state, action) => {
-        state.activities = state.activities.map((activity: IActivity) => {
+        state.activities = state.activities.map((activity) => {
           if (activity.id === action.payload.id) {
             return {
               ...activity,
               name: action.payload.name,
               descr: action.payload.descr,
             };
+          } else {
+            return activity;
           }
-          return activity;
         });
       })
       .addCase(deleteActivity.fulfilled, (state, action) => {
         state.activities = state.activities.filter(
-          (activity: IActivity) => activity.id !== action.meta.arg
+          (activity) => activity.id !== action.meta.arg
         );
       });
   },

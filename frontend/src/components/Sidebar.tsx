@@ -39,7 +39,7 @@ const Sidebar: FC = () => {
             </NavLink>
           </li>
           <li>
-            <NavLink to="/activities">
+            <NavLink to="/activity-groups">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"

@@ -6,13 +6,13 @@ import { ISessionCreate } from '../../ts/interfaces/Session/ISessionCreate';
 
 interface SessionState {
   uncompletedSessions: ISession[];
-  status: string;
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   currentSession: ISession | null;
 }
 
 const initialState: SessionState = {
   uncompletedSessions: [],
-  status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+  status: 'idle',
   currentSession: null,
 };
 
@@ -42,7 +42,6 @@ export const createSession = createAsyncThunk(
       '/sessions',
       newSessionData
     );
-    console.log(unmappedData);
     return mapSessionFromResponse(unmappedData);
   }
 );
@@ -114,7 +113,6 @@ const sessionSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchSessions.pending, (state) => {
-        console.log('fetchSessions.pending');
         state.status = 'loading';
       })
       .addCase(fetchSessions.fulfilled, (state, action) => {

@@ -2,12 +2,13 @@ import { FC } from 'react';
 import Button from './Button';
 import { getTimeHoursMinutesSeconds } from '../utils/timerHelpers';
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
+import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
 interface ActivityBoxProps {
-  activity: IActivity;
-  editHandler: (activity: IActivity) => void;
+  activity: IActivity | IActivityGroup;
+  editHandler: (activityId: string) => void;
   deleteHandler: (activityId: string) => void;
-  startSessionHandler: (activityId: string) => void;
+  startSessionHandler?: (activityId: string) => void;
 }
 
 const ActivityItem: FC<ActivityBoxProps> = ({
@@ -33,7 +34,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
         </div>
         <div className="flex flex-col items-end ml-auto gap-7">
           <div className="flex gap-4">
-            <button onClick={() => editHandler(activity)}>
+            <button onClick={() => editHandler(activity.id)}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -66,27 +67,29 @@ const ActivityItem: FC<ActivityBoxProps> = ({
               </svg>
             </button>
           </div>
-          <div>
-            <Button onClick={() => startSessionHandler(activity.id)}>
-              <div className="flex gap-[6px] items-center">
-                Start session
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="size-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
-                  />
-                </svg>
-              </div>
-            </Button>
-          </div>
+          {startSessionHandler && (
+            <div>
+              <Button onClick={() => startSessionHandler(activity.id)}>
+                <div className="flex gap-[6px] items-center">
+                  Start session
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="size-5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
+                    />
+                  </svg>
+                </div>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <div className="flex justify-center gap-6 mt-6">

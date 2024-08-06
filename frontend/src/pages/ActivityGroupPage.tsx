@@ -4,27 +4,33 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';
 import { useTimer } from '../context/TimerContext';
-import CloseIcon from '@mui/icons-material/Close';
+import { useParams } from 'react-router-dom';
+import { updateSession } from '../redux/slices/sessionSlice';
+import axios from '../axios';
 
-import ActivityManageForm from '../components/forms/ActivityManageForm';
+import CloseIcon from '@mui/icons-material/Close';
+import ActivityCreateForm from '../components/forms/ActivityCreateForm';
 import SessionCreateForm from '../components/forms/SessionCreateForm';
+import ActivityCommonUpdateForm from '../components/forms/ActivityCommonUpdateForm';
 import ActivityItem from '../components/ActivityItem';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
-import { IActivity } from '../ts/interfaces/Activity/IActivity';
-import { updateSession } from '../redux/slices/sessionSlice';
 
-const ActivitiesPage: FC = () => {
+import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
+import { mapActivityGroupFromResponse } from '../utils/mappingHelpers';
+
+const ActivityGroupPage: FC = () => {
   const activities = useSelector(
     (state: RootState) => state.activities.activities
-  );
-  const [currentActivity, setCurrentActivity] = useState<IActivity | null>(
-    null
   );
   const currentSession = useSelector(
     (state: RootState) => state.sessions.currentSession
   );
-  const [manageModal, setManageModal] = useState<boolean>(false);
+  const { activityGroupId } = useParams();
+  const [currentActivityGroup, setCurrentActivityGroup] =
+    useState<IActivityGroup>();
+
+  const [createModal, setCreateModal] = useState<boolean>(false);
   const [deleteModal, setDeleteModal] = useState<string | null>(null); // we store here id of activity we want to delete or null
   const [createSessionModal, setCreateSessionModal] = useState<string | null>(
     null
@@ -36,14 +42,26 @@ const ActivitiesPage: FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    dispatch(fetchActivities());
-  }, []);
+    const fetchActivityGroupInfo = async () => {
+      const { data: unmappedActivityGroup } = await axios.get(
+        `/activity-groups/${activityGroupId}`
+      );
+      const mappedActivityGroup: IActivityGroup = mapActivityGroupFromResponse(
+        unmappedActivityGroup
+      );
+      setCurrentActivityGroup(mappedActivityGroup);
+    };
+    fetchActivityGroupInfo();
+  }, [activityGroupId]);
 
-  const onEditActivityClick = (activity: IActivity) => {
-    setCurrentActivity(activity);
-    setManageModal(true);
+  useEffect(() => {
+    if (activityGroupId) {
+      dispatch(fetchActivities(activityGroupId));
+    }
+  }, [activityGroupId]);
 
-    navigate(`${activity.id}`);
+  const onEditActivityClick = (activityId: string) => {
+    navigate(`activities/${activityId}`);
   };
 
   const onDeleteActivityClick = (activityId: string) => {
@@ -53,25 +71,21 @@ const ActivitiesPage: FC = () => {
 
   return (
     <>
-      {manageModal && (
+      {createModal && (
         <Modal
-          title={
-            !currentActivity
-              ? 'Creating a new activity'
-              : 'Updating an activity'
-          }
+          title={`Creating a new activity for ${currentActivityGroup?.name}`}
           onCloseModal={() => {
-            setManageModal(false);
-            setCurrentActivity(null);
+            setCreateModal(false);
           }}
         >
-          <ActivityManageForm
-            currentActivity={currentActivity}
-            afterSubmitHandler={() => {
-              setCurrentActivity(null);
-              setManageModal(false);
-            }}
-          />
+          {currentActivityGroup && (
+            <ActivityCreateForm
+              afterSubmitHandler={() => {
+                setCreateModal(false);
+              }}
+              activityGroupId={currentActivityGroup.id}
+            />
+          )}
         </Modal>
       )}
 
@@ -107,7 +121,10 @@ const ActivitiesPage: FC = () => {
 
       <div className="container flex justify-between">
         <div>
-          <div className="mb-5 text-xl font-bold">All activities</div>
+          {currentActivityGroup && (
+            <ActivityCommonUpdateForm activityCommon={currentActivityGroup} />
+          )}
+          <div className="my-5 text-xl font-bold">All activities</div>
           <div className="flex flex-col gap-4">
             {activities.filter((activity) =>
               activity.name.includes(searchString)
@@ -149,7 +166,7 @@ const ActivitiesPage: FC = () => {
               </button>
             )}
           </div>
-          <Button onClick={() => setManageModal(true)}>
+          <Button onClick={() => setCreateModal(true)}>
             Create new activity
           </Button>
         </div>
@@ -158,4 +175,4 @@ const ActivitiesPage: FC = () => {
   );
 };
 
-export default ActivitiesPage;
+export default ActivityGroupPage;
