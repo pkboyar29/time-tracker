@@ -73,7 +73,12 @@ const ActivityGroupPage: FC = () => {
     <>
       {createModal && (
         <Modal
-          title={`Creating a new activity for ${currentActivityGroup?.name}`}
+          title={
+            <div>
+              <span className="font-bold">{currentActivityGroup?.name}</span>:
+              creating a new activity
+            </div>
+          }
           onCloseModal={() => {
             setCreateModal(false);
           }}
@@ -102,7 +107,18 @@ const ActivityGroupPage: FC = () => {
 
       {createSessionModal && (
         <Modal
-          title="Starting new session"
+          title={
+            <div>
+              <span className="font-bold">
+                {
+                  activities.find(
+                    (activity) => activity.id === createSessionModal
+                  )?.name
+                }
+              </span>
+              : starting new session
+            </div>
+          }
           onCloseModal={() => setCreateSessionModal(null)}
         >
           <SessionCreateForm

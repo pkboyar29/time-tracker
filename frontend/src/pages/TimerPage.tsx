@@ -19,7 +19,6 @@ import SessionItem from '../components/SessionItem';
 import SessionCreateForm from '../components/forms/SessionCreateForm';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
-import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
   const [createModal, setCreateModal] = useState<boolean>(false);
@@ -188,7 +187,7 @@ const TimerPage: FC = () => {
           </button>
           {!uncompletedLess && (
             <div className="inline-flex flex-col gap-2">
-              {uncompletedSessions.map((session: ISession) => (
+              {uncompletedSessions.map((session) => (
                 <SessionItem
                   key={session.id}
                   session={session}

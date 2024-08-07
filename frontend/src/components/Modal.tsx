@@ -2,7 +2,7 @@ import { FC, ReactNode } from 'react';
 
 interface ModalProps {
   children: ReactNode;
-  title: string;
+  title: ReactNode;
   onCloseModal: () => void;
 }
 
@@ -27,7 +27,7 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
         className="px-3 py-5 overflow-hidden bg-white rounded-md basis-1/3"
       >
         <div className="flex items-center justify-between mb-5">
-          <div>{title}</div>
+          <div className="text-lg">{title}</div>
           <button onClick={onCloseModal}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
