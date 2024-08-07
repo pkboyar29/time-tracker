@@ -27,7 +27,7 @@ const ActivityPage: FC = () => {
     []
   );
   const { activityId } = useParams();
-  const { startTimer, stopTimer } = useTimer();
+  const { startTimer, stopTimer, toggleTimer, enabled } = useTimer();
   const currentSession = useSelector(
     (state: RootState) => state.sessions.currentSession
   );
@@ -59,6 +59,35 @@ const ActivityPage: FC = () => {
     fetchActivityInfo();
   }, []);
 
+  const onSessionClick = (sessionId: string) => {
+    if (currentSession) {
+      dispatch(updateSession(currentSession));
+
+      if (currentSession.id === sessionId) {
+        toggleTimer();
+      } else {
+        dispatch(setCurrentSession(sessionId));
+        startTimer();
+      }
+    } else {
+      dispatch(setCurrentSession(sessionId));
+      startTimer();
+    }
+  };
+
+  const onSessionDelete = (sessionId: string) => {
+    if (currentSession?.id === sessionId) {
+      dispatch(removeCurrentSession());
+      stopTimer();
+    }
+    dispatch(deleteSession(sessionId));
+
+    const uncompletedSessionsUpdated = uncompletedSessions.filter(
+      (uncompletedSession) => uncompletedSession.id !== sessionId
+    );
+    setUncompletedSessions(uncompletedSessionsUpdated);
+  };
+
   return (
     <>
       <div className="container">
@@ -73,30 +102,12 @@ const ActivityPage: FC = () => {
             <div className="flex flex-col gap-5 mt-5 w-96">
               {uncompletedSessions.map((session: ISession) => (
                 <SessionItem
+                  isActive={currentSession?.id === session.id}
+                  isEnabled={enabled}
                   key={session.id}
                   session={session}
-                  sessionClickHandler={(sessionId: string) => {
-                    if (currentSession) {
-                      dispatch(updateSession(currentSession));
-                    }
-
-                    dispatch(setCurrentSession(sessionId));
-                    startTimer();
-                  }}
-                  sessionDeleteHandler={(sessionId: string) => {
-                    if (currentSession?.id === sessionId) {
-                      dispatch(removeCurrentSession());
-                      stopTimer();
-                    }
-                    dispatch(deleteSession(sessionId));
-
-                    const uncompletedSessionsUpdated =
-                      uncompletedSessions.filter(
-                        (uncompletedSession) =>
-                          uncompletedSession.id !== sessionId
-                      );
-                    setUncompletedSessions(uncompletedSessionsUpdated);
-                  }}
+                  sessionClickHandler={onSessionClick}
+                  sessionDeleteHandler={onSessionDelete}
                 />
               ))}
             </div>

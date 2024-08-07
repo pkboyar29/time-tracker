@@ -41,10 +41,17 @@ const TimerPage: FC = () => {
   const onSessionClick = (sessionId: string) => {
     if (currentSession) {
       dispatch(updateSession(currentSession));
-    }
 
-    dispatch(setCurrentSession(sessionId));
-    startTimer();
+      if (currentSession.id === sessionId) {
+        toggleTimer();
+      } else {
+        dispatch(setCurrentSession(sessionId));
+        startTimer();
+      }
+    } else {
+      dispatch(setCurrentSession(sessionId));
+      startTimer();
+    }
   };
 
   const onDeleteSessionClick = (sessionId: string) => {
@@ -189,6 +196,10 @@ const TimerPage: FC = () => {
             <div className="inline-flex flex-col gap-2">
               {uncompletedSessions.map((session) => (
                 <SessionItem
+                  isActive={session.id === currentSession?.id}
+                  isEnabled={
+                    session.id === currentSession?.id ? enabled : undefined
+                  }
                   key={session.id}
                   session={session}
                   sessionClickHandler={onSessionClick}

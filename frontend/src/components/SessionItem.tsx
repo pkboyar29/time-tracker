@@ -1,20 +1,29 @@
 import { FC } from 'react';
+
 import { ISession } from '../ts/interfaces/Session/ISession';
 import CustomCircularProgress from './CustomCircularProgress';
 
 interface SessionItemProps {
+  isActive: boolean;
+  isEnabled?: boolean;
   session: ISession;
   sessionClickHandler?: (sessionId: string) => void;
   sessionDeleteHandler: (sessionId: string) => void;
 }
 
 const SessionItem: FC<SessionItemProps> = ({
+  isActive,
+  isEnabled,
   session,
   sessionClickHandler,
   sessionDeleteHandler,
 }) => {
   return (
-    <div className="p-5 border border-black border-solid rounded-xl">
+    <div
+      className={`p-5 w-96 border border-solid rounded-xl ${
+        isActive ? 'border-red-500' : 'border-black'
+      }`}
+    >
       <div className="flex items-start gap-20">
         <div className="flex gap-5">
           <div className="flex flex-col gap-3 ml-auto">
@@ -34,20 +43,54 @@ const SessionItem: FC<SessionItemProps> = ({
         <div className="flex flex-col gap-5 ml-auto">
           <div className="flex gap-3">
             <button onClick={() => sessionClickHandler?.(session.id)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 7.5V18M15 7.5V18M3 16.811V8.69c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811Z"
-                />
-              </svg>
+              {isActive ? (
+                isEnabled ? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M21 7.5V18M15 7.5V18M3 16.811V8.69c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811Z"
+                    />
+                  </svg>
+                )
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
+                  />
+                </svg>
+              )}
             </button>
             <button onClick={() => sessionDeleteHandler(session.id)}>
               <svg
