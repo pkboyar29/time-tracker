@@ -77,8 +77,8 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
           onBlur={handleSubmit(onSubmit)}
           type="text"
           className={
-            'p-1 text-xl font-bold rounded-lg border border-solid border-gray-300 focus:border-blue-700 ' +
-            (errors.name ? 'focus:border-red-500' : 'asdasd')
+            'p-1 text-xl font-bold rounded-lg border border-solid border-transparent focus:border-blue-700 hover:bg-gray-100 focus:bg-transparent' +
+            (errors.name ? 'focus:border-red-500' : '')
           }
         />
 

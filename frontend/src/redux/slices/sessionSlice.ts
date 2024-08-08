@@ -135,24 +135,29 @@ const sessionSlice = createSlice({
         }
       })
       .addCase(updateSession.fulfilled, (state, action) => {
-        state.uncompletedSessions = state.uncompletedSessions.map(
-          (session: ISession) => {
-            if (session.id === action.payload.id) {
-              return {
-                ...session,
-                totalTimeSeconds: action.payload.totalTimeSeconds,
-                spentTimeSeconds: action.payload.spentTimeSeconds,
-                completed: action.payload.completed,
-              };
+        if (state.currentSession) {
+          saveSessionToLocalStorage(state.currentSession);
+        }
+        if (action.payload.completed) {
+          state.uncompletedSessions = state.uncompletedSessions.filter(
+            (session) => session.id !== action.payload.id
+          );
+        } else {
+          state.uncompletedSessions = state.uncompletedSessions.map(
+            (session) => {
+              if (session.id === action.payload.id) {
+                return {
+                  ...session,
+                  totalTimeSeconds: action.payload.totalTimeSeconds,
+                  spentTimeSeconds: action.payload.spentTimeSeconds,
+                  completed: action.payload.completed,
+                };
+              } else {
+                return session;
+              }
             }
-
-            if (state.currentSession) {
-              saveSessionToLocalStorage(state.currentSession);
-            }
-
-            return session;
-          }
-        );
+          );
+        }
       })
       .addCase(deleteSession.fulfilled, (state, action) => {
         state.uncompletedSessions = state.uncompletedSessions.filter(

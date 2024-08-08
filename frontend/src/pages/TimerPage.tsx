@@ -20,9 +20,14 @@ import SessionCreateForm from '../components/forms/SessionCreateForm';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
 
+interface DeleteModalState {
+  deleteModal: boolean;
+  deletedSessionId: string | null;
+}
+
 const TimerPage: FC = () => {
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<string | null>(null); // we store here id of session we want to delete or null
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>();
   const [uncompletedLess, setUnompletedLess] = useState<boolean>(false); // less - true, more - false
   const { startTimer, toggleTimer, stopTimer, enabled } = useTimer();
 
@@ -59,7 +64,10 @@ const TimerPage: FC = () => {
       dispatch(removeCurrentSession());
       stopTimer();
     }
-    setDeleteModal(null);
+    setDeleteModal({
+      deleteModal: false,
+      deletedSessionId: null,
+    });
     dispatch(deleteSession(sessionId));
   };
 
@@ -83,13 +91,21 @@ const TimerPage: FC = () => {
         </Modal>
       )}
 
-      {deleteModal && (
+      {deleteModal?.deleteModal && (
         <Modal
           title="Deleting session"
-          onCloseModal={() => setDeleteModal(null)}
+          onCloseModal={() =>
+            setDeleteModal({
+              deleteModal: false,
+              deletedSessionId: null,
+            })
+          }
         >
           <button
-            onClick={() => onDeleteSessionClick(deleteModal)}
+            onClick={() =>
+              deleteModal.deletedSessionId &&
+              onDeleteSessionClick(deleteModal.deletedSessionId)
+            }
             className="p-3 text-white bg-red-500 rounded-xl"
           >
             Delete session
@@ -203,7 +219,12 @@ const TimerPage: FC = () => {
                   key={session.id}
                   session={session}
                   sessionClickHandler={onSessionClick}
-                  sessionDeleteHandler={setDeleteModal}
+                  sessionDeleteHandler={(sessionId: string) =>
+                    setDeleteModal({
+                      deleteModal: true,
+                      deletedSessionId: sessionId,
+                    })
+                  }
                 />
               ))}
             </div>

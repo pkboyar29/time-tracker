@@ -127,3 +127,7 @@ h6 {
 .active svg {
   stroke: rgb(239 68 68);
 }
+
+.modal-open {
+  overflow: hidden;
+}

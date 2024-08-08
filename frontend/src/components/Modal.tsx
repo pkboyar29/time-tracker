@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode, useEffect } from 'react';
 
 interface ModalProps {
   children: ReactNode;
@@ -7,6 +7,14 @@ interface ModalProps {
 }
 
 const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+
+    return () => {
+      document.body.classList.remove('modal-open');
+    };
+  }, []);
+
   const handleOutsideClick = () => {
     onCloseModal();
   };

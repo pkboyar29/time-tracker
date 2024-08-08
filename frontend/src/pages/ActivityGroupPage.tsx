@@ -19,6 +19,11 @@ import Modal from '../components/Modal';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 import { mapActivityGroupFromResponse } from '../utils/mappingHelpers';
 
+interface ModalState {
+  modal: boolean;
+  selectedItemId: string | null;
+}
+
 const ActivityGroupPage: FC = () => {
   const activities = useSelector(
     (state: RootState) => state.activities.activities
@@ -31,10 +36,8 @@ const ActivityGroupPage: FC = () => {
     useState<IActivityGroup>();
 
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<string | null>(null); // we store here id of activity we want to delete or null
-  const [createSessionModal, setCreateSessionModal] = useState<string | null>(
-    null
-  ); // we store here id of activity we want to create session of or null
+  const [deleteModal, setDeleteModal] = useState<ModalState>();
+  const [createSessionModal, setCreateSessionModal] = useState<ModalState>();
   const [searchString, setSearchString] = useState<string>('');
   const { startTimer } = useTimer();
 
@@ -65,7 +68,7 @@ const ActivityGroupPage: FC = () => {
   };
 
   const onDeleteActivityClick = (activityId: string) => {
-    setDeleteModal(null);
+    setDeleteModal({ modal: false, selectedItemId: null });
     dispatch(deleteActivity(activityId));
   };
 
@@ -97,9 +100,16 @@ const ActivityGroupPage: FC = () => {
       {deleteModal && (
         <Modal
           title="Deleting activity"
-          onCloseModal={() => setDeleteModal(null)}
+          onCloseModal={() =>
+            setDeleteModal({ modal: false, selectedItemId: null })
+          }
         >
-          <Button onClick={() => onDeleteActivityClick(deleteModal)}>
+          <Button
+            onClick={() =>
+              deleteModal.selectedItemId &&
+              onDeleteActivityClick(deleteModal.selectedItemId)
+            }
+          >
             Delete activity
           </Button>
         </Modal>
@@ -112,17 +122,24 @@ const ActivityGroupPage: FC = () => {
               <span className="font-bold">
                 {
                   activities.find(
-                    (activity) => activity.id === createSessionModal
+                    (activity) =>
+                      activity.id === createSessionModal.selectedItemId
                   )?.name
                 }
               </span>
               : starting new session
             </div>
           }
-          onCloseModal={() => setCreateSessionModal(null)}
+          onCloseModal={() =>
+            setCreateSessionModal({ modal: false, selectedItemId: null })
+          }
         >
           <SessionCreateForm
-            defaultActivity={createSessionModal}
+            defaultActivity={
+              createSessionModal.selectedItemId
+                ? createSessionModal.selectedItemId
+                : undefined
+            }
             afterSubmitHandler={() => {
               if (currentSession) {
                 dispatch(updateSession(currentSession));
@@ -152,9 +169,17 @@ const ActivityGroupPage: FC = () => {
                     key={activity.id}
                     activity={activity}
                     editHandler={onEditActivityClick}
-                    deleteHandler={setDeleteModal}
+                    deleteHandler={(activityId: string) =>
+                      setDeleteModal({
+                        modal: true,
+                        selectedItemId: activityId,
+                      })
+                    }
                     startSessionHandler={() =>
-                      setCreateSessionModal(activity.id)
+                      setCreateSessionModal({
+                        modal: true,
+                        selectedItemId: activity.id,
+                      })
                     }
                   />
                 ))

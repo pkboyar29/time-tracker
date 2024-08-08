@@ -13,7 +13,7 @@ import {
   removeCurrentSession,
   updateSession,
 } from '../redux/slices/sessionSlice';
-import audioUrl from '../assets/audio.mp3';
+import { playAudio } from '../utils/audioHelpers';
 
 interface TimerContextType {
   startTimer: () => void;
@@ -43,12 +43,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const dispatch = useDispatch<AppDispatch>();
 
   const startTimer = () => {
-    console.log('startTimer');
     setEnabled(true);
   };
 
   const toggleTimer = () => {
-    console.log('toggleTimer');
     setEnabled((e) => !e);
     if (enabled) {
       if (currentSession) {
@@ -58,7 +56,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   };
 
   const stopTimer = () => {
-    console.log('stopTimer');
     setEnabled((e) => !e);
     setEnabled(false);
     if (currentSession) {
@@ -80,10 +77,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   useEffect(() => {
     if (currentSession) {
       if (currentSession.spentTimeSeconds === currentSession.totalTimeSeconds) {
-        const audio = new Audio(audioUrl);
-        audio.volume = 0.35;
-        audio.play();
-        // alert('Count down')
+        playAudio(0.35);
         stopTimer();
       }
     }
