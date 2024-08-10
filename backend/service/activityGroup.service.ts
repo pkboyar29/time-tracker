@@ -16,10 +16,7 @@ export default {
 
       return detailedActivityGroups;
     } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -51,10 +48,7 @@ export default {
         spentTimeSeconds,
       };
     } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -86,9 +80,7 @@ export default {
 
       return this.getActivityGroup(newActivityGroupWithId._id.toString());
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -109,9 +101,7 @@ export default {
 
       return this.getActivityGroup(activityGroupId);
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -134,20 +124,24 @@ export default {
             }
           })
         );
-
-        await ActivityGroup.findById(activityGroupId).updateOne({
-          deleted: true,
-        });
-
-        const message = {
-          message: 'Deleted successful',
-        };
-        return message;
       }
+
+      await ActivityGroup.findById(activityGroupId).updateOne({
+        deleted: true,
+      });
+
+      const message = {
+        message: 'Deleted successful',
+      };
+      return message;
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
+    }
+  },
+
+  async handleError(e: unknown) {
+    if (e instanceof Error) {
+      throw new Error(e.message);
     }
   },
 };

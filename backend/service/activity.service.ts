@@ -16,9 +16,7 @@ export default {
 
       return detailedActivities;
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -38,9 +36,7 @@ export default {
 
       return detailedActivities;
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -64,10 +60,7 @@ export default {
         spentTimeSeconds,
       };
     } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -108,9 +101,7 @@ export default {
 
       return this.getActivity(newActivityWithId._id.toString());
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -128,9 +119,7 @@ export default {
 
       return this.getActivity(activityId);
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -158,9 +147,13 @@ export default {
       };
       return message;
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
+    }
+  },
+
+  async handleError(e: unknown) {
+    if (e instanceof Error) {
+      throw new Error(e.message);
     }
   },
 };

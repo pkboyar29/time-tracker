@@ -1,27 +1,21 @@
 import Session from '../model/session.model';
+import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
 import { SessionDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
 export default {
-  async getSessions(completed?: boolean) {
+  async getSessions(filter: Record<string, unknown> = {}) {
     try {
       let sessions;
-      if (completed !== undefined) {
-        sessions = await Session.find({
-          deleted: false,
-          completed: completed,
-        }).populate('activity');
-      } else {
-        sessions = await Session.find({ deleted: false }).populate('activity');
-      }
+      sessions = await Session.find({
+        deleted: false,
+        ...filter,
+      }).populate('activity');
 
       return sessions;
     } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -30,31 +24,17 @@ export default {
       if (!(await activityService.existsActivity(activityId))) {
         throw new Error('Activity For Session Not Found');
       }
-      let sessions;
 
+      const filter: Record<string, unknown> = {
+        activity: activityId,
+      };
       if (completed !== undefined) {
-        sessions = await Session.find({
-          activity: activityId,
-          deleted: false,
-          completed: completed,
-        })
-          .populate('activity')
-          .exec();
-      } else {
-        sessions = await Session.find({
-          activity: activityId,
-          deleted: false,
-        })
-          .populate('activity')
-          .exec();
+        filter.completed = completed;
       }
 
-      return sessions;
+      return await this.getSessions(filter);
     } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -64,24 +44,10 @@ export default {
         throw new Error('Session Not Found');
       }
 
-      const session = await Session.findById(sessionId);
-
-      if (session?.activity) {
-        if (
-          !(await activityService.existsActivity(
-            session.activity._id.toString()
-          ))
-        ) {
-          throw new Error('Activity For Session Not Found');
-        }
-      }
-
+      const session = await Session.findById(sessionId).populate('activity');
       return session;
     } catch (e) {
-      if (e instanceof Error) {
-        console.log(e.message);
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -126,10 +92,7 @@ export default {
 
       return (await newSession.save()).populate('activity');
     } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -148,19 +111,29 @@ export default {
         completed = true;
       }
 
-      await Session.findById(sessionId).updateOne({
-        totalTimeSeconds: sessionDTO.totalTimeSeconds,
-        spentTimeSeconds: sessionDTO.spentTimeSeconds,
-        completed: completed,
-        updatedDate: Date.now(),
-      });
+      const session = await Session.findById(sessionId);
+      if (session) {
+        let partSpentTimeSeconds: number =
+          sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
+        console.log(partSpentTimeSeconds);
+        const newSessionPart = new SessionPart({
+          spentTimeSeconds: partSpentTimeSeconds,
+          session: sessionId,
+          createdDate: Date.now(),
+        });
+        await newSessionPart.save();
+
+        await session.updateOne({
+          totalTimeSeconds: sessionDTO.totalTimeSeconds,
+          spentTimeSeconds: sessionDTO.spentTimeSeconds,
+          completed: completed,
+          updatedDate: Date.now(),
+        });
+      }
 
       return await Session.findById(sessionId);
     } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
     }
   },
 
@@ -179,10 +152,13 @@ export default {
       };
       return message;
     } catch (e) {
-      console.log(e);
-      if (e instanceof Error) {
-        throw new Error(e.message);
-      }
+      this.handleError(e);
+    }
+  },
+
+  async handleError(e: unknown) {
+    if (e instanceof Error) {
+      throw new Error(e.message);
     }
   },
 };

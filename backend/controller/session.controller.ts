@@ -22,7 +22,7 @@ router.get('/', async (req: Request, res: Response) => {
       completed
     );
   } else {
-    data = await sessionService.getSessions(completed);
+    data = await sessionService.getSessions({ completed });
   }
 
   res.json(data);
