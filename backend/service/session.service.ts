@@ -115,7 +115,6 @@ export default {
       if (session) {
         let partSpentTimeSeconds: number =
           sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
-        console.log(partSpentTimeSeconds);
         const newSessionPart = new SessionPart({
           spentTimeSeconds: partSpentTimeSeconds,
           session: sessionId,
@@ -131,8 +130,9 @@ export default {
         });
       }
 
-      return await Session.findById(sessionId);
+      return await this.getSession(sessionId);
     } catch (e) {
+      console.log('trigger 3');
       this.handleError(e);
     }
   },
@@ -156,7 +156,7 @@ export default {
     }
   },
 
-  async handleError(e: unknown) {
+  handleError(e: unknown) {
     if (e instanceof Error) {
       throw new Error(e.message);
     }

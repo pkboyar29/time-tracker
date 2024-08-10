@@ -151,7 +151,7 @@ export default {
     }
   },
 
-  async handleError(e: unknown) {
+  handleError(e: unknown) {
     if (e instanceof Error) {
       throw new Error(e.message);
     }
