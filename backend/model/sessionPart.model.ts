@@ -9,7 +9,7 @@ const sessionPartSchema = new mongoose.Schema({
   },
   session: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'SessionPart',
+    ref: 'Session',
     required: true,
   },
   createdDate: {

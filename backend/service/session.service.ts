@@ -7,13 +7,10 @@ import mongoose from 'mongoose';
 export default {
   async getSessions(filter: Record<string, unknown> = {}) {
     try {
-      let sessions;
-      sessions = await Session.find({
+      return await Session.find({
         deleted: false,
         ...filter,
       }).populate('activity');
-
-      return sessions;
     } catch (e) {
       this.handleError(e);
     }

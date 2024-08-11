@@ -6,6 +6,7 @@ import cors from 'cors';
 import * as sessionRouter from './controller/session.controller';
 import * as activityRouter from './controller/activity.controller';
 import * as activityGroupRouter from './controller/activityGroup.controller';
+import * as analyticsRouter from './controller/analytics.controller';
 
 const app: Express = express();
 dotenv.config();
@@ -24,6 +25,7 @@ app.use(cors());
 app.use('/sessions', sessionRouter.default);
 app.use('/activities', activityRouter.default);
 app.use('/activity-groups/', activityGroupRouter.default);
+app.use('/analytics/', analyticsRouter.default);
 
 function startServer() {
   app.listen(PORT, () => {
