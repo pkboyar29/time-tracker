@@ -30,8 +30,8 @@ export default {
       const activities = await activityService.getActivitiesForActivityGroup(
         activityGroupId
       );
-      let sessionsAmount = 0;
-      let spentTimeSeconds = 0;
+      let sessionsAmount: number = 0;
+      let spentTimeSeconds: number = 0;
 
       if (activities) {
         activities.forEach((activity) => {

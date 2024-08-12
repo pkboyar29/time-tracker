@@ -41,8 +41,7 @@ export default {
         throw new Error('Session Not Found');
       }
 
-      const session = await Session.findById(sessionId).populate('activity');
-      return session;
+      return await Session.findById(sessionId).populate('activity');
     } catch (e) {
       this.handleError(e);
     }
@@ -103,7 +102,7 @@ export default {
         throw new Error('Total time must be greater or equal spent time');
       }
 
-      let completed = false;
+      let completed: boolean = false;
       if (sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds) {
         completed = true;
       }
