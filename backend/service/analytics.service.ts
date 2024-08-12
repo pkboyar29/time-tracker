@@ -1,10 +1,12 @@
 import sessionService from '../service/session.service';
 import sessionPartService from './sessionPart.service';
+import mongoose from 'mongoose';
 import { endOfDay, startOfDay, startOfMonth, endOfMonth } from 'date-fns';
 
 interface AnalyticsForRange {
   sessionsAmount: number;
   spentTimeSeconds: number;
+  sessions?: mongoose.Document[];
 }
 
 export default {
@@ -16,30 +18,31 @@ export default {
       let spentTimeSeconds: number = 0;
       let sessionsAmount: number = 0;
 
-      const sessionPartsForDay =
+      const sessionPartsForRange =
         await sessionPartService.getSessionPartsInDateRange(
           startOfRange,
           endOfRange
         );
-      if (sessionPartsForDay && sessionPartsForDay.length > 0) {
-        spentTimeSeconds = sessionPartsForDay.reduce(
+      if (sessionPartsForRange && sessionPartsForRange.length > 0) {
+        spentTimeSeconds = sessionPartsForRange.reduce(
           (spentTimeSeconds, sessionPart) =>
             spentTimeSeconds + sessionPart.spentTimeSeconds,
           0
         );
       }
 
-      const sessionsForDay = await sessionService.getSessions({
+      const sessionsForRange = await sessionService.getSessions({
         updatedDate: { $gte: startOfRange, $lte: endOfRange },
         completed: true,
       });
-      if (sessionsForDay && sessionsForDay.length > 0) {
-        sessionsAmount = sessionsForDay.length;
+      if (sessionsForRange && sessionsForRange.length > 0) {
+        sessionsAmount = sessionsForRange.length;
       }
 
       return {
         sessionsAmount,
         spentTimeSeconds,
+        sessions: sessionsForRange,
       };
     } catch (e) {
       this.handleError(e);
