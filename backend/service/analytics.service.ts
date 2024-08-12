@@ -1,25 +1,25 @@
 import sessionService from '../service/session.service';
 import sessionPartService from './sessionPart.service';
-import { endOfDay, startOfDay } from 'date-fns';
+import { endOfDay, startOfDay, startOfMonth, endOfMonth } from 'date-fns';
 
-interface AnalyticsForDay {
+interface AnalyticsForRange {
   sessionsAmount: number;
   spentTimeSeconds: number;
 }
 
 export default {
-  async getAnalyticsForDay(date: Date): Promise<AnalyticsForDay | undefined> {
+  async getAnalyticsForRange(
+    startOfRange: Date,
+    endOfRange: Date
+  ): Promise<AnalyticsForRange | undefined> {
     try {
       let spentTimeSeconds: number = 0;
       let sessionsAmount: number = 0;
 
-      const startRange: Date = startOfDay(date);
-      const endRange: Date = endOfDay(date);
-
       const sessionPartsForDay =
         await sessionPartService.getSessionPartsInDateRange(
-          startRange,
-          endRange
+          startOfRange,
+          endOfRange
         );
       if (sessionPartsForDay && sessionPartsForDay.length > 0) {
         spentTimeSeconds = sessionPartsForDay.reduce(
@@ -30,7 +30,7 @@ export default {
       }
 
       const sessionsForDay = await sessionService.getSessions({
-        updatedDate: { $gte: startRange, $lte: endRange },
+        updatedDate: { $gte: startOfRange, $lte: endOfRange },
         completed: true,
       });
       if (sessionsForDay && sessionsForDay.length > 0) {
@@ -44,6 +44,23 @@ export default {
     } catch (e) {
       this.handleError(e);
     }
+  },
+
+  async getAnalyticsForDay(
+    dateWithDay: Date
+  ): Promise<AnalyticsForRange | undefined> {
+    const startDay: Date = startOfDay(dateWithDay);
+    const endDay: Date = endOfDay(dateWithDay);
+
+    return this.getAnalyticsForRange(startDay, endDay);
+  },
+
+  async getAnalyticsForMonth(
+    dateWithMonth: Date
+  ): Promise<AnalyticsForRange | undefined> {
+    const startMonth: Date = startOfMonth(dateWithMonth);
+    const endMonth: Date = endOfMonth(dateWithMonth);
+    return this.getAnalyticsForRange(startMonth, endMonth);
   },
 
   handleError(e: unknown) {
