@@ -10,6 +10,8 @@ import ActivityGroupsPage from './pages/ActivityGroupsPage';
 import ActivityPage from './pages/ActivityPage';
 import ActivityGroupPage from './pages/ActivityGroupPage';
 import SettingsPage from './pages/SettingsPage';
+import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
 import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
@@ -38,7 +40,9 @@ const App: FC = () => {
             />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/" element={<Navigate to="/timer" />} />
+            <Route path="/sign-in" element={<SignInPage />} />
+            <Route path="/sign-up" element={<SignUpPage />} />
+            <Route path="/" element={<Navigate to="/sign-in" />} />
           </Routes>
         </div>
       </div>
