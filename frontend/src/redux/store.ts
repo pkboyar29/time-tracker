@@ -1,14 +1,16 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import sessionReducer from './slices/sessionSlice';
 import activityReducer from './slices/activitySlice';
 import activityGroupReducer from './slices/activityGroupSlice';
 
+const rootReducer = combineReducers({
+  sessions: sessionReducer,
+  activities: activityReducer,
+  activityGroups: activityGroupReducer,
+});
+
 export const store = configureStore({
-  reducer: {
-    sessions: sessionReducer,
-    activities: activityReducer,
-    activityGroups: activityGroupReducer,
-  },
+  reducer: rootReducer,
 });
 
 export type RootState = ReturnType<typeof store.getState>;
