@@ -39,4 +39,15 @@ router.post('/sign-in', async (req: Request, res: Response) => {
   }
 });
 
+router.post('/refresh', async (req: Request, res: Response) => {
+  try {
+    const accessToken = userService.refreshAccessToken(req.body.refreshToken);
+    res.status(200).json({ access: accessToken });
+  } catch (e) {
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    }
+  }
+});
+
 export default router;
