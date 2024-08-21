@@ -54,19 +54,32 @@ export default {
     };
   },
 
-  createAccessToken(userId: string): string {
-    let accessToken: string = '';
-    const accessPayload = {
+  createToken(
+    userId: string,
+    tokenType: 'access' | 'refresh',
+    secretKey: string
+  ): string {
+    let token: string = '';
+
+    const payload = {
       userId,
-      tokenType: 'access',
+      tokenType,
     };
+
+    token = jsonwebtoken.sign(payload, secretKey, {
+      expiresIn: tokenType === 'access' ? '300s' : '5h',
+    });
+    return token;
+  },
+
+  createAccessToken(userId: string): string {
+    let accessToken = '';
+
     if (process.env.ACCESS_TOKEN_SECRET) {
-      accessToken = jsonwebtoken.sign(
-        accessPayload,
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-          expiresIn: '30s', // pass 300 - 300 seconds, 5 min
-        }
+      accessToken = this.createToken(
+        userId,
+        'access',
+        process.env.ACCESS_TOKEN_SECRET
       );
     }
 
@@ -75,17 +88,12 @@ export default {
 
   createRefreshToken(userId: string): string {
     let refreshToken: string = '';
-    const refreshPayload = {
-      userId,
-      tokenType: 'refresh',
-    };
+
     if (process.env.REFRESH_TOKEN_SECRET) {
-      refreshToken = jsonwebtoken.sign(
-        refreshPayload,
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-          expiresIn: '5h', // pass days instead of hours
-        }
+      refreshToken = this.createToken(
+        userId,
+        'refresh',
+        process.env.REFRESH_TOKEN_SECRET
       );
     }
 
