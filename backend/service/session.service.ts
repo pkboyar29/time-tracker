@@ -5,20 +5,26 @@ import { SessionDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
 export default {
-  async getSessions(filter: Record<string, unknown> = {}) {
+  async getSessions(filter: Record<string, unknown> = {}, userId: string) {
     try {
-      return await Session.find({
+      const sessions = await Session.find({
         deleted: false,
+        user: userId,
         ...filter,
       }).populate('activity');
+      return sessions;
     } catch (e) {
       this.handleError(e);
     }
   },
 
-  async getSessionsForActivity(activityId: string, completed?: boolean) {
+  async getSessionsForActivity(
+    activityId: string,
+    userId: string,
+    completed?: boolean
+  ) {
     try {
-      if (!(await activityService.existsActivity(activityId))) {
+      if (!(await activityService.existsActivity(activityId, userId))) {
         throw new Error('Activity For Session Not Found');
       }
 
@@ -29,15 +35,15 @@ export default {
         filter.completed = completed;
       }
 
-      return await this.getSessions(filter);
+      return await this.getSessions(filter, userId);
     } catch (e) {
       this.handleError(e);
     }
   },
 
-  async getSession(sessionId: string) {
+  async getSession(sessionId: string, userId: string) {
     try {
-      if (!(await this.existsSession(sessionId))) {
+      if (!(await this.existsSession(sessionId, userId))) {
         throw new Error('Session Not Found');
       }
 
@@ -47,7 +53,7 @@ export default {
     }
   },
 
-  async existsSession(sessionId: string) {
+  async existsSession(sessionId: string, userId: string) {
     if (!mongoose.Types.ObjectId.isValid(sessionId)) {
       return false;
     }
@@ -63,19 +69,28 @@ export default {
 
     if (session.activity) {
       if (
-        !(await activityService.existsActivity(session.activity.toString()))
+        !(await activityService.existsActivity(
+          session.activity.toString(),
+          userId
+        ))
       ) {
         return false;
       }
     }
 
+    if (session.user.toString() !== userId) {
+      return false;
+    }
+
     return true;
   },
 
-  async createSession(sessionDTO: SessionDTO) {
+  async createSession(sessionDTO: SessionDTO, userId: string) {
     try {
       if (sessionDTO.activity) {
-        if (!(await activityService.existsActivity(sessionDTO.activity))) {
+        if (
+          !(await activityService.existsActivity(sessionDTO.activity, userId))
+        ) {
           throw new Error('Activity Not Found');
         }
       }
@@ -84,6 +99,7 @@ export default {
         totalTimeSeconds: sessionDTO.totalTimeSeconds,
         spentTimeSeconds: 0,
         activity: sessionDTO.activity,
+        user: userId,
       });
 
       return (await newSession.save()).populate('activity');
@@ -92,9 +108,13 @@ export default {
     }
   },
 
-  async updateSession(sessionId: string, sessionDTO: SessionUpdateDTO) {
+  async updateSession(
+    sessionId: string,
+    sessionDTO: SessionUpdateDTO,
+    userId: string
+  ) {
     try {
-      if (!(await this.existsSession(sessionId))) {
+      if (!(await this.existsSession(sessionId, userId))) {
         throw new Error('Session Not Found');
       }
 
@@ -114,6 +134,7 @@ export default {
         const newSessionPart = new SessionPart({
           spentTimeSeconds: partSpentTimeSeconds,
           session: sessionId,
+          user: userId,
           createdDate: Date.now(),
         });
         await newSessionPart.save();
@@ -126,16 +147,15 @@ export default {
         });
       }
 
-      return await this.getSession(sessionId);
+      return await this.getSession(sessionId, userId);
     } catch (e) {
-      console.log('trigger 3');
       this.handleError(e);
     }
   },
 
-  async deleteSession(sessionId: string) {
+  async deleteSession(sessionId: string, userId: string) {
     try {
-      if (!(await this.existsSession(sessionId))) {
+      if (!(await this.existsSession(sessionId, userId))) {
         throw new Error('Session Not Found');
       }
 

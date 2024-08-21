@@ -17,6 +17,11 @@ const activitySchema = new mongoose.Schema({
     ref: 'ActivityGroup',
     required: true,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   createdDate: {
     type: Date,
     default: Date.now(),

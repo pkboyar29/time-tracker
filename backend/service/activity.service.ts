@@ -5,12 +5,12 @@ import sessionService from './session.service';
 import activityGroupService from './activityGroup.service';
 
 export default {
-  async getActivities() {
+  async getActivities(userId: string) {
     try {
-      const activities = await Activity.find({ deleted: false });
+      const activities = await Activity.find({ deleted: false, user: userId });
       const detailedActivities = await Promise.all(
         activities.map(async (activity) =>
-          this.getActivity(activity._id.toString())
+          this.getActivity(activity._id.toString(), userId)
         )
       );
 
@@ -20,17 +20,23 @@ export default {
     }
   },
 
-  async getActivitiesForActivityGroup(activityGroupId: string) {
+  async getActivitiesForActivityGroup(activityGroupId: string, userId: string) {
     try {
-      if (!(await activityGroupService.existsActivityGroup(activityGroupId))) {
+      if (
+        !(await activityGroupService.existsActivityGroup(
+          activityGroupId,
+          userId
+        ))
+      ) {
         throw new Error('Activity Group Not Found');
       }
       const activities = await Activity.find({
         deleted: false,
         activityGroup: activityGroupId,
+        user: userId,
       });
       const detailedActivitiesPromises = activities.map(async (activity) =>
-        this.getActivity(activity._id.toString())
+        this.getActivity(activity._id.toString(), userId)
       );
       const detailedActivities = await Promise.all(detailedActivitiesPromises); // wait for resolving all promises
 
@@ -40,15 +46,18 @@ export default {
     }
   },
 
-  async getActivity(activityId: string) {
+  async getActivity(activityId: string, userId: string) {
     try {
-      if (!(await this.existsActivity(activityId))) {
+      if (!(await this.existsActivity(activityId, userId))) {
         throw new Error('Activity Not Found');
       }
 
       const activity = await Activity.findById(activityId);
 
-      const sessions = await sessionService.getSessionsForActivity(activityId);
+      const sessions = await sessionService.getSessionsForActivity(
+        activityId,
+        userId
+      );
       const spentTimeSeconds = sessions?.reduce(
         (total: number, session) => total + session.spentTimeSeconds,
         0
@@ -64,7 +73,7 @@ export default {
     }
   },
 
-  async existsActivity(activityId: string) {
+  async existsActivity(activityId: string, userId: string) {
     if (!mongoose.Types.ObjectId.isValid(activityId)) {
       return false;
     }
@@ -78,14 +87,19 @@ export default {
       return false;
     }
 
+    if (activity.user.toString() !== userId) {
+      return false;
+    }
+
     return true;
   },
 
-  async createActivity(activityDTO: ActivityCreateDTO) {
+  async createActivity(activityDTO: ActivityCreateDTO, userId: string) {
     try {
       if (
         !(await activityGroupService.existsActivityGroup(
-          activityDTO.activityGroupId
+          activityDTO.activityGroupId,
+          userId
         ))
       ) {
         throw new Error('Activity Group Not Found');
@@ -95,19 +109,24 @@ export default {
         name: activityDTO.name,
         descr: activityDTO.descr,
         activityGroup: activityDTO.activityGroupId,
+        user: userId,
       });
 
       const newActivityWithId = await newActivity.save();
 
-      return this.getActivity(newActivityWithId._id.toString());
+      return this.getActivity(newActivityWithId._id.toString(), userId);
     } catch (e) {
       this.handleError(e);
     }
   },
 
-  async updateActivity(activityId: string, activityDTO: ActivityUpdateDTO) {
+  async updateActivity(
+    activityId: string,
+    activityDTO: ActivityUpdateDTO,
+    userId: string
+  ) {
     try {
-      if (!(await this.existsActivity(activityId))) {
+      if (!(await this.existsActivity(activityId, userId))) {
         throw new Error('Activity Not Found');
       }
 
@@ -117,23 +136,26 @@ export default {
         updatedDate: Date.now(),
       });
 
-      return this.getActivity(activityId);
+      return this.getActivity(activityId, userId);
     } catch (e) {
       this.handleError(e);
     }
   },
 
-  async deleteActivity(activityId: string) {
+  async deleteActivity(activityId: string, userId: string) {
     try {
-      if (!(await this.existsActivity(activityId))) {
+      if (!(await this.existsActivity(activityId, userId))) {
         throw new Error('Activity Not Found');
       }
 
-      const sessions = await sessionService.getSessionsForActivity(activityId);
+      const sessions = await sessionService.getSessionsForActivity(
+        activityId,
+        userId
+      );
       if (sessions && sessions.length > 0) {
         await Promise.all(
           sessions?.map(async (session) => {
-            await sessionService.deleteSession(session._id.toString());
+            await sessionService.deleteSession(session._id.toString(), userId);
           })
         );
       }

@@ -12,7 +12,8 @@ interface AnalyticsForRange {
 export default {
   async getAnalyticsForRange(
     startOfRange: Date,
-    endOfRange: Date
+    endOfRange: Date,
+    userId: string
   ): Promise<AnalyticsForRange | undefined> {
     try {
       let spentTimeSeconds: number = 0;
@@ -21,7 +22,8 @@ export default {
       const sessionPartsForRange =
         await sessionPartService.getSessionPartsInDateRange(
           startOfRange,
-          endOfRange
+          endOfRange,
+          userId
         );
       if (sessionPartsForRange && sessionPartsForRange.length > 0) {
         spentTimeSeconds = sessionPartsForRange.reduce(
@@ -31,10 +33,13 @@ export default {
         );
       }
 
-      const sessionsForRange = await sessionService.getSessions({
-        updatedDate: { $gte: startOfRange, $lte: endOfRange },
-        completed: true,
-      });
+      const sessionsForRange = await sessionService.getSessions(
+        {
+          updatedDate: { $gte: startOfRange, $lte: endOfRange },
+          completed: true,
+        },
+        userId
+      );
       if (sessionsForRange && sessionsForRange.length > 0) {
         sessionsAmount = sessionsForRange.length;
       }
@@ -50,20 +55,22 @@ export default {
   },
 
   async getAnalyticsForDay(
-    dateWithDay: Date
+    dateWithDay: Date,
+    userId: string
   ): Promise<AnalyticsForRange | undefined> {
     const startDay: Date = startOfDay(dateWithDay);
     const endDay: Date = endOfDay(dateWithDay);
 
-    return this.getAnalyticsForRange(startDay, endDay);
+    return this.getAnalyticsForRange(startDay, endDay, userId);
   },
 
   async getAnalyticsForMonth(
-    dateWithMonth: Date
+    dateWithMonth: Date,
+    userId: string
   ): Promise<AnalyticsForRange | undefined> {
     const startMonth: Date = startOfMonth(dateWithMonth);
     const endMonth: Date = endOfMonth(dateWithMonth);
-    return this.getAnalyticsForRange(startMonth, endMonth);
+    return this.getAnalyticsForRange(startMonth, endMonth, userId);
   },
 
   handleError(e: unknown) {

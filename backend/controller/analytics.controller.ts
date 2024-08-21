@@ -9,7 +9,10 @@ router.get('/days/:date', async (req: Request, res: Response) => {
     if (date.toDateString() === 'Invalid Date') {
       res.status(500).send('Invalid Date');
     } else {
-      const data = await analyticsService.getAnalyticsForDay(date);
+      const data = await analyticsService.getAnalyticsForDay(
+        date,
+        res.locals.userId
+      );
       res.status(200).send(data);
     }
   } catch (e) {
@@ -25,7 +28,10 @@ router.get('/months/:date', async (req: Request, res: Response) => {
     if (date.toDateString() === 'Invalid Date') {
       res.status(500).send('Invalid Date');
     } else {
-      const data = await analyticsService.getAnalyticsForMonth(date);
+      const data = await analyticsService.getAnalyticsForMonth(
+        date,
+        res.locals.userId
+      );
       res.status(200).send(data);
     }
   } catch (e) {

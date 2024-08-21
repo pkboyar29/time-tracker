@@ -5,18 +5,23 @@ interface PopulatedSession {
 }
 
 export default {
-  async getSessionPartsInDateRange(startRange: Date, endRange: Date) {
+  async getSessionPartsInDateRange(
+    startRange: Date,
+    endRange: Date,
+    userId: string
+  ) {
     try {
       const sessionParts = await SessionPart.find({
         createdDate: { $gte: startRange, $lte: endRange },
+        user: userId,
       }).populate<{
         session: PopulatedSession;
       }>('session');
-      const notDeletedSessionsParts = sessionParts.filter(
+      const filteredSessionsParts = sessionParts.filter(
         (sessionPart) => !sessionPart.session.deleted
       );
 
-      return notDeletedSessionsParts;
+      return filteredSessionsParts;
     } catch (e) {
       this.handleError(e);
     }

@@ -12,6 +12,11 @@ const activityGroupSchema = new mongoose.Schema({
     maxLength: 500,
     required: false,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   createdDate: {
     type: Date,
     default: Date.now(),

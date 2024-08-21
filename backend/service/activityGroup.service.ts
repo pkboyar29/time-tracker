@@ -4,13 +4,16 @@ import { ActivityGroupDTO } from '../dto/activityGroup.dto';
 import activityService from './activity.service';
 
 export default {
-  async getActivityGroups() {
+  async getActivityGroups(userId: string) {
     try {
-      const activityGroups = await ActivityGroup.find({ deleted: false });
+      const activityGroups = await ActivityGroup.find({
+        deleted: false,
+        user: userId,
+      });
 
       const detailedActivityGroups = await Promise.all(
         activityGroups.map(async (activityGroup) => {
-          return this.getActivityGroup(activityGroup._id.toString());
+          return this.getActivityGroup(activityGroup._id.toString(), userId);
         })
       );
 
@@ -20,19 +23,19 @@ export default {
     }
   },
 
-  async getActivityGroup(activityGroupId: string) {
+  async getActivityGroup(activityGroupId: string, userId: string) {
     try {
-      if (!(await this.existsActivityGroup(activityGroupId))) {
+      if (!(await this.existsActivityGroup(activityGroupId, userId))) {
         throw new Error('Activity Group Not Found');
       }
       const activityGroup = await ActivityGroup.findById(activityGroupId);
 
       const activities = await activityService.getActivitiesForActivityGroup(
-        activityGroupId
+        activityGroupId,
+        userId
       );
       let sessionsAmount: number = 0;
       let spentTimeSeconds: number = 0;
-
       if (activities) {
         activities.forEach((activity) => {
           if (activity?.sessionsAmount && activity.spentTimeSeconds) {
@@ -52,7 +55,7 @@ export default {
     }
   },
 
-  async existsActivityGroup(activityGroupId: string) {
+  async existsActivityGroup(activityGroupId: string, userId: string) {
     if (!mongoose.Types.ObjectId.isValid(activityGroupId)) {
       return false;
     }
@@ -66,19 +69,30 @@ export default {
       return false;
     }
 
+    if (activityGroup.user.toString() !== userId) {
+      return false;
+    }
+
     return true;
   },
 
-  async createActivityGroup(activityGroupDTO: ActivityGroupDTO) {
+  async createActivityGroup(
+    activityGroupDTO: ActivityGroupDTO,
+    userId: string
+  ) {
     try {
       const newActivityGroup = new ActivityGroup({
         name: activityGroupDTO.name,
         descr: activityGroupDTO.descr,
+        user: userId,
       });
 
       const newActivityGroupWithId = await newActivityGroup.save();
 
-      return this.getActivityGroup(newActivityGroupWithId._id.toString());
+      return this.getActivityGroup(
+        newActivityGroupWithId._id.toString(),
+        userId
+      );
     } catch (e) {
       this.handleError(e);
     }
@@ -86,10 +100,11 @@ export default {
 
   async updateActivityGroup(
     activityGroupId: string,
-    activityGroupDTO: ActivityGroupDTO
+    activityGroupDTO: ActivityGroupDTO,
+    userId: string
   ) {
     try {
-      if (!(await this.existsActivityGroup(activityGroupId))) {
+      if (!(await this.existsActivityGroup(activityGroupId, userId))) {
         throw new Error('Activity Group Not Found');
       }
 
@@ -99,27 +114,31 @@ export default {
         updatedDate: Date.now(),
       });
 
-      return this.getActivityGroup(activityGroupId);
+      return this.getActivityGroup(activityGroupId, userId);
     } catch (e) {
       this.handleError(e);
     }
   },
 
-  async deleteActivityGroup(activityGroupId: string) {
+  async deleteActivityGroup(activityGroupId: string, userId: string) {
     try {
-      if (!(await this.existsActivityGroup(activityGroupId))) {
+      if (!(await this.existsActivityGroup(activityGroupId, userId))) {
         throw new Error('Activity Group Not Found');
       }
 
       const activities = await activityService.getActivitiesForActivityGroup(
-        activityGroupId
+        activityGroupId,
+        userId
       );
       if (activities && activities.length > 0) {
         await Promise.all(
           activities?.map(async (activity) => {
             if (activity) {
               if (activity._id) {
-                await activityService.deleteActivity(activity._id.toString());
+                await activityService.deleteActivity(
+                  activity._id.toString(),
+                  userId
+                );
               }
             }
           })

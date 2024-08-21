@@ -23,6 +23,11 @@ const sessionSchema = new mongoose.Schema({
     ref: 'Activity',
     required: false,
   },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
   createdDate: {
     type: Date,
     default: Date.now(),
