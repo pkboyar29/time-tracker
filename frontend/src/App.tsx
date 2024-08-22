@@ -1,22 +1,15 @@
 import { FC, useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import routeConfig from './router/routeConfig';
+import { Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './router/ProtectedRoute';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from './redux/store';
 import { loadSessionFromLocalStorage } from './redux/slices/sessionSlice';
 
-import TimerPage from './pages/TimerPage';
-import AnalyticsPage from './pages/AnalyticsPage';
-import ActivityGroupsPage from './pages/ActivityGroupsPage';
-import ActivityPage from './pages/ActivityPage';
-import ActivityGroupPage from './pages/ActivityGroupPage';
-import SettingsPage from './pages/SettingsPage';
-import SignInPage from './pages/SignInPage';
-import SignUpPage from './pages/SignUpPage';
 import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-
   useEffect(() => {
     dispatch(loadSessionFromLocalStorage());
   }, []);
@@ -28,21 +21,15 @@ const App: FC = () => {
 
         <div className="w-full p-5">
           <Routes>
-            <Route path="/timer" element={<TimerPage />} />
-            <Route path="/activity-groups" element={<ActivityGroupsPage />} />
-            <Route
-              path="/activity-groups/:activityGroupId"
-              element={<ActivityGroupPage />}
-            />
-            <Route
-              path="/activity-groups/:activityGroupId/activities/:activityId"
-              element={<ActivityPage />}
-            />
-            <Route path="/analytics" element={<AnalyticsPage />} />
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/sign-in" element={<SignInPage />} />
-            <Route path="/sign-up" element={<SignUpPage />} />
-            <Route path="/" element={<Navigate to="/sign-in" />} />
+            {routeConfig.map((route) => (
+              <Route
+                key={route.id}
+                path={route.path}
+                element={<ProtectedRoute requiredAuth={route.requiredAuth} />}
+              >
+                <Route path={route.path} element={route.element}></Route>
+              </Route>
+            ))}
           </Routes>
         </div>
       </div>

@@ -17,7 +17,7 @@ interface DeleteModalState {
   deletedGroupId: string | null;
 }
 
-const ActivityGroupPage: FC = () => {
+const ActivityGroupsPage: FC = () => {
   const activityGroups = useSelector(
     (state: RootState) => state.activityGroups.activityGroups
   );
@@ -102,4 +102,4 @@ const ActivityGroupPage: FC = () => {
   );
 };
 
-export default ActivityGroupPage;
+export default ActivityGroupsPage;
