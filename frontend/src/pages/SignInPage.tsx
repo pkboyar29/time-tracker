@@ -1,4 +1,4 @@
-import { FC } from 'react';
+import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import axios from '../axios';
@@ -15,7 +15,10 @@ interface SignInFields {
 }
 
 const SignInPage: FC = () => {
+  const [modal, setModal] = useState<boolean>(false);
+
   const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -32,7 +35,7 @@ const SignInPage: FC = () => {
       Cookies.set('access', access);
       Cookies.set('refresh', refresh);
 
-      navigate('/timer');
+      setModal(true);
     } catch (e) {
       if (e instanceof AxiosError) {
         if (e.response) {
@@ -57,6 +60,22 @@ const SignInPage: FC = () => {
 
   return (
     <div className="flex flex-col items-center mt-32">
+      {modal && (
+        <Modal
+          title="Successful authorization!"
+          onCloseModal={() => setModal(false)}
+        >
+          <Button
+            onClick={() => {
+              setModal(false);
+              navigate('/timer');
+            }}
+          >
+            Ok
+          </Button>
+        </Modal>
+      )}
+
       <div className="text-xl text-red-500">Sign in</div>
 
       <form

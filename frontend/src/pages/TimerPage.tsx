@@ -101,15 +101,14 @@ const TimerPage: FC = () => {
             })
           }
         >
-          <button
+          <Button
             onClick={() =>
               deleteModal.deletedSessionId &&
               onDeleteSessionClick(deleteModal.deletedSessionId)
             }
-            className="p-3 text-white bg-red-500 rounded-xl"
           >
             Delete session
-          </button>
+          </Button>
         </Modal>
       )}
 
