@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import axios from '../axios';
 import { AxiosError } from 'axios';
+import Cookies from 'js-cookie';
 
 import Modal from '../components/Modal';
 import Input from '../components/Input';
@@ -36,7 +37,9 @@ const SignUpPage: FC = () => {
   const onSubmit = async (signUpData: SignUpFields) => {
     try {
       const { data } = await axios.post('/users/sign-up', signUpData);
-      console.log(data);
+      const { access, refresh } = data;
+      Cookies.set('access', access);
+      Cookies.set('refresh', refresh);
 
       navigate('/timer');
     } catch (e) {
