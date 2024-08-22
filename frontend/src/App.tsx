@@ -1,6 +1,6 @@
 import { FC, useEffect } from 'react';
 import routeConfig from './router/routeConfig';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './router/ProtectedRoute';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from './redux/store';
@@ -14,10 +14,14 @@ const App: FC = () => {
     dispatch(loadSessionFromLocalStorage());
   }, []);
 
+  const location = useLocation();
+  const hideSidebarRoutes = ['/sign-in', '/sign-up'];
+  const shouldShowSidebar = !hideSidebarRoutes.includes(location.pathname);
+
   return (
     <>
       <div id="app" className="flex w-full h-full min-h-full">
-        <Sidebar />
+        {shouldShowSidebar && <Sidebar />}
 
         <div className="w-full p-5">
           <Routes>
