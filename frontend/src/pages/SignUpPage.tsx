@@ -90,7 +90,7 @@ const SignUpPage: FC = () => {
       <div className="text-xl text-red-500">Sign up</div>
 
       <form
-        className="flex flex-col gap-5 mt-3"
+        className="flex flex-col items-center gap-5 mt-3"
         onSubmit={handleSubmit(onSubmit)}
       >
         <Input
@@ -236,7 +236,9 @@ const SignUpPage: FC = () => {
           }
           inputType="password"
         />
-        <Button type="submit">Sign up</Button>
+        <Button className="w-[175px]" type="submit">
+          Sign up
+        </Button>
         <a
           className="text-base text-center transition-all delay-100 cursor-pointer hover:text-red-500"
           onClick={() => navigate('/sign-in')}

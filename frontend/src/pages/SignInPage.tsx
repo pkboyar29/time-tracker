@@ -115,7 +115,9 @@ const SignInPage: FC = () => {
           }
           inputType="password"
         />
-        <Button type="submit">Sign in</Button>
+        <Button className="w-[175px]" type="submit">
+          Sign in
+        </Button>
         <a
           className="text-base text-center transition-all delay-100 cursor-pointer hover:text-red-500"
           onClick={() => navigate('/sign-up')}

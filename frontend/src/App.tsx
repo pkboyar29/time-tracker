@@ -15,7 +15,7 @@ const App: FC = () => {
   }, []);
 
   const location = useLocation();
-  const hideSidebarRoutes = ['/sign-in', '/sign-up'];
+  const hideSidebarRoutes = ['/sign-in', '/sign-up', '/not-found'];
   const shouldShowSidebar = !hideSidebarRoutes.includes(location.pathname);
 
   return (

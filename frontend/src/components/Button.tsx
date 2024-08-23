@@ -10,17 +10,20 @@ const Button: FC<ButtonProps> = ({
   children,
   onClick,
   type = 'button',
+  className = '',
   ...otherProps
 }) => {
   return (
-    <button
-      type={type}
-      onClick={onClick}
-      className="p-3 text-white transition duration-300 bg-red-500 hover:bg-red-700 rounded-xl"
-      {...otherProps}
-    >
-      {children}
-    </button>
+    <>
+      <button
+        type={type}
+        onClick={onClick}
+        className={`p-3 text-white transition duration-300 bg-red-500 hover:bg-red-700 rounded-xl ${className}`}
+        {...otherProps}
+      >
+        {children}
+      </button>
+    </>
   );
 };
 

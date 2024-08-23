@@ -199,7 +199,10 @@ const TimerPage: FC = () => {
             </div>
           )}
         </div>
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-end">
+          <Button onClick={() => setCreateModal(true)}>
+            Create new session
+          </Button>
           <button
             onClick={() => setUnompletedLess(!uncompletedLess)}
             className="flex items-center gap-1 my-5 text-xl font-bold"
@@ -228,11 +231,6 @@ const TimerPage: FC = () => {
               ))}
             </div>
           )}
-        </div>
-        <div>
-          <Button onClick={() => setCreateModal(true)}>
-            Create new session
-          </Button>
         </div>
       </div>
     </>
