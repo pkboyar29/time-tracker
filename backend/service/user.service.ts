@@ -1,4 +1,4 @@
-import { UserSignUpDTO, UserSignInDTO } from '../dto/user.dto';
+import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
 import User from '../model/user.model';
 import { genSaltSync, hashSync, compareSync } from 'bcrypt';
 import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
@@ -67,7 +67,7 @@ export default {
     };
 
     token = jsonwebtoken.sign(payload, secretKey, {
-      expiresIn: tokenType === 'access' ? '300s' : '5h',
+      expiresIn: tokenType === 'access' ? '300s' : '5d',
     });
     return token;
   },
@@ -147,5 +147,12 @@ export default {
     if (refreshPayload) {
       return this.createAccessToken(refreshPayload.userId);
     }
+  },
+
+  async getProfileInfo(userId: string): Promise<UserResponseDTO> {
+    const profileInfo = await User.findById(userId).select(
+      'username firstName lastName email'
+    );
+    return profileInfo as UserResponseDTO;
   },
 };
