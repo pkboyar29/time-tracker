@@ -1,5 +1,5 @@
 import { FC, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import axios from '../axios';
 import { AxiosError } from 'axios';
@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '../redux/store';
 import { fetchProfileInfo } from '../redux/slices/userSlice';
+import { isAuth } from '../utils/authHelpers';
 
 import Modal from '../components/Modal';
 import Input from '../components/Input';
@@ -22,6 +23,10 @@ const SignInPage: FC = () => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
+
+  if (isAuth()) {
+    return <Navigate to="/timer" />;
+  }
 
   const {
     register,

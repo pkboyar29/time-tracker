@@ -62,6 +62,11 @@ const routeConfig: RouteType[] = [
   },
   {
     path: '/',
+    element: <Navigate to="/sign-in" />,
+    requiredAuth: false,
+  },
+  {
+    path: '*',
     element: <Navigate to="/not-found" />,
     requiredAuth: false,
   },

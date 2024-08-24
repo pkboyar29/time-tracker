@@ -1,7 +1,11 @@
 import { FC } from 'react';
 
 const NotFoundPage: FC = () => {
-  return <>Not Found</>;
+  return (
+    <>
+      <div className="text-2xl font-semibold">Not Found</div>
+    </>
+  );
 };
 
 export default NotFoundPage;

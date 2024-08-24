@@ -21,7 +21,7 @@ export const clearSession = () => {
   localStorage.removeItem('session');
 };
 
-export const isSession = () => {
+export const isAuth = () => {
   if (Cookies.get('refresh')) {
     return true;
   } else {
