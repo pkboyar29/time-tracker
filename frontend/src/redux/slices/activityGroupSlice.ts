@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from '../../axios';
+import axiosInstance from '../../axios';
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 import { IActivityGroupCreate } from '../../ts/interfaces/ActivityGroup/IActivityGroupCreate';
 import { IActivityGroupUpdate } from '../../ts/interfaces/ActivityGroup/IActivityGroupUpdate';
@@ -18,7 +18,7 @@ const initialState: ActivityGroupState = {
 export const fetchActivityGroups = createAsyncThunk(
   'activity-groups/fetchActivityGroups',
   async () => {
-    const { data: unmappedData } = await axios.get('/activity-groups');
+    const { data: unmappedData } = await axiosInstance.get('/activity-groups');
     const mappedData: IActivityGroup[] = unmappedData.map(
       (unmappedActivityGroup: any) =>
         mapActivityGroupFromResponse(unmappedActivityGroup)
@@ -30,7 +30,7 @@ export const fetchActivityGroups = createAsyncThunk(
 export const createActivityGroup = createAsyncThunk(
   'activity-groups/createActivityGroup',
   async (newActivityGroupData: IActivityGroupCreate) => {
-    const { data: unmappedData } = await axios.post(
+    const { data: unmappedData } = await axiosInstance.post(
       '/activity-groups',
       newActivityGroupData
     );
@@ -42,7 +42,7 @@ export const createActivityGroup = createAsyncThunk(
 export const updateActivityGroup = createAsyncThunk(
   'activity-groups/updateActivityGroup',
   async (activityGroupData: IActivityGroupUpdate) => {
-    const { data: unmappedData } = await axios.put(
+    const { data: unmappedData } = await axiosInstance.put(
       `/activity-groups/${activityGroupData.id}`,
       activityGroupData
     );
@@ -54,7 +54,7 @@ export const updateActivityGroup = createAsyncThunk(
 export const deleteActivityGroup = createAsyncThunk(
   'activity-groups/deleteActivityGroup',
   async (activityGroupId: string) => {
-    const { data: message } = await axios.delete(
+    const { data: message } = await axiosInstance.delete(
       `activity-groups/${activityGroupId}`
     );
     return message;

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from '../../axios';
+import axiosInstance from '../../axios';
 import { mapActivityFromResponse } from '../../utils/mappingHelpers';
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { IActivityCreate } from '../../ts/interfaces/Activity/IActivityCreate';
@@ -18,7 +18,7 @@ const initialState: ActivityState = {
 export const fetchActivities = createAsyncThunk(
   'activities/fetchActivities',
   async (activityGroupId: string) => {
-    const { data: unmappedData } = await axios.get('/activities', {
+    const { data: unmappedData } = await axiosInstance.get('/activities', {
       params: {
         activityGroupId: activityGroupId,
       },
@@ -33,7 +33,7 @@ export const fetchActivities = createAsyncThunk(
 export const createActivity = createAsyncThunk(
   'activities/createActivity',
   async (newActivityData: IActivityCreate) => {
-    const { data: unmappedData } = await axios.post(
+    const { data: unmappedData } = await axiosInstance.post(
       '/activities',
       newActivityData
     );
@@ -45,7 +45,7 @@ export const createActivity = createAsyncThunk(
 export const updateActivity = createAsyncThunk(
   'activities/updateActivity',
   async (activityData: IActivityUpdate) => {
-    const { data: unmappedData } = await axios.put(
+    const { data: unmappedData } = await axiosInstance.put(
       `/activities/${activityData.id}`,
       activityData
     );
@@ -57,7 +57,9 @@ export const updateActivity = createAsyncThunk(
 export const deleteActivity = createAsyncThunk(
   'activities/deleteActivity',
   async (activityId: string) => {
-    const { data: message } = await axios.delete(`/activities/${activityId}`);
+    const { data: message } = await axiosInstance.delete(
+      `/activities/${activityId}`
+    );
     return message;
   }
 );

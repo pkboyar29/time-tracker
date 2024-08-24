@@ -2,11 +2,13 @@ import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import sessionReducer from './slices/sessionSlice';
 import activityReducer from './slices/activitySlice';
 import activityGroupReducer from './slices/activityGroupSlice';
+import userReducer from './slices//userSlice';
 
 const rootReducer = combineReducers({
   sessions: sessionReducer,
   activities: activityReducer,
   activityGroups: activityGroupReducer,
+  users: userReducer,
 });
 
 export const store = configureStore({

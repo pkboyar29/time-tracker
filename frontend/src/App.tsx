@@ -5,23 +5,33 @@ import ProtectedRoute from './router/ProtectedRoute';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from './redux/store';
 import { loadSessionFromLocalStorage } from './redux/slices/sessionSlice';
+import { fetchProfileInfo } from './redux/slices/userSlice';
 
 import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  useEffect(() => {
-    dispatch(loadSessionFromLocalStorage());
-  }, []);
 
   const location = useLocation();
-  const hideSidebarRoutes = ['/sign-in', '/sign-up', '/not-found'];
-  const shouldShowSidebar = !hideSidebarRoutes.includes(location.pathname);
+  const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
+  const requiredAuth = !nonRequiredAuthRoutes.includes(location.pathname);
+
+  useEffect(() => {
+    if (requiredAuth) {
+      dispatch(loadSessionFromLocalStorage());
+    }
+  }, []);
+
+  useEffect(() => {
+    if (requiredAuth) {
+      dispatch(fetchProfileInfo());
+    }
+  }, []);
 
   return (
     <>
       <div id="app" className="flex w-full h-full min-h-full">
-        {shouldShowSidebar && <Sidebar />}
+        {requiredAuth && <Sidebar />}
 
         <div className="w-full p-5">
           <Routes>

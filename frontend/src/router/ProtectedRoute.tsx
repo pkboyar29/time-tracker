@@ -1,18 +1,20 @@
 import { FC } from 'react';
 import { Outlet, Navigate, RouteProps } from 'react-router-dom';
-import Cookies from 'js-cookie';
+import { RootState } from '../redux/store';
+import { useSelector } from 'react-redux';
+import { isSession } from '../utils/authHelpers';
 
 type ProtectedRouteProps = RouteProps & {
   requiredAuth: boolean;
 };
 
 const ProtectedRoute: FC<ProtectedRouteProps> = ({ requiredAuth }) => {
-  // useEffect(() => {
+  const isLoggedOut: boolean = useSelector(
+    (state: RootState) => state.users.status === 'logout'
+  );
+  const shouldRedirect: boolean = requiredAuth && (!isSession() || isLoggedOut);
 
-  // }, [Cookies.get('refresh')]);
-  // quite better when i have global state of user and use useEffect on this state?
-
-  if (requiredAuth && Cookies.get('refresh') === undefined) {
+  if (shouldRedirect) {
     return <Navigate to="/sign-in" />;
   }
 

@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from '../../axios';
+import axiosInstance from '../../axios';
 import { mapSessionFromResponse } from '../../utils/mappingHelpers';
 import { ISession } from '../../ts/interfaces/Session/ISession';
 import { ISessionCreate } from '../../ts/interfaces/Session/ISessionCreate';
@@ -23,7 +23,7 @@ const findSessionById = (sessions: ISession[], id: string): ISession | null => {
 export const fetchSessions = createAsyncThunk(
   'sessions/fetchSessions',
   async () => {
-    const { data: unmappedData } = await axios.get('/sessions', {
+    const { data: unmappedData } = await axiosInstance.get('/sessions', {
       params: {
         completed: false,
       },
@@ -38,7 +38,7 @@ export const fetchSessions = createAsyncThunk(
 export const createSession = createAsyncThunk(
   'sessions/createSession',
   async (newSessionData: ISessionCreate) => {
-    const { data: unmappedData } = await axios.post(
+    const { data: unmappedData } = await axiosInstance.post(
       '/sessions',
       newSessionData
     );
@@ -49,7 +49,7 @@ export const createSession = createAsyncThunk(
 export const updateSession = createAsyncThunk(
   'sessions/updateSession',
   async (existingSessionData: ISession) => {
-    const { data: unmappedData } = await axios.put(
+    const { data: unmappedData } = await axiosInstance.put(
       `/sessions/${existingSessionData.id}`,
       existingSessionData
     );
@@ -60,7 +60,7 @@ export const updateSession = createAsyncThunk(
 export const deleteSession = createAsyncThunk(
   'sessions/deleteSession',
   async (sessionId: string) => {
-    let { data } = await axios.delete(`/sessions/${sessionId}`);
+    let { data } = await axiosInstance.delete(`/sessions/${sessionId}`);
     return data;
   }
 );

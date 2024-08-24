@@ -4,6 +4,9 @@ import { useForm } from 'react-hook-form';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
+import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../redux/store';
+import { fetchProfileInfo } from '../redux/slices/userSlice';
 
 import Modal from '../components/Modal';
 import Input from '../components/Input';
@@ -18,6 +21,7 @@ const SignInPage: FC = () => {
   const [modal, setModal] = useState<boolean>(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
 
   const {
     register,
@@ -34,6 +38,8 @@ const SignInPage: FC = () => {
       const { access, refresh } = data;
       Cookies.set('access', access);
       Cookies.set('refresh', refresh);
+
+      dispatch(fetchProfileInfo());
 
       setModal(true);
     } catch (e) {

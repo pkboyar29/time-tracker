@@ -10,7 +10,21 @@ export const refreshAccessToken = async () => {
     Cookies.set('access', data.access);
   } catch (error) {
     // if refresh token is malformed or expired
-    Cookies.remove('access');
-    Cookies.remove('refresh');
+    clearSession();
+  }
+};
+
+export const clearSession = () => {
+  Cookies.remove('access');
+  Cookies.remove('refresh');
+
+  localStorage.removeItem('session');
+};
+
+export const isSession = () => {
+  if (Cookies.get('refresh')) {
+    return true;
+  } else {
+    return false;
   }
 };
