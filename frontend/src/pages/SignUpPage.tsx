@@ -53,25 +53,26 @@ const SignUpPage: FC = () => {
       setModal(true);
     } catch (e) {
       if (e instanceof AxiosError) {
-        if (e.response) {
-          switch (e.response.data) {
-            case 'Username must be unique':
-              console.log('trigger 1');
-              setError('username', {
-                type: 'custom',
-                message: e.response.data,
-              });
-              break;
-            case 'Email must be unique':
-              console.log('trigger 2');
-              setError('email', {
-                type: 'custom',
-                message: e.response.data,
-              });
-              break;
-          }
-        }
+        handleErrorResponse(e);
       }
+    }
+  };
+
+  const handleErrorResponse = (error: AxiosError) => {
+    const errorMessage = error.response?.data;
+    switch (errorMessage) {
+      case 'Username must be unique':
+        setError('username', {
+          type: 'custom',
+          message: errorMessage,
+        });
+        break;
+      case 'Email must be unique':
+        setError('email', {
+          type: 'custom',
+          message: errorMessage,
+        });
+        break;
     }
   };
 

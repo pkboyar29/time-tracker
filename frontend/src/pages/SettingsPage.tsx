@@ -20,10 +20,10 @@ const SettingsPage: FC = () => {
     (state: RootState) => state.sessions.currentSession
   );
 
-  const logOutHandler = () => {
+  const logOutHandler = async () => {
     if (currentSession) {
       // here i should reset all state
-      dispatch(updateSession(currentSession));
+      await dispatch(updateSession(currentSession));
       dispatch(removeCurrentSession());
     }
     dispatch(logOutUser());

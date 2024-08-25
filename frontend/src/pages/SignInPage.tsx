@@ -24,10 +24,6 @@ const SignInPage: FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  if (isAuth()) {
-    return <Navigate to="/timer" />;
-  }
-
   const {
     register,
     handleSubmit,
@@ -36,6 +32,10 @@ const SignInPage: FC = () => {
   } = useForm<SignInFields>({
     mode: 'onBlur',
   });
+
+  if (isAuth()) {
+    return <Navigate to="/timer" />;
+  }
 
   const onSubmit = async (signInData: SignInFields) => {
     try {
@@ -49,23 +49,26 @@ const SignInPage: FC = () => {
       setModal(true);
     } catch (e) {
       if (e instanceof AxiosError) {
-        if (e.response) {
-          switch (e.response.data) {
-            case 'User with this username doesnt exists':
-              setError('username', {
-                type: 'custom',
-                message: e.response.data,
-              });
-              break;
-            case 'Password incorrect':
-              setError('password', {
-                type: 'custom',
-                message: e.response.data,
-              });
-              break;
-          }
-        }
+        handleErrorResponse(e);
       }
+    }
+  };
+
+  const handleErrorResponse = (error: AxiosError) => {
+    const errorMessage = error.response?.data;
+    switch (errorMessage) {
+      case 'User with this username doesnt exists':
+        setError('username', {
+          type: 'custom',
+          message: errorMessage,
+        });
+        break;
+      case 'Password incorrect':
+        setError('password', {
+          type: 'custom',
+          message: errorMessage,
+        });
+        break;
     }
   };
 
@@ -90,7 +93,7 @@ const SignInPage: FC = () => {
       <div className="text-xl text-red-500">Sign in</div>
 
       <form
-        className="flex flex-col gap-5 mt-3"
+        className="flex flex-col items-center gap-5 mt-3"
         onSubmit={handleSubmit(onSubmit)}
       >
         <Input

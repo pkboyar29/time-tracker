@@ -49,6 +49,7 @@ export const createSession = createAsyncThunk(
 export const updateSession = createAsyncThunk(
   'sessions/updateSession',
   async (existingSessionData: ISession) => {
+    console.log('trigger 1');
     const { data: unmappedData } = await axiosInstance.put(
       `/sessions/${existingSessionData.id}`,
       existingSessionData
