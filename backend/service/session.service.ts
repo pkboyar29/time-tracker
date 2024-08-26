@@ -1,8 +1,17 @@
 import Session from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
-import { SessionDTO, SessionUpdateDTO } from '../dto/session.dto';
+import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
+
+const activityPopulateConfig = {
+  path: 'activity',
+  select: 'name activityGroup -_id',
+  populate: {
+    path: 'activityGroup',
+    select: 'name -_id',
+  },
+};
 
 export default {
   async getSessions(filter: Record<string, unknown> = {}, userId: string) {
@@ -11,7 +20,8 @@ export default {
         deleted: false,
         user: userId,
         ...filter,
-      }).populate('activity');
+      }).populate(activityPopulateConfig);
+
       return sessions;
     } catch (e) {
       this.handleError(e);
@@ -47,7 +57,7 @@ export default {
         throw new Error('Session Not Found');
       }
 
-      return await Session.findById(sessionId).populate('activity');
+      return await Session.findById(sessionId).populate(activityPopulateConfig);
     } catch (e) {
       this.handleError(e);
     }
@@ -85,7 +95,7 @@ export default {
     return true;
   },
 
-  async createSession(sessionDTO: SessionDTO, userId: string) {
+  async createSession(sessionDTO: SessionCreateDTO, userId: string) {
     try {
       if (sessionDTO.activity) {
         if (
@@ -102,7 +112,7 @@ export default {
         user: userId,
       });
 
-      return (await newSession.save()).populate('activity');
+      return (await newSession.save()).populate(activityPopulateConfig);
     } catch (e) {
       this.handleError(e);
     }
@@ -142,6 +152,7 @@ export default {
         await session.updateOne({
           totalTimeSeconds: sessionDTO.totalTimeSeconds,
           spentTimeSeconds: sessionDTO.spentTimeSeconds,
+          note: sessionDTO.note,
           completed: completed,
           updatedDate: Date.now(),
         });

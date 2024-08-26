@@ -1,4 +1,4 @@
-export interface SessionDTO {
+export interface SessionCreateDTO {
   totalTimeSeconds: number;
   activity?: string;
 }
@@ -6,4 +6,5 @@ export interface SessionDTO {
 export interface SessionUpdateDTO {
   totalTimeSeconds: number;
   spentTimeSeconds: number;
+  note?: string;
 }

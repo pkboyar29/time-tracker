@@ -13,6 +13,12 @@ const sessionSchema = new mongoose.Schema({
     min: [0, 'SpentTimeSeconds should be minimum 0 second'],
     max: [36000, 'SpentTimeSeconds should be maximum 10 hours'],
   },
+  note: {
+    type: String,
+    required: false,
+    minLength: 1,
+    maxLength: 300,
+  },
   completed: {
     type: Boolean,
     default: false,
