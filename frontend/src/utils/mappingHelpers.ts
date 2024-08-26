@@ -4,9 +4,9 @@ import { ISession } from '../ts/interfaces/Session/ISession';
 
 export const mapActivityFromResponse = (unmappedActivity: any): IActivity => {
   return {
+    ...unmappedActivity,
     id: unmappedActivity._id,
     activityGroupId: unmappedActivity.activityGroup,
-    ...unmappedActivity,
   };
 };
 
@@ -14,18 +14,18 @@ export const mapActivityGroupFromResponse = (
   unmappedActivityGroup: any
 ): IActivityGroup => {
   return {
-    id: unmappedActivityGroup._id,
     ...unmappedActivityGroup,
+    id: unmappedActivityGroup._id,
   };
 };
 
 export const mapSessionFromResponse = (unmappedSession: any): ISession => {
   return {
+    ...unmappedSession,
     id: unmappedSession._id,
     activity: unmappedSession.activity && {
-      id: unmappedSession.activity._id,
-      ...unmappedSession.activity,
+      activityGroupName: unmappedSession.activity.activityGroup.name,
+      name: unmappedSession.activity.name,
     },
-    ...unmappedSession,
   };
 };

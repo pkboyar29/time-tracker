@@ -6,4 +6,5 @@ export interface ISession {
   spentTimeSeconds: number;
   activity?: ISessionActivity;
   completed: boolean;
+  note?: string;
 }

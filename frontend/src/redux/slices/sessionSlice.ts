@@ -49,7 +49,8 @@ export const createSession = createAsyncThunk(
 export const updateSession = createAsyncThunk(
   'sessions/updateSession',
   async (existingSessionData: ISession) => {
-    console.log('trigger 1');
+    console.log('updating session...');
+    console.log(existingSessionData);
     const { data: unmappedData } = await axiosInstance.put(
       `/sessions/${existingSessionData.id}`,
       existingSessionData
@@ -98,6 +99,11 @@ const sessionSlice = createSlice({
     addSecond(state) {
       if (state.currentSession) {
         state.currentSession.spentTimeSeconds++;
+      }
+    },
+    updateCurrentSessionNote(state, action: PayloadAction<string>) {
+      if (state.currentSession) {
+        state.currentSession.note = action.payload;
       }
     },
     loadSessionFromLocalStorage(state) {
@@ -151,6 +157,7 @@ const sessionSlice = createSlice({
                   ...session,
                   totalTimeSeconds: action.payload.totalTimeSeconds,
                   spentTimeSeconds: action.payload.spentTimeSeconds,
+                  note: action.payload.note,
                   completed: action.payload.completed,
                 };
               } else {
@@ -180,6 +187,7 @@ export const {
   setCurrentSession,
   removeCurrentSession,
   addSecond,
+  updateCurrentSessionNote,
   loadSessionFromLocalStorage,
 } = sessionSlice.actions;
 export default sessionSlice.reducer;

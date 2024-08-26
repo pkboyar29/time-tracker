@@ -15,7 +15,6 @@ export const refreshAccessToken = async () => {
 };
 
 export const clearSession = () => {
-  console.log('trigger 2');
   Cookies.remove('access');
   Cookies.remove('refresh');
 
