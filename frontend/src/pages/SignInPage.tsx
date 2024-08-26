@@ -42,7 +42,7 @@ const SignInPage: FC = () => {
       const { data } = await axios.post('/users/sign-in', signInData);
       const { access, refresh } = data;
       Cookies.set('access', access);
-      Cookies.set('refresh', refresh);
+      Cookies.set('refresh', refresh, { expires: 5 });
 
       dispatch(fetchProfileInfo());
 

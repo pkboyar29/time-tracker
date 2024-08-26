@@ -46,7 +46,7 @@ const SignUpPage: FC = () => {
       const { data } = await axios.post('/users/sign-up', signUpData);
       const { access, refresh } = data;
       Cookies.set('access', access);
-      Cookies.set('refresh', refresh);
+      Cookies.set('refresh', refresh, { expires: 5 });
 
       dispatch(fetchProfileInfo());
 
