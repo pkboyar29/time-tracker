@@ -1,7 +1,6 @@
 import { FC, useState, useEffect, ChangeEvent } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../redux/store';
+import { useAppDispatch } from '../../redux/store';
 import axios from '../../axios';
 import { createSession } from '../../redux/slices/sessionSlice';
 
@@ -10,12 +9,13 @@ import Button from '../Button';
 import {
   mapActivityFromResponse,
   mapActivityGroupFromResponse,
-} from '../../utils/mappingHelpers';
+} from '../../helpers/mappingHelpers';
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
+import { ISession } from '../../ts/interfaces/Session/ISession';
 
 interface SessionCreateFormProps {
-  afterSubmitHandler: () => void;
+  afterSubmitHandler: (session: ISession) => void;
   defaultActivity?: string;
 }
 
@@ -46,7 +46,7 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({
     },
     mode: 'onBlur',
   });
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const fetchActivityGroups = async () => {
@@ -65,7 +65,7 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({
     }
   }, [defaultActivity, activitiesInSelect]);
 
-  const onActivityGroupSelectChange = async (
+  const handleActivityGroupSelectChange = async (
     e: ChangeEvent<HTMLSelectElement>
   ) => {
     setActivitiesInSelect([]);
@@ -85,16 +85,20 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({
     }
   };
 
-  const onSubmit = (data: SessionFields) => {
-    console.log(data);
-    dispatch(
-      createSession({
-        totalTimeSeconds: data.totalTimeMinutes * 60,
-        spentTimeSeconds: 0,
-        activity: data.activity !== '' ? data.activity : undefined,
-      })
-    );
-    afterSubmitHandler();
+  const onSubmit = async (data: SessionFields) => {
+    try {
+      const { payload } = await dispatch(
+        createSession({
+          totalTimeSeconds: data.totalTimeMinutes * 60,
+          spentTimeSeconds: 0,
+          activity: data.activity !== '' ? data.activity : undefined,
+        })
+      );
+
+      afterSubmitHandler(payload as ISession);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -128,7 +132,7 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({
 
       {!defaultActivity ? (
         <>
-          <select onChange={onActivityGroupSelectChange}>
+          <select onChange={handleActivityGroupSelectChange}>
             <option value="">Choose activity group (optional)</option>
             {activityGroupsInSelect.map((activityGroup) => (
               <option key={activityGroup.id} value={activityGroup.id}>

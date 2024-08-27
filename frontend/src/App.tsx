@@ -2,15 +2,14 @@ import { FC, useEffect } from 'react';
 import routeConfig from './router/routeConfig';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './router/ProtectedRoute';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from './redux/store';
-import { loadSessionFromLocalStorage } from './redux/slices/sessionSlice';
+import { useAppDispatch } from './redux/store';
+import { loadCurrentSession } from './redux/slices/sessionSlice';
 import { fetchProfileInfo } from './redux/slices/userSlice';
 
 import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const location = useLocation();
   const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
@@ -18,7 +17,7 @@ const App: FC = () => {
 
   useEffect(() => {
     if (requiredAuth) {
-      dispatch(loadSessionFromLocalStorage());
+      dispatch(loadCurrentSession());
     }
   }, []);
 

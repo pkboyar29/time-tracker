@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { useAppDispatch } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
 import {
   deleteActivityGroup,
@@ -21,7 +22,7 @@ const ActivityGroupsPage: FC = () => {
   const activityGroups = useSelector(
     (state: RootState) => state.activityGroups.activityGroups
   );
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const [createModal, setCreateModal] = useState<boolean>(false);
@@ -31,18 +32,18 @@ const ActivityGroupsPage: FC = () => {
     dispatch(fetchActivityGroups());
   }, []);
 
-  const onEditActivityGroupClick = (activityGroupId: string) => {
+  const handleEditActivityGroupClick = (activityGroupId: string) => {
     navigate(`${activityGroupId}`);
   };
 
-  const onDeleteActivityGroupClick = (activityGroupId: string) => {
+  const handleDeleteActivityGroupClick = (activityGroupId: string) => {
     setDeleteModal({
       deleteModal: true,
       deletedGroupId: activityGroupId,
     });
   };
 
-  const onDeleteActivityGroupModal = () => {
+  const handleDeleteActivityGroupModal = () => {
     if (deleteModal?.deletedGroupId) {
       dispatch(deleteActivityGroup(deleteModal?.deletedGroupId));
     }
@@ -72,7 +73,7 @@ const ActivityGroupsPage: FC = () => {
           title="Deleting activity group"
           onCloseModal={() => setCreateModal(false)}
         >
-          <Button onClick={onDeleteActivityGroupModal}>
+          <Button onClick={handleDeleteActivityGroupModal}>
             Delete activity group
           </Button>
         </Modal>
@@ -86,8 +87,8 @@ const ActivityGroupsPage: FC = () => {
               <ActivityItem
                 key={activityGroup.id}
                 activity={activityGroup}
-                editHandler={onEditActivityGroupClick}
-                deleteHandler={onDeleteActivityGroupClick}
+                editHandler={handleEditActivityGroupClick}
+                deleteHandler={handleDeleteActivityGroupClick}
               ></ActivityItem>
             ))}
           </div>

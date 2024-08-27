@@ -3,16 +3,17 @@ import axiosInstance from '../../axios';
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 import { IActivityGroupCreate } from '../../ts/interfaces/ActivityGroup/IActivityGroupCreate';
 import { IActivityGroupUpdate } from '../../ts/interfaces/ActivityGroup/IActivityGroupUpdate';
-import { mapActivityGroupFromResponse } from '../../utils/mappingHelpers';
+import StateStatuses from '../../ts/enums/StateStatuses';
+import { mapActivityGroupFromResponse } from '../../helpers/mappingHelpers';
 
 interface ActivityGroupState {
   activityGroups: IActivityGroup[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  status: StateStatuses;
 }
 
 const initialState: ActivityGroupState = {
   activityGroups: [],
-  status: 'idle',
+  status: StateStatuses.idle,
 };
 
 export const fetchActivityGroups = createAsyncThunk(
@@ -64,18 +65,22 @@ export const deleteActivityGroup = createAsyncThunk(
 const activityGroupSlice = createSlice({
   name: 'activity-groups',
   initialState,
-  reducers: {},
+  reducers: {
+    reset() {
+      return initialState;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchActivityGroups.pending, (state) => {
-        state.status = 'loading';
+        state.status = StateStatuses.loading;
       })
       .addCase(fetchActivityGroups.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = StateStatuses.succeeded;
         state.activityGroups = action.payload;
       })
       .addCase(fetchActivityGroups.rejected, (state) => {
-        state.status = 'failed';
+        state.status = StateStatuses.failed;
       })
       .addCase(createActivityGroup.fulfilled, (state, action) => {
         state.activityGroups.push(action.payload);
@@ -101,4 +106,5 @@ const activityGroupSlice = createSlice({
   },
 });
 
+export const { reset: resetActivityGroupState } = activityGroupSlice.actions;
 export default activityGroupSlice.reducer;

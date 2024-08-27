@@ -1,7 +1,6 @@
 import { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../redux/store';
+import { useAppDispatch } from '../../redux/store';
 import { updateActivity } from '../../redux/slices/activitySlice';
 import { updateActivityGroup } from '../../redux/slices/activityGroupSlice';
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
@@ -27,7 +26,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
   } = useForm<ActivityCommonFields>({
     mode: 'onBlur',
   });
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   // попробовать все-таки это сделать декларативно, через defaultValues
   useEffect(() => {

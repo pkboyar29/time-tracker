@@ -7,7 +7,7 @@ interface SessionItemProps {
   isActive: boolean;
   isEnabled?: boolean;
   session: ISession;
-  sessionClickHandler?: (sessionId: string) => void;
+  sessionClickHandler?: (session: ISession) => void;
   sessionDeleteHandler: (sessionId: string) => void;
 }
 
@@ -42,7 +42,7 @@ const SessionItem: FC<SessionItemProps> = ({
 
         <div className="flex flex-col gap-5 ml-auto">
           <div className="flex gap-3">
-            <button onClick={() => sessionClickHandler?.(session.id)}>
+            <button onClick={() => sessionClickHandler?.(session)}>
               {isActive ? (
                 isEnabled ? (
                   <svg

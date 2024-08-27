@@ -1,7 +1,7 @@
 import instance from '../axios';
 import Cookies from 'js-cookie';
 
-export const refreshAccessToken = async () => {
+const refreshAccessToken = async () => {
   const refreshToken = Cookies.get('refresh');
   try {
     const { data } = await instance.post('/users/refresh', {
@@ -14,17 +14,19 @@ export const refreshAccessToken = async () => {
   }
 };
 
-export const clearSession = () => {
+const clearSession = () => {
   Cookies.remove('access');
   Cookies.remove('refresh');
 
   localStorage.removeItem('session');
 };
 
-export const isAuth = () => {
+const isAuth = () => {
   if (Cookies.get('refresh')) {
     return true;
   } else {
     return false;
   }
 };
+
+export { refreshAccessToken, clearSession, isAuth };

@@ -26,7 +26,7 @@ const Input: FC<InputProps> = ({
     inputType
   );
 
-  const toggleType = () => {
+  const handleToggleTypeClick = () => {
     if (toggledType === 'text') {
       setToggledType('password');
     } else {
@@ -50,7 +50,7 @@ const Input: FC<InputProps> = ({
           <button
             type="button"
             className="absolute z-50 top-[3.75px] right-2"
-            onClick={toggleType}
+            onClick={handleToggleTypeClick}
           >
             {toggledType === 'password' ? (
               <Visibility style={{ fontSize: '19px' }} />

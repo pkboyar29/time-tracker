@@ -6,19 +6,16 @@ import {
   FC,
   useContext,
 } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
-import {
-  addSecond,
-  removeCurrentSession,
-  updateSession,
-} from '../redux/slices/sessionSlice';
-import { playAudio } from '../utils/audioHelpers';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { useAppDispatch } from '../redux/store';
+import { addSecond, updateSession } from '../redux/slices/sessionSlice';
+import { playAudio } from '../helpers/audioHelpers';
 
 interface TimerContextType {
   startTimer: () => void;
   toggleTimer: () => void;
-  stopTimer: () => void;
+  stopTimer: (afterDelete?: boolean) => void;
   enabled: boolean;
 }
 
@@ -40,7 +37,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const currentSession = useSelector(
     (state: RootState) => state.sessions.currentSession
   );
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const startTimer = () => {
     setEnabled(true);
@@ -48,20 +45,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const toggleTimer = () => {
     setEnabled((e) => !e);
-    if (enabled) {
-      if (currentSession) {
-        dispatch(updateSession(currentSession));
-      }
-    }
   };
 
   const stopTimer = () => {
-    setEnabled((e) => !e);
     setEnabled(false);
-    if (currentSession) {
-      dispatch(updateSession(currentSession));
-    }
-    dispatch(removeCurrentSession());
   };
 
   useEffect(() => {

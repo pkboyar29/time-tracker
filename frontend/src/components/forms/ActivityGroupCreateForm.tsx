@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../redux/store';
+import { useAppDispatch } from '../../redux/store';
 import { createActivityGroup } from '../../redux/slices/activityGroupSlice';
 
 import Button from '../Button';
@@ -18,7 +17,7 @@ interface ActivityGroupFields {
 const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
   afterSubmitHandler,
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const { register, handleSubmit } = useForm<ActivityGroupFields>({
     mode: 'onBlur',

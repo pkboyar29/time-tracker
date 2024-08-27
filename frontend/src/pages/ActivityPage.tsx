@@ -1,56 +1,41 @@
 import { FC, useEffect, useState } from 'react';
-import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { useParams } from 'react-router-dom';
-import { useTimer } from '../context/TimerContext';
-import { useDispatch, useSelector } from 'react-redux';
-import { AppDispatch, RootState } from '../redux/store';
-import {
-  deleteSession,
-  removeCurrentSession,
-  setCurrentSession,
-  updateSession,
-} from '../redux/slices/sessionSlice';
-import axios from '../axios';
-import {
-  mapActivityFromResponse,
-  mapSessionFromResponse,
-} from '../utils/mappingHelpers';
+import axiosInstance from '../axios';
+import { mapActivityFromResponse } from '../helpers/mappingHelpers';
+import { fetchSessions } from '../redux/slices/sessionSlice';
+import { useAppDispatch } from '../redux/store';
 
+import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 import ActivityCommonUpdateForm from '../components/forms/ActivityCommonUpdateForm';
-import SessionItem from '../components/SessionItem';
+import SessionsList from '../components/SessionsList';
 
 const ActivityPage: FC = () => {
   const [currentActivity, setCurrentActivity] = useState<IActivity>();
-  const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
-    []
-  );
   const { activityId } = useParams();
-  const { startTimer, stopTimer, toggleTimer, enabled } = useTimer();
-  const currentSession = useSelector(
-    (state: RootState) => state.sessions.currentSession
-  );
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
+
+  const [uncompletedSessionsForActivity, setUncompletedSessionsForActivity] =
+    useState<ISession[]>([]);
 
   useEffect(() => {
     const fetchActivityInfo = async () => {
       try {
-        const { data: currentActivityInfo } = await axios.get(
+        const { data: currentActivityInfo } = await axiosInstance.get(
           `/activities/${activityId}`
         );
         setCurrentActivity(mapActivityFromResponse(currentActivityInfo));
 
-        const { data: unmappedSessions } = await axios.get(`/sessions`, {
-          params: {
-            activityId,
+        const actionResult = await dispatch(
+          fetchSessions({
+            activityId: activityId,
             completed: false,
-          },
-        });
-        const mappedSessions: ISession[] = unmappedSessions.map(
-          (unmappedSession: any) => mapSessionFromResponse(unmappedSession)
+          })
         );
-        setUncompletedSessions(mappedSessions);
+        if (fetchSessions.fulfilled.match(actionResult)) {
+          setUncompletedSessionsForActivity(actionResult.payload);
+        }
       } catch (e) {
         console.log(e);
       }
@@ -59,33 +44,8 @@ const ActivityPage: FC = () => {
     fetchActivityInfo();
   }, []);
 
-  const onSessionClick = (sessionId: string) => {
-    if (currentSession) {
-      dispatch(updateSession(currentSession));
-
-      if (currentSession.id === sessionId) {
-        toggleTimer();
-      } else {
-        dispatch(setCurrentSession(sessionId));
-        startTimer();
-      }
-    } else {
-      dispatch(setCurrentSession(sessionId));
-      startTimer();
-    }
-  };
-
-  const onSessionDelete = (sessionId: string) => {
-    if (currentSession?.id === sessionId) {
-      dispatch(removeCurrentSession());
-      stopTimer();
-    }
-    dispatch(deleteSession(sessionId));
-
-    const uncompletedSessionsUpdated = uncompletedSessions.filter(
-      (uncompletedSession) => uncompletedSession.id !== sessionId
-    );
-    setUncompletedSessions(uncompletedSessionsUpdated);
+  const updateSessionsList = (updatedList: ISession[]) => {
+    setUncompletedSessionsForActivity(updatedList);
   };
 
   return (
@@ -95,24 +55,12 @@ const ActivityPage: FC = () => {
           <ActivityCommonUpdateForm activityCommon={currentActivity} />
         )}
 
-        {uncompletedSessions.length !== 0 && (
-          <>
-            <div className="mt-5 text-xl font-bold">Uncompleted sessions</div>
+        <div className="mt-5 text-xl font-bold">Uncompleted sessions</div>
 
-            <div className="flex flex-col gap-5 mt-5 w-96">
-              {uncompletedSessions.map((session: ISession) => (
-                <SessionItem
-                  isActive={currentSession?.id === session.id}
-                  isEnabled={enabled}
-                  key={session.id}
-                  session={session}
-                  sessionClickHandler={onSessionClick}
-                  sessionDeleteHandler={onSessionDelete}
-                />
-              ))}
-            </div>
-          </>
-        )}
+        <SessionsList
+          sessions={uncompletedSessionsForActivity}
+          updateSessionsList={updateSessionsList}
+        />
       </div>
     </>
   );

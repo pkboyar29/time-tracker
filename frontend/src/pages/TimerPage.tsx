@@ -2,50 +2,51 @@ import { FC, useEffect, useState } from 'react';
 import {
   fetchSessions,
   updateSession,
-  deleteSession,
-  setCurrentSession,
   updateCurrentSessionNote,
-  removeCurrentSession,
+  resetSessionState,
 } from '../redux/slices/sessionSlice';
-import { useDispatch, useSelector } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
-import { getRemainingTimeHoursMinutesSeconds } from '../utils/timerHelpers';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { useAppDispatch } from '../redux/store';
+import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timerHelpers';
 import { useTimer } from '../context/TimerContext';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import CustomCircularProgress from '../components/CustomCircularProgress';
-import SessionItem from '../components/SessionItem';
+import SessionsList from '../components/SessionsList';
 import SessionCreateForm from '../components/forms/SessionCreateForm';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
-
-interface DeleteModalState {
-  deleteModal: boolean;
-  deletedSessionId: string | null;
-}
+import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<DeleteModalState>();
   const [uncompletedLess, setUnompletedLess] = useState<boolean>(false); // less - true, more - false
+  const [allUncompletedSessions, setAllUncompletedSessions] = useState<
+    ISession[]
+  >([]);
 
   const { startTimer, toggleTimer, stopTimer, enabled } = useTimer();
 
   const [note, setNote] = useState<string>('');
   const [isFocusedNote, setFocusedNote] = useState<boolean>(false);
 
-  const uncompletedSessions = useSelector(
-    (state: RootState) => state.sessions.uncompletedSessions
-  );
   const currentSession = useSelector(
     (state: RootState) => state.sessions.currentSession
   );
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    dispatch(fetchSessions());
+    const fetchAllUncompletedSessions = async () => {
+      const resultAction = await dispatch(fetchSessions({ completed: false }));
+      if (fetchSessions.fulfilled.match(resultAction)) {
+        setAllUncompletedSessions(resultAction.payload);
+      }
+    };
+
+    fetchAllUncompletedSessions();
   }, []);
 
   useEffect(() => {
@@ -60,43 +61,17 @@ const TimerPage: FC = () => {
     }
   }, [currentSession]);
 
-  const onSessionClick = (sessionId: string) => {
-    if (currentSession) {
-      dispatch(updateSession(currentSession));
-
-      if (currentSession.id === sessionId) {
-        toggleTimer();
-      } else {
-        dispatch(setCurrentSession(sessionId));
-        startTimer();
-      }
-    } else {
-      dispatch(setCurrentSession(sessionId));
-      startTimer();
-    }
-  };
-
-  const onDeleteSessionClick = (sessionId: string) => {
-    if (currentSession?.id === sessionId) {
-      dispatch(removeCurrentSession());
-      stopTimer();
-    }
-    setDeleteModal({
-      deleteModal: false,
-      deletedSessionId: null,
-    });
-    dispatch(deleteSession(sessionId));
-  };
-
-  const onChangeNoteInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleChangeNoteInput = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
     setNote(event.target.value);
   };
 
-  const onFocusNoteInput = () => {
+  const handleFocusNoteInput = () => {
     setFocusedNote(true);
   };
 
-  const onBlurNoteInput = () => {
+  const handleBlurNoteInput = () => {
     setFocusedNote(false);
 
     if (currentSession) {
@@ -113,6 +88,48 @@ const TimerPage: FC = () => {
     }
   };
 
+  const updateSessionsList = (updatedList: ISession[]) => {
+    setAllUncompletedSessions(updatedList);
+  };
+
+  const handleAfterSubmitCreateSession = (session: ISession) => {
+    if (currentSession) {
+      dispatch(updateSession(currentSession));
+    }
+
+    const updatedList: ISession[] = [...allUncompletedSessions, session];
+    updateSessionsList(updatedList);
+
+    startTimer();
+    setCreateModal(false);
+  };
+
+  const handleToggleButtonClick = () => {
+    if (enabled && currentSession) {
+      const updatedList: ISession[] = allUncompletedSessions.map((session) => {
+        if (session.id === currentSession.id) {
+          return currentSession;
+        } else {
+          return session;
+        }
+      });
+      updateSessionsList(updatedList);
+
+      dispatch(updateSession(currentSession));
+    }
+
+    toggleTimer();
+  };
+
+  const handleStopButtonClick = () => {
+    stopTimer();
+
+    if (currentSession) {
+      dispatch(updateSession(currentSession));
+    }
+    dispatch(resetSessionState());
+  };
+
   return (
     <>
       {createModal && (
@@ -121,36 +138,8 @@ const TimerPage: FC = () => {
           onCloseModal={() => setCreateModal(false)}
         >
           <SessionCreateForm
-            afterSubmitHandler={() => {
-              if (currentSession) {
-                dispatch(updateSession(currentSession));
-              }
-
-              startTimer();
-              setCreateModal(false);
-            }}
+            afterSubmitHandler={handleAfterSubmitCreateSession}
           />
-        </Modal>
-      )}
-
-      {deleteModal?.deleteModal && (
-        <Modal
-          title="Deleting session"
-          onCloseModal={() =>
-            setDeleteModal({
-              deleteModal: false,
-              deletedSessionId: null,
-            })
-          }
-        >
-          <Button
-            onClick={() =>
-              deleteModal.deletedSessionId &&
-              onDeleteSessionClick(deleteModal.deletedSessionId)
-            }
-          >
-            Delete session
-          </Button>
         </Modal>
       )}
 
@@ -182,7 +171,7 @@ const TimerPage: FC = () => {
                 />
 
                 <div className="flex gap-4">
-                  <button onClick={toggleTimer}>
+                  <button onClick={handleToggleButtonClick}>
                     {enabled ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +204,7 @@ const TimerPage: FC = () => {
                       </svg>
                     )}
                   </button>
-                  <button onClick={stopTimer}>
+                  <button onClick={handleStopButtonClick}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -254,9 +243,9 @@ const TimerPage: FC = () => {
                 <textarea
                   placeholder="Enter your thoughts during this session..."
                   value={note}
-                  onChange={onChangeNoteInput}
-                  onFocus={onFocusNoteInput}
-                  onBlur={onBlurNoteInput}
+                  onChange={handleChangeNoteInput}
+                  onFocus={handleFocusNoteInput}
+                  onBlur={handleBlurNoteInput}
                   className={
                     'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-blue-700 '
                   }
@@ -276,26 +265,12 @@ const TimerPage: FC = () => {
             Uncompleted sessions{' '}
             {uncompletedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}
           </button>
+
           {!uncompletedLess && (
-            <div className="inline-flex flex-col gap-2">
-              {uncompletedSessions.map((session) => (
-                <SessionItem
-                  isActive={session.id === currentSession?.id}
-                  isEnabled={
-                    session.id === currentSession?.id ? enabled : undefined
-                  }
-                  key={session.id}
-                  session={session}
-                  sessionClickHandler={onSessionClick}
-                  sessionDeleteHandler={(sessionId: string) =>
-                    setDeleteModal({
-                      deleteModal: true,
-                      deletedSessionId: sessionId,
-                    })
-                  }
-                />
-              ))}
-            </div>
+            <SessionsList
+              sessions={allUncompletedSessions}
+              updateSessionsList={updateSessionsList}
+            />
           )}
         </div>
       </div>

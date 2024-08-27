@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import Button from './Button';
-import { getTimeHoursMinutesSeconds } from '../utils/timerHelpers';
+import { getTimeHoursMinutesSeconds } from '../helpers/timerHelpers';
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 

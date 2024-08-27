@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { Outlet, Navigate, RouteProps } from 'react-router-dom';
 import { RootState } from '../redux/store';
 import { useSelector } from 'react-redux';
-import { isAuth } from '../utils/authHelpers';
+import { isAuth } from '../helpers/authHelpers';
 
 type ProtectedRouteProps = RouteProps & {
   requiredAuth: boolean;

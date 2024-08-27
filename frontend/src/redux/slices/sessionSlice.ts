@@ -1,43 +1,39 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axiosInstance from '../../axios';
-import { mapSessionFromResponse } from '../../utils/mappingHelpers';
+import { mapSessionFromResponse } from '../../helpers/mappingHelpers';
 import { ISession } from '../../ts/interfaces/Session/ISession';
 import { ISessionCreate } from '../../ts/interfaces/Session/ISessionCreate';
+import StateStatuses from '../../ts/enums/StateStatuses';
+import * as localStorageHelpers from '../../helpers/localstorageHelpers';
 
 interface SessionState {
-  uncompletedSessions: ISession[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
   currentSession: ISession | null;
+  status: StateStatuses;
 }
 
 const initialState: SessionState = {
-  uncompletedSessions: [],
-  status: 'idle',
   currentSession: null,
+  status: StateStatuses.idle,
 };
 
-const findSessionById = (sessions: ISession[], id: string): ISession | null => {
-  return sessions.find((session: ISession) => session.id === id) || null;
-};
+export const fetchSessions = createAsyncThunk<
+  ISession[],
+  Record<string, unknown>
+>('sessions/fetchSessions', async (params) => {
+  const { data: unmappedData } = await axiosInstance.get('/sessions', {
+    params: {
+      ...params,
+    },
+  });
+  const mappedData: ISession[] = unmappedData.map((unmappedSession: any) =>
+    mapSessionFromResponse(unmappedSession)
+  );
+  return mappedData;
+});
 
-export const fetchSessions = createAsyncThunk(
-  'sessions/fetchSessions',
-  async () => {
-    const { data: unmappedData } = await axiosInstance.get('/sessions', {
-      params: {
-        completed: false,
-      },
-    });
-    const mappedData = unmappedData.map((unmappedSession: any) =>
-      mapSessionFromResponse(unmappedSession)
-    );
-    return mappedData;
-  }
-);
-
-export const createSession = createAsyncThunk(
+export const createSession = createAsyncThunk<ISession, ISessionCreate>(
   'sessions/createSession',
-  async (newSessionData: ISessionCreate) => {
+  async (newSessionData) => {
     const { data: unmappedData } = await axiosInstance.post(
       '/sessions',
       newSessionData
@@ -46,11 +42,9 @@ export const createSession = createAsyncThunk(
   }
 );
 
-export const updateSession = createAsyncThunk(
+export const updateSession = createAsyncThunk<ISession, ISession>(
   'sessions/updateSession',
-  async (existingSessionData: ISession) => {
-    console.log('updating session...');
-    console.log(existingSessionData);
+  async (existingSessionData) => {
     const { data: unmappedData } = await axiosInstance.put(
       `/sessions/${existingSessionData.id}`,
       existingSessionData
@@ -59,42 +53,21 @@ export const updateSession = createAsyncThunk(
   }
 );
 
-export const deleteSession = createAsyncThunk(
+export const deleteSession = createAsyncThunk<string, string>(
   'sessions/deleteSession',
-  async (sessionId: string) => {
-    let { data } = await axiosInstance.delete(`/sessions/${sessionId}`);
+  async (sessionId) => {
+    const { data } = await axiosInstance.delete(`/sessions/${sessionId}`);
     return data;
   }
 );
-
-const saveSessionToLocalStorage = (session: ISession) => {
-  const sessionJson = JSON.stringify(session);
-  window.localStorage.setItem('session', sessionJson);
-};
-
-const removeSessionFromLocalStorage = () => {
-  if (window.localStorage.getItem('session')) {
-    window.localStorage.removeItem('session');
-  }
-};
 
 const sessionSlice = createSlice({
   name: 'sessions',
   initialState,
   reducers: {
-    setCurrentSession(state, action: PayloadAction<string>) {
-      const currentSession: ISession | null = findSessionById(
-        state.uncompletedSessions,
-        action.payload
-      );
-      if (currentSession) {
-        state.currentSession = currentSession;
-        saveSessionToLocalStorage(currentSession);
-      }
-    },
-    removeCurrentSession(state) {
-      state.currentSession = null;
-      removeSessionFromLocalStorage();
+    setCurrentSession(state, action: PayloadAction<ISession>) {
+      state.currentSession = action.payload;
+      localStorageHelpers.saveSessionToLocalStorage(action.payload);
     },
     addSecond(state) {
       if (state.currentSession) {
@@ -106,78 +79,27 @@ const sessionSlice = createSlice({
         state.currentSession.note = action.payload;
       }
     },
-    loadSessionFromLocalStorage(state) {
-      const sessionJson = window.localStorage.getItem('session');
-      if (sessionJson) {
-        const session = JSON.parse(sessionJson);
-        // TODO обработать ошибку когда в session хранится не сессия в формате json, а непонятно что
-        // да и вообще надо попытаться запретить изменение local storage, но по-моему это невозможно
-        // в любом случае, если десериализовать не получится, то очистить полностью local storage и в консоль можно вывести сообщение
+    loadCurrentSession(state) {
+      // тут надо брать извне и передавать сюда
+      const session = localStorageHelpers.loadSessionFromLocalStorage();
+      if (session) {
         state.currentSession = session;
       }
+    },
+    reset() {
+      localStorageHelpers.removeSessionFromLocalStorage();
+      return initialState;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchSessions.pending, (state) => {
-        state.status = 'loading';
-      })
-      .addCase(fetchSessions.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.uncompletedSessions = action.payload;
-      })
-      .addCase(fetchSessions.rejected, (state) => {
-        state.status = 'failed';
-      })
       .addCase(createSession.fulfilled, (state, action) => {
-        state.uncompletedSessions.push(action.payload);
-        const currentSession: ISession | null = findSessionById(
-          state.uncompletedSessions,
-          action.payload.id
-        );
-
-        if (currentSession) {
-          state.currentSession = currentSession;
-          saveSessionToLocalStorage(currentSession);
-        }
+        state.currentSession = action.payload;
+        localStorageHelpers.saveSessionToLocalStorage(action.payload);
       })
       .addCase(updateSession.fulfilled, (state, action) => {
         if (state.currentSession) {
-          saveSessionToLocalStorage(state.currentSession);
-        }
-        if (action.payload.completed) {
-          state.uncompletedSessions = state.uncompletedSessions.filter(
-            (session) => session.id !== action.payload.id
-          );
-        } else {
-          state.uncompletedSessions = state.uncompletedSessions.map(
-            (session) => {
-              if (session.id === action.payload.id) {
-                return {
-                  ...session,
-                  totalTimeSeconds: action.payload.totalTimeSeconds,
-                  spentTimeSeconds: action.payload.spentTimeSeconds,
-                  note: action.payload.note,
-                  completed: action.payload.completed,
-                };
-              } else {
-                return session;
-              }
-            }
-          );
-        }
-      })
-      .addCase(deleteSession.fulfilled, (state, action) => {
-        state.uncompletedSessions = state.uncompletedSessions.filter(
-          (session: ISession) => session.id !== action.meta.arg
-        );
-
-        const currentSessionJson = window.localStorage.getItem('session');
-        if (currentSessionJson) {
-          const currentSession: ISession = JSON.parse(currentSessionJson);
-          if (currentSession.id === action.meta.arg) {
-            removeSessionFromLocalStorage();
-          }
+          localStorageHelpers.saveSessionToLocalStorage(action.payload);
         }
       });
   },
@@ -185,9 +107,9 @@ const sessionSlice = createSlice({
 
 export const {
   setCurrentSession,
-  removeCurrentSession,
   addSecond,
   updateCurrentSessionNote,
-  loadSessionFromLocalStorage,
+  loadCurrentSession,
+  reset: resetSessionState,
 } = sessionSlice.actions;
 export default sessionSlice.reducer;

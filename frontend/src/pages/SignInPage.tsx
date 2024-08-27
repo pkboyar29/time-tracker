@@ -4,10 +4,9 @@ import { useForm } from 'react-hook-form';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../redux/store';
+import { useAppDispatch } from '../redux/store';
 import { fetchProfileInfo } from '../redux/slices/userSlice';
-import { isAuth } from '../utils/authHelpers';
+import { isAuth } from '../helpers/authHelpers';
 
 import Modal from '../components/Modal';
 import Input from '../components/Input';
@@ -22,7 +21,7 @@ const SignInPage: FC = () => {
   const [modal, setModal] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const {
     register,

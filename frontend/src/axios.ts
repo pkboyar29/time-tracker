@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
-import { refreshAccessToken } from './utils/authHelpers';
+import { refreshAccessToken } from './helpers/authHelpers';
 
 const instance = axios.create({
   baseURL: 'http://localhost:8000',

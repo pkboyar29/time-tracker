@@ -4,8 +4,7 @@ import { useForm } from 'react-hook-form';
 import axios from '../axios';
 import { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../redux/store';
+import { useAppDispatch } from '../redux/store';
 import { fetchProfileInfo } from '../redux/slices/userSlice';
 
 import Modal from '../components/Modal';
@@ -24,7 +23,7 @@ const SignUpPage: FC = () => {
   const [modal, setModal] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const {
     register,

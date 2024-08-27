@@ -2,13 +2,13 @@ import { ButtonHTMLAttributes, FC, ReactNode } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  onClick?: () => void;
+  clickHandler?: () => void;
   type?: 'button' | 'submit' | 'reset' | undefined;
 }
 
 const Button: FC<ButtonProps> = ({
   children,
-  onClick,
+  clickHandler,
   type = 'button',
   className = '',
   ...otherProps
@@ -17,7 +17,7 @@ const Button: FC<ButtonProps> = ({
     <>
       <button
         type={type}
-        onClick={onClick}
+        onClick={clickHandler}
         className={`p-3 text-white transition duration-300 bg-red-500 hover:bg-red-700 rounded-xl ${className}`}
         {...otherProps}
       >

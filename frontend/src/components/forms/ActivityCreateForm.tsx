@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../redux/store';
+import { useAppDispatch } from '../../redux/store';
 import { createActivity } from '../../redux/slices/activitySlice';
 
 import Button from '../Button';
@@ -20,7 +19,7 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
   afterSubmitHandler,
   activityGroupId,
 }) => {
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
 
   const { register, handleSubmit } = useForm<ActivityFields>({
     mode: 'onBlur',

@@ -1,4 +1,4 @@
-export const getRemainingTimeHoursMinutesSeconds = (
+const getRemainingTimeHoursMinutesSeconds = (
   totalTimeSeconds: number,
   spentTimeSeconds: number
 ): string => {
@@ -15,7 +15,7 @@ export const getRemainingTimeHoursMinutesSeconds = (
   return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
 };
 
-export const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
+const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   const hours: number = Math.trunc(allSeconds / 3600);
   const formattedHours: string = hours < 10 ? '0' + hours : hours.toString();
   const minutes: number = Math.trunc(allSeconds / 60);
@@ -27,3 +27,5 @@ export const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
 
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
+
+export { getRemainingTimeHoursMinutesSeconds, getTimeHoursMinutesSeconds };

@@ -1,7 +1,8 @@
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { useAppDispatch } from '../redux/store';
 import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';
 import { useTimer } from '../context/TimerContext';
 import { useParams } from 'react-router-dom';
@@ -17,7 +18,7 @@ import Button from '../components/Button';
 import Modal from '../components/Modal';
 
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
-import { mapActivityGroupFromResponse } from '../utils/mappingHelpers';
+import { mapActivityGroupFromResponse } from '../helpers/mappingHelpers';
 
 interface ModalState {
   modal: boolean;
@@ -41,7 +42,7 @@ const ActivityGroupPage: FC = () => {
   const [searchString, setSearchString] = useState<string>('');
   const { startTimer } = useTimer();
 
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,11 +64,11 @@ const ActivityGroupPage: FC = () => {
     }
   }, [activityGroupId]);
 
-  const onEditActivityClick = (activityId: string) => {
+  const handleEditActivityClick = (activityId: string) => {
     navigate(`activities/${activityId}`);
   };
 
-  const onDeleteActivityClick = (activityId: string) => {
+  const handleDeleteActivityClick = (activityId: string) => {
     setDeleteModal({ modal: false, selectedItemId: null });
     dispatch(deleteActivity(activityId));
   };
@@ -107,7 +108,7 @@ const ActivityGroupPage: FC = () => {
           <Button
             onClick={() =>
               deleteModal.selectedItemId &&
-              onDeleteActivityClick(deleteModal.selectedItemId)
+              handleDeleteActivityClick(deleteModal.selectedItemId)
             }
           >
             Delete activity
@@ -168,7 +169,7 @@ const ActivityGroupPage: FC = () => {
                   <ActivityItem
                     key={activity.id}
                     activity={activity}
-                    editHandler={onEditActivityClick}
+                    editHandler={handleEditActivityClick}
                     deleteHandler={(activityId: string) =>
                       setDeleteModal({
                         modal: true,

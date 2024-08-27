@@ -1,18 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../axios';
-import { mapActivityFromResponse } from '../../utils/mappingHelpers';
+import { mapActivityFromResponse } from '../../helpers/mappingHelpers';
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { IActivityCreate } from '../../ts/interfaces/Activity/IActivityCreate';
 import { IActivityUpdate } from '../../ts/interfaces/Activity/IActivityUpdate';
+import StateStatuses from '../../ts/enums/StateStatuses';
 
 interface ActivityState {
   activities: IActivity[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  status: StateStatuses;
 }
 
 const initialState: ActivityState = {
   activities: [],
-  status: 'idle',
+  status: StateStatuses.idle,
 };
 
 export const fetchActivities = createAsyncThunk(
@@ -67,18 +68,22 @@ export const deleteActivity = createAsyncThunk(
 const activitySlice = createSlice({
   name: 'activities',
   initialState,
-  reducers: {},
+  reducers: {
+    reset() {
+      return initialState;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchActivities.pending, (state) => {
-        state.status = 'loading';
+        state.status = StateStatuses.loading;
       })
       .addCase(fetchActivities.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = StateStatuses.succeeded;
         state.activities = action.payload;
       })
       .addCase(fetchActivities.rejected, (state) => {
-        state.status = 'failed';
+        state.status = StateStatuses.failed;
       })
       .addCase(createActivity.fulfilled, (state, action) => {
         state.activities.push(action.payload);
@@ -104,5 +109,5 @@ const activitySlice = createSlice({
   },
 });
 
-// export const {  } = activitySlice.actions
+export const { reset: resetActivityState } = activitySlice.actions;
 export default activitySlice.reducer;

@@ -1,15 +1,16 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../axios';
 import { IUser } from '../../ts/interfaces/User/IUser';
+import UserStateStatuses from '../../ts/enums/UserStateStatuses';
 
 interface UserState {
   user: IUser | null;
-  status: 'idle' | 'loading' | 'succeeded' | 'failed' | 'logout';
+  status: UserStateStatuses;
 }
 
 const initialState: UserState = {
   user: null,
-  status: 'idle',
+  status: UserStateStatuses.idle,
 };
 
 export const fetchProfileInfo = createAsyncThunk(
@@ -26,20 +27,20 @@ const userSlice = createSlice({
   reducers: {
     logOutUser(state) {
       state.user = null;
-      state.status = 'logout';
+      state.status = UserStateStatuses.logout;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProfileInfo.pending, (state) => {
-        state.status = 'loading';
+        state.status = UserStateStatuses.loading;
       })
       .addCase(fetchProfileInfo.fulfilled, (state, action) => {
-        state.status = 'succeeded';
+        state.status = UserStateStatuses.succeeded;
         state.user = action.payload;
       })
       .addCase(fetchProfileInfo.rejected, (state) => {
-        state.status = 'failed';
+        state.status = UserStateStatuses.failed;
       });
   },
 });

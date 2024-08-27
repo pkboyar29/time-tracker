@@ -2,7 +2,7 @@ import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
-export const mapActivityFromResponse = (unmappedActivity: any): IActivity => {
+const mapActivityFromResponse = (unmappedActivity: any): IActivity => {
   return {
     ...unmappedActivity,
     id: unmappedActivity._id,
@@ -10,7 +10,7 @@ export const mapActivityFromResponse = (unmappedActivity: any): IActivity => {
   };
 };
 
-export const mapActivityGroupFromResponse = (
+const mapActivityGroupFromResponse = (
   unmappedActivityGroup: any
 ): IActivityGroup => {
   return {
@@ -19,7 +19,7 @@ export const mapActivityGroupFromResponse = (
   };
 };
 
-export const mapSessionFromResponse = (unmappedSession: any): ISession => {
+const mapSessionFromResponse = (unmappedSession: any): ISession => {
   return {
     ...unmappedSession,
     id: unmappedSession._id,
@@ -28,4 +28,10 @@ export const mapSessionFromResponse = (unmappedSession: any): ISession => {
       name: unmappedSession.activity.name,
     },
   };
+};
+
+export {
+  mapActivityFromResponse,
+  mapActivityGroupFromResponse,
+  mapSessionFromResponse,
 };
