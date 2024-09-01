@@ -41,4 +41,15 @@ router.get('/months/:date', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/overall', async (req: Request, res: Response) => {
+  try {
+    const data = await analyticsService.getOverallAnalytics(res.locals.userId);
+    res.status(200).send(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    }
+  }
+});
+
 export default router;

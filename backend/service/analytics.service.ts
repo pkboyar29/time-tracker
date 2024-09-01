@@ -73,6 +73,14 @@ export default {
     return this.getAnalyticsForRange(startMonth, endMonth, userId);
   },
 
+  async getOverallAnalytics(
+    userId: string
+  ): Promise<AnalyticsForRange | undefined> {
+    const startRange: Date = new Date('2000-01-01T00:00:00');
+    const endRange: Date = new Date(Date.now());
+    return this.getAnalyticsForRange(startRange, endRange, userId);
+  },
+
   handleError(e: unknown) {
     if (e instanceof Error) {
       throw new Error(e.message);
