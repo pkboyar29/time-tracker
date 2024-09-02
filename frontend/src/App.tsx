@@ -32,7 +32,7 @@ const App: FC = () => {
       <div id="app" className="flex w-full h-full min-h-full">
         {requiredAuth && <Sidebar />}
 
-        <div className="w-full p-5">
+        <div className="w-full">
           <Routes>
             {routeConfig.map((route) => (
               <Route

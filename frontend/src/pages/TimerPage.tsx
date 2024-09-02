@@ -8,7 +8,7 @@ import {
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useAppDispatch } from '../redux/store';
-import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timerHelpers';
+import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { useTimer } from '../context/TimerContext';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -143,7 +143,7 @@ const TimerPage: FC = () => {
         </Modal>
       )}
 
-      <div className="container flex justify-between">
+      <div className="container flex justify-between mt-5">
         <div>
           {!currentSession ? (
             <div className="text-2xl font-semibold">

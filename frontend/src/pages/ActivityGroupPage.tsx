@@ -98,7 +98,7 @@ const ActivityGroupPage: FC = () => {
         </Modal>
       )}
 
-      {deleteModal && (
+      {deleteModal?.modal && (
         <Modal
           title="Deleting activity"
           onCloseModal={() =>
@@ -116,7 +116,7 @@ const ActivityGroupPage: FC = () => {
         </Modal>
       )}
 
-      {createSessionModal && (
+      {createSessionModal?.modal && (
         <Modal
           title={
             <div>
@@ -131,9 +131,9 @@ const ActivityGroupPage: FC = () => {
               : starting new session
             </div>
           }
-          onCloseModal={() =>
-            setCreateSessionModal({ modal: false, selectedItemId: null })
-          }
+          onCloseModal={() => {
+            setCreateSessionModal({ modal: false, selectedItemId: null });
+          }}
         >
           <SessionCreateForm
             defaultActivity={
@@ -153,7 +153,7 @@ const ActivityGroupPage: FC = () => {
         </Modal>
       )}
 
-      <div className="container flex justify-between">
+      <div className="container flex justify-between mt-5">
         <div>
           {currentActivityGroup && (
             <ActivityCommonUpdateForm activityCommon={currentActivityGroup} />

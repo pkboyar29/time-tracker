@@ -5,6 +5,24 @@
 @tailwind components;
 @tailwind utilities;
 
+.bg-custom-gradient {
+  background: linear-gradient(90deg, #e7e1e3 0%, #cdc7c7 35%, #b1abad 100%);
+}
+
+@layer components {
+  .red-dot {
+    position: relative;
+  }
+
+  .red-dot::after {
+    @apply absolute transform -translate-x-1/2 bg-red-500 -bottom-3 left-1/2;
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+}
+
 /* обнуляющие стили */
 
 html,

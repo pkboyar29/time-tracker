@@ -28,4 +28,13 @@ const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
-export { getRemainingTimeHoursMinutesSeconds, getTimeHoursMinutesSeconds };
+const getTimeMinutes = (seconds: number): number => {
+  const minutes: number = Math.trunc(seconds / 60);
+  return minutes;
+};
+
+export {
+  getRemainingTimeHoursMinutesSeconds,
+  getTimeHoursMinutesSeconds,
+  getTimeMinutes,
+};

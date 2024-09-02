@@ -10,6 +10,7 @@ import { resetActivityGroupState } from '../redux/slices/activityGroupSlice';
 import { resetActivityState } from '../redux/slices/activitySlice';
 import Button from '../components/Button';
 import Modal from '../components/Modal';
+import Title from '../components/Title';
 
 const SettingsPage: FC = () => {
   const [logoutModal, setLogoutModal] = useState<boolean>(false);
@@ -41,9 +42,9 @@ const SettingsPage: FC = () => {
         </Modal>
       )}
 
-      <div className="container">
-        <div className="mb-5 text-xl font-bold">Settings</div>
-        <div className="mb-5">
+      <div className="container mt-5">
+        <Title>Settings</Title>
+        <div className="my-5">
           {userInfo?.firstName} {userInfo?.lastName}
         </div>
         <Button onClick={() => setLogoutModal(true)}>

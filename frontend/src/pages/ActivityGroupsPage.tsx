@@ -10,6 +10,7 @@ import {
 
 import Button from '../components/Button';
 import Modal from '../components/Modal';
+import Title from '../components/Title';
 import ActivityItem from '../components/ActivityItem';
 import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm';
 
@@ -79,10 +80,10 @@ const ActivityGroupsPage: FC = () => {
         </Modal>
       )}
 
-      <div className="container flex justify-between">
+      <div className="container flex justify-between mt-5">
         <div>
-          <div className="mb-5 text-xl font-bold">All activity groups</div>
-          <div className="flex flex-col gap-4">
+          <Title>All activity groups</Title>
+          <div className="flex flex-col gap-4 mt-5">
             {activityGroups.map((activityGroup) => (
               <ActivityItem
                 key={activityGroup.id}

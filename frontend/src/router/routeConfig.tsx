@@ -2,6 +2,8 @@ import { RouteObject, Navigate } from 'react-router-dom';
 
 import TimerPage from '../pages/TimerPage';
 import AnalyticsPage from '../pages/AnalyticsPage';
+import AnalyticsDaysPage from '../pages/AnalyticsDaysPage';
+import AnalyticsMonthsPage from '../pages/AnalyticsMonthsPage';
 import ActivityGroupsPage from '../pages/ActivityGroupsPage';
 import ActivityPage from '../pages/ActivityPage';
 import ActivityGroupPage from '../pages/ActivityGroupPage';
@@ -38,6 +40,16 @@ const routeConfig: RouteType[] = [
   {
     path: '/analytics',
     element: <AnalyticsPage />,
+    requiredAuth: true,
+  },
+  {
+    path: '/analytics/days/:date',
+    element: <AnalyticsDaysPage />,
+    requiredAuth: true,
+  },
+  {
+    path: '/analytics/months/:date',
+    element: <AnalyticsMonthsPage />,
     requiredAuth: true,
   },
   {
