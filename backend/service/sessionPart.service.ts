@@ -2,7 +2,19 @@ import SessionPart from '../model/sessionPart.model';
 
 interface PopulatedSession {
   deleted: boolean;
+  activity: {
+    name: string;
+  };
 }
+
+const sessionPopulateConfig = {
+  path: 'session',
+  select: 'deleted activity',
+  populate: {
+    path: 'activity',
+    select: 'name -_id',
+  },
+};
 
 export default {
   async getSessionPartsInDateRange(
@@ -16,7 +28,7 @@ export default {
         user: userId,
       }).populate<{
         session: PopulatedSession;
-      }>('session');
+      }>(sessionPopulateConfig);
       const filteredSessionsParts = sessionParts.filter(
         (sessionPart) => !sessionPart.session.deleted
       );

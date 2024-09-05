@@ -4,6 +4,10 @@ import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
+interface PopulatedActivity {
+  name: string;
+}
+
 const activityPopulateConfig = {
   path: 'activity',
   select: 'name activityGroup -_id',
@@ -20,7 +24,7 @@ export default {
         deleted: false,
         user: userId,
         ...filter,
-      }).populate(activityPopulateConfig);
+      }).populate<{ activity: PopulatedActivity }>(activityPopulateConfig);
 
       return sessions;
     } catch (e) {
@@ -57,7 +61,9 @@ export default {
         throw new Error('Session Not Found');
       }
 
-      return await Session.findById(sessionId).populate(activityPopulateConfig);
+      return await Session.findById(sessionId).populate<{
+        activity: PopulatedActivity;
+      }>(activityPopulateConfig);
     } catch (e) {
       this.handleError(e);
     }
