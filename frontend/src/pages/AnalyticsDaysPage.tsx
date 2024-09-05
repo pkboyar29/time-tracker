@@ -4,8 +4,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getWeekDays, shiftWeek } from '../helpers/dateHelpers';
 
 import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
+import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
+import ActivityDistributionBox from '../components/ActivityDistributionBox';
 import DaysOfWeekBox from '../components/DaysOfWeekBox';
 
 const AnalyticsDaysPage: FC = () => {
@@ -13,6 +15,8 @@ const AnalyticsDaysPage: FC = () => {
   const navigate = useNavigate();
 
   const [dayStatistics, setDayStatistics] = useState<ISessionStatistics>();
+  const [dayActivityDistribution, setDayActivityDistribution] =
+    useState<IActivityDistribution[]>();
   const [daysOfWeek, setDaysOfWeek] = useState<Date[]>([]);
   const [currentDay, setCurrentDay] = useState<Date>(new Date());
 
@@ -35,6 +39,10 @@ const AnalyticsDaysPage: FC = () => {
       sessionsAmount: data.sessionsAmount,
       spentTimeSeconds: data.spentTimeSeconds,
     };
+    const activityDistribution: IActivityDistribution[] =
+      data.activityDistribution;
+    setDayActivityDistribution(activityDistribution);
+
     setDayStatistics(statistics);
   };
 
@@ -51,9 +59,9 @@ const AnalyticsDaysPage: FC = () => {
   };
 
   return (
-    <>
-      <div className="border-b border-solid border-b-gray-400">
-        <div className="flex justify-center pb-5 my-5">
+    <div className="h-screen bg-custom">
+      <div className="py-5 border-b border-solid border-b-gray-400">
+        <div className="flex justify-center pb-5">
           <DaysOfWeekBox
             dayClickHandler={dayClickHandler}
             leftArrowClickHandler={leftArrowClickHandler}
@@ -63,17 +71,28 @@ const AnalyticsDaysPage: FC = () => {
           />
         </div>
       </div>
-      <div className="flex h-full">
-        <div className="w-1/2 px-4 border-r border-gray-400 border-solid">
-          <div className="mt-5">
-            {dayStatistics && (
-              <SessionStatisticsBox statistics={dayStatistics} />
-            )}
+      {dayStatistics?.spentTimeSeconds !== 0 ? (
+        <div className="flex h-full">
+          <div className="w-1/2 px-4 border-r border-gray-400 border-solid">
+            <div className="flex flex-col gap-5 mt-5">
+              {dayStatistics && (
+                <SessionStatisticsBox statistics={dayStatistics} />
+              )}
+              {dayActivityDistribution && (
+                <ActivityDistributionBox
+                  activityDistribution={dayActivityDistribution}
+                />
+              )}
+            </div>
           </div>
+          <div className="w-1/2 px-4"></div>
         </div>
-        <div className="w-1/2 px-4"></div>
-      </div>
-    </>
+      ) : (
+        <div className="mt-10 text-2xl font-bold text-center">
+          There are no session activity on this day
+        </div>
+      )}
+    </div>
   );
 };
 
