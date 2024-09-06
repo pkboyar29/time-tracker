@@ -70,6 +70,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       if (currentSession.spentTimeSeconds === currentSession.totalTimeSeconds) {
         playAudio(0.35);
         stopTimer();
+        dispatch(updateSession(currentSession));
         dispatch(resetSessionState());
       }
     }

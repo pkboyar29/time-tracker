@@ -47,7 +47,9 @@ const AnalyticsDaysPage: FC = () => {
   };
 
   const dayClickHandler = (date: Date) => {
-    navigate(`/analytics/days/${date.toISOString().split('T')[0]}`);
+    navigate(`/analytics/days/${date.toISOString().split('T')[0]}`, {
+      replace: true,
+    });
   };
 
   const leftArrowClickHandler = () => {
