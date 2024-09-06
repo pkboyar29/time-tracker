@@ -9,7 +9,11 @@ import {
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useAppDispatch } from '../redux/store';
-import { addSecond, updateSession } from '../redux/slices/sessionSlice';
+import {
+  addSecond,
+  updateSession,
+  resetSessionState,
+} from '../redux/slices/sessionSlice';
 import { playAudio } from '../helpers/audioHelpers';
 
 interface TimerContextType {
@@ -66,6 +70,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       if (currentSession.spentTimeSeconds === currentSession.totalTimeSeconds) {
         playAudio(0.35);
         stopTimer();
+        dispatch(resetSessionState());
       }
     }
   }, [currentSession?.spentTimeSeconds]);
