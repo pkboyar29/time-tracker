@@ -21,6 +21,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  dailyGoal: {
+    type: Number,
+    required: true,
+  },
   deleted: {
     type: Boolean,
     default: false,

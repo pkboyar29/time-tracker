@@ -21,6 +21,16 @@ export const fetchProfileInfo = createAsyncThunk(
   }
 );
 
+export const updateDailyGoal = createAsyncThunk(
+  'users/updateDailyGoal',
+  async (newDailyGoal: number) => {
+    const { data } = await axiosInstance.put('/users/updateDailyGoal', {
+      newDailyGoal,
+    });
+    return data;
+  }
+);
+
 const userSlice = createSlice({
   name: 'users',
   initialState,
@@ -41,6 +51,14 @@ const userSlice = createSlice({
       })
       .addCase(fetchProfileInfo.rejected, (state) => {
         state.status = UserStateStatuses.failed;
+      })
+      .addCase(updateDailyGoal.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user = {
+            ...state.user,
+            dailyGoal: action.meta.arg,
+          };
+        }
       });
   },
 });

@@ -26,6 +26,7 @@ export default {
 
     const newUser = new User({
       ...userSignUpDTO,
+      dailyGoal: 10800, // 3 hours
       password: hashedPassword,
     });
 
@@ -151,8 +152,26 @@ export default {
 
   async getProfileInfo(userId: string): Promise<UserResponseDTO> {
     const profileInfo = await User.findById(userId).select(
-      'username firstName lastName email'
+      'username firstName lastName email dailyGoal'
     );
     return profileInfo as UserResponseDTO;
+  },
+
+  async updateDailyGoal(newDailyGoal: number, userId: string) {
+    try {
+      const user = await User.findById(userId);
+      await user?.updateOne({
+        dailyGoal: newDailyGoal,
+      });
+
+      const message = {
+        message: 'Updated successful',
+      };
+      return message;
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      }
+    }
   },
 };

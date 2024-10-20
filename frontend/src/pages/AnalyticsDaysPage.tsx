@@ -2,17 +2,22 @@ import { FC, useState, useEffect } from 'react';
 import axios from '../axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getWeekDays, shiftWeek } from '../helpers/dateHelpers';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
+import DailyGoalBox from '../components/DailyGoalBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
 import DaysOfWeekBox from '../components/DaysOfWeekBox';
 
 const AnalyticsDaysPage: FC = () => {
   const { date: dateParam } = useParams();
   const navigate = useNavigate();
+
+  const userInfo = useSelector((state: RootState) => state.users.user);
 
   const [dayStatistics, setDayStatistics] = useState<ISessionStatistics>();
   const [dayActivityDistribution, setDayActivityDistribution] =
@@ -87,7 +92,16 @@ const AnalyticsDaysPage: FC = () => {
               )}
             </div>
           </div>
-          <div className="w-1/2 px-4"></div>
+          <div className="w-1/2 px-4">
+            <div className="mt-5">
+              {dayStatistics && userInfo && (
+                <DailyGoalBox
+                  spentTimeSeconds={dayStatistics.spentTimeSeconds}
+                  dailyGoalSeconds={userInfo.dailyGoal}
+                />
+              )}
+            </div>
+          </div>
         </div>
       ) : (
         <div className="mt-10 text-2xl font-bold text-center">

@@ -110,7 +110,9 @@ const SessionItem: FC<SessionItemProps> = ({
             </button>
           </div>
           <CustomCircularProgress
-            value={(session.spentTimeSeconds / session.totalTimeSeconds) * 100}
+            valuePercent={
+              (session.spentTimeSeconds / session.totalTimeSeconds) * 100
+            }
             label={`${Math.round(session.spentTimeSeconds / 60)} min`}
           />
         </div>

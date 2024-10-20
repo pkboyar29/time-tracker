@@ -61,4 +61,18 @@ router.get('/profile', async (req: Request, res: Response) => {
   }
 });
 
+router.put('/updateDailyGoal', async (req: Request, res: Response) => {
+  try {
+    const data = await userService.updateDailyGoal(
+      req.body.newDailyGoal,
+      res.locals.userId
+    );
+    res.status(200).json(data);
+  } catch (e) {
+    if (e instanceof Error) {
+      res.status(500).send(e.message);
+    }
+  }
+});
+
 export default router;

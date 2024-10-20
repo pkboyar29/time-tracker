@@ -158,7 +158,7 @@ const TimerPage: FC = () => {
                 </div>
 
                 <CustomCircularProgress
-                  value={
+                  valuePercent={
                     (currentSession.spentTimeSeconds /
                       currentSession.totalTimeSeconds) *
                     100
