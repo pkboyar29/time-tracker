@@ -33,7 +33,7 @@ const SessionsList: FC<SessionsListProps> = ({
     (state: RootState) => state.sessions.currentSession
   );
   const dispatch = useAppDispatch();
-  const { startTimer, stopTimer, toggleTimer, enabled } = useTimer();
+  const { stopTimer, toggleTimer, enabled } = useTimer();
 
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
     visibility: false,
@@ -91,11 +91,11 @@ const SessionsList: FC<SessionsListProps> = ({
         toggleTimer();
       } else {
         dispatch(setCurrentSession(session));
-        startTimer();
+        toggleTimer();
       }
     } else {
       dispatch(setCurrentSession(session));
-      startTimer();
+      toggleTimer();
     }
   };
 

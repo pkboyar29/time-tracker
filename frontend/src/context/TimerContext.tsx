@@ -10,21 +10,19 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
 import { useAppDispatch } from '../redux/store';
 import {
-  addSecond,
+  changeSpentSeconds,
   updateSession,
   resetSessionState,
 } from '../redux/slices/sessionSlice';
 import { playAudio } from '../helpers/audioHelpers';
 
 interface TimerContextType {
-  startTimer: () => void;
   toggleTimer: () => void;
   stopTimer: (afterDelete?: boolean) => void;
   enabled: boolean;
 }
 
 const TimerContext = createContext<TimerContextType>({
-  startTimer: () => {},
   toggleTimer: () => {},
   stopTimer: () => {},
   enabled: false,
@@ -38,32 +36,54 @@ interface TimerProviderProps {
 
 const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const [enabled, setEnabled] = useState<boolean>(false);
+
+  const [startTimestamp, setStartTimestamp] = useState<number>(0); // here we store timestamp
+
+  const [startSpentSeconds, setStartSpentSeconds] = useState<number>(0); // here we store seconds
+
   const currentSession = useSelector(
     (state: RootState) => state.sessions.currentSession
   );
   const dispatch = useAppDispatch();
 
-  const startTimer = () => {
-    setEnabled(true);
-  };
-
   const toggleTimer = () => {
-    setEnabled((e) => !e);
+    if (!enabled) {
+      setStartTimestamp(Date.now());
+      if (currentSession) {
+        setStartSpentSeconds(currentSession.spentTimeSeconds);
+      }
+    }
+    setEnabled((enabled) => !enabled);
   };
 
   const stopTimer = () => {
     setEnabled(false);
+    setStartTimestamp(0);
+    setStartSpentSeconds(0);
   };
 
+  // TODO: зачем нужен этот useEffect, когда можно вызвать setInterval в toggleTimer, когда enabled станет равным true?
   useEffect(() => {
-    if (!enabled) return;
-    const intervalId = setInterval(() => {
-      dispatch(addSecond());
-    }, 1000);
+    let intervalId: number;
+
+    if (enabled) {
+      intervalId = setInterval(() => {
+        if (currentSession) {
+          const startTimestampSeconds = Math.floor(startTimestamp / 1000);
+          const nowTimestampSeconds = Math.floor(Date.now() / 1000);
+          dispatch(
+            changeSpentSeconds(
+              startSpentSeconds + (nowTimestampSeconds - startTimestampSeconds)
+            )
+          );
+        }
+      }, 1000);
+    }
+
     return () => {
       clearInterval(intervalId);
     };
-  }, [enabled]);
+  }, [enabled, dispatch]);
 
   useEffect(() => {
     if (currentSession) {
@@ -92,9 +112,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   }, [currentSession, dispatch]);
 
   return (
-    <TimerContext.Provider
-      value={{ startTimer, toggleTimer, stopTimer, enabled }}
-    >
+    <TimerContext.Provider value={{ toggleTimer, stopTimer, enabled }}>
       {children}
     </TimerContext.Provider>
   );

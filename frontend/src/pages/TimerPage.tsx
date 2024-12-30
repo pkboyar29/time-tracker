@@ -28,7 +28,7 @@ const TimerPage: FC = () => {
     ISession[]
   >([]);
 
-  const { startTimer, toggleTimer, stopTimer, enabled } = useTimer();
+  const { toggleTimer, stopTimer, enabled } = useTimer();
 
   const [note, setNote] = useState<string>('');
   const [isFocusedNote, setFocusedNote] = useState<boolean>(false);
@@ -100,7 +100,7 @@ const TimerPage: FC = () => {
     const updatedList: ISession[] = [...allUncompletedSessions, session];
     updateSessionsList(updatedList);
 
-    startTimer();
+    toggleTimer();
     setCreateModal(false);
   };
 
@@ -124,6 +124,7 @@ const TimerPage: FC = () => {
   const handleStopButtonClick = () => {
     stopTimer();
 
+    // TODO: когда я обновляю сессию в глобальном состоянии, эта сессия не обновляется в списке сессий в TimerPage (добавить useEffect в TimerPage?)
     if (currentSession) {
       dispatch(updateSession(currentSession));
     }

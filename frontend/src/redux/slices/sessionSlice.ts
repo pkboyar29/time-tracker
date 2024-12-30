@@ -69,9 +69,9 @@ const sessionSlice = createSlice({
       state.currentSession = action.payload;
       localStorageHelpers.saveSessionToLocalStorage(action.payload);
     },
-    addSecond(state) {
+    changeSpentSeconds(state, action: PayloadAction<number>) {
       if (state.currentSession) {
-        state.currentSession.spentTimeSeconds++;
+        state.currentSession.spentTimeSeconds = action.payload;
       }
     },
     updateCurrentSessionNote(state, action: PayloadAction<string>) {
@@ -80,7 +80,7 @@ const sessionSlice = createSlice({
       }
     },
     loadCurrentSession(state) {
-      // тут надо брать извне и передавать сюда
+      // TODO: тут надо брать извне и передавать сюда
       const session = localStorageHelpers.loadSessionFromLocalStorage();
       if (session) {
         state.currentSession = session;
@@ -107,7 +107,7 @@ const sessionSlice = createSlice({
 
 export const {
   setCurrentSession,
-  addSecond,
+  changeSpentSeconds,
   updateCurrentSessionNote,
   loadCurrentSession,
   reset: resetSessionState,
