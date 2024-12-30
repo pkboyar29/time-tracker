@@ -1,9 +1,10 @@
-import { FC, useState, useEffect, ChangeEvent } from 'react';
+import { FC, useState, useEffect, ChangeEvent, ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAppDispatch } from '../../redux/store';
 import axios from '../../axios';
 import { createSession } from '../../redux/slices/sessionSlice';
 
+import Modal from './Modal';
 import Button from '../Button';
 
 import {
@@ -14,7 +15,9 @@ import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 import { ISession } from '../../ts/interfaces/Session/ISession';
 
-interface SessionCreateFormProps {
+interface SessionCreateModalProps {
+  onCloseModal: () => void;
+  modalTitle: ReactNode;
   afterSubmitHandler: (session: ISession) => void;
   defaultActivity?: string;
 }
@@ -25,9 +28,11 @@ interface SessionFields {
   activity: string;
 }
 
-const SessionCreateForm: FC<SessionCreateFormProps> = ({
+const SessionCreateModal: FC<SessionCreateModalProps> = ({
   afterSubmitHandler,
   defaultActivity,
+  onCloseModal,
+  modalTitle,
 }) => {
   const [activityGroupsInSelect, setActivityGroupsInSelect] = useState<
     IActivityGroup[]
@@ -102,74 +107,78 @@ const SessionCreateForm: FC<SessionCreateFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col items-start gap-3"
-    >
-      <div>
-        <input
-          {...register('totalTimeMinutes', {
-            required: 'Required!',
-            max: {
-              value: 600,
-              message: '10 hours - max!',
-            },
-            min: {
-              value: 1,
-              message: '1 min - min!',
-            },
-          })}
-          type="number"
-          placeholder="Enter minutes (max - 10 hours)"
-          className="p-1 text-white placeholder-white bg-red-500 rounded-md"
-        />
-        {errors.totalTimeMinutes && (
-          <p className="mt-2 text-red-500">
-            {errors.totalTimeMinutes.message || 'Error!'}
-          </p>
-        )}
-      </div>
+    <Modal title={modalTitle} onCloseModal={onCloseModal}>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col items-start gap-3"
+      >
+        <div className="w-full">
+          <input
+            {...register('totalTimeMinutes', {
+              required: 'Required!',
+              max: {
+                value: 600,
+                message: '10 hours - max!',
+              },
+              min: {
+                value: 1,
+                message: '1 min - min!',
+              },
+            })}
+            type="number"
+            placeholder="Enter minutes (max - 10 hours)"
+            className="w-full px-4 py-2 text-white placeholder-white bg-red-500 rounded-md"
+          />
+          {errors.totalTimeMinutes && (
+            <p className="mt-2 text-red-500">
+              {errors.totalTimeMinutes.message || 'Error!'}
+            </p>
+          )}
+        </div>
 
-      {!defaultActivity ? (
-        <>
-          <select onChange={handleActivityGroupSelectChange}>
-            <option value="">Choose activity group (optional)</option>
-            {activityGroupsInSelect.map((activityGroup) => (
-              <option key={activityGroup.id} value={activityGroup.id}>
-                {activityGroup.name}
-              </option>
-            ))}
-          </select>
-
-          {activitiesInSelect.length > 0 && (
-            <select
-              {...register('activity', {
-                required: 'Required!',
-              })}
-            >
-              <option value="">Choose activity</option>
-              {activitiesInSelect.map((activity) => (
-                <option key={activity.id} value={activity.id}>
-                  {activity.name}
+        {!defaultActivity ? (
+          <>
+            <select onChange={handleActivityGroupSelectChange}>
+              <option value="">Choose activity group (optional)</option>
+              {activityGroupsInSelect.map((activityGroup) => (
+                <option key={activityGroup.id} value={activityGroup.id}>
+                  {activityGroup.name}
                 </option>
               ))}
             </select>
-          )}
-          {errors.activity && (
-            <p className="mt-2 text-red-500">
-              {errors.activity.message || 'Error!'}
-            </p>
-          )}
-        </>
-      ) : (
-        <></>
-      )}
 
-      <Button type="submit" disabled={!isValid}>
-        Create session
-      </Button>
-    </form>
+            {activitiesInSelect.length > 0 && (
+              <select
+                {...register('activity', {
+                  required: 'Required!',
+                })}
+              >
+                <option value="">Choose activity</option>
+                {activitiesInSelect.map((activity) => (
+                  <option key={activity.id} value={activity.id}>
+                    {activity.name}
+                  </option>
+                ))}
+              </select>
+            )}
+            {errors.activity && (
+              <p className="mt-2 text-red-500">
+                {errors.activity.message || 'Error!'}
+              </p>
+            )}
+          </>
+        ) : (
+          <></>
+        )}
+
+        <div className="flex justify-end w-full">
+          <Button type="submit" disabled={!isValid}>
+            Create session
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 };
 
-export default SessionCreateForm;
+export default SessionCreateModal;

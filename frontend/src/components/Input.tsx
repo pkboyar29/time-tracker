@@ -38,7 +38,7 @@ const Input: FC<InputProps> = ({
     <div className="flex flex-col items-center">
       <div className="relative flex">
         <input
-          className={`px-2 py-1 border border-black border-solid rounded-lg focus:shadow-lg ${
+          className={`px-4 py-2 border border-black border-solid rounded-lg focus:shadow-lg ${
             errorMessage && 'border-red-500'
           }`}
           placeholder={placeHolder}

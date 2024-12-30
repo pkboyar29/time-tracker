@@ -7,7 +7,7 @@ import Cookies from 'js-cookie';
 import { useAppDispatch } from '../redux/store';
 import { fetchProfileInfo } from '../redux/slices/userSlice';
 
-import Modal from '../components/Modal';
+import Modal from '../components/modals/Modal';
 import Input from '../components/Input';
 import Button from '../components/Button';
 

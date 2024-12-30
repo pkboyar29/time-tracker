@@ -13,7 +13,7 @@ import { ISession } from '../ts/interfaces/Session/ISession';
 
 import SessionItem from './SessionItem';
 import Button from '../components/Button';
-import Modal from '../components/Modal';
+import Modal from './modals/Modal';
 
 interface SessionsListProps {
   sessions: ISession[];

@@ -9,7 +9,7 @@ import {
 } from '../redux/slices/activityGroupSlice';
 
 import Button from '../components/Button';
-import Modal from '../components/Modal';
+import Modal from '../components/modals/Modal';
 import Title from '../components/Title';
 import ActivityItem from '../components/ActivityItem';
 import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm';

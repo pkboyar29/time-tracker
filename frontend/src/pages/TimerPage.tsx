@@ -16,9 +16,8 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 import CustomCircularProgress from '../components/CustomCircularProgress';
 import SessionsList from '../components/SessionsList';
-import SessionCreateForm from '../components/forms/SessionCreateForm';
 import Button from '../components/Button';
-import Modal from '../components/Modal';
+import SessionCreateModal from '../components/modals/SessionCreateModal';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
@@ -134,14 +133,11 @@ const TimerPage: FC = () => {
   return (
     <>
       {createModal && (
-        <Modal
-          title="Creating new session"
+        <SessionCreateModal
+          modalTitle="Creating new session"
+          afterSubmitHandler={handleAfterSubmitCreateSession}
           onCloseModal={() => setCreateModal(false)}
-        >
-          <SessionCreateForm
-            afterSubmitHandler={handleAfterSubmitCreateSession}
-          />
-        </Modal>
+        />
       )}
 
       <div className="container flex justify-between mt-5">

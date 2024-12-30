@@ -38,14 +38,14 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
         {...register('name')}
         type="text"
         placeholder="Enter name"
-        className="w-full p-1 text-white placeholder-white bg-red-500 rounded-md"
+        className="w-full px-4 py-2 text-white placeholder-white bg-red-500 rounded-md"
       />
       <textarea
         {...register('descr')}
         placeholder="Enter description (optional)"
-        className="w-full h-20 p-1 text-white placeholder-white bg-red-500 rounded-md"
+        className="w-full h-20 px-4 py-2 text-white placeholder-white bg-red-500 rounded-md"
       />
-      <div className="flex gap-4">
+      <div className="flex justify-end w-full">
         <Button type="submit">Create activity group</Button>
       </div>
     </form>

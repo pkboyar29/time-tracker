@@ -1,4 +1,4 @@
-import { FC, ReactNode, useEffect } from 'react';
+import { FC, ReactNode, useEffect, useRef } from 'react';
 
 interface ModalProps {
   children: ReactNode;
@@ -7,6 +7,9 @@ interface ModalProps {
 }
 
 const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const isMouseDownInside = useRef<boolean>(false);
+
   useEffect(() => {
     document.body.classList.add('modal-open');
 
@@ -15,23 +18,35 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
     };
   }, []);
 
-  const handleOutsideClick = () => {
-    onCloseModal();
-  };
-
-  const handleInsideClick = (
+  const handleMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
-    event.stopPropagation();
+    if (modalRef.current?.contains(event.target as Node)) {
+      isMouseDownInside.current = true;
+    } else {
+      isMouseDownInside.current = false;
+    }
+  };
+
+  const handleMouseUp = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    if (
+      !isMouseDownInside.current &&
+      !modalRef.current?.contains(event.target as Node)
+    ) {
+      onCloseModal();
+    }
   };
 
   return (
     <div
-      onClick={handleOutsideClick}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       className="fixed top-0 left-0 z-50 flex items-center justify-center w-full h-full bg-gray-rgba"
     >
       <div
-        onClick={handleInsideClick}
+        ref={modalRef}
         className="px-3 py-5 overflow-hidden bg-white rounded-md basis-1/3"
       >
         <div className="flex items-center justify-between mb-5">

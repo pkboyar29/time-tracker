@@ -9,7 +9,7 @@ import { updateSession, resetSessionState } from '../redux/slices/sessionSlice';
 import { resetActivityGroupState } from '../redux/slices/activityGroupSlice';
 import { resetActivityState } from '../redux/slices/activitySlice';
 import Button from '../components/Button';
-import Modal from '../components/Modal';
+import Modal from '../components/modals/Modal';
 import Title from '../components/Title';
 
 const SettingsPage: FC = () => {
