@@ -99,25 +99,29 @@ const TimerPage: FC = () => {
     const updatedList: ISession[] = [...allUncompletedSessions, session];
     updateSessionsList(updatedList);
 
-    toggleTimer();
+    toggleTimer(0);
     setCreateModal(false);
   };
 
   const handleToggleButtonClick = () => {
-    if (enabled && currentSession) {
-      const updatedList: ISession[] = allUncompletedSessions.map((session) => {
-        if (session.id === currentSession.id) {
-          return currentSession;
-        } else {
-          return session;
-        }
-      });
-      updateSessionsList(updatedList);
+    if (currentSession) {
+      if (enabled) {
+        const updatedList: ISession[] = allUncompletedSessions.map(
+          (session) => {
+            if (session.id === currentSession.id) {
+              return currentSession;
+            } else {
+              return session;
+            }
+          }
+        );
+        updateSessionsList(updatedList);
 
-      dispatch(updateSession(currentSession));
+        dispatch(updateSession(currentSession));
+      }
+
+      toggleTimer(currentSession.spentTimeSeconds);
     }
-
-    toggleTimer();
   };
 
   const handleStopButtonClick = () => {

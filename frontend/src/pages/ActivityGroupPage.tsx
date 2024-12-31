@@ -144,7 +144,7 @@ const ActivityGroupPage: FC = () => {
               dispatch(updateSession(currentSession));
             }
 
-            toggleTimer();
+            toggleTimer(0);
             navigate('/timer');
           }}
         />

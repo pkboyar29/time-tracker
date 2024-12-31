@@ -17,7 +17,7 @@ import {
 import { playAudio } from '../helpers/audioHelpers';
 
 interface TimerContextType {
-  toggleTimer: () => void;
+  toggleTimer: (startSpentSeconds: number) => void;
   stopTimer: (afterDelete?: boolean) => void;
   enabled: boolean;
 }
@@ -46,12 +46,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   );
   const dispatch = useAppDispatch();
 
-  const toggleTimer = () => {
+  const toggleTimer = (startSpentSeconds: number) => {
     if (!enabled) {
       setStartTimestamp(Date.now());
-      if (currentSession) {
-        setStartSpentSeconds(currentSession.spentTimeSeconds);
-      }
+      setStartSpentSeconds(startSpentSeconds);
     }
     setEnabled((enabled) => !enabled);
   };
@@ -62,7 +60,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     setStartSpentSeconds(0);
   };
 
-  // TODO: зачем нужен этот useEffect, когда можно вызвать setInterval в toggleTimer, когда enabled станет равным true?
   useEffect(() => {
     let intervalId: number;
 

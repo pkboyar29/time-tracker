@@ -88,14 +88,14 @@ const SessionsList: FC<SessionsListProps> = ({
       }
 
       if (currentSession.id === session.id) {
-        toggleTimer();
+        toggleTimer(currentSession.spentTimeSeconds);
       } else {
         dispatch(setCurrentSession(session));
-        toggleTimer();
+        toggleTimer(session.spentTimeSeconds);
       }
     } else {
       dispatch(setCurrentSession(session));
-      toggleTimer();
+      toggleTimer(session.spentTimeSeconds);
     }
   };
 
