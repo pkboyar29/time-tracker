@@ -256,9 +256,11 @@ const TimerPage: FC = () => {
           )}
         </div>
         <div className="flex flex-col items-end">
-          <Button onClick={() => setCreateModal(true)}>
-            Create new session
-          </Button>
+          <div>
+            <Button onClick={() => setCreateModal(true)}>
+              Create new session
+            </Button>
+          </div>
           <button
             onClick={() => setUnompletedLess(!uncompletedLess)}
             className="flex items-center gap-1 my-5 text-xl font-bold"

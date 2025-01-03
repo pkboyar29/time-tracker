@@ -2,11 +2,15 @@ import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
+// TODO: присваивать не только activityGroupId, но и название хранить
 const mapActivityFromResponse = (unmappedActivity: any): IActivity => {
   return {
     ...unmappedActivity,
     id: unmappedActivity._id,
-    activityGroupId: unmappedActivity.activityGroup,
+    activityGroup: {
+      id: unmappedActivity.activityGroup._id,
+      name: unmappedActivity.activityGroup.name,
+    },
   };
 };
 

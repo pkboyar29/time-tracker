@@ -52,7 +52,9 @@ export default {
         throw new Error('Activity Not Found');
       }
 
-      const activity = await Activity.findById(activityId);
+      const activity = await Activity.findById(activityId)
+        .populate('activityGroup', 'id name')
+        .exec();
 
       const sessions = await sessionService.getSessionsForActivity(
         activityId,

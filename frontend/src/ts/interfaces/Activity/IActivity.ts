@@ -4,5 +4,8 @@ export interface IActivity {
   descr?: string;
   sessionsAmount: number;
   spentTimeSeconds: number;
-  activityGroupId: string;
+  activityGroup: {
+    id: string;
+    name: string;
+  };
 }

@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, ChangeEvent, ReactNode } from 'react';
+import { FC, useState, useEffect, ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAppDispatch } from '../../redux/store';
 import axios from '../../axios';
@@ -6,13 +6,10 @@ import { createSession } from '../../redux/slices/sessionSlice';
 
 import Modal from './Modal';
 import Button from '../Button';
+import RangeSlider from '../RangeSlider';
 
-import {
-  mapActivityFromResponse,
-  mapActivityGroupFromResponse,
-} from '../../helpers/mappingHelpers';
+import { mapActivityFromResponse } from '../../helpers/mappingHelpers';
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
-import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 import { ISession } from '../../ts/interfaces/Session/ISession';
 
 interface SessionCreateModalProps {
@@ -23,8 +20,6 @@ interface SessionCreateModalProps {
 }
 
 interface SessionFields {
-  totalTimeMinutes: number;
-  activityGroupId: string;
   activity: string;
 }
 
@@ -34,17 +29,15 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   onCloseModal,
   modalTitle,
 }) => {
-  const [activityGroupsInSelect, setActivityGroupsInSelect] = useState<
-    IActivityGroup[]
-  >([]);
-  const [activitiesInSelect, setActivitiesInSelect] = useState<IActivity[]>([]);
+  const [activitiesToChoose, setActivitiesToChoose] = useState<IActivity[]>([]);
+
+  const [minutes, setMinutes] = useState<number>(25);
 
   const {
     register,
     handleSubmit,
     reset,
-    resetField,
-    formState: { errors, isValid },
+    formState: { isValid },
   } = useForm<SessionFields>({
     defaultValues: {
       activity: defaultActivity,
@@ -53,48 +46,29 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   });
   const dispatch = useAppDispatch();
 
+  // TODO: начать получать все активности с названиями активностей групп
   useEffect(() => {
-    const fetchActivityGroups = async () => {
-      const { data } = await axios.get('/activity-groups');
-      const mappedData = data.map((unmappedActivityGroup: any) =>
-        mapActivityGroupFromResponse(unmappedActivityGroup)
+    const fetchActivities = async () => {
+      const { data } = await axios.get('/activities');
+      const mappedData: IActivity[] = data.map((unmappedActivity: any) =>
+        mapActivityFromResponse(unmappedActivity)
       );
-      setActivityGroupsInSelect(mappedData);
+      setActivitiesToChoose(mappedData);
     };
-    fetchActivityGroups();
+    fetchActivities();
   }, []);
 
   useEffect(() => {
     if (defaultActivity) {
       reset();
     }
-  }, [defaultActivity, activitiesInSelect]);
-
-  const handleActivityGroupSelectChange = async (
-    e: ChangeEvent<HTMLSelectElement>
-  ) => {
-    setActivitiesInSelect([]);
-    resetField('activity');
-
-    const activityGroupId: string = e.currentTarget.value;
-    if (activityGroupId !== '') {
-      const { data } = await axios.get('/activities', {
-        params: {
-          activityGroupId,
-        },
-      });
-      const mappedData = data.map((unmappedActivity: any) =>
-        mapActivityFromResponse(unmappedActivity)
-      );
-      setActivitiesInSelect(mappedData);
-    }
-  };
+  }, [defaultActivity, activitiesToChoose]);
 
   const onSubmit = async (data: SessionFields) => {
     try {
       const { payload } = await dispatch(
         createSession({
-          totalTimeSeconds: data.totalTimeMinutes * 60,
+          totalTimeSeconds: minutes * 60,
           spentTimeSeconds: 0,
           activity: data.activity !== '' ? data.activity : undefined,
         })
@@ -110,68 +84,40 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
     <Modal title={modalTitle} onCloseModal={onCloseModal}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col items-start gap-3"
+        className="flex flex-col items-start gap-10"
       >
-        <div className="w-full">
-          <input
-            {...register('totalTimeMinutes', {
-              required: 'Required!',
-              max: {
-                value: 600,
-                message: '10 hours - max!',
-              },
-              min: {
-                value: 1,
-                message: '1 min - min!',
-              },
-            })}
-            type="number"
-            placeholder="Enter minutes (max - 10 hours)"
-            className="w-full px-4 py-2 text-white placeholder-white bg-red-500 rounded-md"
+        <div className="flex flex-col w-full gap-3">
+          <div>{minutes} minutes</div>
+
+          <RangeSlider
+            minValue={1}
+            maxValue={600}
+            currentValue={minutes}
+            changeCurrentValue={(newCurrentValue) =>
+              setMinutes(newCurrentValue)
+            }
           />
-          {errors.totalTimeMinutes && (
-            <p className="mt-2 text-red-500">
-              {errors.totalTimeMinutes.message || 'Error!'}
-            </p>
-          )}
         </div>
 
-        {!defaultActivity ? (
-          <>
-            <select onChange={handleActivityGroupSelectChange}>
-              <option value="">Choose activity group (optional)</option>
-              {activityGroupsInSelect.map((activityGroup) => (
-                <option key={activityGroup.id} value={activityGroup.id}>
-                  {activityGroup.name}
+        <div className="flex flex-col gap-3">
+          <div>Activity</div>
+
+          {activitiesToChoose.length > 0 && (
+            <select
+              className="px-2 py-1 border border-black border-solid rounded-xl"
+              {...register('activity')}
+            >
+              <option value="">Choose activity (optional)</option>
+              {activitiesToChoose.map((activity) => (
+                <option key={activity.id} value={activity.id}>
+                  {activity.activityGroup.name} / {activity.name}
                 </option>
               ))}
             </select>
+          )}
+        </div>
 
-            {activitiesInSelect.length > 0 && (
-              <select
-                {...register('activity', {
-                  required: 'Required!',
-                })}
-              >
-                <option value="">Choose activity</option>
-                {activitiesInSelect.map((activity) => (
-                  <option key={activity.id} value={activity.id}>
-                    {activity.name}
-                  </option>
-                ))}
-              </select>
-            )}
-            {errors.activity && (
-              <p className="mt-2 text-red-500">
-                {errors.activity.message || 'Error!'}
-              </p>
-            )}
-          </>
-        ) : (
-          <></>
-        )}
-
-        <div className="flex justify-end w-full">
+        <div className="flex w-full">
           <Button type="submit" disabled={!isValid}>
             Create session
           </Button>

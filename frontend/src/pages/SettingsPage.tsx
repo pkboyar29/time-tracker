@@ -76,9 +76,11 @@ const SettingsPage: FC = () => {
             className="w-16 border-b border-gray-400 border-solid"
           />
         </div>
-        <Button onClick={() => setLogoutModal(true)}>
-          Log out of your account
-        </Button>
+        <div className="inline-block">
+          <Button onClick={() => setLogoutModal(true)}>
+            Log out of your account
+          </Button>
+        </div>
       </div>
     </>
   );
