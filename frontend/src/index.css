@@ -146,6 +146,10 @@ h6 {
   stroke: rgb(239 68 68);
 }
 
+.active div {
+  color: rgb(239 68 68);
+}
+
 .modal-open {
   overflow: hidden;
 }
