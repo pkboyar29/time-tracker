@@ -8,6 +8,7 @@ import {
   fetchActivityGroups,
 } from '../redux/slices/activityGroupSlice';
 
+import CloseIcon from '@mui/icons-material/Close';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
 import Title from '../components/Title';
@@ -28,6 +29,8 @@ const ActivityGroupsPage: FC = () => {
 
   const [createModal, setCreateModal] = useState<boolean>(false);
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>();
+
+  const [searchString, setSearchString] = useState<string>('');
 
   useEffect(() => {
     dispatch(fetchActivityGroups());
@@ -80,24 +83,57 @@ const ActivityGroupsPage: FC = () => {
         </Modal>
       )}
 
-      <div className="container flex justify-between mt-5">
-        <div>
+      <div className="container">
+        <div className="flex justify-between mt-5">
           <Title>All activity groups</Title>
-          <div className="flex flex-col gap-4 mt-5">
-            {activityGroups.map((activityGroup) => (
-              <ActivityItem
-                key={activityGroup.id}
-                activity={activityGroup}
-                editHandler={handleEditActivityGroupClick}
-                deleteHandler={handleDeleteActivityGroupClick}
-              ></ActivityItem>
-            ))}
+          <div className="flex h-full gap-5">
+            <div className="relative flex">
+              <input
+                value={searchString}
+                onChange={(e) => setSearchString(e.target.value)}
+                className="transition duration-300 border-b border-solid border-b-gray-500 focus:border-b-red-500"
+                type="text"
+                placeholder="Search..."
+              />
+              {searchString && (
+                <button
+                  className="absolute right-0 z-10 top-[6px]"
+                  onClick={() => setSearchString('')}
+                >
+                  <CloseIcon />
+                </button>
+              )}
+            </div>
+
+            <Button onClick={() => setCreateModal(true)}>
+              Create new activity group
+            </Button>
           </div>
         </div>
-        <div className="flex h-full gap-5">
-          <Button onClick={() => setCreateModal(true)}>
-            Create new activity group
-          </Button>
+
+        <div className="flex flex-wrap gap-4 mt-5">
+          {activityGroups.filter((activityGroup) =>
+            activityGroup.name
+              .toLowerCase()
+              .includes(searchString.toLowerCase())
+          ).length !== 0 ? (
+            activityGroups
+              .filter((activityGroup) =>
+                activityGroup.name
+                  .toLowerCase()
+                  .includes(searchString.toLowerCase())
+              )
+              .map((activityGroup) => (
+                <ActivityItem
+                  key={activityGroup.id}
+                  activity={activityGroup}
+                  editHandler={handleEditActivityGroupClick}
+                  deleteHandler={handleDeleteActivityGroupClick}
+                />
+              ))
+          ) : (
+            <>Not found</>
+          )}
         </div>
       </div>
     </>
