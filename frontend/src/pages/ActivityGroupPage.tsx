@@ -150,64 +150,66 @@ const ActivityGroupPage: FC = () => {
         />
       )}
 
-      <div className="container flex justify-between mt-5">
-        <div>
+      <div className="container">
+        <div className="flex justify-between mt-5">
           {currentActivityGroup && (
             <ActivityCommonUpdateForm activityCommon={currentActivityGroup} />
           )}
-          <div className="my-5 text-xl font-bold">All activities</div>
-          <div className="flex flex-col gap-4">
-            {activities.filter((activity) =>
-              activity.name.includes(searchString)
-            ).length !== 0 ? (
-              activities
-                .filter((activity) => activity.name.includes(searchString))
-                .map((activity) => (
-                  <ActivityItem
-                    key={activity.id}
-                    activity={activity}
-                    editHandler={handleEditActivityClick}
-                    deleteHandler={(activityId: string) =>
-                      setDeleteModal({
-                        modal: true,
-                        selectedItemId: activityId,
-                      })
-                    }
-                    startSessionHandler={() =>
-                      setCreateSessionModal({
-                        modal: true,
-                        selectedItemId: activity.id,
-                      })
-                    }
-                  />
-                ))
-            ) : (
-              <>Not found</>
-            )}
+          <div className="flex h-full gap-5">
+            <div className="relative flex">
+              <input
+                value={searchString}
+                onChange={(e) => setSearchString(e.target.value)}
+                className="transition duration-300 border-b border-solid border-b-gray-500 focus:border-b-red-500"
+                type="text"
+                placeholder="Search..."
+              />
+              {searchString && (
+                <button
+                  className="absolute right-0 z-10 top-[6px]"
+                  onClick={() => setSearchString('')}
+                >
+                  <CloseIcon />
+                </button>
+              )}
+            </div>
+            <Button onClick={() => setCreateModal(true)}>
+              Create new activity
+            </Button>
           </div>
         </div>
 
-        <div className="flex h-full gap-5">
-          <div className="relative flex">
-            <input
-              value={searchString}
-              onChange={(e) => setSearchString(e.target.value)}
-              className="transition duration-300 border-b border-solid border-b-gray-500 focus:border-b-red-500"
-              type="text"
-              placeholder="Search..."
-            />
-            {searchString && (
-              <button
-                className="absolute right-0 z-10 top-[6px]"
-                onClick={() => setSearchString('')}
-              >
-                <CloseIcon />
-              </button>
-            )}
-          </div>
-          <Button onClick={() => setCreateModal(true)}>
-            Create new activity
-          </Button>
+        <div className="my-5 text-xl font-bold">All activities</div>
+        <div className="flex flex-wrap gap-4">
+          {activities.filter((activity) =>
+            activity.name.toLowerCase().includes(searchString.toLowerCase())
+          ).length !== 0 ? (
+            activities
+              .filter((activity) =>
+                activity.name.toLowerCase().includes(searchString.toLowerCase())
+              )
+              .map((activity) => (
+                <ActivityItem
+                  key={activity.id}
+                  activity={activity}
+                  editHandler={handleEditActivityClick}
+                  deleteHandler={(activityId: string) =>
+                    setDeleteModal({
+                      modal: true,
+                      selectedItemId: activityId,
+                    })
+                  }
+                  startSessionHandler={() =>
+                    setCreateSessionModal({
+                      modal: true,
+                      selectedItemId: activity.id,
+                    })
+                  }
+                />
+              ))
+          ) : (
+            <>Not found</>
+          )}
         </div>
       </div>
     </>
