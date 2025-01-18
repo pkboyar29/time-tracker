@@ -4,6 +4,7 @@ import { useAppDispatch } from '../../redux/store';
 import { createActivity } from '../../redux/slices/activitySlice';
 
 import Button from '../Button';
+import Input from '../Input';
 
 interface ActivityCreateFormProps {
   afterSubmitHandler: () => void;
@@ -21,7 +22,11 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
 }) => {
   const dispatch = useAppDispatch();
 
-  const { register, handleSubmit } = useForm<ActivityFields>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ActivityFields>({
     mode: 'onBlur',
   });
 
@@ -38,19 +43,31 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col items-start gap-3"
+      className="flex flex-col items-start gap-3 text-base"
     >
-      <input
-        {...register('name')}
-        type="text"
-        placeholder="Enter name"
-        className="w-full px-4 py-2 text-white placeholder-white bg-red-500 rounded-md"
+      <Input
+        fieldName="name"
+        register={register}
+        bg="red"
+        placeHolder="Enter name"
+        validationRules={{
+          required: 'Field is required',
+        }}
+        errorMessage={
+          typeof errors.name?.message === 'string' ? errors.name.message : ''
+        }
       />
-      <textarea
-        {...register('descr')}
-        placeholder="Enter description (optional)"
-        className="w-full h-20 px-4 py-2 text-white placeholder-white bg-red-500 rounded-md"
+
+      <Input
+        isTextArea={true}
+        fieldName="descr"
+        register={register}
+        bg="red"
+        placeHolder="Enter description (optional)"
+        validationRules={{}}
+        errorMessage=""
       />
+
       <div className="flex justify-end w-full">
         <Button type="submit">Create activity</Button>
       </div>
