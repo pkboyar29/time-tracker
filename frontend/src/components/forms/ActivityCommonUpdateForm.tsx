@@ -44,7 +44,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
   };
 
   const onSubmit = (data: ActivityCommonFields) => {
-    if ('activityGroupId' in activityCommon) {
+    if ('activityGroup' in activityCommon) {
       // IActivity
       dispatch(
         updateActivity({

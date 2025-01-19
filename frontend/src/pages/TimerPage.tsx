@@ -248,7 +248,7 @@ const TimerPage: FC = () => {
                   onFocus={handleFocusNoteInput}
                   onBlur={handleBlurNoteInput}
                   className={
-                    'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-blue-700 '
+                    'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-red-500 '
                   }
                 />
               </div>
