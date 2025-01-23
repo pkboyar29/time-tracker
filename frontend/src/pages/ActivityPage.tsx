@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axiosInstance from '../axios';
 import { mapActivityFromResponse } from '../helpers/mappingHelpers';
 import { fetchSessions } from '../redux/slices/sessionSlice';
@@ -15,6 +15,8 @@ const ActivityPage: FC = () => {
   const [currentActivity, setCurrentActivity] = useState<IActivity>();
   const { activityId } = useParams();
   const dispatch = useAppDispatch();
+
+  const navigate = useNavigate();
 
   const [uncompletedSessionsForActivity, setUncompletedSessionsForActivity] =
     useState<ISession[]>([]);
@@ -50,7 +52,27 @@ const ActivityPage: FC = () => {
 
   return (
     <>
-      <div className="container mt-5">
+      <div className="container">
+        <div className="mt-5">
+          <span
+            onClick={() => navigate('/activity-groups')}
+            className="transition duration-300 cursor-pointer hover:text-red-500"
+          >
+            Activity groups
+          </span>{' '}
+          /{' '}
+          <span
+            onClick={() =>
+              navigate(`/activity-groups/${currentActivity?.activityGroup.id}`)
+            }
+            className="transition duration-300 cursor-pointer hover:text-red-500"
+          >
+            {currentActivity?.activityGroup.name}
+          </span>
+          / {currentActivity?.name}
+        </div>
+
+        <div className="mt-5"></div>
         {currentActivity && (
           <ActivityCommonUpdateForm activityCommon={currentActivity} />
         )}

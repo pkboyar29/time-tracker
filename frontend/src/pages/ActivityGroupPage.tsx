@@ -151,6 +151,16 @@ const ActivityGroupPage: FC = () => {
       )}
 
       <div className="container">
+        <div className="mt-5">
+          <span
+            onClick={() => navigate('/activity-groups')}
+            className="transition duration-300 cursor-pointer hover:text-red-500"
+          >
+            Activity groups
+          </span>{' '}
+          / {currentActivityGroup?.name}
+        </div>
+
         <div className="flex justify-between mt-5">
           {currentActivityGroup && (
             <ActivityCommonUpdateForm activityCommon={currentActivityGroup} />
