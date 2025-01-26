@@ -67,16 +67,14 @@ const AnalyticsDaysPage: FC = () => {
 
   return (
     <div className="h-screen bg-custom">
-      <div className="py-5 border-b border-solid border-b-gray-400">
-        <div className="flex justify-center pb-5">
-          <DaysOfWeekBox
-            dayClickHandler={dayClickHandler}
-            leftArrowClickHandler={leftArrowClickHandler}
-            rightArrowClickHandler={rightArrowClickHandler}
-            daysOfWeek={daysOfWeek}
-            currentDay={currentDay}
-          />
-        </div>
+      <div className="flex justify-center py-5 border-b border-solid border-b-gray-400">
+        <DaysOfWeekBox
+          dayClickHandler={dayClickHandler}
+          leftArrowClickHandler={leftArrowClickHandler}
+          rightArrowClickHandler={rightArrowClickHandler}
+          daysOfWeek={daysOfWeek}
+          currentDay={currentDay}
+        />
       </div>
       {dayStatistics?.spentTimeSeconds !== 0 ? (
         <div className="flex h-full">

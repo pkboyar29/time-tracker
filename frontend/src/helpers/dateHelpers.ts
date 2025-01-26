@@ -46,7 +46,6 @@ const shiftWeek = (week: Date[], toNextWeek: boolean): Date[] => {
   }
 
   const step: number = toNextWeek ? 7 : -7;
-
   for (let i = 0; i < 7; i++) {
     newWeek[i].setDate(newWeek[i].getDate() + step);
   }
@@ -54,4 +53,42 @@ const shiftWeek = (week: Date[], toNextWeek: boolean): Date[] => {
   return newWeek;
 };
 
-export { getWeekDays, getDayOfWeekName, shiftWeek };
+const getFiveMonths = (middleDate: Date): Date[] => {
+  const fiveMonths: Date[] = [];
+
+  for (let i = 2; i > 0; i--) {
+    const date: Date = new Date(middleDate);
+    date.setMonth(date.getMonth() - i);
+    fiveMonths.push(date);
+  }
+  fiveMonths.push(new Date(middleDate));
+  for (let i = 1; i < 3; i++) {
+    const date: Date = new Date(middleDate);
+    date.setMonth(date.getMonth() + i);
+    fiveMonths.push(date);
+  }
+
+  return fiveMonths;
+};
+
+const shiftFiveMonths = (fiveMonths: Date[], right: boolean): Date[] => {
+  let newFiveMonths: Date[] = [];
+  for (let i = 0; i < 5; i++) {
+    newFiveMonths.push(fiveMonths[i]);
+  }
+
+  const step: number = right ? 5 : -5;
+  for (let i = 0; i < 5; i++) {
+    newFiveMonths[i].setMonth(newFiveMonths[i].getMonth() + step);
+  }
+
+  return newFiveMonths;
+};
+
+export {
+  getWeekDays,
+  getDayOfWeekName,
+  shiftWeek,
+  getFiveMonths,
+  shiftFiveMonths,
+};

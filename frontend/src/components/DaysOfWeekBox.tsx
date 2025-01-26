@@ -1,6 +1,8 @@
 import { FC } from 'react';
-
 import { getDayOfWeekName } from '../helpers/dateHelpers';
+
+import LeftArrowIcon from '../icons/LeftArrowIcon';
+import RightArrowIcon from '../icons/RightArrowIcon';
 
 interface DaysOfWeekBoxProps {
   daysOfWeek: Date[];
@@ -26,12 +28,7 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({
           onClick={leftArrowClickHandler}
           className="p-[6px] border border-gray-400 border-solid rounded-md hover:bg-gray-200 transition duration-300"
         >
-          <svg fill="black" viewBox="0 0 16 16" className="w-5 h-5">
-            <path
-              fillRule="evenodd"
-              d="M11.354 1.646a.5.5 0 010 .708L5.707 8l5.647 5.646a.5.5 0 01-.708.708l-6-6a.5.5 0 010-.708l6-6a.5.5 0 01.708 0z"
-            />
-          </svg>
+          <LeftArrowIcon />
         </button>
         <div className="flex items-center justify-center w-full text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md hover:bg-gray-200">
           {currentDay.toDateString()}
@@ -40,12 +37,7 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({
           onClick={rightArrowClickHandler}
           className="p-[6px] border border-gray-400 border-solid rounded-md hover:bg-gray-200 transition duration-300"
         >
-          <svg fill="black" viewBox="0 0 16 16" className="w-5 h-5">
-            <path
-              fillRule="evenodd"
-              d="M4.646 1.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L10.293 8 4.646 2.354a.5.5 0 010-.708z"
-            />
-          </svg>
+          <RightArrowIcon />
         </button>
       </div>
       <div className="flex gap-1">

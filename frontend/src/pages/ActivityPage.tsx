@@ -69,7 +69,7 @@ const ActivityPage: FC = () => {
           >
             {currentActivity?.activityGroup.name}
           </span>
-          / {currentActivity?.name}
+          <span> / {currentActivity?.name}</span>
         </div>
 
         <div className="mt-5"></div>
