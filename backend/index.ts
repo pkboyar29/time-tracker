@@ -3,12 +3,12 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import * as sessionRouter from './controller/session.controller';
-import * as activityRouter from './controller/activity.controller';
-import * as activityGroupRouter from './controller/activityGroup.controller';
-import * as analyticsRouter from './controller/analytics.controller';
-import * as userRouter from './controller/user.controller';
-import userService from './service/user.service';
+import * as sessionRouter from './src/controller/session.controller';
+import * as activityRouter from './src/controller/activity.controller';
+import * as activityGroupRouter from './src/controller/activityGroup.controller';
+import * as analyticsRouter from './src/controller/analytics.controller';
+import * as userRouter from './src/controller/user.controller';
+import userService from './src/service/user.service';
 
 const app: Express = express();
 dotenv.config();

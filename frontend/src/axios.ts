@@ -3,7 +3,7 @@ import Cookies from 'js-cookie';
 import { refreshAccessToken } from './helpers/authHelpers';
 
 const instance = axios.create({
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_BACKEND_URL,
 });
 
 instance.interceptors.request.use(
