@@ -68,11 +68,11 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         if (currentSession) {
           const startTimestampSeconds = Math.floor(startTimestamp / 1000);
           const nowTimestampSeconds = Math.floor(Date.now() / 1000);
-          dispatch(
-            changeSpentSeconds(
-              startSpentSeconds + (nowTimestampSeconds - startTimestampSeconds)
-            )
-          );
+
+          const newSpentSeconds =
+            startSpentSeconds + (nowTimestampSeconds - startTimestampSeconds);
+
+          dispatch(changeSpentSeconds(newSpentSeconds));
         }
       }, 1000);
     }
@@ -84,7 +84,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (currentSession) {
-      if (currentSession.spentTimeSeconds === currentSession.totalTimeSeconds) {
+      if (currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds) {
         playAudio(0.35);
         stopTimer();
         dispatch(updateSession(currentSession));
