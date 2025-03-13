@@ -20,7 +20,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
       max={maxValue}
       value={currentValue}
       onChange={(e) => changeCurrentValue(Number(e.target.value))}
-      className="w-full transition-opacity duration-300 ease-in-out bg-red-500 appearance-none rounded-xl opacity-70 hover:opacity-100 range"
+      className="w-full range"
     />
   );
 };

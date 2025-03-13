@@ -154,11 +154,22 @@ h6 {
   overflow: hidden;
 }
 
+/* range slider */
+
+.range {
+  -webkit-appearance: none;
+  background: #f0f2f5;
+  box-shadow: inset 0px 0px 4px rgba(0, 0, 0, 0.2);
+  height: 12px;
+  border-radius: 25px;
+}
+
 .range::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
+  border: 3px solid #ef4444;
   background-color: white;
   border-radius: 50%;
   cursor: pointer;
