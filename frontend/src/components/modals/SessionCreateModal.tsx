@@ -87,7 +87,15 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
         className="flex flex-col items-start gap-10"
       >
         <div className="flex flex-col w-full gap-3">
-          <div>{minutes} minutes</div>
+          <div className="flex gap-1">
+            <div>{minutes} minutes</div>
+            {minutes > 60 && (
+              <div>
+                ({Math.floor(minutes / 60)} hours
+                {minutes % 60 > 0 && <> {minutes % 60} minutes</>})
+              </div>
+            )}
+          </div>
 
           <RangeSlider
             minValue={1}
@@ -99,10 +107,10 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
           />
         </div>
 
-        <div className="flex flex-col gap-3">
-          <div>Activity</div>
+        {activitiesToChoose.length > 0 && (
+          <div className="flex flex-col gap-3">
+            <div>Activity</div>
 
-          {activitiesToChoose.length > 0 && (
             <select
               className="px-2 py-1 border border-black border-solid rounded-xl"
               {...register('activity')}
@@ -114,8 +122,8 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
                 </option>
               ))}
             </select>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="flex w-full">
           <Button type="submit" disabled={!isValid}>
