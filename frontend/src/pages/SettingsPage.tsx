@@ -1,8 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { clearSession } from '../helpers/authHelpers';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { useAppDispatch } from '../redux/store';
+import { useAppDispatch, useAppSelector } from '../redux/store';
 import { logOutUser, updateDailyGoal } from '../redux/slices/userSlice';
 import { updateSession, resetSessionState } from '../redux/slices/sessionSlice';
 
@@ -17,9 +15,9 @@ const SettingsPage: FC = () => {
   const [dailyGoalInput, setDailyGoalInput] = useState<number>(0);
 
   const dispatch = useAppDispatch();
-  const userInfo = useSelector((state: RootState) => state.users.user);
-  const currentSession = useSelector(
-    (state: RootState) => state.sessions.currentSession
+  const userInfo = useAppSelector((state) => state.users.user);
+  const currentSession = useAppSelector(
+    (state) => state.sessions.currentSession
   );
 
   useEffect(() => {

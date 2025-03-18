@@ -1,8 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { useAppDispatch } from '../redux/store';
+import { useAppDispatch, useAppSelector } from '../redux/store';
 import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';
 import { useTimer } from '../context/TimerContext';
 import { useParams } from 'react-router-dom';
@@ -26,11 +24,9 @@ interface ModalState {
 }
 
 const ActivityGroupPage: FC = () => {
-  const activities = useSelector(
-    (state: RootState) => state.activities.activities
-  );
-  const currentSession = useSelector(
-    (state: RootState) => state.sessions.currentSession
+  const activities = useAppSelector((state) => state.activities.activities);
+  const currentSession = useAppSelector(
+    (state) => state.sessions.currentSession
   );
   const { activityGroupId } = useParams();
   const [currentActivityGroup, setCurrentActivityGroup] =

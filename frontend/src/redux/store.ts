@@ -3,7 +3,7 @@ import sessionReducer from './slices/sessionSlice';
 import activityReducer from './slices/activitySlice';
 import activityGroupReducer from './slices/activityGroupSlice';
 import userReducer from './slices//userSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const rootReducer = combineReducers({
   sessions: sessionReducer,
@@ -20,3 +20,4 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
 export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();

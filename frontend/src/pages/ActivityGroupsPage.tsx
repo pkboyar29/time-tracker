@@ -1,7 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { useAppDispatch } from '../redux/store';
+import { useAppDispatch, useAppSelector } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
 import {
   deleteActivityGroup,
@@ -21,8 +19,8 @@ interface DeleteModalState {
 }
 
 const ActivityGroupsPage: FC = () => {
-  const activityGroups = useSelector(
-    (state: RootState) => state.activityGroups.activityGroups
+  const activityGroups = useAppSelector(
+    (state) => state.activityGroups.activityGroups
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();

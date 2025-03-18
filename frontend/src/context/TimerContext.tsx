@@ -6,9 +6,7 @@ import {
   FC,
   useContext,
 } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { useAppDispatch } from '../redux/store';
+import { useAppDispatch, useAppSelector } from '../redux/store';
 import {
   changeSpentSeconds,
   updateSession,
@@ -42,8 +40,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const [startSpentSeconds, setStartSpentSeconds] = useState<number>(0); // here we store seconds
 
-  const currentSession = useSelector(
-    (state: RootState) => state.sessions.currentSession
+  const currentSession = useAppSelector(
+    (state) => state.sessions.currentSession
   );
   const dispatch = useAppDispatch();
 

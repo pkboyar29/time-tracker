@@ -6,9 +6,7 @@ import {
   resetCompletedSessionId,
   resetCurrentSession,
 } from '../redux/slices/sessionSlice';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { useAppDispatch } from '../redux/store';
+import { useAppDispatch, useAppSelector } from '../redux/store';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { useTimer } from '../context/TimerContext';
 
@@ -33,11 +31,11 @@ const TimerPage: FC = () => {
   const [note, setNote] = useState<string>('');
   const [isFocusedNote, setFocusedNote] = useState<boolean>(false);
 
-  const currentSession = useSelector(
-    (state: RootState) => state.sessions.currentSession
+  const currentSession = useAppSelector(
+    (state) => state.sessions.currentSession
   );
-  const completedSessionId = useSelector(
-    (state: RootState) => state.sessions.completedSessionId
+  const completedSessionId = useAppSelector(
+    (state) => state.sessions.completedSessionId
   );
 
   const dispatch = useAppDispatch();
