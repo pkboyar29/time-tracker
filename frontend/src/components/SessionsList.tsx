@@ -5,7 +5,7 @@ import { useAppDispatch } from '../redux/store';
 import { useTimer } from '../context/TimerContext';
 import {
   deleteSession,
-  resetSessionState,
+  resetCurrentSession,
   setCurrentSession,
   updateSession,
 } from '../redux/slices/sessionSlice';
@@ -103,7 +103,7 @@ const SessionsList: FC<SessionsListProps> = ({
     if (currentSession) {
       if (currentSession.id === sessionId) {
         stopTimer();
-        dispatch(resetSessionState());
+        dispatch(resetCurrentSession());
       }
     }
 

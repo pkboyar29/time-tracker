@@ -3,7 +3,8 @@ import {
   fetchSessions,
   updateSession,
   updateCurrentSessionNote,
-  resetSessionState,
+  resetCompletedSessionId,
+  resetCurrentSession,
 } from '../redux/slices/sessionSlice';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
@@ -35,6 +36,10 @@ const TimerPage: FC = () => {
   const currentSession = useSelector(
     (state: RootState) => state.sessions.currentSession
   );
+  const completedSessionId = useSelector(
+    (state: RootState) => state.sessions.completedSessionId
+  );
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -48,6 +53,7 @@ const TimerPage: FC = () => {
     fetchAllUncompletedSessions();
   }, []);
 
+  // TODO: разобраться с этим пока непонятным на первый взгляд useEffect
   useEffect(() => {
     if (currentSession) {
       if (!isFocusedNote) {
@@ -59,6 +65,16 @@ const TimerPage: FC = () => {
       }
     }
   }, [currentSession]);
+
+  useEffect(() => {
+    if (completedSessionId) {
+      setAllUncompletedSessions((prevSessions) =>
+        prevSessions.filter((s) => s.id !== completedSessionId)
+      );
+
+      dispatch(resetCompletedSessionId());
+    }
+  }, [completedSessionId]);
 
   const handleChangeNoteInput = (
     event: React.ChangeEvent<HTMLTextAreaElement>
@@ -127,11 +143,10 @@ const TimerPage: FC = () => {
   const handleStopButtonClick = () => {
     stopTimer();
 
-    // TODO: когда я обновляю сессию в глобальном состоянии, эта сессия не обновляется в списке сессий в TimerPage (добавить useEffect в TimerPage?)
     if (currentSession) {
       dispatch(updateSession(currentSession));
     }
-    dispatch(resetSessionState());
+    dispatch(resetCurrentSession());
   };
 
   return (
@@ -261,19 +276,24 @@ const TimerPage: FC = () => {
               Create new session
             </Button>
           </div>
-          <button
-            onClick={() => setUnompletedLess(!uncompletedLess)}
-            className="flex items-center gap-1 my-5 text-xl font-bold"
-          >
-            Uncompleted sessions{' '}
-            {uncompletedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-          </button>
 
-          {!uncompletedLess && (
-            <SessionsList
-              sessions={allUncompletedSessions}
-              updateSessionsList={updateSessionsList}
-            />
+          {allUncompletedSessions.length > 0 && (
+            <>
+              <button
+                onClick={() => setUnompletedLess(!uncompletedLess)}
+                className="flex items-center gap-1 my-5 text-xl font-bold"
+              >
+                Uncompleted sessions{' '}
+                {uncompletedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+              </button>
+
+              {!uncompletedLess && (
+                <SessionsList
+                  sessions={allUncompletedSessions}
+                  updateSessionsList={updateSessionsList}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

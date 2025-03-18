@@ -12,7 +12,8 @@ import { useAppDispatch } from '../redux/store';
 import {
   changeSpentSeconds,
   updateSession,
-  resetSessionState,
+  resetCurrentSession,
+  setCompletedSessionId,
 } from '../redux/slices/sessionSlice';
 import { playAudio } from '../helpers/audioHelpers';
 
@@ -28,7 +29,7 @@ const TimerContext = createContext<TimerContextType>({
   enabled: false,
 });
 
-TimerContext.Provider;
+// TimerContext.Provider;
 
 interface TimerProviderProps {
   children: ReactNode;
@@ -86,9 +87,12 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     if (currentSession) {
       if (currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds) {
         playAudio(0.35);
+
+        dispatch(setCompletedSessionId(currentSession.id));
+
         stopTimer();
         dispatch(updateSession(currentSession));
-        dispatch(resetSessionState());
+        dispatch(resetCurrentSession());
       }
     }
   }, [currentSession?.spentTimeSeconds]);

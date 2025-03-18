@@ -9,11 +9,13 @@ import * as localStorageHelpers from '../../helpers/localstorageHelpers';
 interface SessionState {
   currentSession: ISession | null;
   status: StateStatuses;
+  completedSessionId: string | null;
 }
 
 const initialState: SessionState = {
   currentSession: null,
   status: StateStatuses.idle,
+  completedSessionId: null,
 };
 
 export const fetchSessions = createAsyncThunk<
@@ -67,6 +69,7 @@ const sessionSlice = createSlice({
   reducers: {
     setCurrentSession(state, action: PayloadAction<ISession>) {
       state.currentSession = action.payload;
+      // TODO: убрать отсюда
       localStorageHelpers.saveSessionToLocalStorage(action.payload);
     },
     changeSpentSeconds(state, action: PayloadAction<number>) {
@@ -80,11 +83,22 @@ const sessionSlice = createSlice({
       }
     },
     loadCurrentSession(state) {
-      // TODO: тут надо брать извне и передавать сюда
+      // TODO: брать извне и передавать сюда
       const session = localStorageHelpers.loadSessionFromLocalStorage();
       if (session) {
         state.currentSession = session;
       }
+    },
+    resetCurrentSession(state) {
+      // TODO: делать это в другом месте?
+      localStorageHelpers.removeSessionFromLocalStorage();
+      state.currentSession = null;
+    },
+    setCompletedSessionId(state, action: PayloadAction<string>) {
+      state.completedSessionId = action.payload;
+    },
+    resetCompletedSessionId(state) {
+      state.completedSessionId = null;
     },
     reset() {
       localStorageHelpers.removeSessionFromLocalStorage();
@@ -95,10 +109,12 @@ const sessionSlice = createSlice({
     builder
       .addCase(createSession.fulfilled, (state, action) => {
         state.currentSession = action.payload;
+        // TODO: делать это в другом месте?
         localStorageHelpers.saveSessionToLocalStorage(action.payload);
       })
       .addCase(updateSession.fulfilled, (state, action) => {
         if (state.currentSession) {
+          // делать это в другом месте?
           localStorageHelpers.saveSessionToLocalStorage(action.payload);
         }
       });
@@ -110,6 +126,9 @@ export const {
   changeSpentSeconds,
   updateCurrentSessionNote,
   loadCurrentSession,
+  resetCurrentSession,
+  setCompletedSessionId,
+  resetCompletedSessionId,
   reset: resetSessionState,
 } = sessionSlice.actions;
 export default sessionSlice.reducer;
