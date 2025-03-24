@@ -15,6 +15,8 @@ import {
 } from '../redux/slices/sessionSlice';
 import { playAudio } from '../helpers/audioHelpers';
 
+import { ToastContainer, toast } from 'react-toastify';
+
 interface TimerContextType {
   toggleTimer: (startSpentSeconds: number) => void;
   stopTimer: (afterDelete?: boolean) => void;
@@ -26,8 +28,6 @@ const TimerContext = createContext<TimerContextType>({
   stopTimer: () => {},
   enabled: false,
 });
-
-// TimerContext.Provider;
 
 interface TimerProviderProps {
   children: ReactNode;
@@ -82,17 +82,28 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   }, [enabled, dispatch]);
 
   useEffect(() => {
-    if (currentSession) {
-      if (currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds) {
-        playAudio(0.35);
+    const checkIfTimePassed = async () => {
+      if (
+        currentSession &&
+        currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
+      ) {
+        try {
+          await dispatch(updateSession(currentSession)).unwrap();
 
-        dispatch(setCompletedSessionId(currentSession.id));
-
-        stopTimer();
-        dispatch(updateSession(currentSession));
-        dispatch(resetCurrentSession());
+          stopTimer();
+          playAudio(0.35);
+          dispatch(setCompletedSessionId(currentSession.id));
+          dispatch(resetCurrentSession());
+        } catch (e) {
+          toast('Произошла серверная ошибка при обновлении сессии', {
+            type: 'error',
+          });
+          stopTimer();
+        }
       }
-    }
+    };
+
+    checkIfTimePassed();
   }, [currentSession?.spentTimeSeconds]);
 
   useEffect(() => {
@@ -111,9 +122,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   }, [currentSession, dispatch]);
 
   return (
-    <TimerContext.Provider value={{ toggleTimer, stopTimer, enabled }}>
-      {children}
-    </TimerContext.Provider>
+    <>
+      <ToastContainer position="top-left" />
+
+      <TimerContext.Provider value={{ toggleTimer, stopTimer, enabled }}>
+        {children}
+      </TimerContext.Provider>
+    </>
   );
 };
 

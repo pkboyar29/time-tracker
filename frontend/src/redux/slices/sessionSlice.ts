@@ -44,6 +44,7 @@ export const createSession = createAsyncThunk<ISession, ISessionCreate>(
   }
 );
 
+// TODO: тут тоже надо как-то ошибки обрабатывать?
 export const updateSession = createAsyncThunk<ISession, ISession>(
   'sessions/updateSession',
   async (existingSessionData) => {
@@ -51,6 +52,7 @@ export const updateSession = createAsyncThunk<ISession, ISession>(
       `/sessions/${existingSessionData.id}`,
       existingSessionData
     );
+
     return mapSessionFromResponse(unmappedData);
   }
 );

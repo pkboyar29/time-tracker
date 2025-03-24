@@ -34,13 +34,17 @@ const App: FC = () => {
 
         <div className="w-full">
           <Routes>
-            {routeConfig.map((route) => (
+            {routeConfig.map((route, index) => (
               <Route
-                key={route.id}
+                key={index}
                 path={route.path}
                 element={<ProtectedRoute requiredAuth={route.requiredAuth} />}
               >
-                <Route path={route.path} element={route.element}></Route>
+                <Route
+                  key={index}
+                  path={route.path}
+                  element={route.element}
+                ></Route>
               </Route>
             ))}
           </Routes>
