@@ -82,6 +82,18 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   }, [enabled, dispatch]);
 
   useEffect(() => {
+    if (currentSession) {
+      if (enabled) {
+        document.title = 'Focus | Time Tracker';
+      } else {
+        document.title = 'Paused | Time Tracker';
+      }
+    } else {
+      document.title = 'Time Tracker';
+    }
+  }, [enabled, currentSession]);
+
+  useEffect(() => {
     const checkIfTimePassed = async () => {
       if (
         currentSession &&
