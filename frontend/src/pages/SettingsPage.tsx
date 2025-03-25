@@ -4,8 +4,6 @@ import { useAppDispatch, useAppSelector } from '../redux/store';
 import { logOutUser, updateDailyGoal } from '../redux/slices/userSlice';
 import { updateSession, resetSessionState } from '../redux/slices/sessionSlice';
 
-import { resetActivityGroupState } from '../redux/slices/activityGroupSlice';
-import { resetActivityState } from '../redux/slices/activitySlice';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
 import Title from '../components/Title';
@@ -31,8 +29,6 @@ const SettingsPage: FC = () => {
       await dispatch(updateSession(currentSession));
 
       dispatch(resetSessionState());
-      dispatch(resetActivityGroupState());
-      dispatch(resetActivityState());
     }
     dispatch(logOutUser());
     clearSession();

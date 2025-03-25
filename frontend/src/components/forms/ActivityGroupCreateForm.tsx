@@ -6,8 +6,10 @@ import { createActivityGroup } from '../../redux/slices/activityGroupSlice';
 import Button from '../Button';
 import Input from '../Input';
 
+import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
+
 interface ActivityGroupCreateFormProps {
-  afterSubmitHandler: () => void;
+  afterSubmitHandler: (newActivityGroup: IActivityGroup) => void;
 }
 
 interface ActivityGroupFields {
@@ -28,10 +30,16 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
     mode: 'onBlur',
   });
 
-  const onSubmit = (data: ActivityGroupFields) => {
-    console.log(data);
-    dispatch(createActivityGroup(data));
-    afterSubmitHandler();
+  const onSubmit = async (data: ActivityGroupFields) => {
+    try {
+      const newActivityGroup = await dispatch(
+        createActivityGroup(data)
+      ).unwrap();
+
+      afterSubmitHandler(newActivityGroup);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (

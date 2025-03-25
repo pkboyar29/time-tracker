@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../redux/store';
+import { useAppDispatch } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
 import {
   deleteActivityGroup,
@@ -12,6 +12,7 @@ import Modal from '../components/modals/Modal';
 import Title from '../components/Title';
 import ActivityItem from '../components/ActivityItem';
 import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm';
+import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
 interface DeleteModalState {
   deleteModal: boolean;
@@ -19,11 +20,10 @@ interface DeleteModalState {
 }
 
 const ActivityGroupsPage: FC = () => {
-  const activityGroups = useAppSelector(
-    (state) => state.activityGroups.activityGroups
-  );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const [activityGroups, setActivityGroups] = useState<IActivityGroup[]>([]);
 
   const [createModal, setCreateModal] = useState<boolean>(false);
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>();
@@ -31,7 +31,12 @@ const ActivityGroupsPage: FC = () => {
   const [searchString, setSearchString] = useState<string>('');
 
   useEffect(() => {
-    dispatch(fetchActivityGroups());
+    const fetch = async () => {
+      const payload = await dispatch(fetchActivityGroups()).unwrap();
+      setActivityGroups(payload);
+    };
+
+    fetch();
   }, []);
 
   const handleEditActivityGroupClick = (activityGroupId: string) => {
@@ -45,14 +50,27 @@ const ActivityGroupsPage: FC = () => {
     });
   };
 
-  const handleDeleteActivityGroupModal = () => {
+  const handleDeleteActivityGroupModal = async () => {
     if (deleteModal?.deletedGroupId) {
-      dispatch(deleteActivityGroup(deleteModal?.deletedGroupId));
+      try {
+        await dispatch(
+          deleteActivityGroup(deleteModal.deletedGroupId)
+        ).unwrap();
+
+        setActivityGroups((activityGroups) =>
+          activityGroups.filter(
+            (group) => group.id !== deleteModal.deletedGroupId
+          )
+        );
+
+        setDeleteModal({
+          deleteModal: false,
+          deletedGroupId: null,
+        });
+      } catch (e) {
+        console.log(e);
+      }
     }
-    setDeleteModal({
-      deleteModal: false,
-      deletedGroupId: null,
-    });
   };
 
   return (
@@ -63,7 +81,9 @@ const ActivityGroupsPage: FC = () => {
           onCloseModal={() => setCreateModal(false)}
         >
           <ActivityGroupCreateForm
-            afterSubmitHandler={() => {
+            afterSubmitHandler={(newActivityGroup) => {
+              setActivityGroups((groups) => [...groups, newActivityGroup]);
+
               setCreateModal(false);
             }}
           />

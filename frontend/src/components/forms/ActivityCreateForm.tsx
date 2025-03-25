@@ -6,8 +6,10 @@ import { createActivity } from '../../redux/slices/activitySlice';
 import Button from '../Button';
 import Input from '../Input';
 
+import { IActivity } from '../../ts/interfaces/Activity/IActivity';
+
 interface ActivityCreateFormProps {
-  afterSubmitHandler: () => void;
+  afterSubmitHandler: (newActivity: IActivity) => void;
   activityGroupId: string;
 }
 
@@ -30,14 +32,19 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
     mode: 'onBlur',
   });
 
-  const onSubmit = (data: ActivityFields) => {
-    dispatch(
-      createActivity({
-        ...data,
-        activityGroupId,
-      })
-    );
-    afterSubmitHandler();
+  const onSubmit = async (data: ActivityFields) => {
+    try {
+      const newActivity = await dispatch(
+        createActivity({
+          ...data,
+          activityGroupId,
+        })
+      ).unwrap();
+
+      afterSubmitHandler(newActivity);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (

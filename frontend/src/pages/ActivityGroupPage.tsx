@@ -16,6 +16,7 @@ import Modal from '../components/modals/Modal';
 import SessionCreateModal from '../components/modals/SessionCreateModal';
 
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
+import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { mapActivityGroupFromResponse } from '../helpers/mappingHelpers';
 
 interface ModalState {
@@ -24,13 +25,14 @@ interface ModalState {
 }
 
 const ActivityGroupPage: FC = () => {
-  const activities = useAppSelector((state) => state.activities.activities);
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
   );
   const { activityGroupId } = useParams();
   const [currentActivityGroup, setCurrentActivityGroup] =
     useState<IActivityGroup>();
+
+  const [activities, setActivities] = useState<IActivity[]>([]);
 
   const [createModal, setCreateModal] = useState<boolean>(false);
   const [deleteModal, setDeleteModal] = useState<ModalState>();
@@ -55,18 +57,35 @@ const ActivityGroupPage: FC = () => {
   }, [activityGroupId]);
 
   useEffect(() => {
-    if (activityGroupId) {
-      dispatch(fetchActivities(activityGroupId));
-    }
+    const fetch = async () => {
+      if (activityGroupId) {
+        const payload = await dispatch(
+          fetchActivities(activityGroupId)
+        ).unwrap();
+
+        setActivities(payload);
+      }
+    };
+
+    fetch();
   }, [activityGroupId]);
 
   const handleEditActivityClick = (activityId: string) => {
     navigate(`activities/${activityId}`);
   };
 
-  const handleDeleteActivityClick = (activityId: string) => {
-    setDeleteModal({ modal: false, selectedItemId: null });
-    dispatch(deleteActivity(activityId));
+  const handleDeleteActivityClick = async (activityId: string) => {
+    try {
+      await dispatch(deleteActivity(activityId)).unwrap();
+
+      setActivities((activities) =>
+        activities.filter((activity) => activity.id !== activityId)
+      );
+
+      setDeleteModal({ modal: false, selectedItemId: null });
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -85,7 +104,9 @@ const ActivityGroupPage: FC = () => {
         >
           {currentActivityGroup && (
             <ActivityCreateForm
-              afterSubmitHandler={() => {
+              afterSubmitHandler={(newActivity) => {
+                setActivities((activities) => [...activities, newActivity]);
+
                 setCreateModal(false);
               }}
               activityGroupId={currentActivityGroup.id}

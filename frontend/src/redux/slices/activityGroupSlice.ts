@@ -1,22 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axiosInstance from '../../axios';
+import { mapActivityGroupFromResponse } from '../../helpers/mappingHelpers';
+
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 import { IActivityGroupCreate } from '../../ts/interfaces/ActivityGroup/IActivityGroupCreate';
 import { IActivityGroupUpdate } from '../../ts/interfaces/ActivityGroup/IActivityGroupUpdate';
-import StateStatuses from '../../ts/enums/StateStatuses';
-import { mapActivityGroupFromResponse } from '../../helpers/mappingHelpers';
 
-interface ActivityGroupState {
-  activityGroups: IActivityGroup[];
-  status: StateStatuses;
-}
+interface ActivityGroupState {}
+const initialState: ActivityGroupState = {};
 
-const initialState: ActivityGroupState = {
-  activityGroups: [],
-  status: StateStatuses.idle,
-};
-
-export const fetchActivityGroups = createAsyncThunk(
+export const fetchActivityGroups = createAsyncThunk<IActivityGroup[], void>(
   'activity-groups/fetchActivityGroups',
   async () => {
     const { data: unmappedData } = await axiosInstance.get('/activity-groups');
@@ -28,7 +21,10 @@ export const fetchActivityGroups = createAsyncThunk(
   }
 );
 
-export const createActivityGroup = createAsyncThunk(
+export const createActivityGroup = createAsyncThunk<
+  IActivityGroup,
+  IActivityGroupCreate
+>(
   'activity-groups/createActivityGroup',
   async (newActivityGroupData: IActivityGroupCreate) => {
     const { data: unmappedData } = await axiosInstance.post(
@@ -65,46 +61,8 @@ export const deleteActivityGroup = createAsyncThunk(
 const activityGroupSlice = createSlice({
   name: 'activity-groups',
   initialState,
-  reducers: {
-    reset() {
-      return initialState;
-    },
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchActivityGroups.pending, (state) => {
-        state.status = StateStatuses.loading;
-      })
-      .addCase(fetchActivityGroups.fulfilled, (state, action) => {
-        state.status = StateStatuses.succeeded;
-        state.activityGroups = action.payload;
-      })
-      .addCase(fetchActivityGroups.rejected, (state) => {
-        state.status = StateStatuses.failed;
-      })
-      .addCase(createActivityGroup.fulfilled, (state, action) => {
-        state.activityGroups.push(action.payload);
-      })
-      .addCase(updateActivityGroup.fulfilled, (state, action) => {
-        state.activityGroups = state.activityGroups.map((activityGroup) => {
-          if (activityGroup.id === action.payload.id) {
-            return {
-              ...activityGroup,
-              name: action.payload.name,
-              descr: action.payload.descr,
-            };
-          } else {
-            return activityGroup;
-          }
-        });
-      })
-      .addCase(deleteActivityGroup.fulfilled, (state, action) => {
-        state.activityGroups = state.activityGroups.filter(
-          (activityGroup) => activityGroup.id !== action.meta.arg
-        );
-      });
-  },
+  reducers: {},
+  extraReducers: (builder) => {},
 });
 
-export const { reset: resetActivityGroupState } = activityGroupSlice.actions;
 export default activityGroupSlice.reducer;
