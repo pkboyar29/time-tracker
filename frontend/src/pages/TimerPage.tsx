@@ -159,7 +159,7 @@ const TimerPage: FC = () => {
         />
       )}
 
-      <div className="container flex justify-between mt-5">
+      <div className="container flex justify-between my-5">
         <div>
           {!currentSession ? (
             <div className="text-2xl font-semibold">

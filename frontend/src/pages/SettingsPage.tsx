@@ -55,7 +55,7 @@ const SettingsPage: FC = () => {
         </Modal>
       )}
 
-      <div className="container mt-5">
+      <div className="container">
         <Title>Settings</Title>
         <div className="my-5 text-lg">
           {userInfo?.firstName} {userInfo?.lastName}

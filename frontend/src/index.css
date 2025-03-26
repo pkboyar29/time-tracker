@@ -85,6 +85,13 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+html,
+body,
+#root,
+.App {
+  height: 100vh;
+}
+
 input,
 button,
 textarea {

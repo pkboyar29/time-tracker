@@ -35,7 +35,7 @@ const AnalyticsPage: FC = () => {
   }, []);
 
   return (
-    <div className="h-full pt-5 bg-custom">
+    <div className="h-full py-5 bg-custom">
       <div className="container">
         <Title>Session statistics</Title>
 

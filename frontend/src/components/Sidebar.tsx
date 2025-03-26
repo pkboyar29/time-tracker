@@ -10,7 +10,7 @@ const Sidebar: FC = () => {
   );
 
   return (
-    <div className="h-full p-5 border-r border-solid border-r-gray-500">
+    <div className="w-[150px] p-5 border-r border-solid border-r-gray-500">
       <ul className="flex flex-col items-center justify-between h-full">
         <div className="flex flex-col items-center gap-5">
           <li className="flex flex-col items-center gap-2">

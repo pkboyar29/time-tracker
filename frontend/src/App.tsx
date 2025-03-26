@@ -22,7 +22,6 @@ const App: FC = () => {
     }
   }, []);
 
-  // TODO: проверить работоспособность
   useEffect(() => {
     const currentSessionId = getSessionFromLocalStorage();
     if (requiredAuth && currentSessionId) {
@@ -32,10 +31,10 @@ const App: FC = () => {
 
   return (
     <>
-      <div id="app" className="flex w-full h-full min-h-full">
+      <div id="app" className="App h-screen grid grid-cols-[auto,1fr]">
         {requiredAuth && <Sidebar />}
 
-        <div className="w-full">
+        <div className="w-full overflow-y-auto">
           <Routes>
             {routeConfig.map((route, index) => (
               <Route
