@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useAppDispatch } from '../../redux/store';
 import axios from '../../axios';
 import { createSession } from '../../redux/slices/sessionSlice';
+import { saveSessionToLocalStorage } from '../../helpers/localstorageHelpers';
 
 import Modal from './Modal';
 import Button from '../Button';
@@ -46,7 +47,6 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   });
   const dispatch = useAppDispatch();
 
-  // TODO: начать получать все активности с названиями активностей групп
   useEffect(() => {
     const fetchActivities = async () => {
       const { data } = await axios.get('/activities');
@@ -66,15 +66,16 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
 
   const onSubmit = async (data: SessionFields) => {
     try {
-      const { payload } = await dispatch(
+      const payload = await dispatch(
         createSession({
           totalTimeSeconds: minutes * 60,
           spentTimeSeconds: 0,
           activity: data.activity !== '' ? data.activity : undefined,
         })
-      );
+      ).unwrap();
+      saveSessionToLocalStorage(payload.id);
 
-      afterSubmitHandler(payload as ISession);
+      afterSubmitHandler(payload);
     } catch (e) {
       console.log(e);
     }

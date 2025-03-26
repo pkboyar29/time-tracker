@@ -1,8 +1,5 @@
-import { ISession } from '../ts/interfaces/Session/ISession';
-
-const saveSessionToLocalStorage = (session: ISession) => {
-  const sessionJson = JSON.stringify(session);
-  window.localStorage.setItem('session', sessionJson);
+const saveSessionToLocalStorage = (sessionId: string) => {
+  window.localStorage.setItem('session', sessionId);
 };
 
 const removeSessionFromLocalStorage = () => {
@@ -11,15 +8,10 @@ const removeSessionFromLocalStorage = () => {
   }
 };
 
-const loadSessionFromLocalStorage = (): ISession | null => {
-  const sessionJson = window.localStorage.getItem('session');
-  if (sessionJson) {
-    // TODO: обработать ошибку когда в session хранится не сессия в формате json, а непонятно что
-    // да и вообще надо попытаться запретить изменение local storage, но по-моему это невозможно
-    // в любом случае, если десериализовать не получится, то очистить полностью local storage и в консоль можно вывести сообщение
-    const session: ISession = JSON.parse(sessionJson);
-
-    return session;
+const getSessionFromLocalStorage = (): string | null => {
+  const sessionId = window.localStorage.getItem('session');
+  if (sessionId) {
+    return sessionId;
   }
   return null;
 };
@@ -27,5 +19,5 @@ const loadSessionFromLocalStorage = (): ISession | null => {
 export {
   saveSessionToLocalStorage,
   removeSessionFromLocalStorage,
-  loadSessionFromLocalStorage,
+  getSessionFromLocalStorage,
 };

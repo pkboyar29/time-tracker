@@ -9,11 +9,16 @@ import {
   setCurrentSession,
   updateSession,
 } from '../redux/slices/sessionSlice';
-import { ISession } from '../ts/interfaces/Session/ISession';
+import {
+  removeSessionFromLocalStorage,
+  saveSessionToLocalStorage,
+} from '../helpers/localstorageHelpers';
 
 import SessionItem from './SessionItem';
 import Button from '../components/Button';
 import Modal from './modals/Modal';
+
+import { ISession } from '../ts/interfaces/Session/ISession';
 
 interface SessionsListProps {
   sessions: ISession[];
@@ -91,10 +96,12 @@ const SessionsList: FC<SessionsListProps> = ({
         toggleTimer(currentSession.spentTimeSeconds);
       } else {
         dispatch(setCurrentSession(session));
+        saveSessionToLocalStorage(session.id);
         toggleTimer(session.spentTimeSeconds);
       }
     } else {
       dispatch(setCurrentSession(session));
+      saveSessionToLocalStorage(session.id);
       toggleTimer(session.spentTimeSeconds);
     }
   };
@@ -104,6 +111,7 @@ const SessionsList: FC<SessionsListProps> = ({
       if (currentSession.id === sessionId) {
         stopTimer();
         dispatch(resetCurrentSession());
+        removeSessionFromLocalStorage();
       }
     }
 

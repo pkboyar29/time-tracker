@@ -6,17 +6,18 @@ import {
   resetCompletedSessionId,
   resetCurrentSession,
 } from '../redux/slices/sessionSlice';
+import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { useTimer } from '../context/TimerContext';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
 import CustomCircularProgress from '../components/CustomCircularProgress';
 import SessionsList from '../components/SessionsList';
 import Button from '../components/Button';
 import SessionCreateModal from '../components/modals/SessionCreateModal';
+
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
@@ -145,6 +146,7 @@ const TimerPage: FC = () => {
       dispatch(updateSession(currentSession));
     }
     dispatch(resetCurrentSession());
+    removeSessionFromLocalStorage();
   };
 
   return (

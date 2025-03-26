@@ -3,20 +3,28 @@ import axiosInstance from '../../axios';
 import { mapSessionFromResponse } from '../../helpers/mappingHelpers';
 import { ISession } from '../../ts/interfaces/Session/ISession';
 import { ISessionCreate } from '../../ts/interfaces/Session/ISessionCreate';
-import StateStatuses from '../../ts/enums/StateStatuses';
 import * as localStorageHelpers from '../../helpers/localstorageHelpers';
 
 interface SessionState {
   currentSession: ISession | null;
-  status: StateStatuses;
   completedSessionId: string | null;
 }
 
 const initialState: SessionState = {
   currentSession: null,
-  status: StateStatuses.idle,
   completedSessionId: null,
 };
+
+export const loadCurrentSession = createAsyncThunk<ISession, string>(
+  'sessions/loadCurrentSession',
+  async (sessionId) => {
+    const { data: unmappedData } = await axiosInstance.get(
+      `/sessions/${sessionId}`
+    );
+
+    return mapSessionFromResponse(unmappedData);
+  }
+);
 
 export const fetchSessions = createAsyncThunk<
   ISession[],
@@ -71,8 +79,9 @@ const sessionSlice = createSlice({
   reducers: {
     setCurrentSession(state, action: PayloadAction<ISession>) {
       state.currentSession = action.payload;
-      // TODO: убрать отсюда
-      localStorageHelpers.saveSessionToLocalStorage(action.payload);
+    },
+    resetCurrentSession(state) {
+      state.currentSession = null;
     },
     changeSpentSeconds(state, action: PayloadAction<number>) {
       if (state.currentSession) {
@@ -84,18 +93,6 @@ const sessionSlice = createSlice({
         state.currentSession.note = action.payload;
       }
     },
-    loadCurrentSession(state) {
-      // TODO: брать извне и передавать сюда
-      const session = localStorageHelpers.loadSessionFromLocalStorage();
-      if (session) {
-        state.currentSession = session;
-      }
-    },
-    resetCurrentSession(state) {
-      // TODO: делать это в другом месте?
-      localStorageHelpers.removeSessionFromLocalStorage();
-      state.currentSession = null;
-    },
     setCompletedSessionId(state, action: PayloadAction<string>) {
       state.completedSessionId = action.payload;
     },
@@ -103,7 +100,6 @@ const sessionSlice = createSlice({
       state.completedSessionId = null;
     },
     reset() {
-      localStorageHelpers.removeSessionFromLocalStorage();
       return initialState;
     },
   },
@@ -111,24 +107,18 @@ const sessionSlice = createSlice({
     builder
       .addCase(createSession.fulfilled, (state, action) => {
         state.currentSession = action.payload;
-        // TODO: делать это в другом месте?
-        localStorageHelpers.saveSessionToLocalStorage(action.payload);
       })
-      .addCase(updateSession.fulfilled, (state, action) => {
-        if (state.currentSession) {
-          // делать это в другом месте?
-          localStorageHelpers.saveSessionToLocalStorage(action.payload);
-        }
+      .addCase(loadCurrentSession.fulfilled, (state, action) => {
+        state.currentSession = action.payload;
       });
   },
 });
 
 export const {
   setCurrentSession,
+  resetCurrentSession,
   changeSpentSeconds,
   updateCurrentSessionNote,
-  loadCurrentSession,
-  resetCurrentSession,
   setCompletedSessionId,
   resetCompletedSessionId,
   reset: resetSessionState,

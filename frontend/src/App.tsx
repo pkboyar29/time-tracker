@@ -5,6 +5,7 @@ import ProtectedRoute from './router/ProtectedRoute';
 import { useAppDispatch } from './redux/store';
 import { loadCurrentSession } from './redux/slices/sessionSlice';
 import { fetchProfileInfo } from './redux/slices/userSlice';
+import { getSessionFromLocalStorage } from './helpers/localstorageHelpers';
 
 import Sidebar from './components/Sidebar';
 
@@ -17,13 +18,15 @@ const App: FC = () => {
 
   useEffect(() => {
     if (requiredAuth) {
-      dispatch(loadCurrentSession());
+      dispatch(fetchProfileInfo());
     }
   }, []);
 
+  // TODO: проверить работоспособность
   useEffect(() => {
-    if (requiredAuth) {
-      dispatch(fetchProfileInfo());
+    const currentSessionId = getSessionFromLocalStorage();
+    if (requiredAuth && currentSessionId) {
+      dispatch(loadCurrentSession(currentSessionId));
     }
   }, []);
 

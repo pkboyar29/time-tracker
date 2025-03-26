@@ -13,6 +13,7 @@ import {
   resetCurrentSession,
   setCompletedSessionId,
 } from '../redux/slices/sessionSlice';
+import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -106,6 +107,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           playAudio(0.35);
           dispatch(setCompletedSessionId(currentSession.id));
           dispatch(resetCurrentSession());
+          removeSessionFromLocalStorage();
         } catch (e) {
           toast('Произошла серверная ошибка при обновлении сессии', {
             type: 'error',
