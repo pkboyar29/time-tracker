@@ -72,7 +72,7 @@ const SignInPage: FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center mt-32">
+    <div className="flex flex-col items-center justify-center w-full mt-32">
       {modal && (
         <Modal
           title="Successful authorization!"
