@@ -1,8 +1,8 @@
 const getWeekDays = (date: Date): Date[] => {
-  let startOfWeekDate: Date = date;
   const initialDayOfWeek: number = date.getDay();
 
   // find start of week in date format (start of week - 0 index - sunday)
+  let startOfWeekDate: Date = new Date(date);
   for (let i = initialDayOfWeek; i > 0; i--) {
     startOfWeekDate.setDate(startOfWeekDate.getDate() - 1);
   }
@@ -11,7 +11,7 @@ const getWeekDays = (date: Date): Date[] => {
   let daysOfWeek: Date[] = [startOfWeekDate];
   let dateInLoop: Date = new Date(startOfWeekDate);
   for (let i = 1; i < 7; i++) {
-    dateInLoop.setDate(startOfWeekDate.getDate() + i);
+    dateInLoop.setDate(dateInLoop.getDate() + 1);
     daysOfWeek.push(new Date(dateInLoop));
   }
 

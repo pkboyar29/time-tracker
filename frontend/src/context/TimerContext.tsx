@@ -101,7 +101,12 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
       ) {
         try {
-          await dispatch(updateSession(currentSession)).unwrap();
+          await dispatch(
+            updateSession({
+              ...currentSession,
+              spentTimeSeconds: currentSession.totalTimeSeconds,
+            })
+          ).unwrap();
 
           stopTimer();
           playAudio(0.35);
