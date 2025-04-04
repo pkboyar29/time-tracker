@@ -55,7 +55,7 @@ const SettingsPage: FC = () => {
         </Modal>
       )}
 
-      <div className="container">
+      <div className="container py-5">
         <Title>Settings</Title>
         <div className="my-5 text-lg">
           {userInfo?.firstName} {userInfo?.lastName}

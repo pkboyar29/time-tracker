@@ -67,7 +67,7 @@ const AnalyticsMonthsPage: FC = () => {
   }, []);
 
   return (
-    <div className="h-screen bg-custom">
+    <div className="flex flex-col h-full bg-custom">
       <div className="flex justify-center py-5 border-b border-solid border-b-gray-400">
         <MonthsBox
           months={months}
@@ -79,7 +79,7 @@ const AnalyticsMonthsPage: FC = () => {
       </div>
 
       {monthStatistics?.spentTimeSeconds !== 0 ? (
-        <div className="flex h-full">
+        <div className="flex flex-1">
           <div className="w-1/2 px-4 border-r border-gray-400 border-solid">
             <div className="flex flex-col gap-5 mt-5">
               {monthStatistics && (

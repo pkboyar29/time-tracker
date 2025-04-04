@@ -101,8 +101,8 @@ const ActivityGroupsPage: FC = () => {
         </Modal>
       )}
 
-      <div className="container">
-        <div className="flex justify-between mt-5">
+      <div className="container my-5">
+        <div className="flex justify-between">
           <Title>All activity groups</Title>
           <div className="flex h-full gap-5">
             <div className="relative flex">

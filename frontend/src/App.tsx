@@ -31,7 +31,12 @@ const App: FC = () => {
 
   return (
     <>
-      <div id="app" className="App h-screen grid grid-cols-[auto,1fr]">
+      <div
+        id="app"
+        className={`App h-screen ${
+          requiredAuth ? 'grid grid-cols-[auto,1fr]' : ''
+        }`}
+      >
         {requiredAuth && <Sidebar />}
 
         <div className="w-full overflow-y-auto">
