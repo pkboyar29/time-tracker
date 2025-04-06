@@ -141,6 +141,15 @@ export default {
     return this.getAnalyticsForRange(startMonth, endMonth, userId);
   },
 
+  async getAnalyticsForYear(
+    year: number,
+    userId: string
+  ): Promise<AnalyticsForRangeDTO | undefined> {
+    const startYear: Date = new Date(`${year}-01-01`);
+    const endYear: Date = new Date(`${year}-12-31`);
+    return this.getAnalyticsForRange(startYear, endYear, userId);
+  },
+
   async getOverallAnalytics(
     userId: string
   ): Promise<AnalyticsForRangeDTO | undefined> {

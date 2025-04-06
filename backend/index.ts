@@ -17,7 +17,7 @@ const MONGO_URL = process.env.MONGO_URL || '';
 const PORT = process.env.PORT || 7000;
 
 mongoose.connect(MONGO_URL).then(() => {
-  console.log('connection is successful');
+  console.log('connection with database is successful');
 });
 
 app.use(bodyParser.json());
