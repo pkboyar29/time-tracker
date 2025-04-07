@@ -4,6 +4,7 @@ import TimerPage from '../pages/TimerPage';
 import AnalyticsPage from '../pages/AnalyticsPage';
 import AnalyticsDaysPage from '../pages/AnalyticsDaysPage';
 import AnalyticsMonthsPage from '../pages/AnalyticsMonthsPage';
+import AnalyticsYearsPage from '../pages/AnalyticsYearsPage';
 import ActivityGroupsPage from '../pages/ActivityGroupsPage';
 import ActivityPage from '../pages/ActivityPage';
 import ActivityGroupPage from '../pages/ActivityGroupPage';
@@ -50,6 +51,11 @@ const routeConfig: RouteType[] = [
   {
     path: '/analytics/months/:date',
     element: <AnalyticsMonthsPage />,
+    requiredAuth: true,
+  },
+  {
+    path: '/analytics/years/:date',
+    element: <AnalyticsYearsPage />,
     requiredAuth: true,
   },
   {

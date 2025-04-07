@@ -58,6 +58,9 @@ const AnalyticsPage: FC = () => {
             <LinkBox link={`months/${currentDayString}`}>
               analytics by months
             </LinkBox>
+            <LinkBox link={`years/${currentDayString}`}>
+              analytics by years
+            </LinkBox>
           </div>
         </div>
       </div>

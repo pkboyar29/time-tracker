@@ -85,10 +85,34 @@ const shiftFiveMonths = (fiveMonths: Date[], right: boolean): Date[] => {
   return newFiveMonths;
 };
 
+const getTwoYears = (yearDate: Date): Date[] => {
+  const previousYearDate: Date = new Date(yearDate);
+  previousYearDate.setFullYear(yearDate.getFullYear() - 1);
+
+  const twoYears: Date[] = [previousYearDate, yearDate];
+  return twoYears;
+};
+
+const shiftTwoYears = (twoYears: Date[], right: boolean): Date[] => {
+  let newTwoYears: Date[] = [];
+  for (let i = 0; i < 2; i++) {
+    newTwoYears.push(twoYears[i]);
+  }
+
+  const step: number = right ? 2 : -2;
+  for (let i = 0; i < 2; i++) {
+    newTwoYears[i].setFullYear(newTwoYears[i].getFullYear() + step);
+  }
+
+  return newTwoYears;
+};
+
 export {
   getWeekDays,
   getDayOfWeekName,
   shiftWeek,
   getFiveMonths,
   shiftFiveMonths,
+  getTwoYears,
+  shiftTwoYears,
 };
