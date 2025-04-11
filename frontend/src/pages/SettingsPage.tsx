@@ -3,6 +3,8 @@ import { clearSession } from '../helpers/authHelpers';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { logOutUser, updateDailyGoal } from '../redux/slices/userSlice';
 import { updateSession, resetSessionState } from '../redux/slices/sessionSlice';
+import axios from '../axios';
+import { resolveAndDownloadBlob } from '../helpers/fileHelpers';
 
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
@@ -46,6 +48,18 @@ const SettingsPage: FC = () => {
     }
   };
 
+  const downloadUserDataFile = async () => {
+    const response = await axios.get(`/users/export`, {
+      responseType: 'blob',
+    });
+    const contentDisposition: string = response.headers['content-disposition'];
+
+    resolveAndDownloadBlob(
+      response,
+      contentDisposition.substring(22, contentDisposition.length - 1)
+    );
+  };
+
   return (
     <>
       {logoutModal && (
@@ -70,10 +84,18 @@ const SettingsPage: FC = () => {
             className="w-16 border-b border-gray-400 border-solid"
           />
         </div>
-        <div className="inline-block">
-          <Button onClick={() => setLogoutModal(true)}>
-            Log out of your account
-          </Button>
+        <div className="flex gap-4">
+          <div>
+            <Button onClick={downloadUserDataFile}>
+              Export user data to file
+            </Button>
+          </div>
+
+          <div>
+            <Button onClick={() => setLogoutModal(true)}>
+              Log out of your account
+            </Button>
+          </div>
         </div>
       </div>
     </>
