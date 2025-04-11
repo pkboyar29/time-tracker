@@ -41,7 +41,7 @@ export default {
         deleted: false,
         activityGroup: activityGroupId,
         user: userId,
-      });
+      }).sort({ createdDate: -1 });
       const detailedActivitiesPromises = activities.map(async (activity) =>
         completed !== undefined
           ? this.getActivity(activity._id.toString(), userId, completed)

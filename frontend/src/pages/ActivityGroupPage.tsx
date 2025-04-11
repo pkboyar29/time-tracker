@@ -105,7 +105,7 @@ const ActivityGroupPage: FC = () => {
           {currentActivityGroup && (
             <ActivityCreateForm
               afterSubmitHandler={(newActivity) => {
-                setActivities((activities) => [...activities, newActivity]);
+                setActivities((activities) => [newActivity, ...activities]);
 
                 setCreateModal(false);
               }}

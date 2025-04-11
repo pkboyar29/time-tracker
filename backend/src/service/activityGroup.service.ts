@@ -9,7 +9,7 @@ export default {
       const activityGroups = await ActivityGroup.find({
         deleted: false,
         user: userId,
-      });
+      }).sort({ createdDate: -1 });
 
       const detailedActivityGroups = await Promise.all(
         activityGroups.map(async (activityGroup) => {

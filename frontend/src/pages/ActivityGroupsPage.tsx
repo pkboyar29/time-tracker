@@ -82,7 +82,7 @@ const ActivityGroupsPage: FC = () => {
         >
           <ActivityGroupCreateForm
             afterSubmitHandler={(newActivityGroup) => {
-              setActivityGroups((groups) => [...groups, newActivityGroup]);
+              setActivityGroups((groups) => [newActivityGroup, ...groups]);
 
               setCreateModal(false);
             }}
