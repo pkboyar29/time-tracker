@@ -28,7 +28,8 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({
         <div className="text-xl">
           You acheived{' '}
           <span className="font-bold">
-            {Math.trunc(spentTimeSeconds / 60)} minutes /{' '}
+            {Math.trunc(spentTimeSeconds / 60)} minutes (
+            {Math.trunc((spentTimeSeconds / dailyGoalSeconds) * 100)}%) /{' '}
             {Math.trunc(dailyGoalSeconds / 60)} minutes
           </span>
         </div>
