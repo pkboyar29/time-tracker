@@ -4,7 +4,7 @@ import { ActivityGroupDTO } from '../dto/activityGroup.dto';
 import activityService from './activity.service';
 
 export default {
-  async getActivityGroups(userId: string) {
+  async getActivityGroups(userId: string, completed?: boolean) {
     try {
       const activityGroups = await ActivityGroup.find({
         deleted: false,
@@ -13,7 +13,15 @@ export default {
 
       const detailedActivityGroups = await Promise.all(
         activityGroups.map(async (activityGroup) => {
-          return this.getActivityGroup(activityGroup._id.toString(), userId);
+          const detailedGroup =
+            completed !== undefined
+              ? this.getActivityGroup(
+                  activityGroup._id.toString(),
+                  userId,
+                  completed
+                )
+              : this.getActivityGroup(activityGroup._id.toString(), userId);
+          return detailedGroup;
         })
       );
 
@@ -23,17 +31,28 @@ export default {
     }
   },
 
-  async getActivityGroup(activityGroupId: string, userId: string) {
+  async getActivityGroup(
+    activityGroupId: string,
+    userId: string,
+    completed?: boolean
+  ) {
     try {
       if (!(await this.existsActivityGroup(activityGroupId, userId))) {
         throw new Error('Activity Group Not Found');
       }
       const activityGroup = await ActivityGroup.findById(activityGroupId);
 
-      const activities = await activityService.getActivitiesForActivityGroup(
-        activityGroupId,
-        userId
-      );
+      const activities =
+        completed !== undefined
+          ? await activityService.getActivitiesForActivityGroup(
+              activityGroupId,
+              userId,
+              completed
+            )
+          : await activityService.getActivitiesForActivityGroup(
+              activityGroupId,
+              userId
+            );
       let sessionsAmount: number = 0;
       let spentTimeSeconds: number = 0;
       if (activities) {

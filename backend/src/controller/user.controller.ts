@@ -75,4 +75,16 @@ router.put('/updateDailyGoal', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/export', async (req: Request, res: Response) => {
+  try {
+    const buffer = await userService.exportUserData(res.locals.userId);
+
+    res.setHeader('Content-Disposition', 'attachment; filename="userData.md"');
+    res.setHeader('Content-Type', 'text/plain');
+    res.status(200).send(buffer);
+  } catch (e) {
+    console.log(e);
+  }
+});
+
 export default router;

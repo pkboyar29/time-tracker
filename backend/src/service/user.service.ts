@@ -1,5 +1,8 @@
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
 import User from '../model/user.model';
+import activityGroupService from './activityGroup.service';
+import activityService from './activity.service';
+import sessionService from './session.service';
 import { genSaltSync, hashSync, compareSync } from 'bcrypt';
 import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
 
@@ -68,7 +71,8 @@ export default {
     };
 
     token = jsonwebtoken.sign(payload, secretKey, {
-      expiresIn: tokenType === 'access' ? '300s' : '5d',
+      // поменять access на 300s
+      expiresIn: tokenType === 'access' ? '5d' : '5d',
     });
     return token;
   },
@@ -173,5 +177,86 @@ export default {
         throw new Error(e.message);
       }
     }
+  },
+
+  async exportUserData(userId: string): Promise<Buffer> {
+    let fileContent = '';
+
+    const getSessionsInfoInBrackets = (info: {
+      sessionsAmount: number;
+      spentTimeSeconds: number;
+    }) => {
+      return ` (${info.sessionsAmount} sessions, ${Math.floor(
+        info.spentTimeSeconds / 60
+      )} minutes, ${Math.floor(info.spentTimeSeconds / 3600)} hours)`;
+    };
+
+    const activityGroups = await activityGroupService.getActivityGroups(
+      userId,
+      true
+    );
+    for (const group of activityGroups || []) {
+      if (group?.name) {
+        fileContent = fileContent.concat(
+          '# ',
+          group.name,
+          getSessionsInfoInBrackets({
+            sessionsAmount: group.sessionsAmount,
+            spentTimeSeconds: group.spentTimeSeconds,
+          }),
+          '\n'
+        );
+
+        const activities =
+          group._id &&
+          (await activityService.getActivitiesForActivityGroup(
+            group._id.toString(),
+            userId,
+            true
+          ));
+        let activitiesContent = '';
+        activities?.forEach((activity, index) => {
+          if (activity?.name) {
+            activitiesContent = activitiesContent.concat(
+              `${index + 1}. `,
+              activity.name,
+              getSessionsInfoInBrackets({
+                sessionsAmount: activity.sessionsAmount,
+                spentTimeSeconds: activity.spentTimeSeconds,
+              }),
+              '\n'
+            );
+          }
+        });
+
+        fileContent = fileContent.concat(activitiesContent);
+      }
+    }
+
+    const sessionsWithoutActivity = await sessionService.getSessions(
+      { activity: undefined, completed: true },
+      userId
+    );
+    const sessionsWithoutActivityAmount: number =
+      sessionsWithoutActivity?.length ?? 0;
+    let sessionsWithoutActivitySpentTimeSeconds: number = 0;
+    sessionsWithoutActivity?.forEach((s) => {
+      sessionsWithoutActivitySpentTimeSeconds += s.spentTimeSeconds;
+    });
+
+    const withoutActivityLine: string = `# Without activity ${getSessionsInfoInBrackets(
+      {
+        sessionsAmount: sessionsWithoutActivityAmount,
+        spentTimeSeconds: sessionsWithoutActivitySpentTimeSeconds,
+      }
+    )}`;
+    fileContent = fileContent.concat(withoutActivityLine);
+
+    // TODO: в activity group считать только закомпличенные сессии
+    // TODO: в actviity считать только закомличенные сесии
+
+    const buffer = Buffer.from(fileContent, 'utf-8');
+
+    return buffer;
   },
 };

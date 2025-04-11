@@ -7,7 +7,10 @@ import activityGroupService from './activityGroup.service';
 export default {
   async getActivities(userId: string) {
     try {
-      const activities = await Activity.find({ deleted: false, user: userId });
+      const activities = await Activity.find({
+        deleted: false,
+        user: userId,
+      });
       const detailedActivities = await Promise.all(
         activities.map(async (activity) =>
           this.getActivity(activity._id.toString(), userId)
@@ -20,7 +23,11 @@ export default {
     }
   },
 
-  async getActivitiesForActivityGroup(activityGroupId: string, userId: string) {
+  async getActivitiesForActivityGroup(
+    activityGroupId: string,
+    userId: string,
+    completed?: boolean
+  ) {
     try {
       if (
         !(await activityGroupService.existsActivityGroup(
@@ -36,7 +43,9 @@ export default {
         user: userId,
       });
       const detailedActivitiesPromises = activities.map(async (activity) =>
-        this.getActivity(activity._id.toString(), userId)
+        completed !== undefined
+          ? this.getActivity(activity._id.toString(), userId, completed)
+          : this.getActivity(activity._id.toString(), userId)
       );
       const detailedActivities = await Promise.all(detailedActivitiesPromises); // wait for resolving all promises
 
@@ -46,7 +55,7 @@ export default {
     }
   },
 
-  async getActivity(activityId: string, userId: string) {
+  async getActivity(activityId: string, userId: string, completed?: boolean) {
     try {
       if (!(await this.existsActivity(activityId, userId))) {
         throw new Error('Activity Not Found');
@@ -56,10 +65,14 @@ export default {
         .populate('activityGroup', 'id name')
         .exec();
 
-      const sessions = await sessionService.getSessionsForActivity(
-        activityId,
-        userId
-      );
+      const sessions =
+        completed !== undefined
+          ? await sessionService.getSessionsForActivity(
+              activityId,
+              userId,
+              completed
+            )
+          : await sessionService.getSessionsForActivity(activityId, userId);
       const spentTimeSeconds = sessions?.reduce(
         (total: number, session) => total + session.spentTimeSeconds,
         0
@@ -67,8 +80,8 @@ export default {
 
       return {
         ...activity?.toObject(),
-        sessionsAmount: sessions?.length,
-        spentTimeSeconds,
+        sessionsAmount: sessions?.length ?? 0,
+        spentTimeSeconds: spentTimeSeconds ?? 0,
       };
     } catch (e) {
       this.handleError(e);
