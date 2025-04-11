@@ -18,7 +18,7 @@ const getRemainingTimeHoursMinutesSeconds = (
 const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   const hours: number = Math.trunc(allSeconds / 3600);
   const formattedHours: string = hours < 10 ? '0' + hours : hours.toString();
-  const minutes: number = Math.trunc(allSeconds / 60);
+  const minutes: number = Math.trunc(allSeconds / 60) - hours * 60;
   const formattedMinutes: string =
     minutes < 10 ? '0' + minutes : minutes.toString();
   const seconds: number = allSeconds % 60;
