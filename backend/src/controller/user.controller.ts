@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import userService from '../service/user.service';
+import { upload } from '../helpers/multer';
 
 const router = Router();
 
@@ -87,5 +88,59 @@ router.get('/export', async (req: Request, res: Response) => {
     console.log(e);
   }
 });
+
+// router.post('/import', async (req: Request, res: Response) => {
+//   try {
+//     res.status(200).send('Импорт успешен');
+//   } catch (e) {
+//     console.log(e);
+//   }
+// });
+
+router.post(
+  '/import',
+  upload.single('file'),
+  async (req: Request, res: Response) => {
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).send('You didnt send file!');
+    }
+
+    const sessionDurationParam = req.body.sessionDuration;
+    const sessionDuration = Number(sessionDurationParam);
+    if (!sessionDurationParam) {
+      return res.status(400).send('sessionsDuration body param is required!');
+    }
+    if (Number.isNaN(sessionDuration)) {
+      return res
+        .status(400)
+        .send('sessionsDuration body param should be number!');
+    }
+    if (sessionDuration > 36000) {
+      return res
+        .status(400)
+        .send(
+          'sessionsDuration body param should be maximum 36000 seconds (10 hours)!'
+        );
+    }
+    if (sessionDuration <= 0) {
+      return res
+        .status(400)
+        .send('sessionsDuration body param should be minimum 1 second!');
+    }
+
+    const buffer = file.buffer;
+    const fileContent = buffer.toString('utf-8');
+
+    const responseMessage = await userService.importFile(
+      fileContent,
+      sessionDuration,
+      res.locals.userId
+    );
+
+    res.status(200).send(responseMessage);
+  }
+);
 
 export default router;

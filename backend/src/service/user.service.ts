@@ -1,10 +1,16 @@
+import { genSaltSync, hashSync, compareSync } from 'bcrypt';
+import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
+import mongoose from 'mongoose';
+
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
-import User from '../model/user.model';
 import activityGroupService from './activityGroup.service';
 import activityService from './activity.service';
 import sessionService from './session.service';
-import { genSaltSync, hashSync, compareSync } from 'bcrypt';
-import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
+import User from '../model/user.model';
+import ActivityGroup from '../model/activityGroup.model';
+import Activity from '../model/activity.model';
+import Session from '../model/session.model';
+import SessionPart from '../model/sessionPart.model';
 
 interface AuthorizeResponse {
   access: string;
@@ -252,11 +258,94 @@ export default {
     )}`;
     fileContent = fileContent.concat(withoutActivityLine);
 
-    // TODO: в activity group считать только закомпличенные сессии
-    // TODO: в actviity считать только закомличенные сесии
-
     const buffer = Buffer.from(fileContent, 'utf-8');
-
     return buffer;
+  },
+
+  async importFile(
+    fileContent: string,
+    sessionDuration: number,
+    userId: string
+  ): Promise<string> {
+    const fileLines = fileContent.split('\n');
+
+    let activeActivityGroup;
+    let activeDate = new Date();
+
+    for (let i = 0; i < fileLines.length; i++) {
+      if (fileLines[i].length == 0) {
+        continue;
+      }
+
+      // обрабатываем строки с группами активности
+      if (fileLines[i].startsWith('# ')) {
+        const groupLine = fileLines[i].substring(2).trim();
+
+        const lastSpaceIndex = groupLine.lastIndexOf(' ');
+        const name = groupLine.slice(0, lastSpaceIndex).trim();
+        const dateString = groupLine.slice(lastSpaceIndex + 1).trim();
+
+        // дополнительная проверка корректности даты
+        activeDate = new Date(dateString);
+        if (isNaN(activeDate.getTime())) {
+          throw new Error(
+            `Invalid date format in group line: "${fileLines[i]}"`
+          );
+        }
+
+        activeActivityGroup = await new ActivityGroup({
+          name,
+          user: userId,
+        }).save();
+
+        continue;
+      }
+
+      // обрабатываем строки с активностями
+      const cleanedActivityLine = fileLines[i].replace(/^\d+\.\s*/, '');
+
+      const lastSpaceIndex = cleanedActivityLine.lastIndexOf(' ');
+      const activityName = cleanedActivityLine.slice(0, lastSpaceIndex);
+      const activitySessionCount = parseInt(
+        cleanedActivityLine.slice(lastSpaceIndex + 1),
+        10
+      );
+
+      const activity = await new Activity({
+        name: activityName,
+        activityGroup: activeActivityGroup,
+        user: userId,
+      }).save();
+
+      const sessions = [];
+      const sessionParts = [];
+      for (let j = 0; j < activitySessionCount; j++) {
+        const sessionId = new mongoose.Types.ObjectId(); // создаём id вручную
+
+        sessions.push({
+          _id: sessionId,
+          totalTimeSeconds: sessionDuration,
+          spentTimeSeconds: sessionDuration,
+          activity: activity.id,
+          completed: true,
+          createdDate: activeDate,
+          updatedDate: activeDate,
+          user: userId,
+        });
+
+        sessionParts.push({
+          spentTimeSeconds: sessionDuration,
+          session: sessionId,
+          user: userId,
+          createdDate: activeDate,
+        });
+      }
+
+      // bulk insert
+      await Session.insertMany(sessions);
+      await SessionPart.insertMany(sessionParts);
+    }
+
+    return 'Импорт успешен';
   },
 };
