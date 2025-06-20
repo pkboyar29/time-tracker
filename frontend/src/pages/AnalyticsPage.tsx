@@ -16,38 +16,41 @@ const AnalyticsPage: FC = () => {
 
   const [overallStatistics, setOverallStatistics] =
     useState<ISessionStatistics>();
-  const [activityDistribution, setActivityDistribution] =
+  const [activityDistributionItems, setActivityDistributionItems] =
     useState<IActivityDistribution[]>();
 
   useEffect(() => {
     const fetchOverallStatistics = async () => {
       const { data } = await axios.get('/analytics/overall');
+
       const statistics: ISessionStatistics = {
         sessionsAmount: data.sessionsAmount,
         spentTimeSeconds: data.spentTimeSeconds,
       };
       setOverallStatistics(statistics);
-      const activityDistribution: IActivityDistribution[] =
+      const activityDistributionItems: IActivityDistribution[] =
         data.activityDistribution;
-      setActivityDistribution(activityDistribution);
+      setActivityDistributionItems([...activityDistributionItems]);
     };
     fetchOverallStatistics();
   }, []);
 
   return (
-    <div className="h-full py-5 bg-custom">
-      <div className="container">
+    <div className="h-screen py-5 overflow-y-hidden bg-custom">
+      <div className="container h-full">
         <Title>Session statistics</Title>
 
-        <div className="flex justify-between mt-5">
+        <div className="flex justify-between h-full mt-5">
           <div className="flex flex-col gap-5 w-[550px]">
             {overallStatistics && (
               <SessionStatisticsBox statistics={overallStatistics} />
             )}
-            {activityDistribution && (
-              <ActivityDistributionBox
-                activityDistribution={activityDistribution}
-              />
+            {activityDistributionItems && (
+              <div className="h-3/5">
+                <ActivityDistributionBox
+                  activityDistributionItems={activityDistributionItems}
+                />
+              </div>
             )}
           </div>
 

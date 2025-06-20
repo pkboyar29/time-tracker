@@ -30,7 +30,7 @@ const AnalyticsYearsPage: FC = () => {
 
     const activityDistribution: IActivityDistribution[] =
       data.activityDistribution;
-    setYearActivityDistribution(activityDistribution);
+    setYearActivityDistribution([...activityDistribution]);
 
     setYearStatistics(statistics);
   };
@@ -68,7 +68,7 @@ const AnalyticsYearsPage: FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-custom">
+    <div className="flex flex-col h-screen overflow-y-hidden bg-custom">
       <div className="flex justify-center py-5 border-b border-solid border-b-gray-400">
         <YearsBox
           years={years}
@@ -80,18 +80,18 @@ const AnalyticsYearsPage: FC = () => {
       </div>
 
       {yearStatistics?.spentTimeSeconds !== 0 ? (
-        <div className="flex flex-1">
-          <div className="w-1/2 px-4 border-r border-gray-400 border-solid">
-            <div className="flex flex-col gap-5 mt-5">
-              {yearStatistics && (
-                <SessionStatisticsBox statistics={yearStatistics} />
-              )}
-              {yearActivityDistribution && (
+        <div className="flex h-full">
+          <div className="flex flex-col w-1/2 h-full gap-5 px-4 pt-5 border-r border-gray-400 border-solid">
+            {yearStatistics && (
+              <SessionStatisticsBox statistics={yearStatistics} />
+            )}
+            {yearActivityDistribution && (
+              <div className="overflow-y-auto basis-3/5">
                 <ActivityDistributionBox
-                  activityDistribution={yearActivityDistribution}
+                  activityDistributionItems={yearActivityDistribution}
                 />
-              )}
-            </div>
+              </div>
+            )}
           </div>
           <div className="w-1/2 px-4"></div>
         </div>

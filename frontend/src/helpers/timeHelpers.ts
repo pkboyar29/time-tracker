@@ -28,13 +28,31 @@ const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
-const getTimeMinutes = (seconds: number): number => {
+const getTimeMinutes = (seconds: number): string => {
   const minutes: number = Math.trunc(seconds / 60);
-  return minutes;
+  return minutes.toString();
+};
+
+const getTimeHoursMinutes = (seconds: number): string => {
+  const hours: number = Math.trunc(seconds / 3600);
+  const hoursString: string = hours === 0 ? '' : `${hours} hours`;
+
+  const remainingSeconds: number = seconds - hours * 3600;
+  const remainingMinutes: number = Math.trunc(remainingSeconds / 60);
+  const minutesString: string =
+    remainingMinutes === 0 ? '' : `${remainingMinutes} minutes`;
+
+  const resultString =
+    hoursString === '' && minutesString === ''
+      ? '0 minutes'
+      : `${hoursString} ${minutesString}`;
+
+  return resultString;
 };
 
 export {
   getRemainingTimeHoursMinutesSeconds,
   getTimeHoursMinutesSeconds,
   getTimeMinutes,
+  getTimeHoursMinutes,
 };

@@ -3,14 +3,14 @@ import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDist
 import { getTimeMinutes } from '../helpers/timeHelpers';
 
 interface ActivityDistributionBoxProps {
-  activityDistribution: IActivityDistribution[];
+  activityDistributionItems: IActivityDistribution[];
 }
 
 const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
-  activityDistribution,
+  activityDistributionItems: activityDistribution,
 }) => {
   return (
-    <div className="px-10 py-5 bg-white rounded-lg">
+    <div className="h-full px-10 py-5 overflow-y-auto bg-white rounded-lg">
       <div className="flex justify-end">
         <div className="inline-block px-4 py-1 mb-4 ml-auto mr-0 text-lg font-medium tracking-wide text-right text-gray-800 bg-gray-300 rounded-lg">
           Activity distribution
@@ -28,6 +28,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           .map((activityDistributionItem, index) => (
             <div className="flex items-center text-base" key={index}>
               <div className="w-1/2 text-lg font-bold">
+                {activityDistributionItem.activityGroup.name} /{' '}
                 {activityDistributionItem.activityName}
               </div>
               <div className="w-1/5">
