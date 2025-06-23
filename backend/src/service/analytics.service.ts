@@ -42,7 +42,6 @@ export default {
         sessionsAmount = completedSessionsForRange.length;
       }
 
-      // activity distribution
       let activityDistributions: ActivityDistribution[] = [];
 
       const activities = await activityService.getActivities(userId);
@@ -52,6 +51,7 @@ export default {
           .map((activity) => {
             const activityDistribution: ActivityDistribution = {
               activityName: activity?.name || '',
+              activityGroup: activity?.activityGroup!,
               sessionsAmount: 0,
               spentTimeSeconds: 0,
               spentTimePercentage: 0,

@@ -4,6 +4,11 @@ import mongoose from 'mongoose';
 import sessionService from './session.service';
 import activityGroupService from './activityGroup.service';
 
+interface PopulatedActivityGroup {
+  _id: string;
+  name: string;
+}
+
 export default {
   async getActivities(userId: string) {
     try {
@@ -62,7 +67,10 @@ export default {
       }
 
       const activity = await Activity.findById(activityId)
-        .populate('activityGroup', 'id name')
+        .populate<{ activityGroup: PopulatedActivityGroup }>(
+          'activityGroup',
+          'id name'
+        )
         .exec();
 
       const sessions =
