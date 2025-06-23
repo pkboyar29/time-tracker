@@ -7,11 +7,9 @@ import axios from '../axios';
 import { resolveAndDownloadBlob } from '../helpers/fileHelpers';
 
 import Button from '../components/Button';
-import Modal from '../components/modals/Modal';
 import Title from '../components/Title';
 
 const SettingsPage: FC = () => {
-  const [logoutModal, setLogoutModal] = useState<boolean>(false);
   const [dailyGoalInput, setDailyGoalInput] = useState<number>(0);
 
   const dispatch = useAppDispatch();
@@ -62,13 +60,6 @@ const SettingsPage: FC = () => {
 
   return (
     <>
-      {logoutModal && (
-        <Modal title="Are you sure?" onCloseModal={() => setLogoutModal(false)}>
-          <div className="mb-3">Are you sure you want to log out?</div>
-          <Button onClick={logOutHandler}>Yes</Button>
-        </Modal>
-      )}
-
       <div className="container py-5">
         <Title>Settings</Title>
         <div className="my-5 text-lg">
@@ -92,9 +83,7 @@ const SettingsPage: FC = () => {
           </div>
 
           <div>
-            <Button onClick={() => setLogoutModal(true)}>
-              Log out of your account
-            </Button>
+            <Button onClick={logOutHandler}>Log out of your account</Button>
           </div>
         </div>
       </div>

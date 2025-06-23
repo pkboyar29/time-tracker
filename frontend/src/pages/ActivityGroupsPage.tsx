@@ -15,7 +15,7 @@ import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
 interface DeleteModalState {
-  deleteModal: boolean;
+  deleteModal: boolean; // TODO: переименовать на status
   deletedGroupId: string | null;
 }
 
@@ -93,8 +93,13 @@ const ActivityGroupsPage: FC = () => {
       {deleteModal?.deleteModal && (
         <Modal
           title="Deleting activity group"
-          onCloseModal={() => setCreateModal(false)}
+          onCloseModal={() =>
+            setDeleteModal({ deleteModal: false, deletedGroupId: null })
+          }
         >
+          <p className="mb-4 text-[15px]">
+            Are you sure you want to delete this group activity?
+          </p>
           <Button onClick={handleDeleteActivityGroupModal}>
             Delete activity group
           </Button>

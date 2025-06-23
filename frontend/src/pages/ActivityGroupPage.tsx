@@ -122,6 +122,9 @@ const ActivityGroupPage: FC = () => {
             setDeleteModal({ modal: false, selectedItemId: null })
           }
         >
+          <p className="mb-4 text-[15px]">
+            Are you sure you want to delete this activity?
+          </p>
           <Button
             onClick={() =>
               deleteModal.selectedItemId &&

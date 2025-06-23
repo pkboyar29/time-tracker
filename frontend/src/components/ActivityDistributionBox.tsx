@@ -28,7 +28,6 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           .map((activityDistributionItem, index) => (
             <div className="flex items-center text-base" key={index}>
               <div className="w-1/2 text-lg font-bold">
-                {activityDistributionItem.activityGroup.name} /{' '}
                 {activityDistributionItem.activityName}
               </div>
               <div className="w-1/5">
