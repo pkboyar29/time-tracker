@@ -10,7 +10,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
   statistics,
 }) => {
   return (
-    <div className="flex justify-center gap-20 px-10 py-5 bg-white rounded-lg">
+    <div className="flex justify-center gap-20 px-10 py-5 bg-white border border-solid rounded-lg border-gray-300/80">
       <div className="text-center">
         <div className="text-xl font-bold">
           {getTimeHoursMinutes(statistics.spentTimeSeconds)}

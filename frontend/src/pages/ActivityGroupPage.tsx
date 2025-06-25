@@ -170,8 +170,8 @@ const ActivityGroupPage: FC = () => {
         />
       )}
 
-      <div className="container">
-        <div className="mt-5">
+      <div className="container my-5">
+        <div>
           <span
             onClick={() => navigate('/activity-groups')}
             className="transition duration-300 cursor-pointer hover:text-red-500"
@@ -190,7 +190,7 @@ const ActivityGroupPage: FC = () => {
               <input
                 value={searchString}
                 onChange={(e) => setSearchString(e.target.value)}
-                className="transition duration-300 border-b border-solid border-b-gray-500 focus:border-b-red-500"
+                className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-red-500"
                 type="text"
                 placeholder="Search..."
               />

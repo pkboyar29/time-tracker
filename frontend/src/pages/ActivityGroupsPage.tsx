@@ -98,7 +98,7 @@ const ActivityGroupsPage: FC = () => {
           }
         >
           <p className="mb-4 text-[15px]">
-            Are you sure you want to delete this group activity?
+            Are you sure you want to delete this activity group?
           </p>
           <Button onClick={handleDeleteActivityGroupModal}>
             Delete activity group
@@ -114,7 +114,7 @@ const ActivityGroupsPage: FC = () => {
               <input
                 value={searchString}
                 onChange={(e) => setSearchString(e.target.value)}
-                className="transition duration-300 border-b border-solid border-b-gray-500 focus:border-b-red-500"
+                className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-red-500"
                 type="text"
                 placeholder="Search..."
               />

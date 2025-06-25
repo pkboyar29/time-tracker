@@ -10,7 +10,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   activityDistributionItems: activityDistribution,
 }) => {
   return (
-    <div className="h-full px-10 py-5 overflow-y-auto bg-white rounded-lg">
+    <div className="h-full px-10 py-5 overflow-y-auto bg-white border border-solid rounded-lg border-gray-300/80">
       <div className="flex justify-end">
         <div className="inline-block px-4 py-1 mb-4 ml-auto mr-0 text-lg font-medium tracking-wide text-right text-gray-800 bg-gray-300 rounded-lg">
           Activity distribution

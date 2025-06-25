@@ -47,7 +47,7 @@ const Input: FC<InputProps> = ({
               errorMessage && 'border-red-500'
             } ${
               bg === 'white'
-                ? 'bg-white border-black'
+                ? 'bg-transparent border-black'
                 : 'bg-red-500 placeholder-white text-white'
             }`}
             placeholder={placeHolder}

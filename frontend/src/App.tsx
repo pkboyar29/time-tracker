@@ -33,7 +33,7 @@ const App: FC = () => {
     <>
       <div
         id="app"
-        className={`App h-screen ${
+        className={`App h-screen bg-custom ${
           requiredAuth ? 'grid grid-cols-[auto,1fr]' : ''
         }`}
       >

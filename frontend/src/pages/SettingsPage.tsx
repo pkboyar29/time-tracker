@@ -72,7 +72,7 @@ const SettingsPage: FC = () => {
             onChange={inputChangeDailyGoalHandler}
             onBlur={inputBlurDailyGoalHandler}
             type="number"
-            className="w-16 border-b border-gray-400 border-solid"
+            className="w-16 bg-transparent border-b border-gray-400 border-solid"
           />
         </div>
         <div className="flex gap-4">

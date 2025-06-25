@@ -76,7 +76,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
           onBlur={handleSubmit(onSubmit)}
           type="text"
           className={
-            'p-1 text-xl font-bold rounded-lg border border-solid border-transparent focus:border-blue-700 hover:bg-gray-100 focus:bg-transparent' +
+            'p-1 text-xl font-bold rounded-lg border border-solid border-transparent focus:border-blue-700 hover:bg-gray-100 bg-transparent focus:bg-transparent' +
             (errors.name ? 'focus:border-red-500' : '')
           }
         />
@@ -89,7 +89,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
           onFocus={handleFocus}
           onBlur={handleSubmit(onSubmit)}
           className={
-            'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-blue-700 ' +
+            'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-blue-700 bg-transparent' +
             (errors.descr ? 'focus:border-red-500' : '')
           }
         />
