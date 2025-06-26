@@ -1,6 +1,7 @@
 import { FC, useEffect, useState } from 'react';
 import { useAppDispatch } from '../redux/store';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import {
   deleteActivityGroup,
   fetchActivityGroups,
@@ -12,6 +13,7 @@ import Modal from '../components/modals/Modal';
 import Title from '../components/Title';
 import ActivityItem from '../components/ActivityItem';
 import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm';
+
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
 interface DeleteModalState {
@@ -68,7 +70,13 @@ const ActivityGroupsPage: FC = () => {
           deletedGroupId: null,
         });
       } catch (e) {
-        console.log(e);
+        setDeleteModal({
+          deleteModal: false,
+          deletedGroupId: null,
+        });
+        toast('A server error occurred while deleting activity group', {
+          type: 'error',
+        });
       }
     }
   };

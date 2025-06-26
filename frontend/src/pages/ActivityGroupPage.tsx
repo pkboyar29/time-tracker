@@ -1,11 +1,12 @@
 import { FC, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import axios from '../axios';
+import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';
 import { useTimer } from '../context/TimerContext';
-import { useParams } from 'react-router-dom';
 import { updateSession } from '../redux/slices/sessionSlice';
-import axios from '../axios';
+import { mapActivityGroupFromResponse } from '../helpers/mappingHelpers';
 
 import CloseIcon from '@mui/icons-material/Close';
 import ActivityCreateForm from '../components/forms/ActivityCreateForm';
@@ -17,7 +18,6 @@ import SessionCreateModal from '../components/modals/SessionCreateModal';
 
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
-import { mapActivityGroupFromResponse } from '../helpers/mappingHelpers';
 
 interface ModalState {
   modal: boolean;
@@ -84,7 +84,10 @@ const ActivityGroupPage: FC = () => {
 
       setDeleteModal({ modal: false, selectedItemId: null });
     } catch (e) {
-      console.log(e);
+      setDeleteModal({ modal: false, selectedItemId: null });
+      toast('A server error occurred while deleting activity', {
+        type: 'error',
+      });
     }
   };
 

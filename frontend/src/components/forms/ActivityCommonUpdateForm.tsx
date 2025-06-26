@@ -1,8 +1,11 @@
 import { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAppDispatch } from '../../redux/store';
+import { toast } from 'react-toastify';
+
 import { updateActivity } from '../../redux/slices/activitySlice';
 import { updateActivityGroup } from '../../redux/slices/activityGroupSlice';
+
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 
@@ -43,23 +46,35 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
     }, 0);
   };
 
-  const onSubmit = (data: ActivityCommonFields) => {
+  const onSubmit = async (data: ActivityCommonFields) => {
     if ('activityGroup' in activityCommon) {
       // IActivity
-      dispatch(
-        updateActivity({
-          id: activityCommon.id,
-          ...data,
-        })
-      );
+      try {
+        await dispatch(
+          updateActivity({
+            id: activityCommon.id,
+            ...data,
+          })
+        ).unwrap();
+      } catch (e) {
+        toast('A server error occurred while updating activity', {
+          type: 'error',
+        });
+      }
     } else {
       // IActivityGroup
-      dispatch(
-        updateActivityGroup({
-          id: activityCommon.id,
-          ...data,
-        })
-      );
+      try {
+        await dispatch(
+          updateActivityGroup({
+            id: activityCommon.id,
+            ...data,
+          })
+        ).unwrap();
+      } catch (e) {
+        toast('A server error occurred while updating activity group', {
+          type: 'error',
+        });
+      }
     }
   };
 
