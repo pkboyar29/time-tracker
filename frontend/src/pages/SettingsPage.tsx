@@ -71,6 +71,8 @@ const SettingsPage: FC = () => {
             value={dailyGoalInput}
             onChange={inputChangeDailyGoalHandler}
             onBlur={inputBlurDailyGoalHandler}
+            min={1}
+            max={1440}
             type="number"
             className="w-16 bg-transparent border-b border-gray-400 border-solid"
           />

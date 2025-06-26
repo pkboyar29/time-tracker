@@ -170,12 +170,19 @@ export default {
   async updateDailyGoal(newDailyGoal: number, userId: string) {
     try {
       const user = await User.findById(userId);
-      await user?.updateOne({
-        dailyGoal: newDailyGoal,
-      });
+
+      user!.dailyGoal = newDailyGoal;
+      const validationError = user?.validateSync();
+      if (validationError) {
+        throw new Error(
+          'Daily goal should be set between 1 minute and 24 hours'
+        );
+      }
+
+      user?.save();
 
       const message = {
-        message: 'Updated successful',
+        message: 'Updated successfully',
       };
       return message;
     } catch (e) {

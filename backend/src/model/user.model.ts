@@ -24,6 +24,8 @@ const userSchema = new mongoose.Schema({
   dailyGoal: {
     type: Number,
     required: true,
+    min: [60, 'Daily goal should be minimum 60 seconds'],
+    max: [86400, 'Daily goal should be maximum 86400 seconds (24 hours)'],
   },
   deleted: {
     type: Boolean,

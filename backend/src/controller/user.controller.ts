@@ -71,7 +71,13 @@ router.put('/updateDailyGoal', async (req: Request, res: Response) => {
     res.status(200).json(data);
   } catch (e) {
     if (e instanceof Error) {
-      res.status(500).send(e.message);
+      if (
+        e.message == 'Daily goal should be set between 1 minute and 24 hours'
+      ) {
+        res.status(400).send(e.message);
+      } else {
+        res.status(500).send(e.message);
+      }
     }
   }
 });
@@ -88,14 +94,6 @@ router.get('/export', async (req: Request, res: Response) => {
     console.log(e);
   }
 });
-
-// router.post('/import', async (req: Request, res: Response) => {
-//   try {
-//     res.status(200).send('Импорт успешен');
-//   } catch (e) {
-//     console.log(e);
-//   }
-// });
 
 router.post(
   '/import',
