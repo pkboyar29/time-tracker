@@ -21,8 +21,25 @@ const AnalyticsMonthsPage: FC = () => {
   const [monthActivityDistribution, setMonthActivityDistribution] =
     useState<IActivityDistribution[]>();
 
+  const getMonthRange = (date: Date) => {
+    const dateString = date.toISOString();
+
+    const startOfMonthString = dateString.substring(0, 8) + '01T00:00:00.000Z';
+    const startOfMonth: Date = new Date(startOfMonthString);
+
+    const endOfMonth: Date = new Date(startOfMonthString);
+    endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+
+    return [startOfMonth, endOfMonth];
+  };
+
   const fetchMonthStatistics = async (date: Date) => {
-    const { data } = await axios.get(`/analytics/months/${date.toISOString()}`);
+    const [startOfMonth, endOfMonth] = getMonthRange(date);
+
+    const { data } = await axios.get(
+      `/analytics/?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`
+    );
+
     const statistics: ISessionStatistics = {
       sessionsAmount: data.sessionsAmount,
       spentTimeSeconds: data.spentTimeSeconds,

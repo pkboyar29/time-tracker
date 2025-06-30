@@ -122,42 +122,6 @@ export default {
     }
   },
 
-  async getAnalyticsForDay(
-    dateWithDay: Date,
-    userId: string
-  ): Promise<AnalyticsForRangeDTO | undefined> {
-    const startDay: Date = startOfDay(dateWithDay);
-    const endDay: Date = endOfDay(dateWithDay);
-
-    return this.getAnalyticsForRange(startDay, endDay, userId);
-  },
-
-  async getAnalyticsForMonth(
-    dateWithMonth: Date,
-    userId: string
-  ): Promise<AnalyticsForRangeDTO | undefined> {
-    const startMonth: Date = startOfMonth(dateWithMonth);
-    const endMonth: Date = endOfMonth(dateWithMonth);
-    return this.getAnalyticsForRange(startMonth, endMonth, userId);
-  },
-
-  async getAnalyticsForYear(
-    year: number,
-    userId: string
-  ): Promise<AnalyticsForRangeDTO | undefined> {
-    const startYear: Date = new Date(`${year}-01-01`);
-    const endYear: Date = new Date(`${year}-12-31`);
-    return this.getAnalyticsForRange(startYear, endYear, userId);
-  },
-
-  async getOverallAnalytics(
-    userId: string
-  ): Promise<AnalyticsForRangeDTO | undefined> {
-    const startRange: Date = new Date('2000-01-01T00:00:00');
-    const endRange: Date = new Date(Date.now());
-    return this.getAnalyticsForRange(startRange, endRange, userId);
-  },
-
   handleError(e: unknown) {
     if (e instanceof Error) {
       throw new Error(e.message);

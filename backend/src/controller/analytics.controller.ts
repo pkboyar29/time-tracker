@@ -1,69 +1,36 @@
 import { Router, Request, Response } from 'express';
-import { getYear } from 'date-fns';
 import analyticsService from '../service/analytics.service';
 
 const router = Router();
 
-router.get('/days/:date', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response) => {
   try {
-    const date: Date = new Date(req.params.date);
-    if (date.toDateString() === 'Invalid Date') {
-      res.status(500).send('Invalid Date');
-    } else {
-      const data = await analyticsService.getAnalyticsForDay(
-        date,
-        res.locals.userId
-      );
-      res.status(200).send(data);
+    const { from, to } = req.query;
+    if (!from) {
+      res.status(400).send('from query param is required');
+      return;
     }
-  } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).send(e.message);
+    if (!to) {
+      res.status(400).send('to query param is required');
+      return;
     }
-  }
-});
 
-router.get('/months/:date', async (req: Request, res: Response) => {
-  try {
-    const date: Date = new Date(req.params.date);
-    if (date.toDateString() === 'Invalid Date') {
-      res.status(500).send('Invalid Date');
-    } else {
-      const data = await analyticsService.getAnalyticsForMonth(
-        date,
-        res.locals.userId
-      );
-      res.status(200).send(data);
+    const fromDate: Date = new Date(from.toString());
+    const toDate: Date = new Date(to.toString());
+    if (fromDate.toDateString() === 'Invalid Date') {
+      res.status(400).send('from - invalid date');
+      return;
     }
-  } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).send(e.message);
+    if (toDate.toDateString() === 'Invalid Date') {
+      res.status(400).send('to - invalid date');
+      return;
     }
-  }
-});
 
-router.get('/years/:date', async (req: Request, res: Response) => {
-  try {
-    const date: Date = new Date(req.params.date);
-    if (date.toDateString() === 'Invalid Date') {
-      res.status(500).send('Invalid Date');
-    } else {
-      const data = await analyticsService.getAnalyticsForYear(
-        getYear(date),
-        res.locals.userId
-      );
-      res.status(200).send(data);
-    }
-  } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
-  }
-});
-
-router.get('/overall', async (req: Request, res: Response) => {
-  try {
-    const data = await analyticsService.getOverallAnalytics(res.locals.userId);
+    const data = await analyticsService.getAnalyticsForRange(
+      fromDate,
+      toDate,
+      res.locals.userId
+    );
     res.status(200).send(data);
   } catch (e) {
     if (e instanceof Error) {

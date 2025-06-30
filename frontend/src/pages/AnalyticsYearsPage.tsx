@@ -21,8 +21,23 @@ const AnalyticsYearsPage: FC = () => {
   const [yearActivityDistribution, setYearActivityDistribution] =
     useState<IActivityDistribution[]>();
 
+  const getYearRange = (date: Date) => {
+    const dateString = date.toISOString();
+
+    const startOfYearString =
+      dateString.substring(0, 5) + '01-01T00:00:00.000Z';
+    const endOfYearString = dateString.substring(0, 5) + '12-31T23:59:59.000Z';
+
+    return [new Date(startOfYearString), new Date(endOfYearString)];
+  };
+
   const fetchYearStatistics = async (date: Date) => {
-    const { data } = await axios.get(`/analytics/years/${date.toISOString()}`);
+    const [startOfYear, endOfYear] = getYearRange(date);
+
+    const { data } = await axios.get(
+      `/analytics/?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`
+    );
+
     const statistics: ISessionStatistics = {
       sessionsAmount: data.sessionsAmount,
       spentTimeSeconds: data.spentTimeSeconds,

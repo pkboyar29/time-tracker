@@ -21,7 +21,11 @@ const AnalyticsPage: FC = () => {
 
   useEffect(() => {
     const fetchOverallStatistics = async () => {
-      const { data } = await axios.get('/analytics/overall');
+      const { data } = await axios.get(
+        `/analytics/?from=2000-01-01T00:00:00&to=${new Date(
+          Date.now()
+        ).toISOString()}`
+      );
 
       const statistics: ISessionStatistics = {
         sessionsAmount: data.sessionsAmount,

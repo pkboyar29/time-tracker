@@ -38,8 +38,21 @@ const AnalyticsDaysPage: FC = () => {
     }
   }, []);
 
+  const getDayRange = (date: Date) => {
+    const dateString = date.toISOString();
+
+    const startOfDayString = dateString.substring(0, 10) + 'T00:00:00.000Z';
+    const endOfDayString = dateString.substring(0, 10) + 'T23:59:59.000Z';
+
+    return [new Date(startOfDayString), new Date(endOfDayString)];
+  };
+
   const fetchDayStatistics = async (date: Date) => {
-    const { data } = await axios.get(`/analytics/days/${date.toISOString()}`);
+    const [startOfDay, endOfDay] = getDayRange(date);
+
+    const { data } = await axios.get(
+      `/analytics/?from=${startOfDay.toISOString()}&to=${endOfDay.toISOString()}`
+    );
     const statistics: ISessionStatistics = {
       sessionsAmount: data.sessionsAmount,
       spentTimeSeconds: data.spentTimeSeconds,
