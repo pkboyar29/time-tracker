@@ -42,7 +42,6 @@ export default {
       }
 
       let activityDistributions: ActivityDistribution[] = [];
-
       const activities = await activityService.getActivities(userId);
       if (activities && activities.length !== 0) {
         activityDistributions = activities
@@ -59,6 +58,9 @@ export default {
           });
       }
 
+      let activitiesSeconds: number = 0;
+      let activitiesSessions: number = 0;
+
       // set sessionsAmount to activityDistributions
       completedSessionsForRange?.forEach((session) => {
         if (session.activity) {
@@ -68,6 +70,8 @@ export default {
                 activityDistribution.activityName === session.activity.name
             );
           activityDistributions[activityDistributionIndex].sessionsAmount += 1;
+
+          activitiesSessions += 1;
         }
       });
 
@@ -82,6 +86,8 @@ export default {
             );
           activityDistributions[activityDistributionIndex].spentTimeSeconds +=
             sessionPart.spentTimeSeconds;
+
+          activitiesSeconds += sessionPart.spentTimeSeconds;
         }
       });
 
@@ -93,23 +99,31 @@ export default {
       );
 
       // set spentTimePercentage to activityDistributions
-      const allSpentTimeSeconds: number = activityDistributions.reduce(
-        (spentTimeSeconds, activityDistribution) =>
-          spentTimeSeconds + activityDistribution.spentTimeSeconds,
-        0
-      );
       activityDistributions = activityDistributions.map(
         (activityDistribution) => {
           return {
             ...activityDistribution,
             spentTimePercentage: parseFloat(
               (
-                activityDistribution.spentTimeSeconds / allSpentTimeSeconds
+                activityDistribution.spentTimeSeconds / spentTimeSeconds
               ).toFixed(2)
             ),
           };
         }
       );
+
+      // set without activity to activityDistributions
+      const woActivitySessions = sessionsAmount - activitiesSessions;
+      const woActivitySeconds = spentTimeSeconds - activitiesSeconds;
+      if (woActivitySeconds > 0) {
+        activityDistributions.push({
+          activityGroup: { _id: '0', name: 'wo' },
+          activityName: 'Without activity',
+          sessionsAmount: woActivitySessions,
+          spentTimeSeconds: woActivitySeconds,
+          spentTimePercentage: woActivitySeconds / spentTimeSeconds,
+        });
+      }
 
       return {
         sessionsAmount,
