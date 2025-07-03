@@ -1,7 +1,6 @@
 import sessionService from '../service/session.service';
 import sessionPartService from './sessionPart.service';
 import activityService from './activity.service';
-import { endOfDay, startOfDay, startOfMonth, endOfMonth } from 'date-fns';
 import {
   AnalyticsForRangeDTO,
   ActivityDistribution,

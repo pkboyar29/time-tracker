@@ -1,23 +1,45 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  getFiveMonths,
+  shiftFiveMonths,
+  getMonthRange,
+} from '../helpers/dateHelpers';
 
 import LeftArrowIcon from '../icons/LeftArrowIcon';
 import RightArrowIcon from '../icons/RightArrowIcon';
 
 interface MonthsBoxProps {
-  months: Date[];
   currentMonth: Date;
-  monthClickHandler: (date: Date) => void;
-  leftArrowClickHandler: () => void;
-  rightArrowClickHandler: () => void;
 }
 
-const MonthsBox: FC<MonthsBoxProps> = ({
-  months,
-  currentMonth,
-  monthClickHandler,
-  leftArrowClickHandler,
-  rightArrowClickHandler,
-}) => {
+const MonthsBox: FC<MonthsBoxProps> = ({ currentMonth }) => {
+  const navigate = useNavigate();
+
+  const [months, setMonths] = useState<Date[]>([]);
+
+  useEffect(() => {
+    setMonths(getFiveMonths(currentMonth));
+  }, []);
+
+  const leftArrowClickHandler = () => {
+    setMonths(shiftFiveMonths(months, false));
+  };
+
+  const rightArrowClickHandler = () => {
+    setMonths(shiftFiveMonths(months, true));
+  };
+
+  const monthClickHandler = (date: Date) => {
+    const [startOfMonth, endOfMonth] = getMonthRange(date);
+    navigate(
+      `/analytics/range?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`,
+      {
+        replace: true,
+      }
+    );
+  };
+
   return (
     <div className="flex flex-col items-center gap-3 select-none">
       <div className="flex gap-1 px-2 pb-1">

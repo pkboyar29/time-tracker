@@ -107,6 +107,43 @@ const shiftTwoYears = (twoYears: Date[], right: boolean): Date[] => {
   return newTwoYears;
 };
 
+const getDayRange = (date: Date): [Date, Date] => {
+  const dateString = date.toISOString();
+
+  const startOfDayString = dateString.substring(0, 10) + 'T00:00:00.000Z';
+  const startOfDay = new Date(startOfDayString);
+
+  const endOfDayString = dateString.substring(0, 10) + 'T23:59:59.000Z';
+  const endOfDay = new Date(endOfDayString);
+  endOfDay.setMilliseconds(1000);
+
+  return [startOfDay, endOfDay];
+};
+
+const getMonthRange = (date: Date): [Date, Date] => {
+  const dateString = date.toISOString();
+
+  const startOfMonthString = dateString.substring(0, 8) + '01T00:00:00.000Z';
+  const startOfMonth: Date = new Date(startOfMonthString);
+
+  const endOfMonth: Date = new Date(startOfMonthString);
+  endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+
+  return [startOfMonth, endOfMonth];
+};
+
+const getYearRange = (date: Date): [Date, Date] => {
+  const dateString = date.toISOString();
+
+  const startOfYearString = dateString.substring(0, 5) + '01-01T00:00:00.000Z';
+  const startOfYear: Date = new Date(startOfYearString);
+
+  const endOfYear: Date = new Date(startOfYearString);
+  endOfYear.setFullYear(startOfYear.getFullYear() + 1);
+
+  return [startOfYear, endOfYear];
+};
+
 export {
   getWeekDays,
   getDayOfWeekName,
@@ -115,4 +152,7 @@ export {
   shiftFiveMonths,
   getTwoYears,
   shiftTwoYears,
+  getDayRange,
+  getMonthRange,
+  getYearRange,
 };

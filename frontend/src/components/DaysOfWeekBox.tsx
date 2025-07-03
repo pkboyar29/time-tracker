@@ -1,25 +1,44 @@
-import { FC } from 'react';
-import { getDayOfWeekName } from '../helpers/dateHelpers';
+import { FC, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  getWeekDays,
+  shiftWeek,
+  getDayOfWeekName,
+  getDayRange,
+} from '../helpers/dateHelpers';
 
 import LeftArrowIcon from '../icons/LeftArrowIcon';
 import RightArrowIcon from '../icons/RightArrowIcon';
 
 interface DaysOfWeekBoxProps {
-  daysOfWeek: Date[];
   currentDay: Date;
-  dayClickHandler: (date: Date) => void;
-  leftArrowClickHandler: () => void;
-  rightArrowClickHandler: () => void;
 }
 
-const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({
-  daysOfWeek,
-  currentDay,
-  dayClickHandler,
-  leftArrowClickHandler,
-  rightArrowClickHandler,
-}) => {
+const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
+  const navigate = useNavigate();
   const today: Date = new Date(Date.now());
+
+  const [daysOfWeek, setDaysOfWeek] = useState<Date[]>([]);
+
+  useEffect(() => {
+    setDaysOfWeek(getWeekDays(currentDay));
+  }, []);
+
+  const leftArrowClickHandler = () => {
+    setDaysOfWeek(shiftWeek(daysOfWeek, false));
+  };
+
+  const rightArrowClickHandler = () => {
+    setDaysOfWeek(shiftWeek(daysOfWeek, true));
+  };
+
+  const dayClickHandler = (date: Date) => {
+    const [startOfDay, endOfDay] = getDayRange(date);
+    navigate(
+      `/analytics/range?from=${startOfDay.toISOString()}&to=${endOfDay.toISOString()}`,
+      { replace: true }
+    );
+  };
 
   return (
     <div className="flex flex-col items-center gap-3 max-w-[340px] select-none">

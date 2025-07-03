@@ -1,10 +1,7 @@
 import { RouteObject, Navigate } from 'react-router-dom';
 
 import TimerPage from '../pages/TimerPage';
-import AnalyticsPage from '../pages/AnalyticsPage';
-import AnalyticsDaysPage from '../pages/AnalyticsDaysPage';
-import AnalyticsMonthsPage from '../pages/AnalyticsMonthsPage';
-import AnalyticsYearsPage from '../pages/AnalyticsYearsPage';
+import AnalyticsOverallPage from '../pages/AnalyticsOverallPage';
 import ActivityGroupsPage from '../pages/ActivityGroupsPage';
 import ActivityPage from '../pages/ActivityPage';
 import ActivityGroupPage from '../pages/ActivityGroupPage';
@@ -12,6 +9,7 @@ import SettingsPage from '../pages/SettingsPage';
 import SignInPage from '../pages/SignInPage';
 import SignUpPage from '../pages/SignUpPage';
 import NotFoundPage from '../pages/NotFoundPage';
+import AnalyticsRangePage from '../pages/AnalyticsRangePage';
 
 type RouteType = RouteObject & {
   requiredAuth: boolean;
@@ -40,22 +38,12 @@ const routeConfig: RouteType[] = [
   },
   {
     path: '/analytics',
-    element: <AnalyticsPage />,
+    element: <AnalyticsOverallPage />,
     requiredAuth: true,
   },
   {
-    path: '/analytics/days/:date',
-    element: <AnalyticsDaysPage />,
-    requiredAuth: true,
-  },
-  {
-    path: '/analytics/months/:date',
-    element: <AnalyticsMonthsPage />,
-    requiredAuth: true,
-  },
-  {
-    path: '/analytics/years/:date',
-    element: <AnalyticsYearsPage />,
+    path: '/analytics/range',
+    element: <AnalyticsRangePage />,
     requiredAuth: true,
   },
   {

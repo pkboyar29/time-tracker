@@ -1,23 +1,45 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  getTwoYears,
+  shiftTwoYears,
+  getYearRange,
+} from '../helpers/dateHelpers';
 
 import LeftArrowIcon from '../icons/LeftArrowIcon';
 import RightArrowIcon from '../icons/RightArrowIcon';
 
 interface YearsBoxProps {
-  years: Date[];
   currentYear: Date;
-  yearClickHandler: (date: Date) => void;
-  leftArrowClickHandler: () => void;
-  rightArrowClickHandler: () => void;
 }
 
-const YearsBox: FC<YearsBoxProps> = ({
-  years,
-  currentYear,
-  yearClickHandler,
-  leftArrowClickHandler,
-  rightArrowClickHandler,
-}) => {
+const YearsBox: FC<YearsBoxProps> = ({ currentYear }) => {
+  const navigate = useNavigate();
+
+  const [years, setYears] = useState<Date[]>([]);
+
+  useEffect(() => {
+    setYears(getTwoYears(currentYear));
+  }, []);
+
+  const leftArrowClickHandler = () => {
+    setYears(shiftTwoYears(years, false));
+  };
+
+  const rightArrowClickHandler = () => {
+    setYears(shiftTwoYears(years, true));
+  };
+
+  const yearClickHandler = (date: Date) => {
+    const [startOfYear, endOfYear] = getYearRange(date);
+    navigate(
+      `/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`,
+      {
+        replace: true,
+      }
+    );
+  };
+
   return (
     <div className="flex flex-col items-center gap-3 select-none">
       <div className="flex gap-1 px-2 pb-1">

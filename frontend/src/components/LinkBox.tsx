@@ -13,6 +13,7 @@ const LinkBox: FC<LinkBoxProps> = ({ children, link }) => {
       className="flex items-center justify-between gap-10 px-8 py-5 transition duration-300 bg-red-500 cursor-pointer hover:bg-red-700 rounded-2xl"
     >
       <div className="text-xl font-bold text-white">{children}</div>
+      {/* TODO: поместить в отдельный компонент */}
       <svg fill="white" viewBox="0 0 16 16" className="w-6 h-6">
         <path
           fillRule="evenodd"
