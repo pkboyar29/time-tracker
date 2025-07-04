@@ -1,6 +1,6 @@
 import { FC } from 'react';
 
-const LeftArrowIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
+const LeftChevronIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
   return (
     <svg fill="black" viewBox="0 0 16 16" className="w-5 h-5" {...props}>
       <path
@@ -11,4 +11,4 @@ const LeftArrowIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
   );
 };
 
-export default LeftArrowIcon;
+export default LeftChevronIcon;

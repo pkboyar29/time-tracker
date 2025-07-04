@@ -6,8 +6,8 @@ import {
   getYearRange,
 } from '../helpers/dateHelpers';
 
-import LeftArrowIcon from '../icons/LeftArrowIcon';
-import RightArrowIcon from '../icons/RightArrowIcon';
+import LeftChevronIcon from '../icons/LeftChevronIcon';
+import RightChevronIcon from '../icons/RightChevronIcon';
 
 interface YearsBoxProps {
   currentYear: Date;
@@ -47,7 +47,7 @@ const YearsBox: FC<YearsBoxProps> = ({ currentYear }) => {
           className="p-[6px] border border-gray-400 border-solid rounded-md hover:bg-gray-200 transition duration-300"
           onClick={leftArrowClickHandler}
         >
-          <LeftArrowIcon />
+          <LeftChevronIcon />
         </button>
         <div className="flex items-center justify-center text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md w-52 hover:bg-gray-200">
           {new Date().getFullYear() === currentYear.getFullYear()
@@ -58,7 +58,7 @@ const YearsBox: FC<YearsBoxProps> = ({ currentYear }) => {
           className="p-[6px] border border-gray-400 border-solid rounded-md hover:bg-gray-200 transition duration-300"
           onClick={rightArrowClickHandler}
         >
-          <RightArrowIcon />
+          <RightChevronIcon />
         </button>
       </div>
 

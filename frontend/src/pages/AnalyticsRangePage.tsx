@@ -13,6 +13,7 @@ import DailyGoalBox from '../components/DailyGoalBox';
 import DaysOfWeekBox from '../components/DaysOfWeekBox';
 import MonthsBox from '../components/MonthsBox';
 import YearsBox from '../components/YearsBox';
+import CustomRangeBox from '../components/CustomRangeBox';
 
 type RangeType = 'days' | 'months' | 'years' | 'custom';
 
@@ -136,8 +137,7 @@ const AnalyticsRangePage: FC = () => {
           ) : rangeType == 'years' ? (
             <YearsBox currentYear={fromDate} />
           ) : (
-            // TODO: для кастомного выбора диапазона указать что-то другое
-            <></>
+            <CustomRangeBox fromDate={fromDate} toDate={toDate} />
           )}
         </div>
       )}
@@ -162,9 +162,11 @@ const AnalyticsRangePage: FC = () => {
 
           <div className="w-1/2 px-4">
             {rangeType == 'days' && rangeStatistics && (
-              <DailyGoalBox
-                spentTimeSeconds={rangeStatistics.spentTimeSeconds}
-              />
+              <div className="pt-5">
+                <DailyGoalBox
+                  spentTimeSeconds={rangeStatistics.spentTimeSeconds}
+                />
+              </div>
             )}
           </div>
         </div>

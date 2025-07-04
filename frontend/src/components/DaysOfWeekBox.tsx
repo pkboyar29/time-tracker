@@ -7,8 +7,8 @@ import {
   getDayRange,
 } from '../helpers/dateHelpers';
 
-import LeftArrowIcon from '../icons/LeftArrowIcon';
-import RightArrowIcon from '../icons/RightArrowIcon';
+import LeftChevronIcon from '../icons/LeftChevronIcon';
+import RightChevronIcon from '../icons/RightChevronIcon';
 
 interface DaysOfWeekBoxProps {
   currentDay: Date;
@@ -47,7 +47,7 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
           onClick={leftArrowClickHandler}
           className="p-[6px] border border-gray-400 border-solid rounded-md hover:bg-gray-200 transition duration-300"
         >
-          <LeftArrowIcon />
+          <LeftChevronIcon />
         </button>
         <div className="flex items-center justify-center w-full text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md hover:bg-gray-200">
           {currentDay.toDateString()}
@@ -56,7 +56,7 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
           onClick={rightArrowClickHandler}
           className="p-[6px] border border-gray-400 border-solid rounded-md hover:bg-gray-200 transition duration-300"
         >
-          <RightArrowIcon />
+          <RightChevronIcon />
         </button>
       </div>
       <div className="flex gap-1">
