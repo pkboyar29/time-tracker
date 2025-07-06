@@ -58,8 +58,8 @@ const AnalyticsOverallPage: FC = () => {
         <div className="container h-full">
           <Title>Session statistics</Title>
 
-          <div className="flex justify-between h-full mt-5">
-            <div className="flex flex-col gap-5 w-[550px]">
+          <div className="flex justify-between h-full gap-2 mt-5">
+            <div className="flex flex-col gap-5 w-[750px]">
               {overallStatistics && (
                 <SessionStatisticsBox statistics={overallStatistics} />
               )}

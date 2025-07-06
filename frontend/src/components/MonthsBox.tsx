@@ -70,7 +70,7 @@ const MonthsBox: FC<MonthsBoxProps> = ({ currentMonth }) => {
         {months.map((month, index) => (
           <div
             key={index}
-            className={`w-40 flex flex-col gap-2 py-2.5 px-2 rounded-[5px] transition duration-300 bg-gray-200 cursor-pointer hover:bg-slate-300 ${
+            className={`w-40 flex flex-col py-2.5 px-2 rounded-[5px] transition duration-300 bg-gray-200 cursor-pointer hover:bg-slate-300 ${
               month.getMonth() === currentMonth.getMonth() &&
               month.getFullYear() === currentMonth.getFullYear() &&
               `bg-slate-300`
