@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosInstance from '../axios';
+import axiosInstance from '../api/axios';
 import { mapActivityFromResponse } from '../helpers/mappingHelpers';
 import { fetchSessions } from '../redux/slices/sessionSlice';
 import { useAppDispatch } from '../redux/store';

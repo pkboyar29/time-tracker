@@ -1,4 +1,4 @@
-import instance from '../axios';
+import instance from '../api/axios';
 import Cookies from 'js-cookie';
 
 const refreshAccessToken = async () => {

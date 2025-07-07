@@ -1,7 +1,7 @@
 import { FC, useState, useEffect, ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAppDispatch } from '../../redux/store';
-import axios from '../../axios';
+import axios from '../../api/axios';
 import { createSession } from '../../redux/slices/sessionSlice';
 import { saveSessionToLocalStorage } from '../../helpers/localstorageHelpers';
 

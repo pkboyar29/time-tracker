@@ -1,13 +1,11 @@
 import { FC, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { getDayRange } from '../helpers/dateHelpers';
-import axios from '../axios';
-
-import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
-import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
+import { useQuery } from '@tanstack/react-query';
+import { fetchRangeAnalytics } from '../api/analyticsApi';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
+import { ClipLoader } from 'react-spinners';
 // TODO: использовать lazy loading
 import DailyGoalBox from '../components/DailyGoalBox';
 import DaysOfWeekBox from '../components/DaysOfWeekBox';
@@ -17,57 +15,32 @@ import CustomRangeBox from '../components/CustomRangeBox';
 
 type RangeType = 'days' | 'months' | 'years' | 'custom';
 
-const validateSearchParams = (
-  fromParam: string | null,
-  toParam: string | null
-): [Date, Date] => {
-  if (!fromParam) {
-    throw new Error('from');
-  }
-  if (!toParam) {
-    throw new Error('to');
-  }
-
-  const fromDate = new Date(fromParam);
-  const toDate = new Date(toParam);
-  if (!(fromDate instanceof Date)) {
-    throw new Error('from');
-  }
-  if (!(toDate instanceof Date)) {
-    throw new Error('to');
-  }
-
-  return [fromDate, toDate];
-};
-
 const AnalyticsRangePage: FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams, _] = useSearchParams();
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
 
-  const [fromDate, setFromDate] = useState<Date>();
-  const [toDate, setToDate] = useState<Date>();
+  // валидация search params
+  if (
+    !fromParam ||
+    isNaN(new Date(fromParam).getTime()) ||
+    !toParam ||
+    isNaN(new Date(toParam).getTime())
+  ) {
+    return (
+      <div className="mt-4 text-lg text-center">Invalid date format in URL</div>
+    );
+  }
+
+  const [fromDate, setFromDate] = useState<Date>(new Date(fromParam));
+  const [toDate, setToDate] = useState<Date>(new Date(toParam));
 
   const [rangeType, setRangeType] = useState<RangeType>();
 
-  const [rangeStatistics, setRangeStatistics] = useState<ISessionStatistics>();
-  const [rangeActivityDistribution, setRangeActivityDistribution] =
-    useState<IActivityDistribution[]>();
-
-  const fetchRangeStatistics = async (fromDate: Date, toDate: Date) => {
-    const { data } = await axios.get(
-      `/analytics/?from=${fromDate.toISOString()}&to=${toDate.toISOString()}`
-    );
-    const statistics: ISessionStatistics = {
-      sessionsAmount: data.sessionsAmount,
-      spentTimeSeconds: data.spentTimeSeconds,
-    };
-    setRangeStatistics(statistics);
-
-    const activityDistribution: IActivityDistribution[] =
-      data.activityDistribution;
-    setRangeActivityDistribution([...activityDistribution]);
-  };
+  const { data: rangeAnalytics, isLoading } = useQuery({
+    queryKey: ['rangeAnalytics', fromDate, toDate],
+    queryFn: () => fetchRangeAnalytics(fromDate, toDate),
+  });
 
   const defineRangeType = (fromDate: Date, toDate: Date) => {
     if (toDate.getTime() - fromDate.getTime() == 86400000) {
@@ -91,40 +64,13 @@ const AnalyticsRangePage: FC = () => {
   };
 
   useEffect(() => {
-    try {
-      const [fromDate, toDate] = validateSearchParams(fromParam, toParam);
-
-      defineRangeType(fromDate, toDate);
-    } catch (e) {
-      const [defaultFrom, defaultTo] = getDayRange(new Date());
-
-      setSearchParams(
-        `?from=${defaultFrom.toISOString()}&to=${defaultTo.toISOString()}&set=123`
-      );
-      defineRangeType(defaultFrom, defaultTo);
-    }
+    defineRangeType(fromDate, toDate);
   }, []);
 
   useEffect(() => {
-    try {
-      const [fromDate, toDate] = validateSearchParams(fromParam, toParam);
-
-      setFromDate(fromDate);
-      setToDate(toDate);
-    } catch (e) {
-      const [defaultFrom, defaultTo] = getDayRange(new Date());
-
-      setSearchParams(
-        `?from=${defaultFrom.toISOString()}&to=${defaultTo.toISOString()}&set=123`
-      );
-    }
+    setFromDate(new Date(fromParam));
+    setToDate(new Date(toParam));
   }, [searchParams]);
-
-  useEffect(() => {
-    if (fromDate && toDate) {
-      fetchRangeStatistics(fromDate, toDate);
-    }
-  }, [fromDate, toDate]);
 
   return (
     <div className="flex flex-col h-screen overflow-y-hidden bg-custom">
@@ -142,29 +88,38 @@ const AnalyticsRangePage: FC = () => {
         </div>
       )}
 
-      {/* TODO: добавить какой-то loading */}
-      {/* TODO: при переходе между датами тоже loading должен отображаться */}
-      {rangeStatistics?.spentTimeSeconds !== 0 ? (
+      {isLoading ? (
+        <div className="mt-5 text-center">
+          <ClipLoader color="#EF4444" />
+        </div>
+      ) : rangeAnalytics &&
+        rangeAnalytics.sessionStatistics.spentTimeSeconds !== 0 ? (
         <div className="flex h-full">
           <div className="flex flex-col w-1/2 h-full gap-5 px-4 pt-5 border-r border-gray-400 border-solid">
-            {rangeStatistics && (
-              <SessionStatisticsBox statistics={rangeStatistics} />
+            {rangeAnalytics.sessionStatistics && (
+              <SessionStatisticsBox
+                statistics={rangeAnalytics.sessionStatistics}
+              />
             )}
 
-            {rangeActivityDistribution && (
+            {rangeAnalytics.activityDistributionItems && (
               <div className="overflow-y-auto basis-3/5">
                 <ActivityDistributionBox
-                  activityDistributionItems={rangeActivityDistribution}
+                  activityDistributionItems={
+                    rangeAnalytics.activityDistributionItems
+                  }
                 />
               </div>
             )}
           </div>
 
           <div className="w-1/2 px-4">
-            {rangeType == 'days' && rangeStatistics && (
+            {rangeType == 'days' && rangeAnalytics.sessionStatistics && (
               <div className="pt-5">
                 <DailyGoalBox
-                  spentTimeSeconds={rangeStatistics.spentTimeSeconds}
+                  spentTimeSeconds={
+                    rangeAnalytics.sessionStatistics.spentTimeSeconds
+                  }
                 />
               </div>
             )}

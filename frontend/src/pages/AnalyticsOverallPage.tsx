@@ -1,52 +1,30 @@
-import { FC, useEffect, useState } from 'react';
-import axios from '../axios';
+import { FC, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchOverallAnalytics } from '../api/analyticsApi';
 import {
   getDayRange,
   getMonthRange,
   getYearRange,
 } from '../helpers/dateHelpers';
 
-import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
-import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
-
 import Title from '../components/Title';
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
 import LinkBox from '../components/LinkBox';
 import AnalyticsRangeModal from '../components/modals/AnalyticsRangeModal';
+import { ClipLoader } from 'react-spinners';
 
 const AnalyticsOverallPage: FC = () => {
   const [startOfDay, endOfDay] = getDayRange(new Date());
   const [startOfMonth, endOfMonth] = getMonthRange(new Date());
   const [startOfYear, endOfYear] = getYearRange(new Date());
 
-  const [overallStatistics, setOverallStatistics] =
-    useState<ISessionStatistics>();
-  const [activityDistributionItems, setActivityDistributionItems] =
-    useState<IActivityDistribution[]>();
+  const { data: overallAnalytics, isLoading } = useQuery({
+    queryKey: ['overallAnalytics'],
+    queryFn: fetchOverallAnalytics,
+  });
 
   const [customModal, setCustomModal] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchOverallStatistics = async () => {
-      const { data } = await axios.get(
-        `/analytics/?from=2000-01-01T00:00:00&to=${new Date(
-          Date.now()
-        ).toISOString()}`
-      );
-
-      const statistics: ISessionStatistics = {
-        sessionsAmount: data.sessionsAmount,
-        spentTimeSeconds: data.spentTimeSeconds,
-      };
-      setOverallStatistics(statistics);
-      const activityDistributionItems: IActivityDistribution[] =
-        data.activityDistribution;
-      setActivityDistributionItems([...activityDistributionItems]);
-    };
-
-    fetchOverallStatistics();
-  }, []);
 
   return (
     <>
@@ -59,18 +37,30 @@ const AnalyticsOverallPage: FC = () => {
           <Title>Session statistics</Title>
 
           <div className="flex justify-between h-full gap-2 mt-5">
-            <div className="flex flex-col gap-5 w-[750px]">
-              {overallStatistics && (
-                <SessionStatisticsBox statistics={overallStatistics} />
-              )}
-              {activityDistributionItems && (
-                <div className="h-3/5">
-                  <ActivityDistributionBox
-                    activityDistributionItems={activityDistributionItems}
+            {isLoading && (
+              <div className="w-[750px] flex justify-center">
+                <ClipLoader color="#EF4444" />
+              </div>
+            )}
+
+            {overallAnalytics && (
+              <div className="flex flex-col gap-5 w-[750px]">
+                {overallAnalytics.sessionStatistics && (
+                  <SessionStatisticsBox
+                    statistics={overallAnalytics.sessionStatistics}
                   />
-                </div>
-              )}
-            </div>
+                )}
+                {overallAnalytics.activityDistributionItems && (
+                  <div className="h-3/5">
+                    <ActivityDistributionBox
+                      activityDistributionItems={
+                        overallAnalytics.activityDistributionItems
+                      }
+                    />
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-col gap-4 max-w-80">
               <LinkBox

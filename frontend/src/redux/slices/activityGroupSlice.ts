@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from '../../axios';
+import axiosInstance from '../../api/axios';
 import { mapActivityGroupFromResponse } from '../../helpers/mappingHelpers';
 
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';

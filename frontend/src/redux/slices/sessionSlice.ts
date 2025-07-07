@@ -1,9 +1,8 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axiosInstance from '../../axios';
+import axios from '../../api/axios';
 import { mapSessionFromResponse } from '../../helpers/mappingHelpers';
 import { ISession } from '../../ts/interfaces/Session/ISession';
 import { ISessionCreate } from '../../ts/interfaces/Session/ISessionCreate';
-import * as localStorageHelpers from '../../helpers/localstorageHelpers';
 
 interface SessionState {
   currentSession: ISession | null;
@@ -18,9 +17,7 @@ const initialState: SessionState = {
 export const loadCurrentSession = createAsyncThunk<ISession, string>(
   'sessions/loadCurrentSession',
   async (sessionId) => {
-    const { data: unmappedData } = await axiosInstance.get(
-      `/sessions/${sessionId}`
-    );
+    const { data: unmappedData } = await axios.get(`/sessions/${sessionId}`);
 
     return mapSessionFromResponse(unmappedData);
   }
@@ -30,7 +27,7 @@ export const fetchSessions = createAsyncThunk<
   ISession[],
   Record<string, unknown>
 >('sessions/fetchSessions', async (params) => {
-  const { data: unmappedData } = await axiosInstance.get('/sessions', {
+  const { data: unmappedData } = await axios.get('/sessions', {
     params: {
       ...params,
     },
@@ -44,7 +41,7 @@ export const fetchSessions = createAsyncThunk<
 export const createSession = createAsyncThunk<ISession, ISessionCreate>(
   'sessions/createSession',
   async (newSessionData) => {
-    const { data: unmappedData } = await axiosInstance.post(
+    const { data: unmappedData } = await axios.post(
       '/sessions',
       newSessionData
     );
@@ -56,7 +53,7 @@ export const createSession = createAsyncThunk<ISession, ISessionCreate>(
 export const updateSession = createAsyncThunk<ISession, ISession>(
   'sessions/updateSession',
   async (existingSessionData) => {
-    const { data: unmappedData } = await axiosInstance.put(
+    const { data: unmappedData } = await axios.put(
       `/sessions/${existingSessionData.id}`,
       existingSessionData
     );
@@ -68,7 +65,7 @@ export const updateSession = createAsyncThunk<ISession, ISession>(
 export const deleteSession = createAsyncThunk<string, string>(
   'sessions/deleteSession',
   async (sessionId) => {
-    const { data } = await axiosInstance.delete(`/sessions/${sessionId}`);
+    const { data } = await axios.delete(`/sessions/${sessionId}`);
     return data;
   }
 );

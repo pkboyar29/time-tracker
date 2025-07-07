@@ -3,7 +3,7 @@ import { clearSession } from '../helpers/authHelpers';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { logOutUser, updateDailyGoal } from '../redux/slices/userSlice';
 import { updateSession, resetSessionState } from '../redux/slices/sessionSlice';
-import axios from '../axios';
+import axios from '../api/axios';
 import { resolveAndDownloadBlob } from '../helpers/fileHelpers';
 
 import Button from '../components/Button';

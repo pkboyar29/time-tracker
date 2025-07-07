@@ -1,6 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from '../axios';
+import axios from '../api/axios';
 import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';

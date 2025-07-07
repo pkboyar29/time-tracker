@@ -50,11 +50,7 @@ const App: FC = () => {
                 path={route.path}
                 element={<ProtectedRoute requiredAuth={route.requiredAuth} />}
               >
-                <Route
-                  key={index}
-                  path={route.path}
-                  element={route.element}
-                ></Route>
+                <Route key={index} path={route.path} element={route.element} />
               </Route>
             ))}
           </Routes>
