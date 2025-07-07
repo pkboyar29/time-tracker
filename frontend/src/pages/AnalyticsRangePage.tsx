@@ -2,6 +2,7 @@ import { FC, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRangeAnalytics } from '../api/analyticsApi';
+import { toast } from 'react-toastify';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
@@ -37,9 +38,14 @@ const AnalyticsRangePage: FC = () => {
 
   const [rangeType, setRangeType] = useState<RangeType>();
 
-  const { data: rangeAnalytics, isLoading } = useQuery({
+  const {
+    data: rangeAnalytics,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['rangeAnalytics', fromDate, toDate],
     queryFn: () => fetchRangeAnalytics(fromDate, toDate),
+    retry: false,
   });
 
   const defineRangeType = (fromDate: Date, toDate: Date) => {
@@ -71,6 +77,14 @@ const AnalyticsRangePage: FC = () => {
     setFromDate(new Date(fromParam));
     setToDate(new Date(toParam));
   }, [searchParams]);
+
+  useEffect(() => {
+    if (isError) {
+      toast('A server error occurred while getting analytics', {
+        type: 'error',
+      });
+    }
+  }, [isError]);
 
   return (
     <div className="flex flex-col h-screen overflow-y-hidden bg-custom">

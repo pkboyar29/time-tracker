@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchOverallAnalytics } from '../api/analyticsApi';
 import {
@@ -6,6 +6,7 @@ import {
   getMonthRange,
   getYearRange,
 } from '../helpers/dateHelpers';
+import { toast } from 'react-toastify';
 
 import Title from '../components/Title';
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
@@ -19,10 +20,23 @@ const AnalyticsOverallPage: FC = () => {
   const [startOfMonth, endOfMonth] = getMonthRange(new Date());
   const [startOfYear, endOfYear] = getYearRange(new Date());
 
-  const { data: overallAnalytics, isLoading } = useQuery({
+  const {
+    data: overallAnalytics,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['overallAnalytics'],
     queryFn: fetchOverallAnalytics,
+    retry: false,
   });
+
+  useEffect(() => {
+    if (isError) {
+      toast('A server error occurred while getting analytics', {
+        type: 'error',
+      });
+    }
+  }, [isError]);
 
   const [customModal, setCustomModal] = useState<boolean>(false);
 

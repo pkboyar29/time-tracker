@@ -22,12 +22,18 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         .padStart(6, '0')
   );
 
-  const sortedItemsWithColors = activityDistributionItems
+  let sortedItemsWithColors = activityDistributionItems
     .toSorted((a, b) => b.spentTimeSeconds - a.spentTimeSeconds)
     .map((item, index) => ({
       ...item,
       fill: hexColors[index],
     }));
+
+  sortedItemsWithColors = [
+    ...sortedItemsWithColors,
+    ...sortedItemsWithColors,
+    ...sortedItemsWithColors,
+  ];
 
   return (
     <div className="h-full px-10 py-5 overflow-y-auto bg-white border border-solid rounded-lg border-gray-300/80">
