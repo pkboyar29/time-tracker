@@ -52,7 +52,6 @@ export default {
               activityGroup: activity?.activityGroup!,
               sessionsAmount: 0,
               spentTimeSeconds: 0,
-              spentTimePercentage: 0,
             };
             return activityDistribution;
           });
@@ -98,20 +97,6 @@ export default {
           activityDistribution.spentTimeSeconds !== 0
       );
 
-      // set spentTimePercentage to activityDistributions
-      activityDistributions = activityDistributions.map(
-        (activityDistribution) => {
-          return {
-            ...activityDistribution,
-            spentTimePercentage: parseFloat(
-              (
-                activityDistribution.spentTimeSeconds / spentTimeSeconds
-              ).toFixed(2)
-            ),
-          };
-        }
-      );
-
       // set without activity to activityDistributions
       const woActivitySessions = sessionsAmount - activitiesSessions;
       const woActivitySeconds = spentTimeSeconds - activitiesSeconds;
@@ -121,7 +106,6 @@ export default {
           activityName: 'Without activity',
           sessionsAmount: woActivitySessions,
           spentTimeSeconds: woActivitySeconds,
-          spentTimePercentage: woActivitySeconds / spentTimeSeconds,
         });
       }
 

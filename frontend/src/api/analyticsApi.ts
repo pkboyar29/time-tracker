@@ -14,7 +14,21 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
       sessionsAmount: unmappedData.sessionsAmount,
       spentTimeSeconds: unmappedData.spentTimeSeconds,
     },
-    activityDistributionItems: unmappedData.activityDistribution,
+    activityDistributionItems: unmappedData.activityDistribution.map(
+      (unmappedDistr: any) => {
+        return {
+          activityName: unmappedDistr.activityName,
+          activityGroup: unmappedDistr.activityGroup,
+          sessionsAmount: unmappedDistr.sessionsAmount,
+          spentTimeSeconds: unmappedDistr.spentTimeSeconds,
+          spentTimePercentage: parseFloat(
+            (
+              unmappedDistr.spentTimeSeconds / unmappedData.spentTimeSeconds
+            ).toFixed(2)
+          ),
+        };
+      }
+    ),
   };
 };
 
