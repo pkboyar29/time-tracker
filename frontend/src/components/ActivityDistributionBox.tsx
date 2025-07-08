@@ -29,12 +29,6 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
       fill: hexColors[index],
     }));
 
-  sortedItemsWithColors = [
-    ...sortedItemsWithColors,
-    ...sortedItemsWithColors,
-    ...sortedItemsWithColors,
-  ];
-
   return (
     <div className="h-full px-10 py-5 overflow-y-auto bg-white border border-solid rounded-lg border-gray-300/80">
       <div className="flex items-start justify-between">

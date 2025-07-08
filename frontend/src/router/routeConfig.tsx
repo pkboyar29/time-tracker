@@ -5,7 +5,6 @@ import AnalyticsOverallPage from '../pages/AnalyticsOverallPage';
 import ActivityGroupsPage from '../pages/ActivityGroupsPage';
 import ActivityPage from '../pages/ActivityPage';
 import ActivityGroupPage from '../pages/ActivityGroupPage';
-import SettingsPage from '../pages/SettingsPage';
 import SignInPage from '../pages/SignInPage';
 import SignUpPage from '../pages/SignUpPage';
 import NotFoundPage from '../pages/NotFoundPage';
@@ -46,11 +45,11 @@ const routeConfig: RouteType[] = [
     element: <AnalyticsRangePage />,
     requiredAuth: true,
   },
-  {
-    path: '/settings',
-    element: <SettingsPage />,
-    requiredAuth: true,
-  },
+  // {
+  //   path: '/settings',
+  //   element: <SettingsPage />,
+  //   requiredAuth: true,
+  // },
   {
     path: '/sign-in',
     element: <SignInPage />,

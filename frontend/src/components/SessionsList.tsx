@@ -1,7 +1,5 @@
 import { FC, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
-import { useAppDispatch } from '../redux/store';
+import { useAppDispatch, useAppSelector } from '../redux/store';
 import { useTimer } from '../context/TimerContext';
 import {
   deleteSession,
@@ -34,8 +32,8 @@ const SessionsList: FC<SessionsListProps> = ({
   sessions,
   updateSessionsList,
 }) => {
-  const currentSession = useSelector(
-    (state: RootState) => state.sessions.currentSession
+  const currentSession = useAppSelector(
+    (state) => state.sessions.currentSession
   );
   const dispatch = useAppDispatch();
   const { stopTimer, toggleTimer, enabled } = useTimer();
