@@ -9,15 +9,71 @@ import ActivityDistributionBox from '../components/ActivityDistributionBox';
 import { ClipLoader } from 'react-spinners';
 // TODO: использовать lazy loading
 import DailyGoalBox from '../components/DailyGoalBox';
-import DaysOfWeekBox from '../components/DaysOfWeekBox';
-import MonthsBox from '../components/MonthsBox';
-import YearsBox from '../components/YearsBox';
-import CustomRangeBox from '../components/CustomRangeBox';
+import DaysOfWeekBox from '../components/analyticsRangeBoxes/DaysOfWeekBox';
+import WeeksBox from '../components/analyticsRangeBoxes/WeeksBox';
+import MonthsBox from '../components/analyticsRangeBoxes/MonthsBox';
+import YearsBox from '../components/analyticsRangeBoxes/YearsBox';
+import CustomRangeBox from '../components/analyticsRangeBoxes/CustomRangeBox';
 
-type RangeType = 'days' | 'months' | 'years' | 'custom';
+type RangeType = 'days' | 'weeks' | 'months' | 'years' | 'custom';
+
+const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
+  const isStartOfDay = (date: Date) =>
+    date.getHours() == 0 &&
+    date.getMinutes() == 0 &&
+    date.getSeconds() == 0 &&
+    date.getMilliseconds() == 0;
+
+  const isEndOfDay = (date: Date) =>
+    date.getHours() == 23 &&
+    date.getMinutes() == 59 &&
+    date.getSeconds() == 59 &&
+    date.getMilliseconds() == 999;
+
+  if (
+    // если fromDate и toDate - начала дня, а также разница между ними - ровно один день
+    toDate.getTime() - fromDate.getTime() == 86400000 &&
+    isStartOfDay(fromDate) &&
+    isStartOfDay(toDate)
+  ) {
+    return 'days';
+  } else if (
+    // если fromDate - понедельник и начало дня, а toDate - воскресенье и конец дня, а также разница между ними - ровно одна неделя
+    toDate.getTime() - fromDate.getTime() == 86400000 * 7 - 1 &&
+    fromDate.getDay() == 1 &&
+    toDate.getDay() == 0 &&
+    isStartOfDay(fromDate) &&
+    isEndOfDay(toDate)
+  ) {
+    return 'weeks';
+  } else if (
+    // если fromDate - начало месяца, а toDate - начало следующего месяца, а также разница между ними - ровно один месяц
+    (toDate.getMonth() - fromDate.getMonth() == 1 ||
+      (toDate.getMonth() == 0 && fromDate.getMonth() == 11)) &&
+    fromDate.getDate() == 1 &&
+    toDate.getDate() == 1 &&
+    isStartOfDay(fromDate) &&
+    isStartOfDay(toDate)
+  ) {
+    return 'months';
+  } else if (
+    // если fromDate - начало января года, а toDate - начало января следующего года, а также разница между ними - ровно один год
+    toDate.getFullYear() - fromDate.getFullYear() == 1 &&
+    fromDate.getMonth() == 0 &&
+    toDate.getMonth() == 0 &&
+    fromDate.getDate() == 1 &&
+    toDate.getDate() == 1 &&
+    isStartOfDay(fromDate) &&
+    isStartOfDay(toDate)
+  ) {
+    return 'years';
+  } else {
+    return 'custom';
+  }
+};
 
 const AnalyticsRangePage: FC = () => {
-  const [searchParams, _] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
 
@@ -35,8 +91,7 @@ const AnalyticsRangePage: FC = () => {
 
   const [fromDate, setFromDate] = useState<Date>(new Date(fromParam));
   const [toDate, setToDate] = useState<Date>(new Date(toParam));
-
-  const [rangeType, setRangeType] = useState<RangeType>();
+  const [rangeType] = useState<RangeType>(getRangeType(fromDate, toDate));
 
   const {
     data: rangeAnalytics,
@@ -47,31 +102,6 @@ const AnalyticsRangePage: FC = () => {
     queryFn: () => fetchRangeAnalytics(fromDate, toDate),
     retry: false,
   });
-
-  const defineRangeType = (fromDate: Date, toDate: Date) => {
-    if (toDate.getTime() - fromDate.getTime() == 86400000) {
-      setRangeType('days');
-    } else if (
-      (toDate.getMonth() - fromDate.getMonth() == 1 ||
-        (toDate.getMonth() == 0 && fromDate.getMonth() == 11)) &&
-      fromDate.toISOString().substring(8) == '01T00:00:00.000Z' &&
-      toDate.toISOString().substring(8) == '01T00:00:00.000Z'
-    ) {
-      setRangeType('months');
-    } else if (
-      toDate.getFullYear() - fromDate.getFullYear() == 1 &&
-      fromDate.toISOString().substring(5) == '01-01T00:00:00.000Z' &&
-      toDate.toISOString().substring(5) == '01-01T00:00:00.000Z'
-    ) {
-      setRangeType('years');
-    } else {
-      setRangeType('custom');
-    }
-  };
-
-  useEffect(() => {
-    defineRangeType(fromDate, toDate);
-  }, []);
 
   useEffect(() => {
     setFromDate(new Date(fromParam));
@@ -92,12 +122,16 @@ const AnalyticsRangePage: FC = () => {
         <div className="flex justify-center py-5 border-b border-solid border-b-gray-400">
           {rangeType == 'days' ? (
             <DaysOfWeekBox currentDay={fromDate} />
+          ) : rangeType == 'weeks' ? (
+            <WeeksBox fromDate={fromDate} toDate={toDate} />
           ) : rangeType == 'months' ? (
             <MonthsBox currentMonth={fromDate} />
           ) : rangeType == 'years' ? (
             <YearsBox currentYear={fromDate} />
-          ) : (
+          ) : rangeType == 'custom' ? (
             <CustomRangeBox fromDate={fromDate} toDate={toDate} />
+          ) : (
+            <></>
           )}
         </div>
       )}

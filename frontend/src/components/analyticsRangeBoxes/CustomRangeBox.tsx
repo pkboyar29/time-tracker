@@ -1,7 +1,7 @@
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import Button from './Button';
+import Button from '../Button';
 
 interface CustomRangeBoxProps {
   fromDate: Date;

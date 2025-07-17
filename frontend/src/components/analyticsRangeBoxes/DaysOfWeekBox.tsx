@@ -1,14 +1,14 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getWeekDays,
-  shiftWeek,
+  shiftWeekDays,
   getDayOfWeekName,
   getDayRange,
-} from '../helpers/dateHelpers';
+} from '../../helpers/dateHelpers';
 
-import LeftChevronIcon from '../icons/LeftChevronIcon';
-import RightChevronIcon from '../icons/RightChevronIcon';
+import LeftChevronIcon from '../../icons/LeftChevronIcon';
+import RightChevronIcon from '../../icons/RightChevronIcon';
 
 interface DaysOfWeekBoxProps {
   currentDay: Date;
@@ -18,18 +18,14 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
   const navigate = useNavigate();
   const today: Date = new Date(Date.now());
 
-  const [daysOfWeek, setDaysOfWeek] = useState<Date[]>([]);
-
-  useEffect(() => {
-    setDaysOfWeek(getWeekDays(currentDay));
-  }, []);
+  const [daysOfWeek, setDaysOfWeek] = useState<Date[]>(getWeekDays(currentDay));
 
   const leftArrowClickHandler = () => {
-    setDaysOfWeek(shiftWeek(daysOfWeek, false));
+    setDaysOfWeek(shiftWeekDays(daysOfWeek, false));
   };
 
   const rightArrowClickHandler = () => {
-    setDaysOfWeek(shiftWeek(daysOfWeek, true));
+    setDaysOfWeek(shiftWeekDays(daysOfWeek, true));
   };
 
   const dayClickHandler = (date: Date) => {
@@ -59,16 +55,15 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
           <RightChevronIcon />
         </button>
       </div>
+
       <div className="flex gap-1">
         {daysOfWeek.map((dayOfWeek, index) => (
           <div
             onClick={() => dayClickHandler(dayOfWeek)}
-            className={`w-12 flex flex-col items-center gap-1 py-1 px-2 rounded-[4px] bg-gray-200 cursor-pointer transition duration-300 hover:bg-slate-300 ${
-              currentDay.toDateString() === dayOfWeek.toDateString() &&
-              'bg-slate-300'
-            } ${
-              today.toDateString() === dayOfWeek.toDateString() && 'red-dot'
-            }`}
+            className={`w-12 flex flex-col items-center gap-1 py-1 px-2 rounded-[4px] bg-gray-200 cursor-pointer transition duration-300 hover:bg-gray-300 ${
+              currentDay.toDateString() == dayOfWeek.toDateString() &&
+              'bg-gray-300'
+            } ${today.toDateString() == dayOfWeek.toDateString() && 'red-dot'}`}
             key={index}
           >
             <div className="text-[13px] font-medium text-gray-500">

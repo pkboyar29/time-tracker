@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useMemo } from 'react';
 import { getTimeMinutes } from '../helpers/timeHelpers';
 import { PieChart, Pie } from 'recharts';
 
@@ -13,21 +13,25 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
 }) => {
   const [activeBar, setActiveBar] = useState<'table' | 'chart'>('table');
 
-  const hexColors = Array.from(
-    { length: activityDistributionItems.length },
-    () =>
-      '#' +
-      Math.floor(Math.random() * 0xffffff)
-        .toString(16)
-        .padStart(6, '0')
-  );
+  const hexColors = useMemo(() => {
+    return Array.from(
+      { length: activityDistributionItems.length },
+      () =>
+        '#' +
+        Math.floor(Math.random() * 0xffffff)
+          .toString(16)
+          .padStart(6, '0')
+    );
+  }, []);
 
-  let sortedItemsWithColors = activityDistributionItems
-    .toSorted((a, b) => b.spentTimeSeconds - a.spentTimeSeconds)
-    .map((item, index) => ({
-      ...item,
-      fill: hexColors[index],
-    }));
+  const sortedItemsWithColors = useMemo(() => {
+    return activityDistributionItems
+      .toSorted((a, b) => b.spentTimeSeconds - a.spentTimeSeconds)
+      .map((item, index) => ({
+        ...item,
+        fill: hexColors[index],
+      }));
+  }, []);
 
   return (
     <div className="h-full px-10 py-5 overflow-y-auto bg-white border border-solid rounded-lg border-gray-300/80">
