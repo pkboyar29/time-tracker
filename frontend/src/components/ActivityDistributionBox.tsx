@@ -1,5 +1,5 @@
 import { FC, useState, useMemo } from 'react';
-import { getTimeMinutes } from '../helpers/timeHelpers';
+import { getTimeHoursMinutes } from '../helpers/timeHelpers';
 import { PieChart, Pie } from 'recharts';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
@@ -22,7 +22,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           .toString(16)
           .padStart(6, '0')
     );
-  }, []);
+  }, [activityDistributionItems]);
 
   const sortedItemsWithColors = useMemo(() => {
     return activityDistributionItems
@@ -31,7 +31,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         ...item,
         fill: hexColors[index],
       }));
-  }, []);
+  }, [activityDistributionItems]);
 
   return (
     <div className="h-full px-10 py-5 overflow-y-auto bg-white border border-solid rounded-lg border-gray-300/80">
@@ -84,7 +84,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 </div>
                 <div className="w-1/5">{item.sessionsAmount}</div>
                 <div className="w-1/5">
-                  {getTimeMinutes(item.spentTimeSeconds)}m
+                  {getTimeHoursMinutes(item.spentTimeSeconds, true)}
                 </div>
                 <div className="w-1/5">
                   {Math.trunc(item.spentTimePercentage * 100)}%
@@ -120,7 +120,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 />
                 <div className="text-lg">{item.activityName}</div>
                 <div className="text-base">
-                  ({getTimeMinutes(item.spentTimeSeconds)} minutes,{' '}
+                  ({getTimeHoursMinutes(item.spentTimeSeconds, true)},{' '}
                   {item.sessionsAmount} sessions)
                 </div>
               </div>

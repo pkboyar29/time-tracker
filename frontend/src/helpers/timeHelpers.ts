@@ -33,21 +33,29 @@ const getTimeMinutes = (seconds: number): string => {
   return minutes.toString();
 };
 
-const getTimeHoursMinutes = (seconds: number): string => {
+const getTimeHoursMinutes = (
+  seconds: number,
+  short: boolean = false
+): string => {
   const hours: number = Math.trunc(seconds / 3600);
-  const hoursString: string = hours === 0 ? '' : `${hours} hours`;
+  const hoursString: string =
+    hours === 0 ? '' : short == true ? `${hours}h` : `${hours} hours`;
 
   const remainingSeconds: number = seconds - hours * 3600;
   const remainingMinutes: number = Math.trunc(remainingSeconds / 60);
   const minutesString: string =
-    remainingMinutes === 0 ? '' : `${remainingMinutes} minutes`;
+    remainingMinutes === 0
+      ? ''
+      : short == true
+      ? `${remainingMinutes}m`
+      : `${remainingMinutes} minutes`;
 
   const resultString =
     hoursString === '' && minutesString === ''
-      ? '0 minutes'
+      ? `${short == true ? '0m' : '0 minutes'}`
       : `${hoursString} ${minutesString}`;
 
-  return resultString;
+  return resultString.trim();
 };
 
 export {
