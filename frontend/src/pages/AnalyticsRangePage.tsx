@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { fetchRangeAnalytics } from '../api/analyticsApi';
 import { toast } from 'react-toastify';
+import { getRangeType, RangeType } from '../helpers/dateHelpers';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
@@ -14,63 +15,6 @@ import WeeksBox from '../components/analyticsRangeBoxes/WeeksBox';
 import MonthsBox from '../components/analyticsRangeBoxes/MonthsBox';
 import YearsBox from '../components/analyticsRangeBoxes/YearsBox';
 import CustomRangeBox from '../components/analyticsRangeBoxes/CustomRangeBox';
-
-type RangeType = 'days' | 'weeks' | 'months' | 'years' | 'custom';
-
-const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
-  const isStartOfDay = (date: Date) =>
-    date.getHours() == 0 &&
-    date.getMinutes() == 0 &&
-    date.getSeconds() == 0 &&
-    date.getMilliseconds() == 0;
-
-  const isEndOfDay = (date: Date) =>
-    date.getHours() == 23 &&
-    date.getMinutes() == 59 &&
-    date.getSeconds() == 59 &&
-    date.getMilliseconds() == 999;
-
-  if (
-    // если fromDate и toDate - начала дня, а также разница между ними - ровно один день
-    toDate.getTime() - fromDate.getTime() == 86400000 &&
-    isStartOfDay(fromDate) &&
-    isStartOfDay(toDate)
-  ) {
-    return 'days';
-  } else if (
-    // если fromDate - понедельник и начало дня, а toDate - воскресенье и конец дня, а также разница между ними - ровно одна неделя
-    toDate.getTime() - fromDate.getTime() == 86400000 * 7 - 1 &&
-    fromDate.getDay() == 1 &&
-    toDate.getDay() == 0 &&
-    isStartOfDay(fromDate) &&
-    isEndOfDay(toDate)
-  ) {
-    return 'weeks';
-  } else if (
-    // если fromDate - начало месяца, а toDate - начало следующего месяца, а также разница между ними - ровно один месяц
-    (toDate.getMonth() - fromDate.getMonth() == 1 ||
-      (toDate.getMonth() == 0 && fromDate.getMonth() == 11)) &&
-    fromDate.getDate() == 1 &&
-    toDate.getDate() == 1 &&
-    isStartOfDay(fromDate) &&
-    isStartOfDay(toDate)
-  ) {
-    return 'months';
-  } else if (
-    // если fromDate - начало января года, а toDate - начало января следующего года, а также разница между ними - ровно один год
-    toDate.getFullYear() - fromDate.getFullYear() == 1 &&
-    fromDate.getMonth() == 0 &&
-    toDate.getMonth() == 0 &&
-    fromDate.getDate() == 1 &&
-    toDate.getDate() == 1 &&
-    isStartOfDay(fromDate) &&
-    isStartOfDay(toDate)
-  ) {
-    return 'years';
-  } else {
-    return 'custom';
-  }
-};
 
 const AnalyticsRangePage: FC = () => {
   const [searchParams] = useSearchParams();
