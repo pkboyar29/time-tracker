@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMonthWeeks, getMonthName } from '../../helpers/dateHelpers';
 
@@ -21,28 +21,48 @@ const WeeksBox: FC<WeeksBoxProps> = ({ fromDate, toDate }) => {
 
   const [weeks, setWeeks] = useState<Date[][]>(getMonthWeeks(fromDate));
 
+  useEffect(() => {
+    const handleKeyClick = (event: KeyboardEvent) => {
+      if (event.code == 'ArrowLeft') {
+        leftArrowClickHandler();
+      } else if (event.code == 'ArrowRight') {
+        rightArrowClickHandler();
+      }
+    };
+
+    window.addEventListener('keyup', handleKeyClick);
+
+    return () => {
+      window.removeEventListener('keyup', handleKeyClick);
+    };
+  }, []);
+
   const leftArrowClickHandler = () => {
-    // первое воскресенье всегда находится в текущем месяце
-    const firstSunday = weeks[0][1];
+    setWeeks((weeks) => {
+      // первое воскресенье всегда находится в текущем месяце
+      const firstSunday = weeks[0][1];
 
-    // выбираем четвертый день в предыдущем месяце
-    const dayFromPrevMonth = new Date(firstSunday);
-    dayFromPrevMonth.setMonth(dayFromPrevMonth.getMonth() - 1);
-    dayFromPrevMonth.setDate(4);
+      // выбираем четвертый день в предыдущем месяце
+      const dayFromPrevMonth = new Date(firstSunday);
+      dayFromPrevMonth.setMonth(dayFromPrevMonth.getMonth() - 1);
+      dayFromPrevMonth.setDate(4);
 
-    setWeeks(getMonthWeeks(dayFromPrevMonth));
+      return getMonthWeeks(dayFromPrevMonth);
+    });
   };
 
   const rightArrowClickHandler = () => {
-    // последний понедельник всегда находится в текущем месяце
-    const lastMonday = weeks[weeks.length - 1][0];
+    setWeeks((weeks) => {
+      // последний понедельник всегда находится в текущем месяце
+      const lastMonday = weeks[weeks.length - 1][0];
 
-    // выбираем четвертый день в следующем месяце
-    const dayFromNextMonth = new Date(lastMonday);
-    dayFromNextMonth.setMonth(dayFromNextMonth.getMonth() + 1);
-    dayFromNextMonth.setDate(4);
+      // выбираем четвертый день в следующем месяце
+      const dayFromNextMonth = new Date(lastMonday);
+      dayFromNextMonth.setMonth(dayFromNextMonth.getMonth() + 1);
+      dayFromNextMonth.setDate(4);
 
-    setWeeks(getMonthWeeks(dayFromNextMonth));
+      return getMonthWeeks(dayFromNextMonth);
+    });
   };
 
   const weekClickHandler = (week: Date[]) => {

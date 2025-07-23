@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getTwoYears,
@@ -22,12 +22,28 @@ const YearsBox: FC<YearsBoxProps> = ({ currentYear }) => {
 
   const [years, setYears] = useState<Date[]>(getTwoYears(currentYear));
 
+  useEffect(() => {
+    const handleKeyClick = (event: KeyboardEvent) => {
+      if (event.code == 'ArrowLeft') {
+        leftArrowClickHandler();
+      } else if (event.code == 'ArrowRight') {
+        rightArrowClickHandler();
+      }
+    };
+
+    window.addEventListener('keyup', handleKeyClick);
+
+    return () => {
+      window.removeEventListener('keyup', handleKeyClick);
+    };
+  }, []);
+
   const leftArrowClickHandler = () => {
-    setYears(shiftTwoYears(years, false));
+    setYears((years) => shiftTwoYears(years, false));
   };
 
   const rightArrowClickHandler = () => {
-    setYears(shiftTwoYears(years, true));
+    setYears((years) => shiftTwoYears(years, true));
   };
 
   const yearClickHandler = (date: Date) => {

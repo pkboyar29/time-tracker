@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getFiveMonths,
@@ -25,12 +25,28 @@ const MonthsBox: FC<MonthsBoxProps> = ({ currentMonth }) => {
 
   const [months, setMonths] = useState<Date[]>(getFiveMonths(currentMonth));
 
+  useEffect(() => {
+    const handleKeyClick = (event: KeyboardEvent) => {
+      if (event.code == 'ArrowLeft') {
+        leftArrowClickHandler();
+      } else if (event.code == 'ArrowRight') {
+        rightArrowClickHandler();
+      }
+    };
+
+    window.addEventListener('keyup', handleKeyClick);
+
+    return () => {
+      window.removeEventListener('keyup', handleKeyClick);
+    };
+  }, []);
+
   const leftArrowClickHandler = () => {
-    setMonths(shiftFiveMonths(months, false));
+    setMonths((months) => shiftFiveMonths(months, false));
   };
 
   const rightArrowClickHandler = () => {
-    setMonths(shiftFiveMonths(months, true));
+    setMonths((months) => shiftFiveMonths(months, true));
   };
 
   const monthClickHandler = (date: Date) => {

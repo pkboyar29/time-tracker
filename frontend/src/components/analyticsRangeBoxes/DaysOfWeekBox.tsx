@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getWeekDays,
@@ -19,13 +19,30 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
   const today: Date = new Date(Date.now());
 
   const [daysOfWeek, setDaysOfWeek] = useState<Date[]>(getWeekDays(currentDay));
+  console.log('re render');
+
+  useEffect(() => {
+    const handleKeyClick = (event: KeyboardEvent) => {
+      if (event.code == 'ArrowLeft') {
+        leftArrowClickHandler();
+      } else if (event.code == 'ArrowRight') {
+        rightArrowClickHandler();
+      }
+    };
+
+    window.addEventListener('keyup', handleKeyClick);
+
+    return () => {
+      window.removeEventListener('keyup', handleKeyClick);
+    };
+  }, []);
 
   const leftArrowClickHandler = () => {
-    setDaysOfWeek(shiftWeekDays(daysOfWeek, false));
+    setDaysOfWeek((daysOfWeek) => shiftWeekDays(daysOfWeek, false));
   };
 
   const rightArrowClickHandler = () => {
-    setDaysOfWeek(shiftWeekDays(daysOfWeek, true));
+    setDaysOfWeek((daysOfWeek) => shiftWeekDays(daysOfWeek, true));
   };
 
   const dayClickHandler = (date: Date) => {
