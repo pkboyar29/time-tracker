@@ -1,5 +1,5 @@
 // TODO: возвращать дни недели, начиная с понедельника (1 индекса)
-const getWeekDays = (date: Date): Date[] => {
+export const getWeekDays = (date: Date): Date[] => {
   const initialDayOfWeek: number = date.getDay();
 
   // find start of week in date format (start of week - 0 index - sunday)
@@ -19,7 +19,7 @@ const getWeekDays = (date: Date): Date[] => {
   return daysOfWeek;
 };
 
-const getDayOfWeekName = (dayNumber: number): string => {
+export const getDayOfWeekName = (dayNumber: number): string => {
   switch (dayNumber) {
     case 0:
       return 'SUN';
@@ -40,7 +40,7 @@ const getDayOfWeekName = (dayNumber: number): string => {
   }
 };
 
-const shiftWeekDays = (days: Date[], right: boolean): Date[] => {
+export const shiftWeekDays = (days: Date[], right: boolean): Date[] => {
   let newDays: Date[] = [];
   for (let i = 0; i < 7; i++) {
     newDays.push(new Date(days[i]));
@@ -54,39 +54,46 @@ const shiftWeekDays = (days: Date[], right: boolean): Date[] => {
   return newDays;
 };
 
-const getMonthName = (monthNumber: number) => {
-  switch (monthNumber) {
-    case 0:
-      return 'Jan';
-    case 1:
-      return 'Feb';
-    case 2:
-      return 'Mar';
-    case 3:
-      return 'Apr';
-    case 4:
-      return 'May';
-    case 5:
-      return 'Jun';
-    case 6:
-      return 'Jul';
-    case 7:
-      return 'Aug';
-    case 8:
-      return 'Sep';
-    case 9:
-      return 'Oct';
-    case 10:
-      return 'Nov';
-    case 11:
-      return 'Dec';
-    default:
-      return 'undefined';
-  }
+export const getMonthName = (monthNumber: number) => {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  return `${months[monthNumber]}`;
+};
+
+export const getMonthDetailedName = (date: Date) => {
+  const months = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  return `${months[date.getMonth()]} ${date.getFullYear()}`;
 };
 
 // TODO: можно указать такой тип [Date, Date][]
-const getMonthWeeks = (date: Date): Date[][] => {
+export const getMonthWeeks = (date: Date): Date[][] => {
   date = new Date(date);
 
   // находим дату понедельника
@@ -155,7 +162,7 @@ const getMonthWeeks = (date: Date): Date[][] => {
   return weeks;
 };
 
-const getFiveMonths = (middleDate: Date): Date[] => {
+export const getFiveMonths = (middleDate: Date): Date[] => {
   const fiveMonths: Date[] = [];
 
   for (let i = 2; i > 0; i--) {
@@ -173,7 +180,7 @@ const getFiveMonths = (middleDate: Date): Date[] => {
   return fiveMonths;
 };
 
-const shiftFiveMonths = (fiveMonths: Date[], right: boolean): Date[] => {
+export const shiftFiveMonths = (fiveMonths: Date[], right: boolean): Date[] => {
   let newFiveMonths: Date[] = [];
   for (let i = 0; i < 5; i++) {
     newFiveMonths.push(fiveMonths[i]);
@@ -187,7 +194,7 @@ const shiftFiveMonths = (fiveMonths: Date[], right: boolean): Date[] => {
   return newFiveMonths;
 };
 
-const getTwoYears = (yearDate: Date): Date[] => {
+export const getTwoYears = (yearDate: Date): Date[] => {
   const previousYearDate: Date = new Date(yearDate);
   previousYearDate.setFullYear(yearDate.getFullYear() - 1);
 
@@ -195,7 +202,7 @@ const getTwoYears = (yearDate: Date): Date[] => {
   return twoYears;
 };
 
-const shiftTwoYears = (twoYears: Date[], right: boolean): Date[] => {
+export const shiftTwoYears = (twoYears: Date[], right: boolean): Date[] => {
   let newTwoYears: Date[] = [];
   for (let i = 0; i < 2; i++) {
     newTwoYears.push(twoYears[i]);
@@ -209,7 +216,7 @@ const shiftTwoYears = (twoYears: Date[], right: boolean): Date[] => {
   return newTwoYears;
 };
 
-const getDayRange = (date: Date): [Date, Date] => {
+export const getDayRange = (date: Date): [Date, Date] => {
   const startOfDay = new Date(
     date.getFullYear(),
     date.getMonth(),
@@ -226,7 +233,7 @@ const getDayRange = (date: Date): [Date, Date] => {
   return [startOfDay, endOfDay];
 };
 
-const getWeekRange = (date: Date): [Date, Date] => {
+export const getWeekRange = (date: Date): [Date, Date] => {
   const mondayDate = new Date(date);
 
   if (mondayDate.getDay() == 0) {
@@ -251,7 +258,7 @@ const getWeekRange = (date: Date): [Date, Date] => {
   return [mondayDate, sundayDate];
 };
 
-const getMonthRange = (date: Date): [Date, Date] => {
+export const getMonthRange = (date: Date): [Date, Date] => {
   const startOfMonth = new Date(date);
   startOfMonth.setDate(1);
   startOfMonth.setHours(0);
@@ -265,7 +272,7 @@ const getMonthRange = (date: Date): [Date, Date] => {
   return [startOfMonth, endOfMonth];
 };
 
-const getYearRange = (date: Date): [Date, Date] => {
+export const getYearRange = (date: Date): [Date, Date] => {
   const startOfYear = new Date(date);
   startOfYear.setMonth(0);
   startOfYear.setDate(1);
@@ -280,26 +287,43 @@ const getYearRange = (date: Date): [Date, Date] => {
   return [startOfYear, endOfYear];
 };
 
-export type RangeType = 'days' | 'weeks' | 'months' | 'years' | 'custom';
-
-const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
-  const isStartOfDay = (date: Date) =>
+export const isStartOfDay = (date: Date) => {
+  return (
     date.getHours() == 0 &&
     date.getMinutes() == 0 &&
     date.getSeconds() == 0 &&
-    date.getMilliseconds() == 0;
+    date.getMilliseconds() == 0
+  );
+};
 
-  const isEndOfDay = (date: Date) =>
+export const isEndOfDay = (date: Date) => {
+  return (
     date.getHours() == 23 &&
     date.getMinutes() == 59 &&
     date.getSeconds() == 59 &&
-    date.getMilliseconds() == 999;
+    date.getMilliseconds() == 999
+  );
+};
 
+export const isSameDay = (oneDay: Date, twoDay: Date) => {
+  return (
+    oneDay.getFullYear() == twoDay.getFullYear() &&
+    oneDay.getMonth() == twoDay.getMonth() &&
+    oneDay.getDate() == twoDay.getDate()
+  );
+};
+
+export type RangeType = 'days' | 'weeks' | 'months' | 'years' | 'custom';
+
+export const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
   if (
-    // если fromDate и toDate - начала дня, а также разница между ними - ровно один день
-    toDate.getTime() - fromDate.getTime() == 86400000 &&
-    isStartOfDay(fromDate) &&
-    isStartOfDay(toDate)
+    // если fromDate и toDate - начала дня, а также разница между ними - ровно один день ИЛИ это один день, но fromDate - начало дня, а toDate - конец дня
+    (toDate.getTime() - fromDate.getTime() == 86400000 &&
+      isStartOfDay(fromDate) &&
+      isStartOfDay(toDate)) ||
+    (isSameDay(fromDate, toDate) &&
+      isStartOfDay(fromDate) &&
+      isEndOfDay(toDate))
   ) {
     return 'days';
   } else if (
@@ -337,19 +361,17 @@ const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
   }
 };
 
-export {
-  getWeekDays,
-  getDayOfWeekName,
-  shiftWeekDays,
-  getMonthName,
-  getMonthWeeks,
-  getFiveMonths,
-  shiftFiveMonths,
-  getTwoYears,
-  shiftTwoYears,
-  getDayRange,
-  getWeekRange,
-  getMonthRange,
-  getYearRange,
-  getRangeType,
+export const toLocalISOString = (date: Date) => {
+  const pad = (n: any) => {
+    return n.toString().padStart(2, '0');
+  };
+
+  const year = date.getFullYear();
+  const month = pad(date.getMonth() + 1);
+  const day = pad(date.getDate());
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+
+  return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 };

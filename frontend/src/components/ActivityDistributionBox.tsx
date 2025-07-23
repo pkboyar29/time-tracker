@@ -63,7 +63,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           </button>
         </div>
 
-        <div className="inline-block px-4 py-1 mb-4 ml-auto mr-0 text-lg font-medium tracking-wide text-right text-gray-800 bg-gray-300 rounded-lg">
+        <div className="inline-block px-4 py-1 mb-4 ml-auto mr-0 text-lg font-medium tracking-wide text-right text-gray-800 bg-gray-200 rounded-lg">
           Activity distribution
         </div>
       </div>

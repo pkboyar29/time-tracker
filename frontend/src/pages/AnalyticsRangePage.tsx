@@ -10,6 +10,7 @@ import ActivityDistributionBox from '../components/ActivityDistributionBox';
 import { ClipLoader } from 'react-spinners';
 // TODO: использовать lazy loading
 import DailyGoalBox from '../components/DailyGoalBox';
+import ColumnChartBox from '../components/ColumnChartBox';
 import DaysOfWeekBox from '../components/analyticsRangeBoxes/DaysOfWeekBox';
 import WeeksBox from '../components/analyticsRangeBoxes/WeeksBox';
 import MonthsBox from '../components/analyticsRangeBoxes/MonthsBox';
@@ -105,15 +106,16 @@ const AnalyticsRangePage: FC = () => {
             )}
           </div>
 
-          <div className="w-1/2 px-4">
+          <div className="w-1/2 px-4 pt-5">
             {rangeType == 'days' && rangeAnalytics.sessionStatistics && (
-              <div className="pt-5">
-                <DailyGoalBox
-                  spentTimeSeconds={
-                    rangeAnalytics.sessionStatistics.spentTimeSeconds
-                  }
-                />
-              </div>
+              <DailyGoalBox
+                spentTimeSeconds={
+                  rangeAnalytics.sessionStatistics.spentTimeSeconds
+                }
+              />
+            )}
+            {rangeType != 'days' && (
+              <ColumnChartBox timeBars={rangeAnalytics.timeBars} />
             )}
           </div>
         </div>

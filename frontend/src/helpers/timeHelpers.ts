@@ -1,4 +1,4 @@
-const getRemainingTimeHoursMinutesSeconds = (
+export const getRemainingTimeHoursMinutesSeconds = (
   totalTimeSeconds: number,
   spentTimeSeconds: number
 ): string => {
@@ -15,7 +15,7 @@ const getRemainingTimeHoursMinutesSeconds = (
   return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
 };
 
-const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
+export const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   const hours: number = Math.trunc(allSeconds / 3600);
   const formattedHours: string = hours < 10 ? '0' + hours : hours.toString();
   const minutes: number = Math.trunc(allSeconds / 60) - hours * 60;
@@ -28,12 +28,12 @@ const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
-const getTimeMinutes = (seconds: number): string => {
+export const getTimeMinutes = (seconds: number): string => {
   const minutes: number = Math.trunc(seconds / 60);
   return minutes.toString();
 };
 
-const getTimeHoursMinutes = (
+export const getTimeHoursMinutes = (
   seconds: number,
   short: boolean = false
 ): string => {
@@ -58,9 +58,11 @@ const getTimeHoursMinutes = (
   return resultString.trim();
 };
 
-export {
-  getRemainingTimeHoursMinutesSeconds,
-  getTimeHoursMinutesSeconds,
-  getTimeMinutes,
-  getTimeHoursMinutes,
+export const getTimeHHmmFromDate = (date: Date) => {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  return `${hours < 10 ? `0${hours}` : `${hours}`}:${
+    minutes < 10 ? `0${minutes}` : `${minutes}`
+  }`;
 };

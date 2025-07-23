@@ -1,5 +1,7 @@
 import { FC, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toLocalISOString } from '../../helpers/dateHelpers';
+import { toast } from 'react-toastify';
 
 import Button from '../Button';
 
@@ -11,15 +13,24 @@ interface CustomRangeBoxProps {
 const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
   const navigate = useNavigate();
 
-  const [from, setFrom] = useState<string>(
-    fromDate.toISOString().substring(0, 16)
-  );
-  const [to, setTo] = useState<string>(toDate.toISOString().substring(0, 16));
+  const [from, setFrom] = useState<string>(toLocalISOString(fromDate));
+  const [to, setTo] = useState<string>(toLocalISOString(toDate));
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
+  // FOCUS: тут string надо преобразовывать в ISO string
   const handleApply = () => {
-    navigate(`/analytics/range?from=${from}&to=${to}`);
+    const fromDate = new Date(from);
+    const toDate = new Date(to);
+
+    if (fromDate.getTime() > toDate.getTime()) {
+      toast('"to date" should be later than "from date"', { type: 'error' });
+      return;
+    }
+
+    navigate(
+      `/analytics/range?from=${fromDate.toISOString()}&to=${toDate.toISOString()}`
+    );
     setIsEditing(false);
   };
 
