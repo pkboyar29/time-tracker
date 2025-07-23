@@ -56,3 +56,9 @@ const Session = mongoose.model('Session', sessionSchema, 'sessions');
 export default Session;
 
 export type SessionType = InferSchemaType<typeof sessionSchema>;
+
+export type PopulatedSessionType = SessionType & {
+  activity: {
+    name: string;
+  };
+};

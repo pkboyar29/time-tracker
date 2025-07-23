@@ -6,12 +6,93 @@ import {
   ActivityDistribution,
   TimeBar,
 } from '../dto/analytics.dto';
-import { SessionPartType } from '../model/sessionPart.model';
-import { SessionType } from '../model/session.model';
+import { PopulatedSessionPartType } from '../model/sessionPart.model';
+import { PopulatedSessionType } from '../model/session.model';
 
 import { DateTime } from 'luxon';
 
 export default {
+  // TODO: убрать тип any
+  async getActivityDistributions(
+    allSessionsAmount: number,
+    allSpentTimeSeconds: number,
+    sessionParts: any,
+    completedSessions: any,
+    userId: string
+  ): Promise<ActivityDistribution[]> {
+    let activityDistributions: ActivityDistribution[] = [];
+
+    const activities = await activityService.getActivities(userId);
+    if (activities && activities.length !== 0) {
+      activityDistributions = activities
+        .filter((activity) => activity && activity.name)
+        .map((activity) => {
+          const activityDistribution: ActivityDistribution = {
+            activityName: activity?.name || '',
+            activityGroup: activity?.activityGroup!,
+            sessionsAmount: 0,
+            spentTimeSeconds: 0,
+          };
+          return activityDistribution;
+        });
+    }
+
+    let activitiesSeconds: number = 0;
+    let activitiesSessions: number = 0;
+
+    // set sessionsAmount to activityDistributions
+    completedSessions?.forEach((session: PopulatedSessionType) => {
+      if (session.activity) {
+        const activityDistributionIndex: number =
+          activityDistributions.findIndex(
+            (activityDistribution) =>
+              activityDistribution.activityName === session.activity.name
+          );
+        activityDistributions[activityDistributionIndex].sessionsAmount += 1;
+
+        activitiesSessions += 1;
+      }
+    });
+
+    // set spentTimeSeconds to activityDistributions
+    sessionParts?.forEach((sessionPart: PopulatedSessionPartType) => {
+      if (sessionPart.session.activity) {
+        const activityDistributionIndex: number =
+          activityDistributions.findIndex(
+            (activityDistribution) =>
+              activityDistribution.activityName ===
+              sessionPart.session.activity.name
+          );
+        activityDistributions[activityDistributionIndex].spentTimeSeconds +=
+          sessionPart.spentTimeSeconds;
+
+        activitiesSeconds += sessionPart.spentTimeSeconds;
+      }
+    });
+
+    // delete empty activity distributions
+    activityDistributions = activityDistributions.filter(
+      (activityDistribution) =>
+        activityDistribution.sessionsAmount !== 0 ||
+        activityDistribution.spentTimeSeconds !== 0
+    );
+
+    // set without activity to activityDistributions
+    const woActivitySessions = allSessionsAmount - activitiesSessions;
+    const woActivitySeconds = allSpentTimeSeconds - activitiesSeconds;
+    if (woActivitySeconds > 0) {
+      activityDistributions.push({
+        activityGroup: { _id: '0', name: 'wo' },
+        activityName: 'Without activity',
+        sessionsAmount: woActivitySessions,
+        spentTimeSeconds: woActivitySeconds,
+      });
+    }
+
+    return activityDistributions;
+  },
+
+  // TODO: убрать тип any
   getTimeBars(
     startOfRange: Date,
     endOfRange: Date,
@@ -58,7 +139,7 @@ export default {
 
     while (true) {
       const filteredSessionParts = sessionParts?.filter(
-        (sessionPart: SessionPartType) => {
+        (sessionPart: PopulatedSessionPartType) => {
           const createdDate = sessionPart.createdDate.getTime();
 
           return (
@@ -68,7 +149,7 @@ export default {
         }
       );
       const filteredSessions = completedSessions?.filter(
-        (session: SessionType) => {
+        (session: PopulatedSessionType) => {
           const completedDate = session.updatedDate.getTime();
 
           return (
@@ -80,7 +161,7 @@ export default {
 
       const barSpentTimeSeconds = filteredSessionParts
         ? filteredSessionParts.reduce(
-            (total: number, sessionPart: SessionPartType) =>
+            (total: number, sessionPart: PopulatedSessionPartType) =>
               total + sessionPart.spentTimeSeconds,
             0
           )
@@ -151,73 +232,13 @@ export default {
         sessionsAmount = completedSessionsForRange.length;
       }
 
-      let activityDistributions: ActivityDistribution[] = [];
-      const activities = await activityService.getActivities(userId);
-      if (activities && activities.length !== 0) {
-        activityDistributions = activities
-          .filter((activity) => activity && activity.name)
-          .map((activity) => {
-            const activityDistribution: ActivityDistribution = {
-              activityName: activity?.name || '',
-              activityGroup: activity?.activityGroup!,
-              sessionsAmount: 0,
-              spentTimeSeconds: 0,
-            };
-            return activityDistribution;
-          });
-      }
-
-      let activitiesSeconds: number = 0;
-      let activitiesSessions: number = 0;
-
-      // set sessionsAmount to activityDistributions
-      completedSessionsForRange?.forEach((session) => {
-        if (session.activity) {
-          const activityDistributionIndex: number =
-            activityDistributions.findIndex(
-              (activityDistribution) =>
-                activityDistribution.activityName === session.activity.name
-            );
-          activityDistributions[activityDistributionIndex].sessionsAmount += 1;
-
-          activitiesSessions += 1;
-        }
-      });
-
-      // set spentTimeSeconds to activityDistributions
-      sessionPartsForRange?.forEach((sessionPart) => {
-        if (sessionPart.session.activity) {
-          const activityDistributionIndex: number =
-            activityDistributions.findIndex(
-              (activityDistribution) =>
-                activityDistribution.activityName ===
-                sessionPart.session.activity.name
-            );
-          activityDistributions[activityDistributionIndex].spentTimeSeconds +=
-            sessionPart.spentTimeSeconds;
-
-          activitiesSeconds += sessionPart.spentTimeSeconds;
-        }
-      });
-
-      // delete empty activity distributions
-      activityDistributions = activityDistributions.filter(
-        (activityDistribution) =>
-          activityDistribution.sessionsAmount !== 0 ||
-          activityDistribution.spentTimeSeconds !== 0
+      const activityDistributions = await this.getActivityDistributions(
+        sessionsAmount,
+        spentTimeSeconds,
+        sessionPartsForRange,
+        completedSessionsForRange,
+        userId
       );
-
-      // set without activity to activityDistributions
-      const woActivitySessions = sessionsAmount - activitiesSessions;
-      const woActivitySeconds = spentTimeSeconds - activitiesSeconds;
-      if (woActivitySeconds > 0) {
-        activityDistributions.push({
-          activityGroup: { _id: '0', name: 'wo' },
-          activityName: 'Without activity',
-          sessionsAmount: woActivitySessions,
-          spentTimeSeconds: woActivitySeconds,
-        });
-      }
 
       let timeBars: TimeBar[] = [];
       let daysInRange = Math.ceil(

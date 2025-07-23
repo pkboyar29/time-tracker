@@ -33,3 +33,11 @@ const SessionPart = mongoose.model(
 export default SessionPart;
 
 export type SessionPartType = InferSchemaType<typeof sessionPartSchema>;
+
+export type PopulatedSessionPartType = SessionPartType & {
+  session: {
+    activity: {
+      name: string;
+    };
+  };
+};
