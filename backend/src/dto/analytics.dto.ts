@@ -5,10 +5,18 @@ interface ActivityDistribution {
   spentTimeSeconds: number;
 }
 
+interface TimeBar {
+  startOfRange: Date;
+  endOfRange: Date;
+  sessionsAmount: number;
+  spentTimeSeconds: number;
+}
+
 interface AnalyticsForRangeDTO {
   sessionsAmount: number;
   spentTimeSeconds: number;
   activityDistribution: ActivityDistribution[];
+  timeBars: TimeBar[];
 }
 
-export { AnalyticsForRangeDTO, ActivityDistribution };
+export { AnalyticsForRangeDTO, ActivityDistribution, TimeBar };

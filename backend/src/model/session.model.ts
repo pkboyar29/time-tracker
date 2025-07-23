@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { InferSchemaType } from 'mongoose';
 
 const sessionSchema = new mongoose.Schema({
   totalTimeSeconds: {
@@ -54,3 +54,5 @@ const sessionSchema = new mongoose.Schema({
 const Session = mongoose.model('Session', sessionSchema, 'sessions');
 
 export default Session;
+
+export type SessionType = InferSchemaType<typeof sessionSchema>;
