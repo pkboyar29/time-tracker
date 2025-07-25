@@ -52,8 +52,6 @@ const MonthsBox: FC<MonthsBoxProps> = ({ currentMonth }) => {
   const monthClickHandler = (date: Date) => {
     const [startOfMonth, endOfMonth] = getMonthRange(date);
 
-    console.log(startOfMonth, endOfMonth);
-
     navigate(
       `/analytics/range?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`,
       {

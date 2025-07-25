@@ -14,6 +14,7 @@ const mapActivityFromResponse = (unmappedActivity: any): IActivity => {
   };
 };
 
+// FOCUS: delete
 const mapActivityGroupFromResponse = (
   unmappedActivityGroup: any
 ): IActivityGroup => {

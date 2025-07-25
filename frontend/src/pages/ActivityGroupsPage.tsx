@@ -1,12 +1,13 @@
-import { FC, useEffect, useState } from 'react';
-import { useAppDispatch } from '../redux/store';
+import { FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  deleteActivityGroup,
   fetchActivityGroups,
-} from '../redux/slices/activityGroupSlice';
+  deleteActivityGroup,
+} from '../api/activityGroupApi';
 
+import { ClipLoader } from 'react-spinners';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
@@ -17,29 +18,41 @@ import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
 interface DeleteModalState {
-  deleteModal: boolean; // TODO: переименовать на status
+  status: boolean;
   deletedGroupId: string | null;
 }
 
 const ActivityGroupsPage: FC = () => {
-  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const [activityGroups, setActivityGroups] = useState<IActivityGroup[]>([]);
+  // FOCUS: отображать тост об ошибке, если получили ошибку
+
+  const {
+    data: activityGroups,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['activityGroups'],
+    queryFn: () => fetchActivityGroups(),
+    retry: false,
+  });
 
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<DeleteModalState>();
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
+    status: false,
+    deletedGroupId: null,
+  });
 
   const [searchString, setSearchString] = useState<string>('');
 
   useEffect(() => {
-    const fetch = async () => {
-      const payload = await dispatch(fetchActivityGroups()).unwrap();
-      setActivityGroups(payload);
-    };
-
-    fetch();
-  }, []);
+    if (isError) {
+      toast('A server error occurred while getting activity groups', {
+        type: 'error',
+      });
+    }
+  }, [isError]);
 
   const handleEditActivityGroupClick = (activityGroupId: string) => {
     navigate(`${activityGroupId}`);
@@ -47,31 +60,29 @@ const ActivityGroupsPage: FC = () => {
 
   const handleDeleteActivityGroupClick = (activityGroupId: string) => {
     setDeleteModal({
-      deleteModal: true,
+      status: true,
       deletedGroupId: activityGroupId,
     });
   };
 
   const handleDeleteActivityGroupModal = async () => {
-    if (deleteModal?.deletedGroupId) {
+    if (deleteModal.deletedGroupId) {
       try {
-        await dispatch(
-          deleteActivityGroup(deleteModal.deletedGroupId)
-        ).unwrap();
+        await deleteActivityGroup(deleteModal.deletedGroupId);
 
-        setActivityGroups((activityGroups) =>
-          activityGroups.filter(
-            (group) => group.id !== deleteModal.deletedGroupId
-          )
+        queryClient.setQueryData(
+          ['activityGroups'],
+          (oldData: IActivityGroup[]) =>
+            oldData.filter((group) => group.id !== deleteModal.deletedGroupId)
         );
 
         setDeleteModal({
-          deleteModal: false,
+          status: false,
           deletedGroupId: null,
         });
       } catch (e) {
         setDeleteModal({
-          deleteModal: false,
+          status: false,
           deletedGroupId: null,
         });
         toast('A server error occurred while deleting activity group', {
@@ -90,7 +101,10 @@ const ActivityGroupsPage: FC = () => {
         >
           <ActivityGroupCreateForm
             afterSubmitHandler={(newActivityGroup) => {
-              setActivityGroups((groups) => [newActivityGroup, ...groups]);
+              queryClient.setQueryData(
+                ['activityGroups'],
+                (oldData: IActivityGroup[]) => [newActivityGroup, ...oldData]
+              );
 
               setCreateModal(false);
             }}
@@ -98,11 +112,11 @@ const ActivityGroupsPage: FC = () => {
         </Modal>
       )}
 
-      {deleteModal?.deleteModal && (
+      {deleteModal.status && (
         <Modal
           title="Deleting activity group"
           onCloseModal={() =>
-            setDeleteModal({ deleteModal: false, deletedGroupId: null })
+            setDeleteModal({ status: false, deletedGroupId: null })
           }
         >
           <p className="mb-4 text-[15px]">
@@ -142,30 +156,38 @@ const ActivityGroupsPage: FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4 mt-5">
-          {activityGroups.filter((activityGroup) =>
-            activityGroup.name
-              .toLowerCase()
-              .includes(searchString.toLowerCase())
-          ).length !== 0 ? (
-            activityGroups
-              .filter((activityGroup) =>
+        {isLoading ? (
+          <div className="mt-5 text-center">
+            <ClipLoader color="#EF4444" />
+          </div>
+        ) : (
+          activityGroups && (
+            <div className="flex flex-wrap gap-4 mt-5">
+              {activityGroups.filter((activityGroup) =>
                 activityGroup.name
                   .toLowerCase()
                   .includes(searchString.toLowerCase())
-              )
-              .map((activityGroup) => (
-                <ActivityItem
-                  key={activityGroup.id}
-                  activity={activityGroup}
-                  editHandler={handleEditActivityGroupClick}
-                  deleteHandler={handleDeleteActivityGroupClick}
-                />
-              ))
-          ) : (
-            <>Not found</>
-          )}
-        </div>
+              ).length !== 0 ? (
+                activityGroups
+                  .filter((activityGroup) =>
+                    activityGroup.name
+                      .toLowerCase()
+                      .includes(searchString.toLowerCase())
+                  )
+                  .map((activityGroup) => (
+                    <ActivityItem
+                      key={activityGroup.id}
+                      activity={activityGroup}
+                      editHandler={handleEditActivityGroupClick}
+                      deleteHandler={handleDeleteActivityGroupClick}
+                    />
+                  ))
+              ) : (
+                <div className="text-base">Not found</div>
+              )}
+            </div>
+          )
+        )}
       </div>
     </>
   );

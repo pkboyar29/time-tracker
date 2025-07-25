@@ -19,7 +19,6 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
   const today: Date = new Date(Date.now());
 
   const [daysOfWeek, setDaysOfWeek] = useState<Date[]>(getWeekDays(currentDay));
-  console.log('re render');
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {

@@ -35,8 +35,8 @@ const ActivityGroupPage: FC = () => {
   const [activities, setActivities] = useState<IActivity[]>([]);
 
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<ModalState>();
-  const [createSessionModal, setCreateSessionModal] = useState<ModalState>();
+  const [deleteModal, setDeleteModal] = useState<ModalState>(); // TODO: добавить default value
+  const [createSessionModal, setCreateSessionModal] = useState<ModalState>(); // TODO: добавить default value
   const [searchString, setSearchString] = useState<string>('');
   const { toggleTimer } = useTimer();
 

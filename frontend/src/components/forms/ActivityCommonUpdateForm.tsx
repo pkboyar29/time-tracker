@@ -4,7 +4,7 @@ import { useAppDispatch } from '../../redux/store';
 import { toast } from 'react-toastify';
 
 import { updateActivity } from '../../redux/slices/activitySlice';
-import { updateActivityGroup } from '../../redux/slices/activityGroupSlice';
+import { updateActivityGroup } from '../../api/activityGroupApi';
 
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
@@ -31,7 +31,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
   });
   const dispatch = useAppDispatch();
 
-  // попробовать все-таки это сделать декларативно, через defaultValues
+  // TODO: попробовать все-таки это сделать декларативно, через defaultValues
   useEffect(() => {
     setValue('name', activityCommon.name);
     setValue('descr', activityCommon.descr);
@@ -64,12 +64,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
     } else {
       // IActivityGroup
       try {
-        await dispatch(
-          updateActivityGroup({
-            id: activityCommon.id,
-            ...data,
-          })
-        ).unwrap();
+        await updateActivityGroup({ id: activityCommon.id, ...data });
       } catch (e) {
         toast('A server error occurred while updating activity group', {
           type: 'error',
