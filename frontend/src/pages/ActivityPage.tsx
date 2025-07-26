@@ -1,34 +1,40 @@
 import { FC, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosInstance from '../api/axios';
-import { mapActivityFromResponse } from '../helpers/mappingHelpers';
 import { fetchSessions } from '../redux/slices/sessionSlice';
 import { useAppDispatch } from '../redux/store';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchActivity } from '../api/activityApi';
+import { toast } from 'react-toastify';
 
-import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 import ActivityCommonUpdateForm from '../components/forms/ActivityCommonUpdateForm';
 import SessionsList from '../components/SessionsList';
+import { ClipLoader } from 'react-spinners';
 
 const ActivityPage: FC = () => {
-  const [currentActivity, setCurrentActivity] = useState<IActivity>();
   const { activityId } = useParams();
-  const dispatch = useAppDispatch();
 
+  const queryClient = useQueryClient();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const {
+    data: currentActivity,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ['activity', activityId],
+    queryFn: () => fetchActivity(activityId!),
+    retry: false,
+  });
 
   const [uncompletedSessionsForActivity, setUncompletedSessionsForActivity] =
     useState<ISession[]>([]);
-
+  // TODO: что тут происходит
   useEffect(() => {
-    const fetchActivityInfo = async () => {
+    const fetchUncompletedSessionsForActivity = async () => {
       try {
-        const { data: currentActivityInfo } = await axiosInstance.get(
-          `/activities/${activityId}`
-        );
-        setCurrentActivity(mapActivityFromResponse(currentActivityInfo));
-
         const actionResult = await dispatch(
           fetchSessions({
             activityId: activityId,
@@ -43,8 +49,18 @@ const ActivityPage: FC = () => {
       }
     };
 
-    fetchActivityInfo();
-  }, []);
+    if (currentActivity) {
+      fetchUncompletedSessionsForActivity();
+    }
+  }, [currentActivity]);
+
+  useEffect(() => {
+    if (isError) {
+      toast('A server error occurred while getting activity', {
+        type: 'error',
+      });
+    }
+  }, [isError]);
 
   const updateSessionsList = (updatedList: ISession[]) => {
     setUncompletedSessionsForActivity(updatedList);
@@ -52,38 +68,61 @@ const ActivityPage: FC = () => {
 
   return (
     <>
-      <div className="container">
-        <div className="mt-5">
-          <span
-            onClick={() => navigate('/activity-groups')}
-            className="transition duration-300 cursor-pointer hover:text-red-500"
-          >
-            Activity groups
-          </span>{' '}
-          /{' '}
-          <span
-            onClick={() =>
-              navigate(`/activity-groups/${currentActivity?.activityGroup.id}`)
-            }
-            className="transition duration-300 cursor-pointer hover:text-red-500"
-          >
-            {currentActivity?.activityGroup.name}
-          </span>
-          <span> / {currentActivity?.name}</span>
+      {isLoading ? (
+        <div className="mt-5 text-center">
+          <ClipLoader color="#EF4444" />
         </div>
+      ) : (
+        <div className="container">
+          <div className="mt-5">
+            <span
+              onClick={() => navigate('/activity-groups')}
+              className="transition duration-300 cursor-pointer hover:text-red-500"
+            >
+              Activity groups
+            </span>{' '}
+            /{' '}
+            <span
+              onClick={() =>
+                navigate(
+                  `/activity-groups/${currentActivity?.activityGroup.id}`
+                )
+              }
+              className="transition duration-300 cursor-pointer hover:text-red-500"
+            >
+              {currentActivity?.activityGroup.name}
+            </span>
+            <span> / {currentActivity?.name}</span>
+          </div>
 
-        <div className="mt-5"></div>
-        {currentActivity && (
-          <ActivityCommonUpdateForm activityCommon={currentActivity} />
-        )}
+          <div className="mt-5">
+            {currentActivity && (
+              <ActivityCommonUpdateForm
+                activityCommon={currentActivity}
+                afterUpdateHandler={(updatedActivity) => {
+                  if ('activityGroup' in updatedActivity) {
+                    queryClient.setQueryData(
+                      ['activity', activityId],
+                      () => updatedActivity
+                    );
+                  }
+                }}
+              />
+            )}
+          </div>
 
-        <div className="mt-5 text-xl font-bold">Uncompleted sessions</div>
+          {uncompletedSessionsForActivity.length > 0 && (
+            <>
+              <div className="mt-5 text-xl font-bold">Uncompleted sessions</div>
 
-        <SessionsList
-          sessions={uncompletedSessionsForActivity}
-          updateSessionsList={updateSessionsList}
-        />
-      </div>
+              <SessionsList
+                sessions={uncompletedSessionsForActivity}
+                updateSessionsList={updateSessionsList}
+              />
+            </>
+          )}
+        </div>
+      )}
     </>
   );
 };

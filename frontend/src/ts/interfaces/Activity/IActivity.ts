@@ -9,3 +9,15 @@ export interface IActivity {
     name: string;
   };
 }
+
+export interface IActivityCreate {
+  name: string;
+  descr?: string;
+  activityGroupId: string;
+}
+
+export interface IActivityUpdate {
+  id: string;
+  name: string;
+  descr?: string;
+}

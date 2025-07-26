@@ -1,12 +1,12 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from '../api/axios';
-import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '../redux/store';
-import { fetchActivities, deleteActivity } from '../redux/slices/activitySlice';
 import { useTimer } from '../context/TimerContext';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { fetchActivityGroup } from '../api/activityGroupApi';
+import { fetchActivities, deleteActivity } from '../api/activityApi';
 import { updateSession } from '../redux/slices/sessionSlice';
-import { mapActivityGroupFromResponse } from '../helpers/mappingHelpers';
+import { toast } from 'react-toastify';
 
 import CloseIcon from '@mui/icons-material/Close';
 import ActivityCreateForm from '../components/forms/ActivityCreateForm';
@@ -15,60 +15,78 @@ import ActivityItem from '../components/ActivityItem';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
 import SessionCreateModal from '../components/modals/SessionCreateModal';
+import { ClipLoader } from 'react-spinners';
 
-import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 
+// TODO: отображать серверную ошибку, если не удалось получить activity group (типо 404 страницы?)
+// TODO: отображать серверную ошибку, если ее получили при получении activities
+
 interface ModalState {
-  modal: boolean;
+  status: boolean;
   selectedItemId: string | null;
 }
 
 const ActivityGroupPage: FC = () => {
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
-  const { activityGroupId } = useParams();
-  const [currentActivityGroup, setCurrentActivityGroup] =
-    useState<IActivityGroup>();
-
-  const [activities, setActivities] = useState<IActivity[]>([]);
-
-  const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<ModalState>(); // TODO: добавить default value
-  const [createSessionModal, setCreateSessionModal] = useState<ModalState>(); // TODO: добавить default value
-  const [searchString, setSearchString] = useState<string>('');
-  const { toggleTimer } = useTimer();
-
+  const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchActivityGroupInfo = async () => {
-      const { data: unmappedActivityGroup } = await axios.get(
-        `/activity-groups/${activityGroupId}`
-      );
-      const mappedActivityGroup: IActivityGroup = mapActivityGroupFromResponse(
-        unmappedActivityGroup
-      );
-      setCurrentActivityGroup(mappedActivityGroup);
-    };
-    fetchActivityGroupInfo();
-  }, [activityGroupId]);
+  const { activityGroupId } = useParams();
+
+  const currentSession = useAppSelector(
+    (state) => state.sessions.currentSession
+  );
+
+  const {
+    data: currentActivityGroup,
+    isLoading: isLoadingGroup,
+    isError: isErrorGroup,
+  } = useQuery({
+    queryKey: ['activityGroup', activityGroupId],
+    queryFn: () => fetchActivityGroup(activityGroupId!),
+    retry: false,
+  });
+  const {
+    data: activities,
+    isLoading: isLoadingActivity,
+    isError: isErrorActivities,
+  } = useQuery({
+    queryKey: ['activities', activityGroupId],
+    queryFn: () => fetchActivities(activityGroupId!),
+    retry: false,
+  });
+
+  const isLoading = isLoadingActivity || isLoadingGroup;
+
+  const [createModal, setCreateModal] = useState<boolean>(false);
+  const [deleteModal, setDeleteModal] = useState<ModalState>({
+    status: false,
+    selectedItemId: null,
+  });
+  const [createSessionModal, setCreateSessionModal] = useState<ModalState>({
+    status: false,
+    selectedItemId: null,
+  });
+  const [searchString, setSearchString] = useState<string>('');
+
+  const { toggleTimer } = useTimer();
 
   useEffect(() => {
-    const fetch = async () => {
-      if (activityGroupId) {
-        const payload = await dispatch(
-          fetchActivities(activityGroupId)
-        ).unwrap();
+    if (isErrorGroup) {
+      toast('A server error occurred while getting activity group', {
+        type: 'error',
+      });
+    }
+  }, [isErrorGroup]);
 
-        setActivities(payload);
-      }
-    };
-
-    fetch();
-  }, [activityGroupId]);
+  useEffect(() => {
+    if (isErrorActivities) {
+      toast('A server error occurred while getting activities for group', {
+        type: 'error',
+      });
+    }
+  }, [isErrorActivities]);
 
   const handleEditActivityClick = (activityId: string) => {
     navigate(`activities/${activityId}`);
@@ -76,15 +94,17 @@ const ActivityGroupPage: FC = () => {
 
   const handleDeleteActivityClick = async (activityId: string) => {
     try {
-      await dispatch(deleteActivity(activityId)).unwrap();
+      await deleteActivity(activityId);
 
-      setActivities((activities) =>
-        activities.filter((activity) => activity.id !== activityId)
+      queryClient.setQueryData(
+        ['activities', activityGroupId],
+        (oldData: IActivity[]) =>
+          oldData.filter((activity) => activity.id !== activityId)
       );
 
-      setDeleteModal({ modal: false, selectedItemId: null });
+      setDeleteModal({ status: false, selectedItemId: null });
     } catch (e) {
-      setDeleteModal({ modal: false, selectedItemId: null });
+      setDeleteModal({ status: false, selectedItemId: null });
       toast('A server error occurred while deleting activity', {
         type: 'error',
       });
@@ -108,7 +128,10 @@ const ActivityGroupPage: FC = () => {
           {currentActivityGroup && (
             <ActivityCreateForm
               afterSubmitHandler={(newActivity) => {
-                setActivities((activities) => [newActivity, ...activities]);
+                queryClient.setQueryData(
+                  ['activities', activityGroupId],
+                  (oldData: IActivity[]) => [newActivity, ...oldData]
+                );
 
                 setCreateModal(false);
               }}
@@ -118,11 +141,11 @@ const ActivityGroupPage: FC = () => {
         </Modal>
       )}
 
-      {deleteModal?.modal && (
+      {deleteModal.status && (
         <Modal
           title="Deleting activity"
           onCloseModal={() =>
-            setDeleteModal({ modal: false, selectedItemId: null })
+            setDeleteModal({ status: false, selectedItemId: null })
           }
         >
           <p className="mb-4 text-[15px]">
@@ -139,13 +162,13 @@ const ActivityGroupPage: FC = () => {
         </Modal>
       )}
 
-      {createSessionModal?.modal && (
+      {createSessionModal.status && (
         <SessionCreateModal
           modalTitle={
             <div>
               <span className="font-bold">
                 {
-                  activities.find(
+                  activities?.find(
                     (activity) =>
                       activity.id === createSessionModal.selectedItemId
                   )?.name
@@ -155,7 +178,7 @@ const ActivityGroupPage: FC = () => {
             </div>
           }
           onCloseModal={() => {
-            setCreateSessionModal({ modal: false, selectedItemId: null });
+            setCreateSessionModal({ status: false, selectedItemId: null });
           }}
           defaultActivity={
             createSessionModal.selectedItemId
@@ -173,78 +196,99 @@ const ActivityGroupPage: FC = () => {
         />
       )}
 
-      <div className="container my-5">
-        <div>
-          <span
-            onClick={() => navigate('/activity-groups')}
-            className="transition duration-300 cursor-pointer hover:text-red-500"
-          >
-            Activity groups
-          </span>{' '}
-          / {currentActivityGroup?.name}
+      {isLoading ? (
+        <div className="mt-5 text-center">
+          <ClipLoader color="#EF4444" />
         </div>
+      ) : (
+        currentActivityGroup &&
+        activities && (
+          <div className="container my-5">
+            <div>
+              <span
+                onClick={() => navigate('/activity-groups')}
+                className="transition duration-300 cursor-pointer hover:text-red-500"
+              >
+                Activity groups
+              </span>{' '}
+              / {currentActivityGroup.name}
+            </div>
 
-        <div className="flex justify-between mt-5">
-          {currentActivityGroup && (
-            <ActivityCommonUpdateForm activityCommon={currentActivityGroup} />
-          )}
-          <div className="flex h-full gap-5">
-            <div className="relative flex">
-              <input
-                value={searchString}
-                onChange={(e) => setSearchString(e.target.value)}
-                className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-red-500"
-                type="text"
-                placeholder="Search..."
-              />
-              {searchString && (
-                <button
-                  className="absolute right-0 z-10 top-[6px]"
-                  onClick={() => setSearchString('')}
-                >
-                  <CloseIcon />
-                </button>
+            <div className="flex justify-between mt-5">
+              {currentActivityGroup && (
+                <ActivityCommonUpdateForm
+                  activityCommon={currentActivityGroup}
+                  afterUpdateHandler={(updatedGroup) => {
+                    if (!('activityGroup' in updatedGroup)) {
+                      queryClient.setQueryData(
+                        ['activityGroup', activityGroupId],
+                        () => updatedGroup
+                      );
+                    }
+                  }}
+                />
+              )}
+              <div className="flex h-full gap-5">
+                <div className="relative flex">
+                  <input
+                    value={searchString}
+                    onChange={(e) => setSearchString(e.target.value)}
+                    className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-red-500"
+                    type="text"
+                    placeholder="Search..."
+                  />
+                  {searchString && (
+                    <button
+                      className="absolute right-0 z-10 top-[6px]"
+                      onClick={() => setSearchString('')}
+                    >
+                      <CloseIcon />
+                    </button>
+                  )}
+                </div>
+                <Button onClick={() => setCreateModal(true)}>
+                  Create new activity
+                </Button>
+              </div>
+            </div>
+
+            <div className="my-5 text-xl font-bold">All activities</div>
+            <div className="flex flex-wrap gap-4">
+              {activities.filter((activity) =>
+                activity.name.toLowerCase().includes(searchString.toLowerCase())
+              ).length !== 0 ? (
+                activities
+                  .filter((activity) =>
+                    activity.name
+                      .toLowerCase()
+                      .includes(searchString.toLowerCase())
+                  )
+                  .map((activity) => (
+                    <ActivityItem
+                      key={activity.id}
+                      activity={activity}
+                      editHandler={handleEditActivityClick}
+                      deleteHandler={(activityId: string) =>
+                        setDeleteModal({
+                          status: true,
+                          selectedItemId: activityId,
+                        })
+                      }
+                      startSessionHandler={() =>
+                        setCreateSessionModal({
+                          status: true,
+                          selectedItemId: activity.id,
+                        })
+                      }
+                    />
+                  ))
+              ) : (
+                <>Not found</>
               )}
             </div>
-            <Button onClick={() => setCreateModal(true)}>
-              Create new activity
-            </Button>
           </div>
-        </div>
-
-        <div className="my-5 text-xl font-bold">All activities</div>
-        <div className="flex flex-wrap gap-4">
-          {activities.filter((activity) =>
-            activity.name.toLowerCase().includes(searchString.toLowerCase())
-          ).length !== 0 ? (
-            activities
-              .filter((activity) =>
-                activity.name.toLowerCase().includes(searchString.toLowerCase())
-              )
-              .map((activity) => (
-                <ActivityItem
-                  key={activity.id}
-                  activity={activity}
-                  editHandler={handleEditActivityClick}
-                  deleteHandler={(activityId: string) =>
-                    setDeleteModal({
-                      modal: true,
-                      selectedItemId: activityId,
-                    })
-                  }
-                  startSessionHandler={() =>
-                    setCreateSessionModal({
-                      modal: true,
-                      selectedItemId: activity.id,
-                    })
-                  }
-                />
-              ))
-          ) : (
-            <>Not found</>
-          )}
-        </div>
-      </div>
+        )
+      )}
     </>
   );
 };

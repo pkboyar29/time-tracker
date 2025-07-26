@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { createActivityGroup } from '../../api/activityGroupApi';
+import { toast } from 'react-toastify';
 
 import Button from '../Button';
 import Input from '../Input';
@@ -33,7 +34,9 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
 
       afterSubmitHandler(newActivityGroup);
     } catch (e) {
-      console.log(e);
+      toast('A server error occurred while creating activity group', {
+        type: 'error',
+      });
     }
   };
 

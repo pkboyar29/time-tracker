@@ -26,8 +26,6 @@ const ActivityGroupsPage: FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  // FOCUS: отображать тост об ошибке, если получили ошибку
-
   const {
     data: activityGroups,
     isLoading,

@@ -1,16 +1,18 @@
 import { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useAppDispatch } from '../../redux/store';
 import { toast } from 'react-toastify';
 
-import { updateActivity } from '../../redux/slices/activitySlice';
 import { updateActivityGroup } from '../../api/activityGroupApi';
+import { updateActivity } from '../../api/activityApi';
 
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 
 interface ActivityCommonUpdateFormProps {
   activityCommon: IActivity | IActivityGroup;
+  afterUpdateHandler: (
+    updatedActivityCommon: IActivity | IActivityGroup
+  ) => void;
 }
 
 interface ActivityCommonFields {
@@ -20,6 +22,7 @@ interface ActivityCommonFields {
 
 const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
   activityCommon,
+  afterUpdateHandler,
 }) => {
   const {
     register,
@@ -29,7 +32,6 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
   } = useForm<ActivityCommonFields>({
     mode: 'onBlur',
   });
-  const dispatch = useAppDispatch();
 
   // TODO: попробовать все-таки это сделать декларативно, через defaultValues
   useEffect(() => {
@@ -50,12 +52,12 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
     if ('activityGroup' in activityCommon) {
       // IActivity
       try {
-        await dispatch(
-          updateActivity({
-            id: activityCommon.id,
-            ...data,
-          })
-        ).unwrap();
+        const updatedData = await updateActivity({
+          id: activityCommon.id,
+          ...data,
+        });
+
+        afterUpdateHandler(updatedData);
       } catch (e) {
         toast('A server error occurred while updating activity', {
           type: 'error',
@@ -64,7 +66,12 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
     } else {
       // IActivityGroup
       try {
-        await updateActivityGroup({ id: activityCommon.id, ...data });
+        const updatedData = await updateActivityGroup({
+          id: activityCommon.id,
+          ...data,
+        });
+
+        afterUpdateHandler(updatedData);
       } catch (e) {
         toast('A server error occurred while updating activity group', {
           type: 'error',
