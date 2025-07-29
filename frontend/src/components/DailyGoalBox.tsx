@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import { useAppSelector } from '../redux/store';
+import { getTimeHoursMinutes } from '../helpers/timeHelpers';
 
 import CustomCircularProgress from './CustomCircularProgress';
 
@@ -25,16 +26,15 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
         <div className="flex flex-col items-center gap-5">
           <CustomCircularProgress
             valuePercent={dailyGoalPercent}
-            label={`Daily goal: ${dailyGoalSeconds / 60}m`}
+            label={`Daily goal: ${getTimeHoursMinutes(dailyGoalSeconds, true)}`}
             size="verybig"
           />
 
           <div className="text-xl text-center">
             You acheived{' '}
             <span className="font-bold">
-              {Math.trunc(spentTimeSeconds / 60)} minutes (
-              {Math.trunc((spentTimeSeconds / dailyGoalSeconds) * 100)}%) /{' '}
-              {Math.trunc(dailyGoalSeconds / 60)} minutes
+              {getTimeHoursMinutes(spentTimeSeconds, false)} (
+              {Math.trunc((spentTimeSeconds / dailyGoalSeconds) * 100)}%)
             </span>
           </div>
         </div>
