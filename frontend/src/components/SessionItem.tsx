@@ -4,6 +4,7 @@ import { ISession } from '../ts/interfaces/Session/ISession';
 
 import DeleteIcon from '../icons/DeleteIcon';
 import PlayIcon from '../icons/PlayIcon';
+import PauseIcon from '../icons/PauseIcon';
 import ResumeIcon from '../icons/ResumeIcon';
 import CustomCircularProgress from './CustomCircularProgress';
 
@@ -48,22 +49,8 @@ const SessionItem: FC<SessionItemProps> = ({
           <div className="flex gap-3">
             <button onClick={() => sessionClickHandler?.(session)}>
               {isActive ? (
-                // TODO: вынести иконки в отдельные файлы. У второй иконки возможно название не ResumeIcon
                 isEnabled ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="size-10"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.75 5.25v13.5m-7.5-13.5v13.5"
-                    />
-                  </svg>
+                  <PauseIcon />
                 ) : (
                   <ResumeIcon />
                 )

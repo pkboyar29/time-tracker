@@ -12,6 +12,9 @@ import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 import { useTimer } from '../context/TimerContext';
 
+import ResumeIcon from '../icons/ResumeIcon';
+import PauseIcon from '../icons/PauseIcon';
+import StopIcon from '../icons/StopIcon';
 import CustomCircularProgress from '../components/CustomCircularProgress';
 import SessionsList from '../components/SessionsList';
 import Button from '../components/Button';
@@ -192,53 +195,11 @@ const TimerPage: FC = () => {
 
                   <div className="flex gap-4">
                     <button onClick={handleToggleButtonClick}>
-                      {enabled ? (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M15.75 5.25v13.5m-7.5-13.5v13.5"
-                          />
-                        </svg>
-                      ) : (
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth="1.5"
-                          stroke="currentColor"
-                          className="size-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M21 7.5V18M15 7.5V18M3 16.811V8.69c0-.864.933-1.406 1.683-.977l7.108 4.061a1.125 1.125 0 0 1 0 1.954l-7.108 4.061A1.125 1.125 0 0 1 3 16.811Z"
-                          />
-                        </svg>
-                      )}
+                      {enabled ? <PauseIcon /> : <ResumeIcon />}
                     </button>
+
                     <button onClick={handleStopButtonClick}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="size-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5.25 7.5A2.25 2.25 0 0 1 7.5 5.25h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9Z"
-                        />
-                      </svg>
+                      <StopIcon />
                     </button>
                   </div>
                   {!enabled && <div>Paused</div>}
