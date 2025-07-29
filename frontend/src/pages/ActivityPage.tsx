@@ -113,11 +113,10 @@ const ActivityPage: FC = () => {
 
           {uncompletedSessionsForActivity.length > 0 && (
             <>
-              <div className="mt-5 text-xl font-bold">Uncompleted sessions</div>
-
               <SessionsList
+                title="Uncompleted sessions"
                 sessions={uncompletedSessionsForActivity}
-                updateSessionsList={updateSessionsList}
+                updateSessionsListHandler={updateSessionsList}
               />
             </>
           )}

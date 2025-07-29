@@ -3,15 +3,14 @@ import { useAppDispatch, useAppSelector } from '../redux/store';
 import { useTimer } from '../context/TimerContext';
 import {
   deleteSession,
-  resetCurrentSession,
   setCurrentSession,
   updateSession,
 } from '../redux/slices/sessionSlice';
-import {
-  removeSessionFromLocalStorage,
-  saveSessionToLocalStorage,
-} from '../helpers/localstorageHelpers';
+import { saveSessionToLocalStorage } from '../helpers/localstorageHelpers';
+import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SessionItem from './SessionItem';
 import Button from '../components/Button';
 import Modal from './modals/Modal';
@@ -19,84 +18,60 @@ import Modal from './modals/Modal';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 interface SessionsListProps {
+  title: string;
   sessions: ISession[];
-  updateSessionsList: (updatedSessions: ISession[]) => void;
+  updateSessionsListHandler: (updatedSessions: ISession[]) => void;
 }
 
 interface DeleteModalState {
-  visibility: boolean;
+  status: boolean;
   deletedItemId: string | null;
 }
 
 const SessionsList: FC<SessionsListProps> = ({
+  title,
   sessions,
-  updateSessionsList,
+  updateSessionsListHandler,
 }) => {
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
   const dispatch = useAppDispatch();
   const { stopTimer, toggleTimer, enabled } = useTimer();
 
+  const currentSession = useAppSelector(
+    (state) => state.sessions.currentSession
+  );
+  // removing current session from the list
+  const filteredSessions = sessions.filter(
+    (session) => session.id !== currentSession?.id
+  );
+
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
-    visibility: false,
+    status: false,
     deletedItemId: null,
   });
 
-  const getUpdatedSessionsListAfterUpdate = (
-    updatedCurrentSession: ISession
-  ): ISession[] => {
-    let updatedSessions: ISession[] = [];
-
-    if (updatedCurrentSession.completed) {
-      updatedSessions = sessions.filter(
-        (session) => session.id !== updatedCurrentSession.id
-      );
-    } else {
-      updatedSessions = sessions.map((session) => {
-        if (session.id === updatedCurrentSession.id) {
-          return {
-            ...session,
-            totalTimeSeconds: updatedCurrentSession.totalTimeSeconds,
-            spentTimeSeconds: updatedCurrentSession.spentTimeSeconds,
-            note: updatedCurrentSession.note,
-            completed: updatedCurrentSession.completed,
-          };
-        } else {
-          return session;
-        }
-      });
-    }
-
-    return updatedSessions;
-  };
-
-  const getUpdatedSessionsListAfterDelete = (sessionId: string): ISession[] => {
-    const sessionsUpdated = sessions.filter(
-      (session) => session.id !== sessionId
-    );
-
-    return sessionsUpdated;
-  };
+  const [less, setLess] = useState<boolean>(false); // less - true, more - false
 
   const handleSessionClick = async (session: ISession) => {
     if (currentSession) {
+      // updating the previous session if this session is not paused
       if (enabled) {
-        const actionResult = await dispatch(updateSession(currentSession));
-        if (updateSession.fulfilled.match(actionResult)) {
-          updateSessionsList(
-            getUpdatedSessionsListAfterUpdate(actionResult.payload)
+        try {
+          const updatedSession = await dispatch(
+            updateSession(currentSession)
+          ).unwrap();
+
+          updateSessionsListHandler(
+            getSessionsListAfterSessionUpdate(sessions, updatedSession)
           );
+        } catch (e) {
+          console.log(e);
         }
       }
 
-      if (currentSession.id === session.id) {
-        toggleTimer(currentSession.spentTimeSeconds);
-      } else {
-        dispatch(setCurrentSession(session));
-        saveSessionToLocalStorage(session.id);
-        toggleTimer(session.spentTimeSeconds);
-      }
+      dispatch(setCurrentSession(session));
+      saveSessionToLocalStorage(session.id);
+      // TODO: если было enabled (не стояло на паузе), то новая выбранная сессия будет стоять в паузе
+      toggleTimer(session.spentTimeSeconds);
     } else {
       dispatch(setCurrentSession(session));
       saveSessionToLocalStorage(session.id);
@@ -105,43 +80,39 @@ const SessionsList: FC<SessionsListProps> = ({
   };
 
   const handleSessionDelete = (sessionId: string) => {
-    if (currentSession) {
-      if (currentSession.id === sessionId) {
-        stopTimer();
-        dispatch(resetCurrentSession());
-        removeSessionFromLocalStorage();
-      }
-    }
-
     dispatch(deleteSession(sessionId));
-
-    updateSessionsList(getUpdatedSessionsListAfterDelete(sessionId));
+    updateSessionsListHandler(
+      sessions.filter((session) => session.id !== sessionId)
+    );
 
     setDeleteModal({
-      visibility: false,
+      status: false,
       deletedItemId: null,
     });
   };
 
   const handleSessionDeleteClick = (sessionId: string) => {
     setDeleteModal({
-      visibility: true,
+      status: true,
       deletedItemId: sessionId,
     });
   };
 
   return (
     <>
-      {deleteModal.visibility && (
+      {deleteModal.status && (
         <Modal
           title="Deleting session"
           onCloseModal={() =>
             setDeleteModal({
-              visibility: false,
+              status: false,
               deletedItemId: null,
             })
           }
         >
+          <p className="mb-4 text-[15px]">
+            Are you sure you want to delete this session?
+          </p>
           <Button
             onClick={() =>
               deleteModal.deletedItemId &&
@@ -153,19 +124,31 @@ const SessionsList: FC<SessionsListProps> = ({
         </Modal>
       )}
 
-      {sessions.length !== 0 && (
-        <div className="flex flex-col gap-5 mt-5 w-96">
-          {sessions.map((session) => (
-            <SessionItem
-              isActive={currentSession?.id === session.id}
-              isEnabled={enabled} // session.id === currentSession?.id ? enabled : undefined
-              key={session.id}
-              session={session}
-              sessionClickHandler={handleSessionClick}
-              sessionDeleteHandler={handleSessionDeleteClick}
-            />
-          ))}
-        </div>
+      {filteredSessions.length !== 0 && (
+        <>
+          <button
+            onClick={() => setLess(!less)}
+            className="flex items-center gap-1 my-5 text-xl font-bold"
+          >
+            {title}
+            {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+          </button>
+
+          {!less && (
+            <div className="flex flex-col gap-5 mt-5 w-96">
+              {filteredSessions.map((session) => (
+                <SessionItem
+                  isActive={currentSession?.id === session.id}
+                  isEnabled={enabled}
+                  key={session.id}
+                  session={session}
+                  sessionClickHandler={handleSessionClick}
+                  sessionDeleteHandler={handleSessionDeleteClick}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
     </>
   );

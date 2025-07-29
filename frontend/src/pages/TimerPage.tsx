@@ -9,10 +9,9 @@ import {
 import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
+import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 import { useTimer } from '../context/TimerContext';
 
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CustomCircularProgress from '../components/CustomCircularProgress';
 import SessionsList from '../components/SessionsList';
 import Button from '../components/Button';
@@ -22,10 +21,9 @@ import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [uncompletedLess, setUnompletedLess] = useState<boolean>(false); // less - true, more - false
-  const [allUncompletedSessions, setAllUncompletedSessions] = useState<
-    ISession[]
-  >([]);
+  const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
+    []
+  );
 
   const { toggleTimer, stopTimer, enabled } = useTimer();
 
@@ -45,7 +43,7 @@ const TimerPage: FC = () => {
     const fetchAllUncompletedSessions = async () => {
       const resultAction = await dispatch(fetchSessions({ completed: false }));
       if (fetchSessions.fulfilled.match(resultAction)) {
-        setAllUncompletedSessions(resultAction.payload);
+        setUncompletedSessions(resultAction.payload);
       }
     };
 
@@ -67,7 +65,7 @@ const TimerPage: FC = () => {
 
   useEffect(() => {
     if (completedSessionId) {
-      setAllUncompletedSessions((prevSessions) =>
+      setUncompletedSessions((prevSessions) =>
         prevSessions.filter((s) => s.id !== completedSessionId)
       );
 
@@ -102,17 +100,12 @@ const TimerPage: FC = () => {
     }
   };
 
-  const updateSessionsList = (updatedList: ISession[]) => {
-    setAllUncompletedSessions(updatedList);
-  };
-
   const handleAfterSubmitCreateSession = (session: ISession) => {
     if (currentSession) {
       dispatch(updateSession(currentSession));
     }
 
-    const updatedList: ISession[] = [...allUncompletedSessions, session];
-    updateSessionsList(updatedList);
+    setUncompletedSessions([...uncompletedSessions, session]);
 
     toggleTimer(0);
     setCreateModal(false);
@@ -121,17 +114,9 @@ const TimerPage: FC = () => {
   const handleToggleButtonClick = () => {
     if (currentSession) {
       if (enabled) {
-        const updatedList: ISession[] = allUncompletedSessions.map(
-          (session) => {
-            if (session.id === currentSession.id) {
-              return currentSession;
-            } else {
-              return session;
-            }
-          }
+        setUncompletedSessions(
+          getSessionsListAfterSessionUpdate(uncompletedSessions, currentSession)
         );
-        updateSessionsList(updatedList);
-
         dispatch(updateSession(currentSession));
       }
 
@@ -143,8 +128,12 @@ const TimerPage: FC = () => {
     stopTimer();
 
     if (currentSession) {
+      setUncompletedSessions(
+        getSessionsListAfterSessionUpdate(uncompletedSessions, currentSession)
+      );
       dispatch(updateSession(currentSession));
     }
+
     dispatch(resetCurrentSession());
     removeSessionFromLocalStorage();
   };
@@ -278,23 +267,12 @@ const TimerPage: FC = () => {
               </Button>
             </div>
 
-            {allUncompletedSessions.length > 0 && (
-              <>
-                <button
-                  onClick={() => setUnompletedLess(!uncompletedLess)}
-                  className="flex items-center gap-1 my-5 text-xl font-bold"
-                >
-                  Uncompleted sessions{' '}
-                  {uncompletedLess ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-                </button>
-
-                {!uncompletedLess && (
-                  <SessionsList
-                    sessions={allUncompletedSessions}
-                    updateSessionsList={updateSessionsList}
-                  />
-                )}
-              </>
+            {uncompletedSessions.length > 0 && (
+              <SessionsList
+                title="Uncompleted sessions"
+                sessions={uncompletedSessions}
+                updateSessionsListHandler={setUncompletedSessions}
+              />
             )}
           </div>
         </div>
