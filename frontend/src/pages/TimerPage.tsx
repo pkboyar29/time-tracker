@@ -40,6 +40,20 @@ const TimerPage: FC = () => {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    const handleKeyClick = (event: KeyboardEvent) => {
+      if (event.code == 'Space') {
+        handleToggleButtonClick();
+      }
+    };
+
+    window.addEventListener('keyup', handleKeyClick);
+
+    return () => {
+      window.removeEventListener('keyup', handleKeyClick);
+    };
+  }, []);
+
+  useEffect(() => {
     const fetchAllUncompletedSessions = async () => {
       const resultAction = await dispatch(fetchSessions({ completed: false }));
       if (fetchSessions.fulfilled.match(resultAction)) {
