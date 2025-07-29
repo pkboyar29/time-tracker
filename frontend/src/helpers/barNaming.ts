@@ -15,8 +15,6 @@ export const getBarName = (unmappedBar: any): string => {
   } else if (endOfRange.getTime() - startOfRange.getTime() < 86400000 - 1) {
     return startOfRange.getDate().toString();
   } else if (getRangeType(startOfRange, endOfRange) == 'months') {
-    console.log(startOfRange.getMonth());
-    console.log(getMonthName(startOfRange.getMonth()));
     return getMonthName(startOfRange.getMonth());
     // if there is more than one day in range
   } else if (endOfRange.getTime() - startOfRange.getTime() > 86400000 - 1) {

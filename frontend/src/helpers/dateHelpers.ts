@@ -1,14 +1,17 @@
-// TODO: возвращать дни недели, начиная с понедельника (1 индекса)
 export const getWeekDays = (date: Date): Date[] => {
   const initialDayOfWeek: number = date.getDay();
 
-  // find start of week in date format (start of week - 0 index - sunday)
+  // find start of week in date format (start of week - 1 index - monday)
   let startOfWeekDate: Date = new Date(date);
-  for (let i = initialDayOfWeek; i > 0; i--) {
-    startOfWeekDate.setDate(startOfWeekDate.getDate() - 1);
+  if (startOfWeekDate.getDay() == 0) {
+    startOfWeekDate.setDate(startOfWeekDate.getDate() + 1);
+  } else {
+    for (let i = initialDayOfWeek; i > 1; i--) {
+      startOfWeekDate.setDate(startOfWeekDate.getDate() - 1);
+    }
   }
 
-  // generate array of 7 dates starting from sunday
+  // generate array of 7 dates starting from monday
   let daysOfWeek: Date[] = [startOfWeekDate];
   let dateInLoop: Date = new Date(startOfWeekDate);
   for (let i = 1; i < 7; i++) {
