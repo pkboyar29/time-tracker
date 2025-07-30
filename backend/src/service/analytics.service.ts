@@ -11,6 +11,8 @@ import { PopulatedSessionType } from '../model/session.model';
 
 import { DateTime } from 'luxon';
 
+type TimeBarType = 'hour' | 'day' | 'month' | 'year';
+
 export default {
   // TODO: убрать тип any
   async getActivityDistributions(
@@ -92,13 +94,28 @@ export default {
     return activityDistributions;
   },
 
+  getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
+    let daysInRange = Math.ceil(
+      (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24)
+    );
+    if (daysInRange == 1) {
+      return 'hour';
+    } else if (daysInRange <= 31) {
+      return 'day';
+    } else if (daysInRange <= 732) {
+      return 'month';
+    } else {
+      return 'year';
+    }
+  },
+
   // TODO: убрать тип any
   getTimeBars(
     startOfRange: Date,
     endOfRange: Date,
     sessionParts: any,
     completedSessions: any,
-    barType: 'day' | 'month',
+    barType: TimeBarType,
     timezone: string
   ): TimeBar[] {
     let timeBars: TimeBar[] = [];
@@ -135,6 +152,9 @@ export default {
         const startOfNextMonth = dt.plus({ months: 1 }).startOf('month');
         nextPeriod = startOfNextMonth.toJSDate();
       }
+    } else {
+      // if bar type is year or hour
+      return [];
     }
 
     while (true) {
@@ -244,32 +264,14 @@ export default {
         userId
       );
 
-      let timeBars: TimeBar[] = [];
-      let daysInRange = Math.ceil(
-        (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24)
+      const timeBars = this.getTimeBars(
+        startOfRange,
+        endOfRange,
+        sessionPartsForRange,
+        completedSessionsForRange,
+        this.getTimeBarType(startOfRange, endOfRange),
+        timezone
       );
-      if (daysInRange == 1) {
-        // тут либо оставляем массив пустым, либо работаем по часам
-      } else if (daysInRange >= 2 && daysInRange <= 31) {
-        timeBars = this.getTimeBars(
-          startOfRange,
-          endOfRange,
-          sessionPartsForRange,
-          completedSessionsForRange,
-          'day',
-          timezone
-        );
-      } else if (daysInRange <= 366) {
-        // if days in range > 31
-        timeBars = this.getTimeBars(
-          startOfRange,
-          endOfRange,
-          sessionPartsForRange,
-          completedSessionsForRange,
-          'month',
-          timezone
-        );
-      }
 
       return {
         sessionsAmount,

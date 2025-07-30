@@ -3,6 +3,62 @@ import activityService from '../../service/activity.service';
 
 jest.mock('../../service/activity.service');
 
+describe('analyticsService.getTimeBarType', () => {
+  it('returns "hour" when range is exactly 1 day', () => {
+    const start = new Date(2024, 6, 1); // July 1, 2024
+    const end = new Date(2024, 6, 2); // July 2, 2024
+    expect(analyticsService.getTimeBarType(start, end)).toBe('hour');
+  });
+
+  it('returns "day" when range is 2 days', () => {
+    const start = new Date(2024, 6, 1);
+    const end = new Date(2024, 6, 3);
+    expect(analyticsService.getTimeBarType(start, end)).toBe('day');
+  });
+
+  it('returns "day" when range is exactly 31 days', () => {
+    const start = new Date(2024, 0, 1); // Jan 1
+    const end = new Date(2024, 1, 1); // Feb 1
+    expect(analyticsService.getTimeBarType(start, end)).toBe('day');
+  });
+
+  it('returns "month" when range is more than 31 days', () => {
+    const start = new Date(2024, 0, 1); // Jan 1
+    const end = new Date(2024, 2, 5); // Mar 5 (~64 days)
+    expect(analyticsService.getTimeBarType(start, end)).toBe('month');
+  });
+
+  it('rounds up partial days to the next full day (ceil behavior)', () => {
+    const start = new Date(2024, 6, 1, 0, 0, 0); // July 1 00:00
+    const end = new Date(2024, 6, 1, 12, 0, 0); // July 1 12:00 (12 hours)
+    expect(analyticsService.getTimeBarType(start, end)).toBe('hour'); // Still 1 day (ceil → 1)
+  });
+
+  it('returns "hour" for exactly 24 hours range', () => {
+    const start = new Date('2024-07-01T08:00:00Z');
+    const end = new Date('2024-07-02T08:00:00Z');
+    expect(analyticsService.getTimeBarType(start, end)).toBe('hour');
+  });
+
+  it('returns "year" when range is more than 732 days (2 full years)', () => {
+    const start = new Date(2020, 0, 1); // Jan 1, 2020
+    const end = new Date(2022, 1, 2); // Feb 2, 2022 (~763 days)
+    expect(analyticsService.getTimeBarType(start, end)).toBe('year');
+  });
+
+  it('returns "month" when range is exactly 732 days', () => {
+    const start = new Date(2020, 0, 1); // Jan 1, 2020
+    const end = new Date(2022, 0, 2); // Jan 2, 2022 (732 days incl. leap year)
+    expect(analyticsService.getTimeBarType(start, end)).toBe('month');
+  });
+
+  it('returns "year" when range is far more than 2 years', () => {
+    const start = new Date(2019, 0, 1);
+    const end = new Date(2023, 0, 1); // 4 years = 1461 days (incl. 1 leap year)
+    expect(analyticsService.getTimeBarType(start, end)).toBe('year');
+  });
+});
+
 describe('analyticsService.getTimeBars', () => {
   const sessionParts = [
     {
