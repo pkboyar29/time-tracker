@@ -190,7 +190,11 @@ export default {
         nextPeriod.setDate(nextPeriod.getDate() + 1);
       } else if (barType == 'month') {
         prevPeriod = new Date(nextPeriod);
-        nextPeriod.setMonth(nextPeriod.getMonth() + 1);
+
+        const nextPeriodLuxon = DateTime.fromJSDate(nextPeriod, {
+          zone: timezone,
+        }).plus({ months: 1 });
+        nextPeriod = nextPeriodLuxon.toJSDate();
       }
     }
 
