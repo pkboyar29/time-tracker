@@ -12,6 +12,10 @@ export const getRemainingTimeHoursMinutesSeconds = (
   const formattedSeconds: string =
     seconds < 10 ? '0' + (seconds % 60) : (seconds % 60).toString();
 
+  if (spentTimeSeconds > totalTimeSeconds) {
+    return '00:00';
+  }
+
   return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
 };
 
@@ -26,11 +30,6 @@ export const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
     seconds < 10 ? '0' + (seconds % 60) : (seconds % 60).toString();
 
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-};
-
-export const getTimeMinutes = (seconds: number): string => {
-  const minutes: number = Math.trunc(seconds / 60);
-  return minutes.toString();
 };
 
 export const getTimeHoursMinutes = (

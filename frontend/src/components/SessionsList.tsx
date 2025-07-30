@@ -53,7 +53,7 @@ const SessionsList: FC<SessionsListProps> = ({
 
   const handleSessionClick = async (session: ISession) => {
     if (currentSession) {
-      // updating the previous session if this session is not paused
+      // updating the previous session if it's not paused
       if (enabled) {
         try {
           const updatedSession = await dispatch(
