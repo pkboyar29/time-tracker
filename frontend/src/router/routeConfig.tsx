@@ -3,7 +3,6 @@ import { RouteObject, Navigate } from 'react-router-dom';
 import TimerPage from '../pages/TimerPage';
 import AnalyticsOverallPage from '../pages/AnalyticsOverallPage';
 import ActivityGroupsPage from '../pages/ActivityGroupsPage';
-import ActivityPage from '../pages/ActivityPage';
 import ActivityGroupPage from '../pages/ActivityGroupPage';
 import SignInPage from '../pages/SignInPage';
 import SignUpPage from '../pages/SignUpPage';
@@ -28,11 +27,6 @@ const routeConfig: RouteType[] = [
   {
     path: '/activity-groups/:activityGroupId',
     element: <ActivityGroupPage />,
-    requiredAuth: true,
-  },
-  {
-    path: '/activity-groups/:activityGroupId/activities/:activityId',
-    element: <ActivityPage />,
     requiredAuth: true,
   },
   {

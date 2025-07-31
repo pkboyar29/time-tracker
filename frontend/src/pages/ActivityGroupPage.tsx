@@ -19,9 +19,6 @@ import { ClipLoader } from 'react-spinners';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 
-// TODO: отображать серверную ошибку, если не удалось получить activity group (типо 404 страницы?)
-// TODO: отображать серверную ошибку, если ее получили при получении activities
-
 interface ModalState {
   status: boolean;
   selectedItemId: string | null;
@@ -87,10 +84,6 @@ const ActivityGroupPage: FC = () => {
       });
     }
   }, [isErrorActivities]);
-
-  const handleEditActivityClick = (activityId: string) => {
-    navigate(`activities/${activityId}`);
-  };
 
   const handleDeleteActivityClick = async (activityId: string) => {
     try {
@@ -266,8 +259,19 @@ const ActivityGroupPage: FC = () => {
                   .map((activity) => (
                     <ActivityItem
                       key={activity.id}
-                      activity={activity}
-                      editHandler={handleEditActivityClick}
+                      activityCommon={activity}
+                      editHandler={() => console.log('edit handler')}
+                      afterBlurHandler={(updatedActivity) => {
+                        queryClient.setQueryData(
+                          ['activities', activityGroupId],
+                          (oldData: IActivity[]) =>
+                            oldData.filter((activity) =>
+                              activity.id == updatedActivity.id
+                                ? updatedActivity
+                                : activity
+                            )
+                        );
+                      }}
                       deleteHandler={(activityId: string) =>
                         setDeleteModal({
                           status: true,

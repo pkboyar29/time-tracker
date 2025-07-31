@@ -175,7 +175,7 @@ const ActivityGroupsPage: FC = () => {
                   .map((activityGroup) => (
                     <ActivityItem
                       key={activityGroup.id}
-                      activity={activityGroup}
+                      activityCommon={activityGroup}
                       editHandler={handleEditActivityGroupClick}
                       deleteHandler={handleDeleteActivityGroupClick}
                     />
