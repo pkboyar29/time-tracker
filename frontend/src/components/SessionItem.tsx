@@ -47,7 +47,10 @@ const SessionItem: FC<SessionItemProps> = ({
 
         <div className="flex flex-col gap-5 ml-auto">
           <div className="flex gap-3">
-            <button onClick={() => sessionClickHandler?.(session)}>
+            <button
+              className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
+              onClick={() => sessionClickHandler?.(session)}
+            >
               {isActive ? (
                 isEnabled ? (
                   <PauseIcon />
@@ -59,7 +62,10 @@ const SessionItem: FC<SessionItemProps> = ({
               )}
             </button>
 
-            <button onClick={() => sessionDeleteHandler(session.id)}>
+            <button
+              className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
+              onClick={() => sessionDeleteHandler(session.id)}
+            >
               <DeleteIcon />
             </button>
           </div>

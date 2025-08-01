@@ -5,3 +5,16 @@ export interface IUser {
   email: string;
   dailyGoal: number;
 }
+
+export interface ISignIn {
+  username: string;
+  password: string;
+}
+
+export interface ISignUp {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  password: string;
+}

@@ -53,7 +53,10 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
       >
         <div className="flex items-center justify-between mb-5">
           <div className="text-lg">{title}</div>
-          <button onClick={onCloseModal}>
+          <button
+            className="p-1.5 hover:bg-[#F1F1F1] transition duration-300 rounded-full"
+            onClick={onCloseModal}
+          >
             <CrossIcon />
           </button>
         </div>

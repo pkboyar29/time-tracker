@@ -14,7 +14,7 @@ router.post('/sign-up', async (req: Request, res: Response) => {
         e.message === 'Username must be unique' ||
         e.message === 'Email must be unique'
       ) {
-        res.status(404).send(e.message);
+        res.status(401).send(e.message);
       } else {
         res.status(500).send(e.message);
       }
