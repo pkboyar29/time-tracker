@@ -85,9 +85,17 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   useEffect(() => {
     if (currentSession) {
       if (enabled) {
-        document.title = 'Focus | Time Tracker';
+        document.title = `Focus | ${
+          currentSession.activity
+            ? currentSession.activity.name
+            : 'Without activity'
+        }`;
       } else {
-        document.title = 'Paused | Time Tracker';
+        document.title = `Paused | ${
+          currentSession.activity
+            ? currentSession.activity.name
+            : 'Without activity'
+        }`;
       }
     } else {
       document.title = 'Time Tracker';
