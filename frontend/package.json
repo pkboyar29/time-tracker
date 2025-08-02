@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "docker-start": "vite --host",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "types": "tsc --noEmit --project ./tsconfig.json && tsc --noEmit --project ./tsconfig.node.json",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest"
