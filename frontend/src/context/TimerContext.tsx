@@ -16,7 +16,7 @@ import {
 import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
 
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 interface TimerContextType {
   toggleTimer: (startSpentSeconds: number) => void;
@@ -85,9 +85,17 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   useEffect(() => {
     if (currentSession) {
       if (enabled) {
-        document.title = 'Focus | Time Tracker';
+        document.title = `Focus | ${
+          currentSession.activity
+            ? currentSession.activity.name
+            : 'Without activity'
+        }`;
       } else {
-        document.title = 'Paused | Time Tracker';
+        document.title = `Paused | ${
+          currentSession.activity
+            ? currentSession.activity.name
+            : 'Without activity'
+        }`;
       }
     } else {
       document.title = 'Time Tracker';
@@ -114,7 +122,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           dispatch(resetCurrentSession());
           removeSessionFromLocalStorage();
         } catch (e) {
-          toast('Произошла серверная ошибка при обновлении сессии', {
+          toast('A server error occurred while updating session', {
             type: 'error',
           });
           stopTimer();
@@ -141,13 +149,9 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   }, [currentSession, dispatch]);
 
   return (
-    <>
-      <ToastContainer position="top-left" />
-
-      <TimerContext.Provider value={{ toggleTimer, stopTimer, enabled }}>
-        {children}
-      </TimerContext.Provider>
-    </>
+    <TimerContext.Provider value={{ toggleTimer, stopTimer, enabled }}>
+      {children}
+    </TimerContext.Provider>
   );
 };
 

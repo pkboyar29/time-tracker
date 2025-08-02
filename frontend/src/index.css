@@ -6,7 +6,9 @@
 @tailwind utilities;
 
 .bg-custom {
-  background: #d5ced0;
+  /* background: #d5ced0; */
+  /* background: #f9faf5; */
+  background: #f0f0f0;
 }
 
 @layer components {

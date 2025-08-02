@@ -1,4 +1,4 @@
-const getRemainingTimeHoursMinutesSeconds = (
+export const getRemainingTimeHoursMinutesSeconds = (
   totalTimeSeconds: number,
   spentTimeSeconds: number
 ): string => {
@@ -12,10 +12,14 @@ const getRemainingTimeHoursMinutesSeconds = (
   const formattedSeconds: string =
     seconds < 10 ? '0' + (seconds % 60) : (seconds % 60).toString();
 
+  if (spentTimeSeconds > totalTimeSeconds) {
+    return '00:00';
+  }
+
   return `${formattedHours}${formattedMinutes}:${formattedSeconds}`;
 };
 
-const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
+export const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   const hours: number = Math.trunc(allSeconds / 3600);
   const formattedHours: string = hours < 10 ? '0' + hours : hours.toString();
   const minutes: number = Math.trunc(allSeconds / 60) - hours * 60;
@@ -28,13 +32,36 @@ const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
-const getTimeMinutes = (seconds: number): number => {
-  const minutes: number = Math.trunc(seconds / 60);
-  return minutes;
+export const getTimeHoursMinutes = (
+  seconds: number,
+  short: boolean = false
+): string => {
+  const hours: number = Math.trunc(seconds / 3600);
+  const hoursString: string =
+    hours === 0 ? '' : short == true ? `${hours}h` : `${hours} hours`;
+
+  const remainingSeconds: number = seconds - hours * 3600;
+  const remainingMinutes: number = Math.trunc(remainingSeconds / 60);
+  const minutesString: string =
+    remainingMinutes === 0
+      ? ''
+      : short == true
+      ? `${remainingMinutes}m`
+      : `${remainingMinutes} minutes`;
+
+  const resultString =
+    hoursString === '' && minutesString === ''
+      ? `${short == true ? '0m' : '0 minutes'}`
+      : `${hoursString} ${minutesString}`;
+
+  return resultString.trim();
 };
 
-export {
-  getRemainingTimeHoursMinutesSeconds,
-  getTimeHoursMinutesSeconds,
-  getTimeMinutes,
+export const getTimeHHmmFromDate = (date: Date) => {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+
+  return `${hours < 10 ? `0${hours}` : `${hours}`}:${
+    minutes < 10 ? `0${minutes}` : `${minutes}`
+  }`;
 };

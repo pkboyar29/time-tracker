@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  mongo_db:
+    container_name: database_container
+    image: mongo:8.0.5
+    volumes:
+      - mongo_db:/data/db
+
+  node_app:
+    build: ./backend
+    ports:
+      - '8003:8000'
+    environment:
+      - PORT=8000
+      - MONGO_URL=mongodb://mongo_db:27017/time_tracker
+      - ACCESS_TOKEN_SECRET=asdaksldj23123
+      - REFRESH_TOKEN_SECRET=zc,43sdszxckl;;
+    depends_on:
+      - mongo_db
+
+volumes:
+  mongo_db: {}

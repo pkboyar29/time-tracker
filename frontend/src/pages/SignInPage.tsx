@@ -1,14 +1,13 @@
-import { FC, useState } from 'react';
+import { FC } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import axios from '../axios';
-import { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
 import { useAppDispatch } from '../redux/store';
 import { fetchProfileInfo } from '../redux/slices/userSlice';
 import { isAuth } from '../helpers/authHelpers';
+import { signIn } from '../api/userApi';
+import { toast } from 'react-toastify';
 
-import Modal from '../components/modals/Modal';
 import Input from '../components/Input';
 import Button from '../components/Button';
 
@@ -18,8 +17,6 @@ interface SignInFields {
 }
 
 const SignInPage: FC = () => {
-  const [modal, setModal] = useState<boolean>(false);
-
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -38,22 +35,17 @@ const SignInPage: FC = () => {
 
   const onSubmit = async (signInData: SignInFields) => {
     try {
-      const { data } = await axios.post('/users/sign-in', signInData);
-      const { access, refresh } = data;
+      const { access, refresh } = await signIn(signInData);
       Cookies.set('access', access);
       Cookies.set('refresh', refresh, { expires: 5 });
 
       dispatch(fetchProfileInfo());
-
-      setModal(true);
     } catch (e) {
-      if (e instanceof AxiosError) {
-        handleErrorResponse(e);
-      }
+      handleErrorResponse(e);
     }
   };
 
-  const handleErrorResponse = (error: AxiosError) => {
+  const handleErrorResponse = (error: any) => {
     const errorMessage = error.response?.data;
     switch (errorMessage) {
       case 'User with this username doesnt exists':
@@ -68,27 +60,16 @@ const SignInPage: FC = () => {
           message: errorMessage,
         });
         break;
+      default:
+        toast('A server error occurred while signing in', {
+          type: 'error',
+        });
+        break;
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center w-full mt-32">
-      {modal && (
-        <Modal
-          title="Successful authorization!"
-          onCloseModal={() => setModal(false)}
-        >
-          <Button
-            onClick={() => {
-              setModal(false);
-              navigate('/timer');
-            }}
-          >
-            Ok
-          </Button>
-        </Modal>
-      )}
-
       <div className="text-xl text-red-500">Sign in</div>
 
       <form
@@ -111,6 +92,7 @@ const SignInPage: FC = () => {
               : ''
           }
         />
+
         <Input
           fieldName="password"
           placeHolder="Password"
@@ -128,9 +110,11 @@ const SignInPage: FC = () => {
           }
           inputType="password"
         />
+
         <Button className="w-[175px]" type="submit">
           Sign in
         </Button>
+
         <a
           className="text-base text-center transition-all delay-100 cursor-pointer hover:text-red-500"
           onClick={() => navigate('/sign-up')}

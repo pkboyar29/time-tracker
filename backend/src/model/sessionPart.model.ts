@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose, { InferSchemaType } from 'mongoose';
 
 const sessionPartSchema = new mongoose.Schema({
   spentTimeSeconds: {
@@ -31,3 +31,13 @@ const SessionPart = mongoose.model(
 );
 
 export default SessionPart;
+
+export type SessionPartType = InferSchemaType<typeof sessionPartSchema>;
+
+export type PopulatedSessionPartType = SessionPartType & {
+  session: {
+    activity: {
+      name: string;
+    };
+  };
+};

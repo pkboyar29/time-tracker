@@ -7,6 +7,7 @@ import { loadCurrentSession } from './redux/slices/sessionSlice';
 import { fetchProfileInfo } from './redux/slices/userSlice';
 import { getSessionFromLocalStorage } from './helpers/localstorageHelpers';
 
+import { ToastContainer } from 'react-toastify';
 import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
@@ -31,9 +32,11 @@ const App: FC = () => {
 
   return (
     <>
+      <ToastContainer position="top-right" limit={3} />
+
       <div
         id="app"
-        className={`App h-screen ${
+        className={`App h-screen bg-custom ${
           requiredAuth ? 'grid grid-cols-[auto,1fr]' : ''
         }`}
       >
@@ -47,11 +50,7 @@ const App: FC = () => {
                 path={route.path}
                 element={<ProtectedRoute requiredAuth={route.requiredAuth} />}
               >
-                <Route
-                  key={index}
-                  path={route.path}
-                  element={route.element}
-                ></Route>
+                <Route key={index} path={route.path} element={route.element} />
               </Route>
             ))}
           </Routes>

@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { Outlet, Navigate, RouteProps } from 'react-router-dom';
-import { RootState } from '../redux/store';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '../redux/store';
 import { isAuth } from '../helpers/authHelpers';
 
 type ProtectedRouteProps = RouteProps & {
@@ -9,8 +8,8 @@ type ProtectedRouteProps = RouteProps & {
 };
 
 const ProtectedRoute: FC<ProtectedRouteProps> = ({ requiredAuth }) => {
-  const isLoggedOut: boolean = useSelector(
-    (state: RootState) => state.users.status === 'logout'
+  const isLoggedOut: boolean = useAppSelector(
+    (state) => state.users.status === 'logout'
   );
   const shouldRedirect: boolean = requiredAuth && (!isAuth() || isLoggedOut);
 

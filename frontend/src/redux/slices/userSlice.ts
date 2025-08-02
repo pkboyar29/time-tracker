@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from '../../axios';
+import axios from '../../api/axios';
 import { IUser } from '../../ts/interfaces/User/IUser';
 import UserStateStatuses from '../../ts/enums/UserStateStatuses';
 
@@ -16,7 +16,7 @@ const initialState: UserState = {
 export const fetchProfileInfo = createAsyncThunk(
   'users/fetchProfileInfo',
   async () => {
-    const { data } = await axiosInstance.get('/users/profile');
+    const { data } = await axios.get('/users/profile');
     return data as IUser;
   }
 );
@@ -24,7 +24,7 @@ export const fetchProfileInfo = createAsyncThunk(
 export const updateDailyGoal = createAsyncThunk(
   'users/updateDailyGoal',
   async (newDailyGoal: number) => {
-    const { data } = await axiosInstance.put('/users/updateDailyGoal', {
+    const { data } = await axios.put('/users/updateDailyGoal', {
       newDailyGoal,
     });
     return data;

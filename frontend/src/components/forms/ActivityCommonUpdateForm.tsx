@@ -1,13 +1,18 @@
 import { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useAppDispatch } from '../../redux/store';
-import { updateActivity } from '../../redux/slices/activitySlice';
-import { updateActivityGroup } from '../../redux/slices/activityGroupSlice';
+import { toast } from 'react-toastify';
+
+import { updateActivityGroup } from '../../api/activityGroupApi';
+import { updateActivity } from '../../api/activityApi';
+
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 
 interface ActivityCommonUpdateFormProps {
   activityCommon: IActivity | IActivityGroup;
+  afterUpdateHandler: (
+    updatedActivityCommon: IActivity | IActivityGroup
+  ) => void;
 }
 
 interface ActivityCommonFields {
@@ -17,6 +22,7 @@ interface ActivityCommonFields {
 
 const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
   activityCommon,
+  afterUpdateHandler,
 }) => {
   const {
     register,
@@ -26,9 +32,8 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
   } = useForm<ActivityCommonFields>({
     mode: 'onBlur',
   });
-  const dispatch = useAppDispatch();
 
-  // попробовать все-таки это сделать декларативно, через defaultValues
+  // TODO: попробовать все-таки это сделать декларативно, через defaultValues
   useEffect(() => {
     setValue('name', activityCommon.name);
     setValue('descr', activityCommon.descr);
@@ -43,23 +48,35 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
     }, 0);
   };
 
-  const onSubmit = (data: ActivityCommonFields) => {
+  const onSubmit = async (data: ActivityCommonFields) => {
     if ('activityGroup' in activityCommon) {
       // IActivity
-      dispatch(
-        updateActivity({
+      try {
+        const updatedData = await updateActivity({
           id: activityCommon.id,
           ...data,
-        })
-      );
+        });
+
+        afterUpdateHandler(updatedData);
+      } catch (e) {
+        toast('A server error occurred while updating activity', {
+          type: 'error',
+        });
+      }
     } else {
       // IActivityGroup
-      dispatch(
-        updateActivityGroup({
+      try {
+        const updatedData = await updateActivityGroup({
           id: activityCommon.id,
           ...data,
-        })
-      );
+        });
+
+        afterUpdateHandler(updatedData);
+      } catch (e) {
+        toast('A server error occurred while updating activity group', {
+          type: 'error',
+        });
+      }
     }
   };
 
@@ -76,7 +93,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
           onBlur={handleSubmit(onSubmit)}
           type="text"
           className={
-            'p-1 text-xl font-bold rounded-lg border border-solid border-transparent focus:border-blue-700 hover:bg-gray-100 focus:bg-transparent' +
+            'p-1 text-xl font-bold rounded-lg border border-solid border-transparent focus:border-blue-700 hover:bg-gray-100 bg-transparent focus:bg-transparent' +
             (errors.name ? 'focus:border-red-500' : '')
           }
         />
@@ -89,7 +106,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
           onFocus={handleFocus}
           onBlur={handleSubmit(onSubmit)}
           className={
-            'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-blue-700 ' +
+            'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-blue-700 bg-transparent' +
             (errors.descr ? 'focus:border-red-500' : '')
           }
         />

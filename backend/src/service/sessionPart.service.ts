@@ -29,6 +29,7 @@ export default {
       }).populate<{
         session: PopulatedSession;
       }>(sessionPopulateConfig);
+
       const filteredSessionsParts = sessionParts.filter(
         (sessionPart) => !sessionPart.session.deleted
       );

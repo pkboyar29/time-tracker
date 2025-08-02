@@ -1,16 +1,16 @@
 import { FC, useState, useEffect, ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAppDispatch } from '../../redux/store';
-import axios from '../../axios';
 import { createSession } from '../../redux/slices/sessionSlice';
 import { saveSessionToLocalStorage } from '../../helpers/localstorageHelpers';
+import { useQuery } from '@tanstack/react-query';
+import { fetchActivities } from '../../api/activityApi';
 
 import Modal from './Modal';
 import Button from '../Button';
 import RangeSlider from '../RangeSlider';
+import { ClipLoader } from 'react-spinners';
 
-import { mapActivityFromResponse } from '../../helpers/mappingHelpers';
-import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 import { ISession } from '../../ts/interfaces/Session/ISession';
 
 interface SessionCreateModalProps {
@@ -30,7 +30,13 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   onCloseModal,
   modalTitle,
 }) => {
-  const [activitiesToChoose, setActivitiesToChoose] = useState<IActivity[]>([]);
+  const { data: activitiesToChoose, isLoading: isLoadingActivities } = useQuery(
+    {
+      queryKey: ['activitiesToChoose'],
+      queryFn: () => fetchActivities(),
+      retry: false,
+    }
+  );
 
   const [minutes, setMinutes] = useState<number>(25);
 
@@ -46,17 +52,6 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
     mode: 'onBlur',
   });
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    const fetchActivities = async () => {
-      const { data } = await axios.get('/activities');
-      const mappedData: IActivity[] = data.map((unmappedActivity: any) =>
-        mapActivityFromResponse(unmappedActivity)
-      );
-      setActivitiesToChoose(mappedData);
-    };
-    fetchActivities();
-  }, []);
 
   useEffect(() => {
     if (defaultActivity) {
@@ -108,22 +103,28 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
           />
         </div>
 
-        {activitiesToChoose.length > 0 && (
-          <div className="flex flex-col gap-3">
-            <div>Activity</div>
+        {/* TODO: как-то отображать в контейнере с одной высотой, чтобы не дергался контент */}
+        {isLoadingActivities ? (
+          <ClipLoader size={'25px'} color="#EF4444" />
+        ) : (
+          activitiesToChoose &&
+          activitiesToChoose.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <div>Activity</div>
 
-            <select
-              className="px-2 py-1 border border-black border-solid rounded-xl"
-              {...register('activity')}
-            >
-              <option value="">Choose activity (optional)</option>
-              {activitiesToChoose.map((activity) => (
-                <option key={activity.id} value={activity.id}>
-                  {activity.activityGroup.name} / {activity.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              <select
+                className="px-2 py-1 border border-black border-solid rounded-xl"
+                {...register('activity')}
+              >
+                <option value="">Choose activity (optional)</option>
+                {activitiesToChoose.map((activity) => (
+                  <option key={activity.id} value={activity.id}>
+                    {activity.activityGroup.name} / {activity.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )
         )}
 
         <div className="flex w-full">

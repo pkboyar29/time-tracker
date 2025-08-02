@@ -1,7 +1,7 @@
 import { FC } from 'react';
 import { useForm } from 'react-hook-form';
-import { useAppDispatch } from '../../redux/store';
-import { createActivity } from '../../redux/slices/activitySlice';
+import { createActivity } from '../../api/activityApi';
+import { toast } from 'react-toastify';
 
 import Button from '../Button';
 import Input from '../Input';
@@ -22,8 +22,6 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
   afterSubmitHandler,
   activityGroupId,
 }) => {
-  const dispatch = useAppDispatch();
-
   const {
     register,
     handleSubmit,
@@ -34,16 +32,13 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
 
   const onSubmit = async (data: ActivityFields) => {
     try {
-      const newActivity = await dispatch(
-        createActivity({
-          ...data,
-          activityGroupId,
-        })
-      ).unwrap();
+      const newActivity = await createActivity({ ...data, activityGroupId });
 
       afterSubmitHandler(newActivity);
     } catch (e) {
-      console.log(e);
+      toast('A server error occurred while creating activity', {
+        type: 'error',
+      });
     }
   };
 

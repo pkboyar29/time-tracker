@@ -1,6 +1,6 @@
 import axios, { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
-import { refreshAccessToken } from './helpers/authHelpers';
+import { refreshAccessToken } from '../helpers/authHelpers';
 
 const instance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,

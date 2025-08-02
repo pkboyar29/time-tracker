@@ -47,7 +47,7 @@ const Input: FC<InputProps> = ({
               errorMessage && 'border-red-500'
             } ${
               bg === 'white'
-                ? 'bg-white border-black'
+                ? 'bg-transparent border-black'
                 : 'bg-red-500 placeholder-white text-white'
             }`}
             placeholder={placeHolder}
@@ -72,7 +72,7 @@ const Input: FC<InputProps> = ({
         {inputType === 'password' && (
           <button
             type="button"
-            className="absolute z-50 top-[3.75px] right-2"
+            className="absolute z-50 -translate-y-1/2 top-1/2 right-2"
             onClick={handleToggleTypeClick}
           >
             {toggledType === 'password' ? (

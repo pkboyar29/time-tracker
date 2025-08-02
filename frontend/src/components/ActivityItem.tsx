@@ -1,105 +1,144 @@
-import { FC } from 'react';
-import Button from './Button';
+import { FC, useState } from 'react';
+import { updateActivityGroup } from '../api/activityGroupApi';
+import { updateActivity } from '../api/activityApi';
 import { getTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
+import { toast } from 'react-toastify';
+
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
+import Button from './Button';
+import DeleteIcon from '../icons/DeleteIcon';
+import EditIcon from '../icons/EditIcon';
+import SaveIcon from '../icons/SaveIcon';
+import PlayIcon from '../icons/PlayIcon';
+
 interface ActivityBoxProps {
-  activity: IActivity | IActivityGroup;
+  activityCommon: IActivity | IActivityGroup;
   editHandler: (activityId: string) => void;
   deleteHandler: (activityId: string) => void;
   startSessionHandler?: (activityId: string) => void;
+  afterBlurHandler?: (updatedActivity: IActivity | IActivityGroup) => void;
 }
 
 const ActivityItem: FC<ActivityBoxProps> = ({
-  activity,
+  activityCommon,
   editHandler,
   deleteHandler,
   startSessionHandler,
+  afterBlurHandler,
 }) => {
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [name, setName] = useState<string>(activityCommon.name);
+
+  const inputChangeHandler = async (e: React.FormEvent<HTMLInputElement>) => {
+    setName(e.currentTarget.value);
+  };
+
+  const handleEditButtonClick = () => {
+    if (afterBlurHandler) {
+      if (isEditing) {
+        onSubmit();
+      }
+
+      setIsEditing((isEditing) => !isEditing);
+    } else {
+      editHandler(activityCommon.id);
+    }
+  };
+
+  const handleDeleteButtonClick = () => {
+    deleteHandler(activityCommon.id);
+  };
+
+  const onSubmit = async () => {
+    if ('activityGroup' in activityCommon) {
+      // IActivity
+      try {
+        const updatedData = await updateActivity({
+          id: activityCommon.id,
+          name,
+        });
+
+        afterBlurHandler && afterBlurHandler(updatedData);
+      } catch (e) {
+        toast('A server error occurred while updating activity', {
+          type: 'error',
+        });
+        setName(activityCommon.name);
+      }
+    } else {
+      // IActivityGroup
+      try {
+        const updatedData = await updateActivityGroup({
+          id: activityCommon.id,
+          name,
+        });
+
+        afterBlurHandler && afterBlurHandler(updatedData);
+      } catch (e) {
+        toast('A server error occurred while updating activity group', {
+          type: 'error',
+        });
+        setName(activityCommon.name);
+      }
+    }
+  };
+
   return (
-    <div className="p-5 border border-black border-solid rounded-xl">
-      <div className="flex items-start gap-[100px]">
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-col gap-2">
-            <div className="text-lg font-bold">Name</div>
-            <div>{activity.name}</div>
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="text-lg font-bold">Description</div>
-            <div>
-              {activity.descr !== '' ? activity.descr : 'Without description'}
-            </div>
-          </div>
-        </div>
-        <div className="flex flex-col items-end ml-auto gap-7">
-          <div className="flex gap-4">
-            <button onClick={() => editHandler(activity.id)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"
-                />
-              </svg>
-            </button>
-            <button onClick={() => deleteHandler(activity.id)}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth="1.5"
-                stroke="currentColor"
-                className="size-6"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                />
-              </svg>
-            </button>
-          </div>
-          {startSessionHandler && (
-            <div>
-              <Button onClick={() => startSessionHandler(activity.id)}>
-                <div className="flex gap-[6px] items-center">
-                  Start session
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="size-5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
-                    />
-                  </svg>
-                </div>
-              </Button>
-            </div>
-          )}
+    <div className="p-5 bg-white border border-gray-300/80 border-solid rounded-xl w-[320px] min-h-[150px] flex flex-col">
+      <div className="flex items-start justify-between flex-1 gap-5">
+        <input
+          value={name}
+          onChange={inputChangeHandler}
+          onBlur={() => {
+            onSubmit();
+            setIsEditing(false);
+          }}
+          className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-red-500 ${
+            isEditing ? 'border-gray-300' : 'border-transparent text-ellipsis'
+          }`}
+          maxLength={50}
+          disabled={!isEditing}
+        />
+
+        <div className="flex gap-2">
+          <button
+            className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
+            onClick={handleEditButtonClick}
+          >
+            {isEditing ? <SaveIcon /> : <EditIcon />}
+          </button>
+          <button
+            className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
+            onClick={handleDeleteButtonClick}
+          >
+            <DeleteIcon />
+          </button>
         </div>
       </div>
+
+      {startSessionHandler && 'activityGroup' in activityCommon && (
+        <div className="flex justify-end mt-4">
+          <div className="w-fit">
+            <Button onClick={() => startSessionHandler(activityCommon.id)}>
+              <div className="flex gap-[6px] items-center">
+                <span>Start session</span>
+                <PlayIcon />
+              </div>
+            </Button>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-center gap-6 mt-6">
         <div className="text-center">
-          <div className="font-bold">{activity.sessionsAmount}</div>
+          <div className="font-bold">{activityCommon.sessionsAmount}</div>
           <div className="text-[13px]">sessions</div>
         </div>
         <div className="text-center">
           <div className="font-bold">
-            {getTimeHoursMinutesSeconds(activity.spentTimeSeconds)}
+            {getTimeHoursMinutesSeconds(activityCommon.spentTimeSeconds)}
           </div>
           <div className="text-[13px]">spent time</div>
         </div>

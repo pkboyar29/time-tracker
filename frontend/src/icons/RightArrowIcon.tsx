@@ -1,11 +1,11 @@
 import { FC } from 'react';
 
-const RightArrowIcon: FC = () => {
+const RightArrowIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
   return (
-    <svg fill="black" viewBox="0 0 16 16" className="w-5 h-5">
+    <svg fill="white" viewBox="0 0 16 16" className="w-6 h-6" {...props}>
       <path
         fillRule="evenodd"
-        d="M4.646 1.646a.5.5 0 01.708 0l6 6a.5.5 0 010 .708l-6 6a.5.5 0 01-.708-.708L10.293 8 4.646 2.354a.5.5 0 010-.708z"
+        d="M1 8a.5.5 0 01.5-.5h11.793l-3.147-3.146a.5.5 0 01.708-.708l4 4a.5.5 0 010 .708l-4 4a.5.5 0 01-.708-.708L13.293 8.5H1.5A.5.5 0 011 8z"
       />
     </svg>
   );

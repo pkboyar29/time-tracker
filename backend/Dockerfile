@@ -1,5 +1,6 @@
 # проверить работоспособность копирования
 
+# TODO: надо использовать конкретную версию?
 FROM node:alpine
 WORKDIR /usr/src/app
 COPY ./package.json ./

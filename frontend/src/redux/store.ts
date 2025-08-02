@@ -1,14 +1,10 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import sessionReducer from './slices/sessionSlice';
-import activityReducer from './slices/activitySlice';
-import activityGroupReducer from './slices/activityGroupSlice';
 import userReducer from './slices//userSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 const rootReducer = combineReducers({
   sessions: sessionReducer,
-  activities: activityReducer,
-  activityGroups: activityGroupReducer,
   users: userReducer,
 });
 

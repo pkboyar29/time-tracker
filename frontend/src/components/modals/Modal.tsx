@@ -1,5 +1,7 @@
 import { FC, ReactNode, useEffect, useRef } from 'react';
 
+import CrossIcon from '../../icons/CrossIcon';
+
 interface ModalProps {
   children: ReactNode;
   title: ReactNode;
@@ -51,21 +53,11 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
       >
         <div className="flex items-center justify-between mb-5">
           <div className="text-lg">{title}</div>
-          <button onClick={onCloseModal}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18 18 6M6 6l12 12"
-              />
-            </svg>
+          <button
+            className="p-1.5 hover:bg-[#F1F1F1] transition duration-300 rounded-full"
+            onClick={onCloseModal}
+          >
+            <CrossIcon />
           </button>
         </div>
         {children}
