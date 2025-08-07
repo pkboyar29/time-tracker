@@ -240,6 +240,7 @@ export const getWeekRange = (date: Date): [Date, Date] => {
   const mondayDate = new Date(date);
 
   if (mondayDate.getDay() == 0) {
+    // TODO: то есть у нас воскресенье, а таким увеличением даты мы переходим на следующую неделю?
     mondayDate.setDate(mondayDate.getDate() + 1);
   } else if (mondayDate.getDay() > 1) {
     while (mondayDate.getDay() != 1) {
