@@ -1,6 +1,13 @@
 import instance from '../api/axios';
 import Cookies from 'js-cookie';
 
+const clearSession = () => {
+  Cookies.remove('access');
+  Cookies.remove('refresh');
+
+  localStorage.removeItem('session');
+};
+
 const refreshAccessToken = async () => {
   const refreshToken = Cookies.get('refresh');
   try {
@@ -12,13 +19,6 @@ const refreshAccessToken = async () => {
     // if refresh token is malformed or expired
     clearSession();
   }
-};
-
-const clearSession = () => {
-  Cookies.remove('access');
-  Cookies.remove('refresh');
-
-  localStorage.removeItem('session');
 };
 
 const isAuth = () => {

@@ -70,10 +70,10 @@ const SignInPage: FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center w-full mt-32">
-      <div className="text-xl text-red-500">Sign in</div>
+      <div className="text-2xl text-red-500">Sign in</div>
 
       <form
-        className="flex flex-col items-center gap-5 mt-3"
+        className="flex flex-col items-center gap-5 mt-3 w-[225px]"
         onSubmit={handleSubmit(onSubmit)}
       >
         <Input
@@ -111,7 +111,7 @@ const SignInPage: FC = () => {
           inputType="password"
         />
 
-        <Button className="w-[175px]" type="submit">
+        <Button className="text-[16px]" type="submit">
           Sign in
         </Button>
 

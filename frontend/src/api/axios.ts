@@ -34,6 +34,8 @@ instance.interceptors.response.use(
           return axios.request(originalRequest);
         }
       }
+
+      return Promise.reject(error);
     }
   }
 );

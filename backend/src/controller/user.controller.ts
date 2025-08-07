@@ -14,7 +14,7 @@ router.post('/sign-up', async (req: Request, res: Response) => {
         e.message === 'Username must be unique' ||
         e.message === 'Email must be unique'
       ) {
-        res.status(401).send(e.message);
+        res.status(400).send(e.message);
       } else {
         res.status(500).send(e.message);
       }
@@ -32,7 +32,7 @@ router.post('/sign-in', async (req: Request, res: Response) => {
         e.message === 'User with this username doesnt exists' ||
         e.message === 'Password incorrect'
       ) {
-        res.status(401).send(e.message);
+        res.status(400).send(e.message);
       } else {
         res.status(500).send(e.message);
       }

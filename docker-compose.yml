@@ -3,7 +3,7 @@ version: '3'
 services:
   mongo_db:
     container_name: database_container
-    image: mongo:latest # TODO: надо использовать конкретную версию
+    image: mongo:8.0.5
     volumes:
       - mongo_db:/data/db
 
@@ -19,7 +19,6 @@ services:
     depends_on:
       - mongo_db
 
-  # TODO: remove
   react_app:
     build: ./frontend
     ports:

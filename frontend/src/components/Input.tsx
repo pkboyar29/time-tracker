@@ -39,7 +39,7 @@ const Input: FC<InputProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center w-full">
+    <div className="flex flex-col items-center w-full gap-2">
       <div className="relative flex w-full">
         {!isTextArea ? (
           <input
@@ -83,8 +83,9 @@ const Input: FC<InputProps> = ({
           </button>
         )}
       </div>
+
       {errorMessage && (
-        <div className="pt-2 text-base text-red-500">{errorMessage}</div>
+        <div className="text-base text-red-500">{errorMessage}</div>
       )}
     </div>
   );
