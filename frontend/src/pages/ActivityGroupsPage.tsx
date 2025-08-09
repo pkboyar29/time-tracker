@@ -16,11 +16,7 @@ import ActivityItem from '../components/ActivityItem';
 import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm';
 
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
-
-interface DeleteModalState {
-  status: boolean;
-  deletedGroupId: string | null;
-}
+import { ModalState } from '../ts/interfaces/ModalState';
 
 const ActivityGroupsPage: FC = () => {
   const queryClient = useQueryClient();
@@ -37,9 +33,9 @@ const ActivityGroupsPage: FC = () => {
   });
 
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
+  const [deleteModal, setDeleteModal] = useState<ModalState>({
     status: false,
-    deletedGroupId: null,
+    selectedItemId: null,
   });
 
   const [searchString, setSearchString] = useState<string>('');
@@ -59,29 +55,29 @@ const ActivityGroupsPage: FC = () => {
   const handleDeleteActivityGroupClick = (activityGroupId: string) => {
     setDeleteModal({
       status: true,
-      deletedGroupId: activityGroupId,
+      selectedItemId: activityGroupId,
     });
   };
 
   const handleDeleteActivityGroupModal = async () => {
-    if (deleteModal.deletedGroupId) {
+    if (deleteModal.selectedItemId) {
       try {
-        await deleteActivityGroup(deleteModal.deletedGroupId);
+        await deleteActivityGroup(deleteModal.selectedItemId);
 
         queryClient.setQueryData(
           ['activityGroups'],
           (oldData: IActivityGroup[]) =>
-            oldData.filter((group) => group.id !== deleteModal.deletedGroupId)
+            oldData.filter((group) => group.id !== deleteModal.selectedItemId)
         );
 
         setDeleteModal({
           status: false,
-          deletedGroupId: null,
+          selectedItemId: null,
         });
       } catch (e) {
         setDeleteModal({
           status: false,
-          deletedGroupId: null,
+          selectedItemId: null,
         });
         toast('A server error occurred while deleting activity group', {
           type: 'error',
@@ -114,7 +110,7 @@ const ActivityGroupsPage: FC = () => {
         <Modal
           title="Deleting activity group"
           onCloseModal={() =>
-            setDeleteModal({ status: false, deletedGroupId: null })
+            setDeleteModal({ status: false, selectedItemId: null })
           }
         >
           <p className="mb-4 text-[15px]">

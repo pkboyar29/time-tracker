@@ -1,10 +1,10 @@
 import { FC, useState, useEffect, ReactNode } from 'react';
-import { useForm } from 'react-hook-form';
 import { useAppDispatch } from '../../redux/store';
 import { createSession } from '../../redux/slices/sessionSlice';
 import { saveSessionToLocalStorage } from '../../helpers/localstorageHelpers';
 import { useQuery } from '@tanstack/react-query';
 import { fetchActivities } from '../../api/activityApi';
+import { toast } from 'react-toastify';
 
 import Modal from './Modal';
 import Button from '../Button';
@@ -18,10 +18,6 @@ interface SessionCreateModalProps {
   modalTitle: ReactNode;
   afterSubmitHandler: (session: ISession) => void;
   defaultActivity?: string;
-}
-
-interface SessionFields {
-  activity: string;
 }
 
 const SessionCreateModal: FC<SessionCreateModalProps> = ({
@@ -38,57 +34,45 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
     }
   );
 
-  const [minutes, setMinutes] = useState<number>(25);
+  const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
+  const [selectedActivityId, setSelectedActivityId] = useState<string>(
+    defaultActivity ? defaultActivity : ''
+  );
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { isValid },
-  } = useForm<SessionFields>({
-    defaultValues: {
-      activity: defaultActivity,
-    },
-    mode: 'onBlur',
-  });
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    if (defaultActivity) {
-      reset();
-    }
-  }, [defaultActivity, activitiesToChoose]);
-
-  const onSubmit = async (data: SessionFields) => {
+  const onSubmit = async () => {
     try {
       const payload = await dispatch(
         createSession({
-          totalTimeSeconds: minutes * 60,
+          totalTimeSeconds: selectedMinutes * 60,
           spentTimeSeconds: 0,
-          activity: data.activity !== '' ? data.activity : undefined,
+          activity: selectedActivityId !== '' ? selectedActivityId : undefined,
         })
       ).unwrap();
       saveSessionToLocalStorage(payload.id);
 
       afterSubmitHandler(payload);
     } catch (e) {
-      console.log(e);
+      toast('A server error occurred while creating new session', {
+        type: 'error',
+      });
     }
   };
 
   return (
     <Modal title={modalTitle} onCloseModal={onCloseModal}>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col items-start gap-10"
-      >
+      <form className="flex flex-col items-start gap-10">
         <div className="flex flex-col w-full gap-3">
           <div className="flex gap-1">
-            <div>{minutes} minutes</div>
-            {minutes > 60 && (
+            <div>{selectedMinutes} minutes</div>
+            {selectedMinutes > 60 && (
               <div>
-                ({Math.floor(minutes / 60)} hours
-                {minutes % 60 > 0 && <> {minutes % 60} minutes</>})
+                ({Math.floor(selectedMinutes / 60)} hours
+                {selectedMinutes % 60 > 0 && (
+                  <> {selectedMinutes % 60} minutes</>
+                )}
+                )
               </div>
             )}
           </div>
@@ -96,9 +80,9 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
           <RangeSlider
             minValue={1}
             maxValue={600}
-            currentValue={minutes}
+            currentValue={selectedMinutes}
             changeCurrentValue={(newCurrentValue) =>
-              setMinutes(newCurrentValue)
+              setSelectedMinutes(newCurrentValue)
             }
           />
         </div>
@@ -113,8 +97,11 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
               <div>Activity</div>
 
               <select
+                value={selectedActivityId}
                 className="px-2 py-1 border border-black border-solid rounded-xl"
-                {...register('activity')}
+                onChange={(e) => {
+                  setSelectedActivityId(e.target.value);
+                }}
               >
                 <option value="">Choose activity (optional)</option>
                 {activitiesToChoose.map((activity) => (
@@ -128,9 +115,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
         )}
 
         <div className="flex w-full">
-          <Button type="submit" disabled={!isValid}>
-            Create session
-          </Button>
+          <Button onClick={onSubmit}>Start new session</Button>
         </div>
       </form>
     </Modal>

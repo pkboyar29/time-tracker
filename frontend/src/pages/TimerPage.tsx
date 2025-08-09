@@ -2,40 +2,61 @@ import { FC, useEffect, useState } from 'react';
 import {
   fetchSessions,
   updateSession,
-  updateCurrentSessionNote,
   resetCompletedSessionId,
   resetCurrentSession,
+  createSession,
 } from '../redux/slices/sessionSlice';
-import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { useAppDispatch, useAppSelector } from '../redux/store';
-import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
+import { useQuery } from '@tanstack/react-query';
+import { fetchActivities } from '../api/activityApi';
+import {
+  saveSessionToLocalStorage,
+  removeSessionFromLocalStorage,
+  getSessionIdFromLocalStorage,
+} from '../helpers/localstorageHelpers';
+import {
+  getRemainingTimeHoursMinutesSeconds,
+  getTimeHoursMinutes,
+} from '../helpers/timeHelpers';
 import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 import { useTimer } from '../context/TimerContext';
+import { toast } from 'react-toastify';
 
-import ResumeIcon from '../icons/ResumeIcon';
+import PlayIcon from '../icons/PlayIcon';
 import PauseIcon from '../icons/PauseIcon';
 import StopIcon from '../icons/StopIcon';
 import CustomCircularProgress from '../components/CustomCircularProgress';
 import SessionsList from '../components/SessionsList';
 import Button from '../components/Button';
-import SessionCreateModal from '../components/modals/SessionCreateModal';
+import RangeSlider from '../components/RangeSlider';
+import NotesSection from '../components/NotesSection';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
-  const [createModal, setCreateModal] = useState<boolean>(false);
+  const sessionIdFromLocalStorage = getSessionIdFromLocalStorage();
+
   const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
     []
   );
 
-  const { toggleTimer, stopTimer, enabled } = useTimer();
+  const { data: activitiesToChoose, isLoading: isLoadingActivities } = useQuery(
+    {
+      queryKey: ['activitiesToChoose'],
+      queryFn: () => fetchActivities(),
+      retry: false,
+    }
+  );
 
-  const [note, setNote] = useState<string>('');
-  const [isFocusedNote, setFocusedNote] = useState<boolean>(false);
+  const [selectedSeconds, setSelectedSeconds] = useState<number>(1500);
+  const [selectedActivityId, setSelectedActivityId] = useState<string>('');
+
+  const { toggleTimer, stopTimer, enabled } = useTimer();
 
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
   );
+  // TODO: вспомнить, зачем нужно это состояние (исключительно для заполнения массива uncompletedSessions? подумать как можно обойтись без него)
   const completedSessionId = useAppSelector(
     (state) => state.sessions.completedSessionId
   );
@@ -67,19 +88,6 @@ const TimerPage: FC = () => {
     fetchAllUncompletedSessions();
   }, []);
 
-  // TODO: разобраться с этим пока непонятным на первый взгляд useEffect
-  useEffect(() => {
-    if (currentSession) {
-      if (!isFocusedNote) {
-        if (currentSession.note) {
-          setNote(currentSession.note);
-        } else {
-          setNote('');
-        }
-      }
-    }
-  }, [currentSession]);
-
   useEffect(() => {
     if (completedSessionId) {
       setUncompletedSessions((prevSessions) =>
@@ -90,42 +98,31 @@ const TimerPage: FC = () => {
     }
   }, [completedSessionId]);
 
-  const handleChangeNoteInput = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
+  const onStartSessionClick = async () => {
+    try {
+      const newSession = await dispatch(
+        createSession({
+          totalTimeSeconds: selectedSeconds,
+          spentTimeSeconds: 0,
+          activity: selectedActivityId !== '' ? selectedActivityId : undefined,
+        })
+      ).unwrap();
+      saveSessionToLocalStorage(newSession.id);
+
+      setUncompletedSessions([...uncompletedSessions, newSession]);
+
+      toggleTimer(0);
+    } catch (e) {
+      toast('A server error occurred while starting new session', {
+        type: 'error',
+      });
+    }
+  };
+
+  const onActivitiesSelectChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    setNote(event.target.value);
-  };
-
-  const handleFocusNoteInput = () => {
-    setFocusedNote(true);
-  };
-
-  const handleBlurNoteInput = () => {
-    setFocusedNote(false);
-
-    if (currentSession) {
-      if (currentSession.note !== note) {
-        dispatch(updateCurrentSessionNote(note));
-
-        dispatch(
-          updateSession({
-            ...currentSession,
-            note,
-          })
-        );
-      }
-    }
-  };
-
-  const handleAfterSubmitCreateSession = (session: ISession) => {
-    if (currentSession) {
-      dispatch(updateSession(currentSession));
-    }
-
-    setUncompletedSessions([...uncompletedSessions, session]);
-
-    toggleTimer(0);
-    setCreateModal(false);
+    setSelectedActivityId(e.target.value);
   };
 
   const handleToggleButtonClick = () => {
@@ -148,6 +145,7 @@ const TimerPage: FC = () => {
       setUncompletedSessions(
         getSessionsListAfterSessionUpdate(uncompletedSessions, currentSession)
       );
+      // TODO: если сессию не удалось обновить?
       dispatch(updateSession(currentSession));
     }
 
@@ -156,103 +154,143 @@ const TimerPage: FC = () => {
   };
 
   return (
-    <>
-      {createModal && (
-        <SessionCreateModal
-          modalTitle="Creating new session"
-          afterSubmitHandler={handleAfterSubmitCreateSession}
-          onCloseModal={() => setCreateModal(false)}
-        />
-      )}
-
-      <div className="h-full bg-white">
-        <div className="container flex justify-between h-full py-5">
-          <div>
-            {!currentSession ? (
-              <div className="text-2xl font-semibold">
-                Choose existing session or create a new one
+    <div className="h-full bg-white">
+      <div className="container flex items-stretch justify-between h-full gap-10 py-5">
+        {sessionIdFromLocalStorage && !currentSession ? null : (
+          <div className="sticky top-0 flex text-lg gap-28">
+            {/* Left part of timer */}
+            <div className="flex flex-col items-center flex-1 gap-2">
+              <div>
+                Session{' '}
+                {getTimeHoursMinutes(
+                  currentSession
+                    ? currentSession.totalTimeSeconds
+                    : selectedSeconds,
+                  false
+                )}
               </div>
-            ) : (
-              <div className="flex text-lg gap-28">
-                <div className="flex flex-col items-center gap-2">
-                  <div>
-                    Session {Math.round(currentSession.totalTimeSeconds / 60)}{' '}
-                    minutes
-                  </div>
 
-                  <CustomCircularProgress
-                    valuePercent={
-                      (currentSession.spentTimeSeconds /
-                        currentSession.totalTimeSeconds) *
-                      100
-                    }
-                    label={`Left ${getRemainingTimeHoursMinutesSeconds(
-                      currentSession.totalTimeSeconds,
-                      currentSession.spentTimeSeconds
-                    )}`}
-                    size="big"
-                  />
+              {currentSession ? (
+                <CustomCircularProgress
+                  valuePercent={
+                    (currentSession.spentTimeSeconds /
+                      currentSession.totalTimeSeconds) *
+                    100
+                  }
+                  label={`${getRemainingTimeHoursMinutesSeconds(
+                    currentSession.totalTimeSeconds,
+                    currentSession.spentTimeSeconds
+                  )}`}
+                  size="verybig"
+                />
+              ) : (
+                <CustomCircularProgress
+                  valuePercent={0}
+                  label={`${getRemainingTimeHoursMinutesSeconds(
+                    selectedSeconds,
+                    0
+                  )}`}
+                  size="verybig"
+                />
+              )}
 
-                  <div className="flex gap-4">
-                    <button onClick={handleToggleButtonClick}>
-                      {enabled ? <PauseIcon /> : <ResumeIcon />}
+              {currentSession ? (
+                <>
+                  <div className="flex mt-2 gap-7">
+                    <button
+                      className="bg-[#F1F1F1] hover:bg-[#B5B5B5] transition duration-300 rounded-full p-1.5 flex"
+                      onClick={handleToggleButtonClick}
+                    >
+                      {enabled ? <PauseIcon /> : <PlayIcon />}
                     </button>
 
-                    <button onClick={handleStopButtonClick}>
+                    <button
+                      className="bg-[#F1F1F1] hover:bg-[#B5B5B5] transition duration-300 rounded-full p-1.5"
+                      onClick={handleStopButtonClick}
+                    >
                       <StopIcon />
                     </button>
                   </div>
-                  {!enabled && <div>Paused</div>}
-                </div>
-                <div className="flex flex-col gap-4">
-                  {currentSession.activity ? (
-                    <>
-                      <div>
-                        <span className="font-semibold">Activity group: </span>{' '}
-                        {currentSession.activity.activityGroupName}
-                      </div>
-                      <div>
-                        <span className="font-semibold">Activity: </span>
-                        {currentSession.activity.name}
-                      </div>
-                    </>
-                  ) : (
-                    <>Without activity</>
-                  )}
 
-                  <div className="text-xl font-bold">Notes</div>
-                  <textarea
-                    placeholder="Enter your thoughts during this session..."
-                    value={note}
-                    onChange={handleChangeNoteInput}
-                    onFocus={handleFocusNoteInput}
-                    onBlur={handleBlurNoteInput}
-                    className={
-                      'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-red-500 '
-                    }
-                  />
+                  {!enabled && <div>Paused</div>}
+                </>
+              ) : (
+                <div className="mt-2">
+                  <Button onClick={onStartSessionClick} className="py-2">
+                    Start new session
+                  </Button>
                 </div>
-              </div>
-            )}
-          </div>
-          <div className="flex flex-col items-end">
-            <div>
-              <Button onClick={() => setCreateModal(true)}>
-                Create new session
-              </Button>
+              )}
             </div>
 
-            {uncompletedSessions.length > 0 && (
-              <SessionsList
-                title="Uncompleted sessions"
-                sessions={uncompletedSessions}
-                updateSessionsListHandler={setUncompletedSessions}
-              />
-            )}
+            {/* Right part of timer */}
+            <div className="flex flex-col p-6 rounded-lg shadow-md w-96 bg-[#F1F1F1]">
+              <div className="flex flex-col flex-grow gap-6 overflow-auto">
+                <div>
+                  <span className="block mb-2 text-lg font-semibold">
+                    Activity
+                  </span>
+                  {!currentSession ? (
+                    <select
+                      onChange={onActivitiesSelectChange}
+                      className="w-full px-3 py-2 transition border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                    >
+                      <option value="">Choose activity (optional)</option>
+                      {activitiesToChoose?.map((activity) => (
+                        <option key={activity.id} value={activity.id}>
+                          {activity.activityGroup.name} / {activity.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : currentSession.activity ? (
+                    <div className="text-base">
+                      {currentSession.activity.name}
+                    </div>
+                  ) : (
+                    <div className="text-base italic text-gray-500">
+                      Without activity
+                    </div>
+                  )}
+                </div>
+
+                {!currentSession && (
+                  <div>
+                    <span className="block mb-2 text-lg font-semibold">
+                      Session duration (minutes)
+                    </span>
+                    <RangeSlider
+                      minValue={1}
+                      maxValue={600}
+                      currentValue={selectedSeconds / 60}
+                      changeCurrentValue={(newCurrentValue) =>
+                        setSelectedSeconds(newCurrentValue * 60)
+                      }
+                    />
+                  </div>
+                )}
+
+                {currentSession && (
+                  <div className="flex flex-col flex-grow">
+                    <div className="mb-2 text-xl font-bold">Notes</div>
+                    <NotesSection />
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+        )}
+
+        <div className="ml-auto overflow-auto">
+          {uncompletedSessions.length > 0 && (
+            <SessionsList
+              title="Uncompleted sessions"
+              sessions={uncompletedSessions}
+              updateSessionsListHandler={setUncompletedSessions}
+            />
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

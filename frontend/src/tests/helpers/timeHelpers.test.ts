@@ -8,32 +8,32 @@ import {
 describe('getRemainingTimeHoursMinutesSeconds', () => {
   it('returns full format when hours, minutes and seconds are present', () => {
     const result = getRemainingTimeHoursMinutesSeconds(7205, 5); // 2h 0m 0s
-    expect(result).toBe('2:00:00');
+    expect(result).toBe('02:00:00');
   });
 
   it('returns format with minutes and seconds when no hours', () => {
     const result = getRemainingTimeHoursMinutesSeconds(300, 60); // 4m 0s
-    expect(result).toBe('04:00');
+    expect(result).toBe('00:04:00');
   });
 
   it('returns format with only seconds', () => {
     const result = getRemainingTimeHoursMinutesSeconds(10, 5); // 0m 5s
-    expect(result).toBe('00:05');
+    expect(result).toBe('00:00:05');
   });
 
   it('formats minutes and seconds with leading zeros', () => {
     const result = getRemainingTimeHoursMinutesSeconds(3665, 3600); // 1m 5s
-    expect(result).toBe('01:05');
+    expect(result).toBe('00:01:05');
   });
 
   it('omits hours if zero', () => {
     const result = getRemainingTimeHoursMinutesSeconds(3599, 0); // 59m 59s
-    expect(result).toBe('59:59');
+    expect(result).toBe('00:59:59');
   });
 
   it('returns "00:00" when no time remains', () => {
     const result = getRemainingTimeHoursMinutesSeconds(100, 100);
-    expect(result).toBe('00:00');
+    expect(result).toBe('00:00:00');
   });
 
   it('handles negative remaining time by showing 00:00', () => {

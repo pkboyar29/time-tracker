@@ -91,7 +91,13 @@ router.put('/:id', async (req: Request, res: Response) => {
     res.status(200).json(data);
   } catch (e) {
     if (e instanceof Error) {
-      if (e.message === 'Session Not Found') {
+      if (
+        e.message ===
+          'Note is too long. Maximum allowed length is 1600 characters' ||
+        e.message === 'Total time must be greater or equal spent time'
+      ) {
+        res.status(400).send(e.message);
+      } else if (e.message === 'Session Not Found') {
         res.status(404).send(e.message);
       } else {
         res.status(500).send(e.message);

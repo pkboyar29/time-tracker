@@ -5,7 +5,7 @@ import ProtectedRoute from './router/ProtectedRoute';
 import { useAppDispatch } from './redux/store';
 import { loadCurrentSession } from './redux/slices/sessionSlice';
 import { fetchProfileInfo } from './redux/slices/userSlice';
-import { getSessionFromLocalStorage } from './helpers/localstorageHelpers';
+import { getSessionIdFromLocalStorage } from './helpers/localstorageHelpers';
 
 import { ToastContainer } from 'react-toastify';
 import Sidebar from './components/Sidebar';
@@ -24,7 +24,7 @@ const App: FC = () => {
   }, []);
 
   useEffect(() => {
-    const currentSessionId = getSessionFromLocalStorage();
+    const currentSessionId = getSessionIdFromLocalStorage();
     if (requiredAuth && currentSessionId) {
       dispatch(loadCurrentSession(currentSessionId));
     }

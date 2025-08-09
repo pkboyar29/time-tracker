@@ -27,7 +27,7 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
           <CustomCircularProgress
             valuePercent={dailyGoalPercent}
             label={`Daily goal: ${getTimeHoursMinutes(dailyGoalSeconds, true)}`}
-            size="verybig"
+            size="big"
           />
 
           <div className="text-xl text-center">
