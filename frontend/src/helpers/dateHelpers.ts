@@ -239,10 +239,12 @@ export const getDayRange = (date: Date): [Date, Date] => {
 export const getWeekRange = (date: Date): [Date, Date] => {
   const mondayDate = new Date(date);
 
+  // in case of sunday we are shifting the day to saturday (6)
   if (mondayDate.getDay() == 0) {
-    // TODO: то есть у нас воскресенье, а таким увеличением даты мы переходим на следующую неделю?
-    mondayDate.setDate(mondayDate.getDate() + 1);
-  } else if (mondayDate.getDay() > 1) {
+    mondayDate.setDate(mondayDate.getDate() - 1);
+  }
+
+  if (mondayDate.getDay() > 1) {
     while (mondayDate.getDay() != 1) {
       mondayDate.setDate(mondayDate.getDate() - 1);
     }

@@ -282,13 +282,12 @@ describe('getWeekRange', () => {
     expect(monday <= date && date <= sunday).toBe(true);
   });
 
-  // TODO: моя функция реально так странно работает?
-  it('should handle Sunday by shifting Monday to next day', () => {
+  it('should handle Sunday properly', () => {
     const sundayDate = new Date('2025-08-10T10:00:00'); // Sunday
     const [monday, sunday] = getWeekRange(sundayDate);
 
-    expect(monday.getDay()).toBe(1); // Monday is next day (11th Aug)
-    expect(monday.getDate()).toBe(sundayDate.getDate() + 1);
+    expect(monday.getDay()).toBe(1); // Monday
+    expect(monday.getDate()).toBe(4); // 4th Aug
 
     expect(sunday.getDay()).toBe(0);
     expect(sunday.getDate()).toBe(monday.getDate() + 6);
