@@ -1,0 +1,36 @@
+stages:
+  - install
+  - test
+  - build
+  - deploy
+
+# Install
+backend_install:
+  stage: install
+  script:
+    - echo "backend installing..."
+
+
+# TODO: проверить работоспособность
+frontend_install:
+  stage: install
+  script:
+    - cd frontend
+    - ls
+    - echo "installing frontend deps..."
+    - npm ci
+    # - echo "frontend deps installed"
+
+frontend_test:
+  stage: test
+  script:
+    - echo "frontend testing..."
+    - cd frontend
+    - npm run test
+    - echo "frontend tested"
+
+# Test
+
+# Build
+
+# Deploy
