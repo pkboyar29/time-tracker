@@ -41,13 +41,13 @@ describe('getWeekDays', () => {
   });
 
   it('should return correct week when date is a Sunday', () => {
-    const input = new Date('2023-08-13'); // Sunday
+    const input = new Date('2025-08-17'); // Sunday
     const result = getWeekDays(input);
 
     expect(result).toHaveLength(7);
     expect(result[0].getDay()).toBe(1); // Monday
     expect(result[0].toDateString()).toBe(
-      new Date('2023-08-14').toDateString()
+      new Date('2025-08-11').toDateString()
     );
     expect(result[6].getDay()).toBe(0); // Sunday
   });

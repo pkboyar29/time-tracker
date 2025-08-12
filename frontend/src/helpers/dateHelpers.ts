@@ -1,14 +1,11 @@
 export const getWeekDays = (date: Date): Date[] => {
-  const initialDayOfWeek: number = date.getDay();
-
   // find start of week in date format (start of week - 1 index - monday)
   let startOfWeekDate: Date = new Date(date);
   if (startOfWeekDate.getDay() == 0) {
-    startOfWeekDate.setDate(startOfWeekDate.getDate() + 1);
-  } else {
-    for (let i = initialDayOfWeek; i > 1; i--) {
-      startOfWeekDate.setDate(startOfWeekDate.getDate() - 1);
-    }
+    startOfWeekDate.setDate(startOfWeekDate.getDate() - 1);
+  }
+  while (startOfWeekDate.getDay() != 1) {
+    startOfWeekDate.setDate(startOfWeekDate.getDate() - 1);
   }
 
   // generate array of 7 dates starting from monday
@@ -244,10 +241,8 @@ export const getWeekRange = (date: Date): [Date, Date] => {
     mondayDate.setDate(mondayDate.getDate() - 1);
   }
 
-  if (mondayDate.getDay() > 1) {
-    while (mondayDate.getDay() != 1) {
-      mondayDate.setDate(mondayDate.getDate() - 1);
-    }
+  while (mondayDate.getDay() != 1) {
+    mondayDate.setDate(mondayDate.getDate() - 1);
   }
   mondayDate.setHours(0);
   mondayDate.setMinutes(0);
