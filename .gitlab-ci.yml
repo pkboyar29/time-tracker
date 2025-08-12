@@ -1,3 +1,5 @@
+image: node:18
+
 stages:
   - install
   - test
@@ -5,13 +7,13 @@ stages:
   - deploy
 
 # Install
+# TODO: пропустить? так как и так будет команда build
 backend_install:
   stage: install
   script:
     - echo "backend installing..."
 
 
-# TODO: проверить работоспособность
 frontend_install:
   stage: install
   script:
@@ -19,6 +21,15 @@ frontend_install:
     - echo "installing frontend deps..."
     - npm ci
     - echo "frontend deps installed"
+
+# Test
+backend_test:
+  stage: test
+  script:
+    - echo "backend testing"
+    - cd backend
+    - npm run test
+    - echo "backend tested"
 
 frontend_test:
   stage: test
@@ -28,8 +39,13 @@ frontend_test:
     - npm run test
     - echo "frontend tested"
 
-# Test
-
 # Build
+frontend_build:
+  stage: build
+  script:
+    - echo "frontend building"
+    - cd frontend
+    - npm run build
+    - echo "frontend builded"
 
 # Deploy
