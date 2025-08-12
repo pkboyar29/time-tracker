@@ -16,10 +16,9 @@ frontend_install:
   stage: install
   script:
     - cd frontend
-    - ls
     - echo "installing frontend deps..."
     - npm ci
-    # - echo "frontend deps installed"
+    - echo "frontend deps installed"
 
 frontend_test:
   stage: test
