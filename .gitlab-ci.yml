@@ -19,6 +19,9 @@ frontend_test:
     - cd frontend
     - npm ci 
     - npm run test
+  artifacts:
+    paths:
+      - frontend/node_modules
 
 # Build
 frontend_build:
@@ -27,11 +30,22 @@ frontend_build:
     - echo "frontend building"
     - echo $VITE_BACKEND_URL
     - cd frontend
-    - npm ci
+    - ls
     - npm run build
     - echo "frontend built"
+  artifacts:
+    paths:
+      - frontend/dist
 
-# TODO: установить в артефакт сбилженный фронт, чтобы в job деплоя его использовать (убедиться сначала с помощью команды ls)
 
 # TODO: задеплоить фронтенд
 # Deploy
+frontend_deploy:
+  stage: deploy
+  script:
+    - echo "frontend deploying"
+    - cd frontend
+    - ls
+    - echo "frontend deployed"
+
+# TODO: установить в артефакт сбилженный фронт, чтобы в job деплоя его использовать (убедиться сначала с помощью команды ls)
