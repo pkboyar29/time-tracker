@@ -38,14 +38,11 @@ frontend_build:
       - frontend/dist
 
 
-# TODO: задеплоить фронтенд
+# TODO: настроить ssh ключ
 # Deploy
 frontend_deploy:
   stage: deploy
   script:
     - echo "frontend deploying"
-    - cd frontend
-    - ls
+    - rsync -avz frontend/dist/ root@185.23.34.22:/etc/nginx/sites-available/185.23.34.22/
     - echo "frontend deployed"
-
-# TODO: установить в артефакт сбилженный фронт, чтобы в job деплоя его использовать (убедиться сначала с помощью команды ls)
