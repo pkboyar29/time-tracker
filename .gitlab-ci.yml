@@ -1,26 +1,10 @@
 image: node:18
 
 stages:
-  - install
+  - install # TODO: delete
   - test
   - build
   - deploy
-
-# Install
-# TODO: пропустить? так как и так будет команда build
-backend_install:
-  stage: install
-  script:
-    - echo "backend installing..."
-
-
-frontend_install:
-  stage: install
-  script:
-    - cd frontend
-    - echo "installing frontend deps..."
-    - npm ci
-    - echo "frontend deps installed"
 
 # Test
 backend_test:
@@ -28,6 +12,7 @@ backend_test:
   script:
     - echo "backend testing"
     - cd backend
+    - npm ci
     - npm run test
     - echo "backend tested"
 
@@ -36,16 +21,21 @@ frontend_test:
   script:
     - echo "frontend testing..."
     - cd frontend
+    - npm ci 
     - npm run test
     - echo "frontend tested"
 
 # Build
+# TODO: установить .env переменные?
 frontend_build:
   stage: build
   script:
     - echo "frontend building"
     - cd frontend
+    - npm ci
     - npm run build
-    - echo "frontend builded"
+    - cd dist
+    - ls
+    - echo "frontend built"
 
 # Deploy
