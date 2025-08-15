@@ -42,5 +42,6 @@ frontend_deploy:
     - apk add --no-cache rsync openssh
   script:
     - echo "frontend deploying"
+    - echo $SSH_PRIVATE_KEY
     - rsync -avz frontend/dist/ root@185.23.34.22:/etc/nginx/sites-available/185.23.34.22/
     - echo "frontend deployed"
