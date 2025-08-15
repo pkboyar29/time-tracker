@@ -38,7 +38,6 @@ frontend_build:
       - frontend/dist
 
 
-# TODO: настроить ssh ключ
 # Deploy
 frontend_deploy:
   stage: deploy
