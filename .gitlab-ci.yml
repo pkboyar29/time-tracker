@@ -27,12 +27,8 @@ frontend_test:
 frontend_build:
   stage: build
   script:
-    - echo "frontend building"
-    - echo $VITE_BACKEND_URL
     - cd frontend
-    - ls
     - npm run build
-    - echo "frontend built"
   artifacts:
     paths:
       - frontend/dist
@@ -40,7 +36,10 @@ frontend_build:
 
 # Deploy
 frontend_deploy:
+  image: alpine:3.21
   stage: deploy
+  before_script:
+    - apk add --no-cache rsync openssh
   script:
     - echo "frontend deploying"
     - rsync -avz frontend/dist/ root@185.23.34.22:/etc/nginx/sites-available/185.23.34.22/
