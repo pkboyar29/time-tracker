@@ -35,7 +35,7 @@ frontend_build:
 
 
 # Deploy
-# TODO: надо создавать в директории файл с ключом, разве нет?
+# TODO: надо создавать в директории файл с ключом, разве нет? Тут надо именно погуглить, как команду rsync использовать с ssh ключами правильно
 frontend_deploy:
   image: alpine:3.21
   stage: deploy
@@ -43,6 +43,8 @@ frontend_deploy:
     - apk add --no-cache rsync openssh
   script:
     - echo "frontend deploying"
+    # FOCUS: проверка сначала на обычном подключении к серверу по ssh
+    - ssh root@185.23.34.22 "ls"
     # - echo $SSH_PRIVATE_KEY
-    - rsync -avz frontend/dist/ root@185.23.34.22:/etc/nginx/sites-available/185.23.34.22/
+    # - rsync -avz frontend/dist/ root@185.23.34.22:/etc/nginx/sites-available/185.23.34.22/
     - echo "frontend deployed"
