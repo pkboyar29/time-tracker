@@ -1,11 +1,8 @@
 import { FC, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../redux/store';
-import { useTimer } from '../context/TimerContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchActivityGroup } from '../api/activityGroupApi';
 import { fetchActivities, deleteActivity } from '../api/activityApi';
-import { updateSession } from '../redux/slices/sessionSlice';
 import { toast } from 'react-toastify';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -14,26 +11,16 @@ import ActivityCommonUpdateForm from '../components/forms/ActivityCommonUpdateFo
 import ActivityItem from '../components/ActivityItem';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
-import SessionCreateModal from '../components/modals/SessionCreateModal';
 import { ClipLoader } from 'react-spinners';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
-
-interface ModalState {
-  status: boolean;
-  selectedItemId: string | null;
-}
+import { ModalState } from '../ts/interfaces/ModalState';
 
 const ActivityGroupPage: FC = () => {
   const queryClient = useQueryClient();
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const { activityGroupId } = useParams();
-
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
 
   const {
     data: currentActivityGroup,
@@ -61,13 +48,7 @@ const ActivityGroupPage: FC = () => {
     status: false,
     selectedItemId: null,
   });
-  const [createSessionModal, setCreateSessionModal] = useState<ModalState>({
-    status: false,
-    selectedItemId: null,
-  });
   const [searchString, setSearchString] = useState<string>('');
-
-  const { toggleTimer } = useTimer();
 
   useEffect(() => {
     if (isErrorGroup) {
@@ -153,40 +134,6 @@ const ActivityGroupPage: FC = () => {
             Delete activity
           </Button>
         </Modal>
-      )}
-
-      {createSessionModal.status && (
-        <SessionCreateModal
-          modalTitle={
-            <div>
-              <span className="font-bold">
-                {
-                  activities?.find(
-                    (activity) =>
-                      activity.id === createSessionModal.selectedItemId
-                  )?.name
-                }
-              </span>
-              : starting new session
-            </div>
-          }
-          onCloseModal={() => {
-            setCreateSessionModal({ status: false, selectedItemId: null });
-          }}
-          defaultActivity={
-            createSessionModal.selectedItemId
-              ? createSessionModal.selectedItemId
-              : undefined
-          }
-          afterSubmitHandler={() => {
-            if (currentSession) {
-              dispatch(updateSession(currentSession));
-            }
-
-            toggleTimer(0);
-            navigate('/timer');
-          }}
-        />
       )}
 
       {isLoading ? (
@@ -276,12 +223,6 @@ const ActivityGroupPage: FC = () => {
                         setDeleteModal({
                           status: true,
                           selectedItemId: activityId,
-                        })
-                      }
-                      startSessionHandler={() =>
-                        setCreateSessionModal({
-                          status: true,
-                          selectedItemId: activity.id,
                         })
                       }
                     />

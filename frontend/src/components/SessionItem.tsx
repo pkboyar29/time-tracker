@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { getTimeHoursMinutes } from '../helpers/timeHelpers';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -34,7 +35,11 @@ const SessionItem: FC<SessionItemProps> = ({
           <div className="flex flex-col gap-3 ml-auto">
             <div className="flex flex-col gap-2">
               <div className="text-lg font-bold">Durability</div>
-              <div>{session.totalTimeSeconds / 60} min</div>
+              <div>
+                {session.totalTimeSeconds >= 3600
+                  ? getTimeHoursMinutes(session.totalTimeSeconds, true)
+                  : getTimeHoursMinutes(session.totalTimeSeconds, false)}
+              </div>
             </div>
             <div className="flex flex-col gap-2">
               <div className="text-lg font-bold">Activity</div>
@@ -74,7 +79,11 @@ const SessionItem: FC<SessionItemProps> = ({
             valuePercent={
               (session.spentTimeSeconds / session.totalTimeSeconds) * 100
             }
-            label={`${Math.round(session.spentTimeSeconds / 60)} min`}
+            label={
+              session.spentTimeSeconds >= 3600
+                ? getTimeHoursMinutes(session.spentTimeSeconds, true)
+                : `${Math.round(session.spentTimeSeconds / 60)} min`
+            }
           />
         </div>
       </div>

@@ -77,8 +77,7 @@ export default {
     };
 
     token = jsonwebtoken.sign(payload, secretKey, {
-      // поменять access на 300s
-      expiresIn: tokenType === 'access' ? '5d' : '5d',
+      expiresIn: tokenType === 'access' ? '800s' : '20d',
     });
     return token;
   },

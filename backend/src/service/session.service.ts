@@ -134,6 +134,12 @@ export default {
         throw new Error('Session Not Found');
       }
 
+      if (sessionDTO.note && sessionDTO.note.length > 1600) {
+        throw new Error(
+          'Note is too long. Maximum allowed length is 1600 characters'
+        );
+      }
+
       if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
         throw new Error('Total time must be greater or equal spent time');
       }

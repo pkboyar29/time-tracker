@@ -13,7 +13,6 @@ export const signIn = async (
 export const signUp = async (
   payload: ISignUp
 ): Promise<{ access: string; refresh: string }> => {
-  // TODO: если же вместо 401 будет возвращаться 404 ошибка, то все сломается
   const { data } = await axios.post('/users/sign-up', payload);
 
   return data;

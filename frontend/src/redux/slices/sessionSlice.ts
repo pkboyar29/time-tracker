@@ -85,7 +85,7 @@ const sessionSlice = createSlice({
         state.currentSession.spentTimeSeconds = action.payload;
       }
     },
-    updateCurrentSessionNote(state, action: PayloadAction<string>) {
+    changeNote(state, action: PayloadAction<string>) {
       if (state.currentSession) {
         state.currentSession.note = action.payload;
       }
@@ -115,7 +115,7 @@ export const {
   setCurrentSession,
   resetCurrentSession,
   changeSpentSeconds,
-  updateCurrentSessionNote,
+  changeNote,
   setCompletedSessionId,
   resetCompletedSessionId,
   reset: resetSessionState,

@@ -1,52 +1,67 @@
-import { CircularProgress, Box, Typography } from '@mui/material';
-import { FC } from 'react';
+import { FC, useMemo } from 'react';
+
+import { CircularProgress, Box } from '@mui/material';
+
+type CircularSize = 'small' | 'big' | 'verybig';
 
 interface CustomCircularProgressProps {
-  valuePercent: number; // from 0 to 100 percent
+  valuePercent: number; // from 0 to 100
   label: string;
-  size?: 'small' | 'big' | 'verybig';
+  size?: CircularSize;
 }
+
+const getSize = (size: CircularSize) => {
+  switch (size) {
+    case 'verybig':
+      return 240;
+    case 'big':
+      return 200;
+    default:
+      return 60;
+  }
+};
 
 const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
   valuePercent: value,
   label,
   size = 'small',
 }) => {
-  const getSize = () => {
-    switch (size) {
-      case 'verybig':
-        return 200;
-      case 'big':
-        return 140;
-      default:
-        return 60;
-    }
-  };
-
-  const circleSize = getSize();
+  const circleSize = useMemo(() => getSize(size), [size]);
+  const circleThinkness = useMemo(
+    () => (size === 'big' ? 4 : size == 'verybig' ? 2.5 : 2),
+    [size]
+  );
+  const labelClassnames = useMemo(
+    () =>
+      size === 'big'
+        ? 'text-[18px] font-medium'
+        : size == 'verybig'
+        ? 'text-[24px] font-medium'
+        : 'text-[14px]',
+    [size]
+  );
 
   return (
     <Box sx={{ position: 'relative', width: circleSize, height: circleSize }}>
       <CircularProgress
         variant="determinate"
         sx={{
-          color: (theme) =>
-            theme.palette.grey[theme.palette.mode === 'light' ? 200 : 800],
+          // 800 если темный
+          color: (theme) => theme.palette.grey[200],
         }}
         size={circleSize}
-        thickness={size === 'big' || size === 'verybig' ? 4 : 2}
+        thickness={circleThinkness}
         value={100}
       />
 
       <CircularProgress
         sx={{
-          color: (theme) =>
-            theme.palette.mode === 'light' ? '#ef4444' : '#ef4444',
+          color: () => '#ef4444',
           position: 'absolute',
           left: 0,
         }}
         size={circleSize}
-        thickness={size === 'big' || size === 'verybig' ? 4 : 2}
+        thickness={circleThinkness}
         variant="determinate"
         value={value}
       />
@@ -65,12 +80,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
           height: '100%',
         }}
       >
-        <Typography
-          variant={size === 'big' || size === 'verybig' ? 'h6' : 'inherit'}
-          component="div"
-        >
-          {label}
-        </Typography>
+        <div className={labelClassnames}>{label}</div>
       </Box>
     </Box>
   );

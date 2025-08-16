@@ -45,7 +45,7 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
     <div
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
-      className="fixed top-0 left-0 z-50 flex items-center justify-center w-full h-full bg-gray-rgba"
+      className="fixed top-0 left-0 z-[100000] flex items-center justify-center w-full h-full bg-gray-rgba"
     >
       <div
         ref={modalRef}
@@ -53,6 +53,7 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
       >
         <div className="flex items-center justify-between mb-5">
           <div className="text-lg">{title}</div>
+
           <button
             className="p-1.5 hover:bg-[#F1F1F1] transition duration-300 rounded-full"
             onClick={onCloseModal}
@@ -60,6 +61,7 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
             <CrossIcon />
           </button>
         </div>
+
         {children}
       </div>
     </div>

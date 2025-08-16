@@ -16,16 +16,12 @@ import Button from '../components/Button';
 import Modal from './modals/Modal';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
+import { ModalState } from '../ts/interfaces/ModalState';
 
 interface SessionsListProps {
   title: string;
   sessions: ISession[];
   updateSessionsListHandler: (updatedSessions: ISession[]) => void;
-}
-
-interface DeleteModalState {
-  status: boolean;
-  deletedItemId: string | null;
 }
 
 const SessionsList: FC<SessionsListProps> = ({
@@ -44,9 +40,9 @@ const SessionsList: FC<SessionsListProps> = ({
     (session) => session.id !== currentSession?.id
   );
 
-  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
+  const [deleteModal, setDeleteModal] = useState<ModalState>({
     status: false,
-    deletedItemId: null,
+    selectedItemId: null,
   });
 
   const [less, setLess] = useState<boolean>(false); // less - true, more - false
@@ -87,14 +83,14 @@ const SessionsList: FC<SessionsListProps> = ({
 
     setDeleteModal({
       status: false,
-      deletedItemId: null,
+      selectedItemId: null,
     });
   };
 
   const handleSessionDeleteClick = (sessionId: string) => {
     setDeleteModal({
       status: true,
-      deletedItemId: sessionId,
+      selectedItemId: sessionId,
     });
   };
 
@@ -106,7 +102,7 @@ const SessionsList: FC<SessionsListProps> = ({
           onCloseModal={() =>
             setDeleteModal({
               status: false,
-              deletedItemId: null,
+              selectedItemId: null,
             })
           }
         >
@@ -115,8 +111,8 @@ const SessionsList: FC<SessionsListProps> = ({
           </p>
           <Button
             onClick={() =>
-              deleteModal.deletedItemId &&
-              handleSessionDelete(deleteModal.deletedItemId)
+              deleteModal.selectedItemId &&
+              handleSessionDelete(deleteModal.selectedItemId)
             }
           >
             Delete session
@@ -125,10 +121,10 @@ const SessionsList: FC<SessionsListProps> = ({
       )}
 
       {filteredSessions.length !== 0 && (
-        <>
+        <div className="flex flex-col items-end">
           <button
             onClick={() => setLess(!less)}
-            className="flex items-center gap-1 my-5 text-xl font-bold"
+            className="sticky top-0 flex items-center justify-end gap-1 my-5 text-xl font-bold bg-white z-[5000] w-full"
           >
             {title}
             {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}
@@ -148,7 +144,7 @@ const SessionsList: FC<SessionsListProps> = ({
               ))}
             </div>
           )}
-        </>
+        </div>
       )}
     </>
   );

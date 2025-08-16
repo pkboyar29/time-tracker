@@ -8,7 +8,7 @@ const removeSessionFromLocalStorage = () => {
   }
 };
 
-const getSessionFromLocalStorage = (): string | null => {
+const getSessionIdFromLocalStorage = (): string | null => {
   const sessionId = window.localStorage.getItem('session');
   if (sessionId) {
     return sessionId;
@@ -19,5 +19,5 @@ const getSessionFromLocalStorage = (): string | null => {
 export {
   saveSessionToLocalStorage,
   removeSessionFromLocalStorage,
-  getSessionFromLocalStorage,
+  getSessionIdFromLocalStorage,
 };
