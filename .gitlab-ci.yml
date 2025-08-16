@@ -48,8 +48,5 @@ frontend_deploy:
     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
     # - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
   script:
-    - echo "frontend deploying"
-    # FOCUS: проверка сначала на обычном подключении к серверу по ssh
-    - ssh root@185.23.34.22 "ls"
-    # - rsync -avz frontend/dist/ root@185.23.34.22:/etc/nginx/sites-available/185.23.34.22/
-    - echo "frontend deployed"
+    # - ssh root@185.23.34.22 "ls"
+    - rsync -avz frontend/dist/ root@185.23.34.22:/etc/nginx/sites-available/185.23.34.22/
