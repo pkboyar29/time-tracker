@@ -35,7 +35,6 @@ frontend_build:
 
 
 # Deploy
-# TODO: надо создавать в директории файл с ключом, разве нет? Тут надо именно погуглить, как команду rsync использовать с ssh ключами правильно
 frontend_deploy:
   image: alpine:3.21
   stage: deploy
@@ -45,7 +44,9 @@ frontend_deploy:
     - echo "$SSH_PRIVATE_KEY"
     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
     - chmod 600 ~/.ssh/id_ed25519
-    # - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts # TODO: можно добавить
+    - echo "HOST *" > ~/.ssh/config
+    - echo "StrictHostKeyChecking no" >> ~/.ssh/config
+    # - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
   script:
     - echo "frontend deploying"
     # FOCUS: проверка сначала на обычном подключении к серверу по ssh
