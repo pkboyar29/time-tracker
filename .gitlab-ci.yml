@@ -48,5 +48,5 @@ frontend_deploy:
     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
     # - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
   script:
-    # - ssh root@185.23.34.22 "ls"
-    - rsync -avz frontend/dist/ root@185.23.34.22:/etc/nginx/sites-available/185.23.34.22/
+    # - ssh root@185.23.34.22 "ls /var/www/185.23.34.22/"
+    - rsync -avz frontend/dist/ root@185.23.34.22:/var/www/185.23.34.22/
