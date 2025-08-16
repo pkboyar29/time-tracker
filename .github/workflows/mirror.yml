@@ -15,6 +15,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          echo ${GITLAB_TOKEN}
 
           git remote add gitlab https://oauth2:${GITLAB_TOKEN}@gitlab.com/pkboyar/time-tracker.git
 
