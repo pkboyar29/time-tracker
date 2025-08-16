@@ -43,8 +43,9 @@ frontend_deploy:
     - apk add --no-cache rsync openssh
     - mkdir -p ~/.ssh
     - echo "$SSH_PRIVATE_KEY"
-    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/gitlab-ci
-    - chmod 600 ~/.ssh/gitlab-ci
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    # - echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts # TODO: можно добавить
   script:
     - echo "frontend deploying"
     # FOCUS: проверка сначала на обычном подключении к серверу по ssh
