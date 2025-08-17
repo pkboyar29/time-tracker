@@ -208,7 +208,7 @@ const ActivityGroupPage: FC = () => {
                       key={activity.id}
                       activityCommon={activity}
                       editHandler={() => console.log('edit handler')}
-                      afterBlurHandler={(updatedActivity) => {
+                      afterUpdateHandler={(updatedActivity) => {
                         queryClient.setQueryData(
                           ['activities', activityGroupId],
                           (oldData: IActivity[]) =>

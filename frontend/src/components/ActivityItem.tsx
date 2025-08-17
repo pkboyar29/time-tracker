@@ -23,14 +23,14 @@ interface ActivityBoxProps {
   activityCommon: IActivity | IActivityGroup;
   editHandler: (activityId: string) => void;
   deleteHandler: (activityId: string) => void;
-  afterBlurHandler?: (updatedActivity: IActivity | IActivityGroup) => void;
+  afterUpdateHandler?: (updatedActivity: IActivity | IActivityGroup) => void;
 }
 
 const ActivityItem: FC<ActivityBoxProps> = ({
   activityCommon,
   editHandler,
   deleteHandler,
-  afterBlurHandler,
+  afterUpdateHandler,
 }) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [name, setName] = useState<string>(activityCommon.name);
@@ -52,9 +52,9 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     setName(e.currentTarget.value);
   };
 
-  const handleEditButtonClick = () => {
-    if (afterBlurHandler) {
-      if (isEditing) {
+  const editButtonClickHandler = () => {
+    if (afterUpdateHandler) {
+      if (isEditing && name != activityCommon.name) {
         onSubmit();
       }
 
@@ -64,7 +64,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     }
   };
 
-  const handleDeleteButtonClick = () => {
+  const deleteButtonClickHandler = () => {
     deleteHandler(activityCommon.id);
   };
 
@@ -77,7 +77,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           name,
         });
 
-        afterBlurHandler && afterBlurHandler(updatedData);
+        afterUpdateHandler && afterUpdateHandler(updatedData);
       } catch (e) {
         toast('A server error occurred while updating activity', {
           type: 'error',
@@ -92,7 +92,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           name,
         });
 
-        afterBlurHandler && afterBlurHandler(updatedData);
+        afterUpdateHandler && afterUpdateHandler(updatedData);
       } catch (e) {
         toast('A server error occurred while updating activity group', {
           type: 'error',
@@ -138,10 +138,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           <input
             value={name}
             onChange={inputChangeHandler}
-            onBlur={() => {
-              onSubmit();
-              setIsEditing(false);
-            }}
+            onBlur={editButtonClickHandler}
             className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-red-500 ${
               isEditing ? 'border-gray-300' : 'border-transparent text-ellipsis'
             }`}
@@ -152,13 +149,13 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           <div className="flex gap-2">
             <button
               className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
-              onClick={handleEditButtonClick}
+              onClick={editButtonClickHandler}
             >
               {isEditing ? <SaveIcon /> : <EditIcon />}
             </button>
             <button
               className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
-              onClick={handleDeleteButtonClick}
+              onClick={deleteButtonClickHandler}
             >
               <DeleteIcon />
             </button>
