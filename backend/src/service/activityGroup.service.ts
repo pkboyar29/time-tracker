@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import ActivityGroup from '../model/activityGroup.model';
 import { ActivityGroupDTO } from '../dto/activityGroup.dto';
 import activityService from './activity.service';
+import { HttpError } from '../helpers/HttpError';
 
 export default {
   async getActivityGroups(userId: string, completed?: boolean) {
@@ -38,7 +39,7 @@ export default {
   ) {
     try {
       if (!(await this.existsActivityGroup(activityGroupId, userId))) {
-        throw new Error('Activity Group Not Found');
+        throw new HttpError(404, 'Activity Group Not Found');
       }
       const activityGroup = await ActivityGroup.findById(activityGroupId);
 
@@ -106,6 +107,16 @@ export default {
         user: userId,
       });
 
+      const validationError = newActivityGroup.validateSync();
+      if (validationError) {
+        if (validationError.errors.name) {
+          throw new HttpError(400, validationError.errors.name.toString());
+        }
+        if (validationError.errors.descr) {
+          throw new HttpError(400, validationError.errors.descr.toString());
+        }
+      }
+
       const newActivityGroupWithId = await newActivityGroup.save();
 
       return this.getActivityGroup(
@@ -124,14 +135,25 @@ export default {
   ) {
     try {
       if (!(await this.existsActivityGroup(activityGroupId, userId))) {
-        throw new Error('Activity Group Not Found');
+        throw new HttpError(404, 'Activity Group Not Found');
       }
 
-      await ActivityGroup.findById(activityGroupId).updateOne({
-        name: activityGroupDTO.name,
-        descr: activityGroupDTO.descr,
-        updatedDate: Date.now(),
-      });
+      const activityGroup = await ActivityGroup.findById(activityGroupId);
+      activityGroup!.name = activityGroupDTO.name;
+      activityGroup!.descr = activityGroupDTO.descr;
+      activityGroup!.updatedDate = new Date();
+
+      const validationError = activityGroup!.validateSync();
+      if (validationError) {
+        if (validationError.errors.name) {
+          throw new HttpError(400, validationError.errors.name.toString());
+        }
+        if (validationError.errors.descr) {
+          throw new HttpError(400, validationError.errors.descr.toString());
+        }
+      }
+
+      await activityGroup!.save();
 
       return this.getActivityGroup(activityGroupId, userId);
     } catch (e) {
@@ -142,7 +164,7 @@ export default {
   async deleteActivityGroup(activityGroupId: string, userId: string) {
     try {
       if (!(await this.existsActivityGroup(activityGroupId, userId))) {
-        throw new Error('Activity Group Not Found');
+        throw new HttpError(404, 'Activity Group Not Found');
       }
 
       const activities = await activityService.getActivitiesForActivityGroup(
@@ -178,8 +200,8 @@ export default {
   },
 
   handleError(e: unknown) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
+    if (e instanceof Error || e instanceof HttpError) {
+      throw e;
     }
   },
 };

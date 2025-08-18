@@ -142,6 +142,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
             className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-red-500 ${
               isEditing ? 'border-gray-300' : 'border-transparent text-ellipsis'
             }`}
+            minLength={1}
             maxLength={50}
             disabled={!isEditing}
           />

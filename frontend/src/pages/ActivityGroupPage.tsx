@@ -212,7 +212,7 @@ const ActivityGroupPage: FC = () => {
                         queryClient.setQueryData(
                           ['activities', activityGroupId],
                           (oldData: IActivity[]) =>
-                            oldData.filter((activity) =>
+                            oldData.map((activity) =>
                               activity.id == updatedActivity.id
                                 ? updatedActivity
                                 : activity
