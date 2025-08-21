@@ -50,9 +50,15 @@ backend_test:
 
 backend_build:
   stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  variables:
+    DOCKER_HOST: tcp://docker:2375/
+    DOCKER_TLS_CERTDIR: ""
   script:
+    - docker info
     - echo "backend building"
-    - ls
     - cd backend
     - docker build -t node-app:latest .
     - docker images
@@ -69,3 +75,4 @@ backend_build:
 #     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
 #   script:
 #     - ssh root@185.23.34.22 "cd ~/time-tracker/ && git pull && cd backend/ && docker compose up --build -d"
+
