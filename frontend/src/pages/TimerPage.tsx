@@ -22,6 +22,7 @@ import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 import { useTimer } from '../context/TimerContext';
 import { toast } from 'react-toastify';
 
+import { ClipLoader } from 'react-spinners';
 import PlayIcon from '../icons/PlayIcon';
 import PauseIcon from '../icons/PauseIcon';
 import StopIcon from '../icons/StopIcon';
@@ -30,6 +31,7 @@ import SessionsList from '../components/SessionsList';
 import Button from '../components/Button';
 import RangeSlider from '../components/RangeSlider';
 import NotesSection from '../components/NotesSection';
+import ActivitySelect from '../components/ActivitySelect';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -119,10 +121,8 @@ const TimerPage: FC = () => {
     }
   };
 
-  const onActivitiesSelectChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    setSelectedActivityId(e.target.value);
+  const onActivitiesSelectChange = (id: string) => {
+    setSelectedActivityId(id);
   };
 
   const handleToggleButtonClick = () => {
@@ -231,17 +231,22 @@ const TimerPage: FC = () => {
                     Activity
                   </span>
                   {!currentSession ? (
-                    <select
-                      onChange={onActivitiesSelectChange}
-                      className="w-full px-3 py-2 transition border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                    >
-                      <option value="">Choose activity (optional)</option>
-                      {activitiesToChoose?.map((activity) => (
-                        <option key={activity.id} value={activity.id}>
-                          {activity.activityGroup.name} / {activity.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="h-[42px] flex items-center">
+                      {isLoadingActivities ? (
+                        <ClipLoader size={'25px'} color="#EF4444" />
+                      ) : (
+                        activitiesToChoose && (
+                          <ActivitySelect
+                            topActivities={activitiesToChoose.topActivities}
+                            remainingActivities={
+                              activitiesToChoose.remainingActivities
+                            }
+                            value={selectedActivityId}
+                            onChange={onActivitiesSelectChange}
+                          />
+                        )
+                      )}
+                    </div>
                   ) : currentSession.activity ? (
                     <div className="text-base">
                       {currentSession.activity.name}

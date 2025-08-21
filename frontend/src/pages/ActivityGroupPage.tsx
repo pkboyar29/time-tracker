@@ -2,7 +2,7 @@ import { FC, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchActivityGroup } from '../api/activityGroupApi';
-import { fetchActivities, deleteActivity } from '../api/activityApi';
+import { fetchGroupActivities, deleteActivity } from '../api/activityApi';
 import { toast } from 'react-toastify';
 
 import CloseIcon from '@mui/icons-material/Close';
@@ -37,7 +37,7 @@ const ActivityGroupPage: FC = () => {
     isError: isErrorActivities,
   } = useQuery({
     queryKey: ['activities', activityGroupId],
-    queryFn: () => fetchActivities(activityGroupId!),
+    queryFn: () => fetchGroupActivities(activityGroupId!),
     retry: false,
   });
 

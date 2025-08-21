@@ -60,6 +60,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
       ];
     }
 
+    // TODO: можно установить исключения для нескольких цветов, которые есть в самом интерфейсе
     const hexColors = Array.from(
       { length: pieItems.length },
       () =>
