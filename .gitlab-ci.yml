@@ -13,68 +13,50 @@ backend_test:
     - npm ci
     - npm run test
 
-# frontend_test:
-#   stage: test
-#   script:
-#     - cd frontend
-#     - npm ci 
-#     - npm run test
-#   artifacts:
-#     paths:
-#       - frontend/node_modules
+frontend_test:
+  stage: test
+  script:
+    - cd frontend
+    - npm ci 
+    - npm run test
+  artifacts:
+    paths:
+      - frontend/node_modules
 
 # Build
-# frontend_build:
-#   stage: build
-#   script:
-#     - cd frontend
-#     - npm run build
-#   artifacts:
-#     paths:
-#       - frontend/dist
+frontend_build:
+  stage: build
+  script:
+    - cd frontend
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist
 
 
 # Deploy
-# frontend_deploy:
-#   image: alpine:3.21
-#   stage: deploy
-#   before_script:
-#     - apk add --no-cache rsync openssh
-#     - mkdir -p ~/.ssh
-#     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-#     - chmod 600 ~/.ssh/id_ed25519
-#     - echo "HOST *" > ~/.ssh/config
-#     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
-#   script:
-#     - rsync -avz frontend/dist/ root@185.23.34.22:/var/www/185.23.34.22/
-
-backend_build:
-  stage: build
-  image: docker:24
-  services:
-    - docker:24-dind
-  variables:
-    DOCKER_HOST: tcp://docker:2375/
-    DOCKER_TLS_CERTDIR: ""
+frontend_deploy:
+  image: alpine:3.21
+  stage: deploy
+  before_script:
+    - apk add --no-cache rsync openssh
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - echo "HOST *" > ~/.ssh/config
+    - echo "StrictHostKeyChecking no" >> ~/.ssh/config
   script:
-    - cd backend
-    - docker build -t node-app:latest .
-    - docker tag node-app:latest $DOCKERHUB_USERNAME/node-app:latest
-    # TODO: как убедиться в том, что я залогинился верно?
-    - echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
-    - docker push $DOCKERHUB_USERNAME/node-app:latest
+    - rsync -avz frontend/dist/ root@185.23.34.22:/var/www/185.23.34.22/
 
-# backend_build_and_deploy:
-#   image: alpine:3.21
-#   stage: deploy
-#   before_script:
-#     - apk add --no-cache openssh
-#     - mkdir -p ~/.ssh
-#     - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
-#     - chmod 600 ~/.ssh/id_ed25519
-#     - echo "HOST *" > ~/.ssh/config
-#     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
-#   script:
-#     - ssh root@185.23.34.22 "cd ~/time-tracker/ && git pull && cd backend/ && docker compose up --build -d"
-
-
+backend_build_and_deploy:
+  image: alpine:3.21
+  stage: deploy
+  before_script:
+    - apk add --no-cache openssh
+    - mkdir -p ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - echo "HOST *" > ~/.ssh/config
+    - echo "StrictHostKeyChecking no" >> ~/.ssh/config
+  script:
+    - ssh root@185.23.34.22 "cd ~/time-tracker/ && git pull --no-rebase && cd backend/ && docker compose up --build -d"
