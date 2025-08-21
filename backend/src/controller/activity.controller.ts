@@ -15,7 +15,7 @@ router.get('/', async (req: Request, res: Response) => {
         res.locals.userId
       );
     } else {
-      data = await activityService.getActivities(res.locals.userId);
+      data = await activityService.getSplitActivities(res.locals.userId);
     }
     res.status(200).json(data);
   } catch (e) {

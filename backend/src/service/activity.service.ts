@@ -1,4 +1,5 @@
 import Activity from '../model/activity.model';
+import UserTopActivity from '../model/userTopActivity.model';
 import { ActivityCreateDTO, ActivityUpdateDTO } from '../dto/activity.dto';
 import mongoose from 'mongoose';
 import sessionService from './session.service';
@@ -13,17 +14,18 @@ interface PopulatedActivityGroup {
 export default {
   async getActivities(userId: string) {
     try {
-      const activities = await Activity.find({
+      const allActivities = await Activity.find({
         deleted: false,
         user: userId,
       });
-      const detailedActivities = await Promise.all(
-        activities.map(async (activity) =>
-          this.getActivity(activity._id.toString(), userId)
+
+      const detailedAllActivities = await Promise.all(
+        allActivities.map(async (a) =>
+          this.getActivity(a._id.toString(), userId)
         )
       );
 
-      return detailedActivities;
+      return detailedAllActivities;
     } catch (e) {
       this.handleError(e);
     }
@@ -59,6 +61,34 @@ export default {
     } catch (e) {
       this.handleError(e);
     }
+  },
+
+  async getSplitActivities(userId: string) {
+    const detailedAllActivities = await this.getActivities(userId);
+
+    const topActivities = await UserTopActivity.find(
+      { userId },
+      'activityId'
+    ).sort({
+      createdDate: -1,
+    });
+    const topActivityIds = topActivities.map((a) => a.activityId.toString());
+    const topActivityIdsSet = new Set(topActivityIds);
+
+    const idMap = new Map(
+      detailedAllActivities?.map((a) => [a?._id!.toString(), a])
+    );
+    const detailedTopActivities = topActivityIds
+      .map((id) => idMap.get(id))
+      .filter(Boolean);
+    const detailedRemainingActivities = detailedAllActivities?.filter(
+      (a) => !topActivityIdsSet.has(a!._id!.toString())
+    );
+
+    return {
+      topActivities: detailedTopActivities,
+      remainingActivities: detailedRemainingActivities,
+    };
   },
 
   async getActivity(activityId: string, userId: string, completed?: boolean) {
@@ -178,6 +208,8 @@ export default {
           throw new HttpError(400, validationError.errors.descr.toString());
         }
       }
+
+      await activity!.save();
 
       return this.getActivity(activityId, userId);
     } catch (e) {
