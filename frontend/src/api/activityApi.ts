@@ -18,13 +18,26 @@ const mapResponseData = (unmappedActivity: any): IActivity => {
   };
 };
 
-export const fetchActivities = async (
-  activityGroupId?: string
+export const fetchActivities = async (): Promise<{
+  topActivities: IActivity[];
+  remainingActivities: IActivity[];
+}> => {
+  const { data } = await axios.get(`/activities/`);
+
+  return {
+    topActivities: data.topActivities.map((a: any) => mapResponseData(a)),
+    remainingActivities: data.remainingActivities.map((a: any) =>
+      mapResponseData(a)
+    ),
+  };
+};
+
+// TODO: rename to fetchGroupActivities
+export const fetchGroupActivities = async (
+  activityGroupId: string
 ): Promise<IActivity[]> => {
   const searchParams = new URLSearchParams();
-  if (activityGroupId) {
-    searchParams.append('activityGroupId', activityGroupId);
-  }
+  searchParams.append('activityGroupId', activityGroupId);
 
   const { data } = await axios.get(`/activities/?${searchParams.toString()}`);
 

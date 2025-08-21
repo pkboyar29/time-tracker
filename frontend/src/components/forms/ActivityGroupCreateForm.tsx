@@ -52,6 +52,10 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
         placeHolder="Enter name"
         validationRules={{
           required: 'Field is required',
+          maxLength: {
+            value: 50,
+            message: 'Max 50 is allowed',
+          },
         }}
         errorMessage={
           typeof errors.name?.message === 'string' ? errors.name.message : ''
@@ -64,8 +68,15 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
         register={register}
         bg="red"
         placeHolder="Enter description (optional)"
-        validationRules={{}}
-        errorMessage=""
+        validationRules={{
+          maxLength: {
+            value: 500,
+            message: 'Max 500 is allowed',
+          },
+        }}
+        errorMessage={
+          typeof errors.descr?.message === 'string' ? errors.descr.message : ''
+        }
       />
 
       <div className="flex justify-end w-full">

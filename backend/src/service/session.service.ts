@@ -1,5 +1,6 @@
 import Session from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
+import UserTopActivity from '../model/userTopActivity.model';
 import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
@@ -107,9 +108,12 @@ export default {
         if (
           !(await activityService.existsActivity(sessionDTO.activity, userId))
         ) {
+          // TODO: возвращать HttpError
           throw new Error('Activity Not Found');
         }
       }
+
+      // TODO: возвращать валидационные ошибки с 400 кодом
 
       const newSession = new Session({
         totalTimeSeconds: sessionDTO.totalTimeSeconds,
@@ -117,6 +121,28 @@ export default {
         activity: sessionDTO.activity,
         user: userId,
       });
+
+      // TODO: надо поддерживать максимум 5 элементов атомарно (использовать атомарный вариант с upsert)
+      if (sessionDTO.activity) {
+        const userTopActivities = await UserTopActivity.find({ userId }).sort({
+          createdDate: 1,
+        });
+
+        const isActivityInUserTop = userTopActivities.find((topActivity) =>
+          topActivity.activityId.equals(sessionDTO.activity)
+        );
+        if (!isActivityInUserTop) {
+          if (userTopActivities.length == 5) {
+            await userTopActivities[0].deleteOne();
+          }
+
+          await new UserTopActivity({
+            userId,
+            activityId: sessionDTO.activity,
+            createdDate: new Date(),
+          }).save();
+        }
+      }
 
       return (await newSession.save()).populate(activityPopulateConfig);
     } catch (e) {

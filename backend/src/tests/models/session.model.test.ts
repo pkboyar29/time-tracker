@@ -2,10 +2,6 @@ import mongoose from 'mongoose';
 import Session from '../../model/session.model';
 
 describe('Session model validation', () => {
-  afterAll(async () => {
-    await mongoose.disconnect();
-  });
-
   it('should fail if totalTimeSeconds < 1', async () => {
     const session = new Session({
       totalTimeSeconds: 0,
