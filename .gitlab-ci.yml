@@ -57,11 +57,12 @@ backend_build:
     DOCKER_HOST: tcp://docker:2375/
     DOCKER_TLS_CERTDIR: ""
   script:
-    - docker info
-    - echo "backend building"
     - cd backend
     - docker build -t node-app:latest .
-    - docker images
+    - docker tag node-app:latest $DOCKERHUB_USERNAME/node-app:latest
+    # TODO: как убедиться в том, что я залогинился верно?
+    - echo $DOCKERHUB_TOKEN | docker login -u $DOCKERHUB_USERNAME --password-stdin
+    - docker push $DOCKERHUB_USERNAME/node-app:latest
 
 # backend_build_and_deploy:
 #   image: alpine:3.21
@@ -75,4 +76,5 @@ backend_build:
 #     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
 #   script:
 #     - ssh root@185.23.34.22 "cd ~/time-tracker/ && git pull && cd backend/ && docker compose up --build -d"
+
 
