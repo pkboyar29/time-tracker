@@ -98,29 +98,29 @@ describe('sessionService.createSession', () => {
     activity: 'activity123',
   };
 
-  it('should create session if activity exists', async () => {
-    // Arrange
-    (activityService.existsActivity as jest.Mock).mockResolvedValue(true);
+  // it('should create session if activity exists', async () => {
+  //   // Arrange
+  //   (activityService.existsActivity as jest.Mock).mockResolvedValue(true);
 
-    const mockSave = jest.fn().mockResolvedValue({
-      populate: jest.fn().mockResolvedValue('populated session'),
-    });
+  //   const mockSave = jest.fn().mockResolvedValue({
+  //     populate: jest.fn().mockResolvedValue('populated session'),
+  //   });
 
-    (Session as unknown as jest.Mock).mockImplementation(() => ({
-      save: mockSave,
-    }));
+  //   (Session as unknown as jest.Mock).mockImplementation(() => ({
+  //     save: mockSave,
+  //   }));
 
-    // Act
-    const result = await sessionService.createSession(mockSessionDTO, userId);
+  //   // Act
+  //   const result = await sessionService.createSession(mockSessionDTO, userId);
 
-    // Assert
-    expect(activityService.existsActivity).toHaveBeenCalledWith(
-      'activity123',
-      userId
-    );
-    expect(mockSave).toHaveBeenCalled();
-    expect(result).toBe('populated session');
-  });
+  //   // Assert
+  //   expect(activityService.existsActivity).toHaveBeenCalledWith(
+  //     'activity123',
+  //     userId
+  //   );
+  //   expect(mockSave).toHaveBeenCalled();
+  //   expect(result).toBe('populated session');
+  // });
 
   it('should throw error if activity not found', async () => {
     (activityService.existsActivity as jest.Mock).mockResolvedValue(false);

@@ -3,13 +3,13 @@ import mongoose from 'mongoose';
 const activityGroupSchema = new mongoose.Schema({
   name: {
     type: String,
-    maxLength: 50,
-    minLength: 1,
+    maxLength: [50, 'Name maximum length is 50 characters'],
+    minLength: [1, 'Name minimum length is 1 characters'],
     required: true,
   },
   descr: {
     type: String,
-    maxLength: 500,
+    maxLength: [500, 'Description maximum length is 500 characters'],
     required: false,
   },
   user: {

@@ -3,7 +3,7 @@ import { useAppDispatch } from '../../redux/store';
 import { createSession } from '../../redux/slices/sessionSlice';
 import { saveSessionToLocalStorage } from '../../helpers/localstorageHelpers';
 import { useQuery } from '@tanstack/react-query';
-import { fetchActivities } from '../../api/activityApi';
+import { fetchActivities, fetchGroupActivities } from '../../api/activityApi';
 import { toast } from 'react-toastify';
 
 import Modal from './Modal';
@@ -92,7 +92,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
           <ClipLoader size={'25px'} color="#EF4444" />
         ) : (
           activitiesToChoose &&
-          activitiesToChoose.length > 0 && (
+          activitiesToChoose.remainingActivities.length > 0 && (
             <div className="flex flex-col gap-3">
               <div>Activity</div>
 
@@ -104,7 +104,10 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
                 }}
               >
                 <option value="">Choose activity (optional)</option>
-                {activitiesToChoose.map((activity) => (
+                {[
+                  ...activitiesToChoose.topActivities,
+                  ...activitiesToChoose.remainingActivities,
+                ].map((activity) => (
                   <option key={activity.id} value={activity.id}>
                     {activity.activityGroup.name} / {activity.name}
                   </option>

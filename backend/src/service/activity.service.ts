@@ -1,8 +1,10 @@
 import Activity from '../model/activity.model';
+import UserTopActivity from '../model/userTopActivity.model';
 import { ActivityCreateDTO, ActivityUpdateDTO } from '../dto/activity.dto';
 import mongoose from 'mongoose';
 import sessionService from './session.service';
 import activityGroupService from './activityGroup.service';
+import { HttpError } from '../helpers/HttpError';
 
 interface PopulatedActivityGroup {
   _id: string;
@@ -12,17 +14,18 @@ interface PopulatedActivityGroup {
 export default {
   async getActivities(userId: string) {
     try {
-      const activities = await Activity.find({
+      const allActivities = await Activity.find({
         deleted: false,
         user: userId,
       });
-      const detailedActivities = await Promise.all(
-        activities.map(async (activity) =>
-          this.getActivity(activity._id.toString(), userId)
+
+      const detailedAllActivities = await Promise.all(
+        allActivities.map(async (a) =>
+          this.getActivity(a._id.toString(), userId)
         )
       );
 
-      return detailedActivities;
+      return detailedAllActivities;
     } catch (e) {
       this.handleError(e);
     }
@@ -40,7 +43,7 @@ export default {
           userId
         ))
       ) {
-        throw new Error('Activity Group Not Found');
+        throw new HttpError(404, 'Activity Group Not Found');
       }
       const activities = await Activity.find({
         deleted: false,
@@ -60,10 +63,38 @@ export default {
     }
   },
 
+  async getSplitActivities(userId: string) {
+    const detailedAllActivities = await this.getActivities(userId);
+
+    const topActivities = await UserTopActivity.find(
+      { userId },
+      'activityId'
+    ).sort({
+      createdDate: -1,
+    });
+    const topActivityIds = topActivities.map((a) => a.activityId.toString());
+    const topActivityIdsSet = new Set(topActivityIds);
+
+    const idMap = new Map(
+      detailedAllActivities?.map((a) => [a?._id!.toString(), a])
+    );
+    const detailedTopActivities = topActivityIds
+      .map((id) => idMap.get(id))
+      .filter(Boolean);
+    const detailedRemainingActivities = detailedAllActivities?.filter(
+      (a) => !topActivityIdsSet.has(a!._id!.toString())
+    );
+
+    return {
+      topActivities: detailedTopActivities,
+      remainingActivities: detailedRemainingActivities,
+    };
+  },
+
   async getActivity(activityId: string, userId: string, completed?: boolean) {
     try {
       if (!(await this.existsActivity(activityId, userId))) {
-        throw new Error('Activity Not Found');
+        throw new HttpError(404, 'Activity Not Found');
       }
 
       const activity = await Activity.findById(activityId)
@@ -125,7 +156,7 @@ export default {
           userId
         ))
       ) {
-        throw new Error('Activity Group Not Found');
+        throw new HttpError(404, 'Activity Group Not Found');
       }
 
       const newActivity = new Activity({
@@ -134,6 +165,16 @@ export default {
         activityGroup: activityDTO.activityGroupId,
         user: userId,
       });
+
+      const validationError = newActivity.validateSync();
+      if (validationError) {
+        if (validationError.errors.name) {
+          throw new HttpError(400, validationError.errors.name.toString());
+        }
+        if (validationError.errors.descr) {
+          throw new HttpError(400, validationError.errors.descr.toString());
+        }
+      }
 
       const newActivityWithId = await newActivity.save();
 
@@ -150,14 +191,25 @@ export default {
   ) {
     try {
       if (!(await this.existsActivity(activityId, userId))) {
-        throw new Error('Activity Not Found');
+        throw new HttpError(404, 'Activity Not Found');
       }
 
-      await Activity.findById(activityId).updateOne({
-        name: activityDTO.name,
-        descr: activityDTO.descr,
-        updatedDate: Date.now(),
-      });
+      const activity = await Activity.findById(activityId);
+      activity!.name = activityDTO.name;
+      activity!.descr = activityDTO.descr;
+      activity!.updatedDate = new Date();
+
+      const validationError = activity!.validateSync();
+      if (validationError) {
+        if (validationError.errors.name) {
+          throw new HttpError(400, validationError.errors.name.toString());
+        }
+        if (validationError.errors.descr) {
+          throw new HttpError(400, validationError.errors.descr.toString());
+        }
+      }
+
+      await activity!.save();
 
       return this.getActivity(activityId, userId);
     } catch (e) {
@@ -168,7 +220,7 @@ export default {
   async deleteActivity(activityId: string, userId: string) {
     try {
       if (!(await this.existsActivity(activityId, userId))) {
-        throw new Error('Activity Not Found');
+        throw new HttpError(404, 'Activity Not Found');
       }
 
       const sessions = await sessionService.getSessionsForActivity(
@@ -197,8 +249,8 @@ export default {
   },
 
   handleError(e: unknown) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
+    if (e instanceof Error || e instanceof HttpError) {
+      throw e;
     }
   },
 };
