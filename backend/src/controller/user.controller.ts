@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import userService from '../service/user.service';
 import { upload } from '../helpers/multer';
+import { sendErrorResponse } from '../helpers/sendErrorResponse';
 
 const router = Router();
 
@@ -9,16 +10,7 @@ router.post('/sign-up', async (req: Request, res: Response) => {
     const data = await userService.signUp(req.body);
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      if (
-        e.message === 'Username must be unique' ||
-        e.message === 'Email must be unique'
-      ) {
-        res.status(400).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -27,16 +19,7 @@ router.post('/sign-in', async (req: Request, res: Response) => {
     const data = await userService.signIn(req.body);
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      if (
-        e.message === 'User with this username doesnt exists' ||
-        e.message === 'Password incorrect'
-      ) {
-        res.status(400).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -45,9 +28,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
     const accessToken = userService.refreshAccessToken(req.body.refreshToken);
     res.status(200).json({ access: accessToken });
   } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -56,9 +37,7 @@ router.get('/profile', async (req: Request, res: Response) => {
     const data = await userService.getProfileInfo(res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -70,15 +49,7 @@ router.put('/updateDailyGoal', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      if (
-        e.message == 'Daily goal should be set between 1 minute and 24 hours'
-      ) {
-        res.status(400).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -91,7 +62,7 @@ router.get('/export', async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'text/plain');
     res.status(200).send(buffer);
   } catch (e) {
-    console.log(e);
+    sendErrorResponse(e, res);
   }
 });
 

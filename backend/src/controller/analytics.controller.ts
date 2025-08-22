@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import analyticsService from '../service/analytics.service';
 import { isValidTimeZone } from '../helpers/isValidTimeZone';
+import { sendErrorResponse } from '../helpers/sendErrorResponse';
 
 const router = Router();
 
@@ -49,9 +50,7 @@ router.get('/', async (req: Request, res: Response) => {
     );
     res.status(200).send(data);
   } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
+    sendErrorResponse(e, res);
   }
 });
 

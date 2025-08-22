@@ -17,7 +17,10 @@ const sessionSchema = new mongoose.Schema({
     type: String,
     required: false,
     minLength: 1,
-    maxLength: 300,
+    maxLength: [
+      1600,
+      'Note is too long. Maximum allowed length is 1600 characters',
+    ],
   },
   completed: {
     type: Boolean,

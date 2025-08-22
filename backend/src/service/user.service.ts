@@ -2,6 +2,7 @@ import { genSaltSync, hashSync, compareSync } from 'bcrypt';
 import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 
+import { HttpError } from '../helpers/HttpError';
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
 import activityGroupService from './activityGroup.service';
 import activityService from './activity.service';
@@ -22,11 +23,11 @@ export default {
     const users = await User.find({});
     users.forEach((user) => {
       if (user.username === userSignUpDTO.username) {
-        throw new Error('Username must be unique');
+        throw new HttpError(400, 'Username must be unique');
       }
 
       if (user.email === userSignUpDTO.email) {
-        throw new Error('Email must be unique');
+        throw new HttpError(400, 'Email must be unique');
       }
     });
 
@@ -47,11 +48,11 @@ export default {
   async signIn(userSignInDTO: UserSignInDTO): Promise<AuthorizeResponse> {
     const user = await User.find({ username: userSignInDTO.username });
     if (!user[0]) {
-      throw new Error('User with this username doesnt exists');
+      throw new HttpError(400, 'User with this username doesnt exists');
     }
 
     if (!compareSync(userSignInDTO.password, user[0].password)) {
-      throw new Error('Password incorrect');
+      throw new HttpError(400, 'Password incorrect');
     }
 
     return this.createTokens(user[0].id);
@@ -171,14 +172,15 @@ export default {
       const user = await User.findById(userId);
 
       user!.dailyGoal = newDailyGoal;
-      const validationError = user?.validateSync();
+      const validationError = user!.validateSync();
       if (validationError) {
-        throw new Error(
+        throw new HttpError(
+          400,
           'Daily goal should be set between 1 minute and 24 hours'
         );
       }
 
-      user?.save();
+      user!.save();
 
       const message = {
         message: 'Updated successfully',

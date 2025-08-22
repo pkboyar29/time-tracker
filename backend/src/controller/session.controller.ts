@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import sessionService from '../service/session.service';
+import { sendErrorResponse } from '../helpers/sendErrorResponse';
 
 const router = Router();
 
@@ -32,13 +33,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     res.json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      if (e.message === 'Activity For Session Not Found') {
-        res.status(404).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -50,16 +45,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      if (
-        e.message === 'Session Not Found' ||
-        e.message === 'Activity For Session Not Found'
-      ) {
-        res.status(404).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -71,13 +57,7 @@ router.post('/', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      if (e.message === 'Activity Not Found') {
-        res.status(404).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -90,22 +70,9 @@ router.put('/:id', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      if (
-        e.message ===
-          'Note is too long. Maximum allowed length is 1600 characters' ||
-        e.message === 'Total time must be greater or equal spent time'
-      ) {
-        res.status(400).send(e.message);
-      } else if (e.message === 'Session Not Found') {
-        res.status(404).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
+    sendErrorResponse(e, res);
   }
 });
-
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const data = await sessionService.deleteSession(
@@ -114,13 +81,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      if (e.message === 'Session Not Found') {
-        res.status(404).send(e.message);
-      } else {
-        res.status(500).send(e.message);
-      }
-    }
+    sendErrorResponse(e, res);
   }
 });
 
