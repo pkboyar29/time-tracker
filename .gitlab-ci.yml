@@ -17,7 +17,7 @@ frontend_test:
   stage: test
   script:
     - cd frontend
-    - npm ci 
+    - npm ci
     - npm run test
   artifacts:
     paths:
@@ -32,7 +32,6 @@ frontend_build:
   artifacts:
     paths:
       - frontend/dist
-
 
 # Deploy
 frontend_deploy:
