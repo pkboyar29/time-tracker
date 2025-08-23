@@ -1,0 +1,5 @@
+version: '3'
+
+services:
+  node_app:
+    command: npm run start

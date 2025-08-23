@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.ts",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest"
+    "dev": "nodemon index.ts",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
+    "build": "tsc",
+    "start": "npm run build && pm2 start ./build/index.js --name api"
   },
   "author": "",
   "license": "ISC",
@@ -20,6 +22,7 @@
     "mongoose": "^8.4.4",
     "multer": "^1.4.5-lts.2",
     "nodemon": "^3.1.4",
+    "pm2": "^6.0.8",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   },
