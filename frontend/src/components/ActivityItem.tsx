@@ -139,7 +139,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
             value={name}
             onChange={inputChangeHandler}
             onBlur={editButtonClickHandler}
-            className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-red-500 ${
+            className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-primary ${
               isEditing ? 'border-gray-300' : 'border-transparent text-ellipsis'
             }`}
             minLength={1}

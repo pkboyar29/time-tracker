@@ -7,7 +7,7 @@ import {
   deleteActivityGroup,
 } from '../api/activityGroupApi';
 
-import { ClipLoader } from 'react-spinners';
+import PrimaryClipLoader from '../components/PrimaryClipLoader';
 import CloseIcon from '@mui/icons-material/Close';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
@@ -130,7 +130,7 @@ const ActivityGroupsPage: FC = () => {
               <input
                 value={searchString}
                 onChange={(e) => setSearchString(e.target.value)}
-                className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-red-500"
+                className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-primary"
                 type="text"
                 placeholder="Search..."
               />
@@ -152,7 +152,7 @@ const ActivityGroupsPage: FC = () => {
 
         {isLoading ? (
           <div className="mt-5 text-center">
-            <ClipLoader color="#EF4444" />
+            <PrimaryClipLoader />
           </div>
         ) : (
           activityGroups && (

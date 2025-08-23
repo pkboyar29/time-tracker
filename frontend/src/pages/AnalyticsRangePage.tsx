@@ -7,7 +7,7 @@ import { getRangeType, RangeType } from '../helpers/dateHelpers';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
-import { ClipLoader } from 'react-spinners';
+import PrimaryClipLoader from '../components/PrimaryClipLoader';
 // TODO: использовать lazy loading
 import DailyGoalBox from '../components/DailyGoalBox';
 import ColumnChartBox from '../components/ColumnChartBox';
@@ -83,7 +83,7 @@ const AnalyticsRangePage: FC = () => {
 
       {isLoading ? (
         <div className="mt-5 text-center">
-          <ClipLoader color="#EF4444" />
+          <PrimaryClipLoader />
         </div>
       ) : rangeAnalytics &&
         rangeAnalytics.sessionStatistics.spentTimeSeconds !== 0 ? (

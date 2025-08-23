@@ -1,15 +1,15 @@
-import { FC, useState, useEffect, ReactNode } from 'react';
+import { FC, useState, ReactNode } from 'react';
 import { useAppDispatch } from '../../redux/store';
 import { createSession } from '../../redux/slices/sessionSlice';
 import { saveSessionToLocalStorage } from '../../helpers/localstorageHelpers';
 import { useQuery } from '@tanstack/react-query';
-import { fetchActivities, fetchGroupActivities } from '../../api/activityApi';
+import { fetchActivities } from '../../api/activityApi';
 import { toast } from 'react-toastify';
 
 import Modal from './Modal';
 import Button from '../Button';
 import RangeSlider from '../RangeSlider';
-import { ClipLoader } from 'react-spinners';
+import PrimaryClipLoader from '../PrimaryClipLoader';
 
 import { ISession } from '../../ts/interfaces/Session/ISession';
 
@@ -89,7 +89,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
 
         {/* TODO: как-то отображать в контейнере с одной высотой, чтобы не дергался контент */}
         {isLoadingActivities ? (
-          <ClipLoader size={'25px'} color="#EF4444" />
+          <PrimaryClipLoader size="25px" />
         ) : (
           activitiesToChoose &&
           activitiesToChoose.remainingActivities.length > 0 && (

@@ -22,7 +22,7 @@ import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 import { useTimer } from '../context/TimerContext';
 import { toast } from 'react-toastify';
 
-import { ClipLoader } from 'react-spinners';
+import PrimaryClipLoader from '../components/PrimaryClipLoader';
 import PlayIcon from '../icons/PlayIcon';
 import PauseIcon from '../icons/PauseIcon';
 import StopIcon from '../icons/StopIcon';
@@ -233,7 +233,7 @@ const TimerPage: FC = () => {
                   {!currentSession ? (
                     <div className="h-[42px] flex items-center">
                       {isLoadingActivities ? (
-                        <ClipLoader size={'25px'} color="#EF4444" />
+                        <PrimaryClipLoader size="25px" />
                       ) : (
                         activitiesToChoose && (
                           <ActivitySelect

@@ -13,7 +13,7 @@ import Title from '../components/Title';
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
 import LinkBox from '../components/LinkBox';
-import { ClipLoader } from 'react-spinners';
+import PrimaryClipLoader from '../components/PrimaryClipLoader';
 
 const AnalyticsOverallPage: FC = () => {
   const [startOfDay, endOfDay] = getDayRange(new Date());
@@ -50,7 +50,7 @@ const AnalyticsOverallPage: FC = () => {
         <div className="flex justify-between h-full gap-2 mt-5">
           {isLoading && (
             <div className="w-[750px] flex justify-center">
-              <ClipLoader color="#EF4444" />
+              <PrimaryClipLoader />
             </div>
           )}
 

@@ -44,11 +44,11 @@ const Input: FC<InputProps> = ({
         {!isTextArea ? (
           <input
             className={`w-full px-4 py-2 border border-solid rounded-lg focus:shadow-lg ${
-              errorMessage && 'border-red-500'
+              errorMessage && 'border-primary'
             } ${
               bg === 'white'
                 ? 'bg-transparent border-black'
-                : 'bg-red-500 placeholder-white text-white'
+                : 'bg-primary placeholder-white text-white'
             }`}
             placeholder={placeHolder}
             {...register(fieldName, validationRules)}
@@ -58,11 +58,11 @@ const Input: FC<InputProps> = ({
         ) : (
           <textarea
             className={`w-full h-20 px-4 py-2 border border-solid rounded-lg focus:shadow-lg ${
-              errorMessage && 'border-red-500'
+              errorMessage && 'border-primary'
             } ${
               bg === 'white'
                 ? 'bg-white border-black'
-                : 'bg-red-500 placeholder-white text-white'
+                : 'bg-primary placeholder-white text-white'
             }`}
             placeholder={placeHolder}
             {...register(fieldName, validationRules)}
@@ -85,7 +85,7 @@ const Input: FC<InputProps> = ({
       </div>
 
       {errorMessage && (
-        <div className="text-base text-red-500">{errorMessage}</div>
+        <div className="text-base text-primary">{errorMessage}</div>
       )}
     </div>
   );

@@ -6,7 +6,6 @@ import {
   IActivityUpdate,
 } from '../ts/interfaces/Activity/IActivity';
 
-// TODO: присваивать не только activityGroupId, но и название хранить
 const mapResponseData = (unmappedActivity: any): IActivity => {
   return {
     ...unmappedActivity,
@@ -32,7 +31,6 @@ export const fetchActivities = async (): Promise<{
   };
 };
 
-// TODO: rename to fetchGroupActivities
 export const fetchGroupActivities = async (
   activityGroupId: string
 ): Promise<IActivity[]> => {
