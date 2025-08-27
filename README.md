@@ -13,3 +13,4 @@ With it, you can easily see where your day goes, and the flexible analytics modu
 ## Tech Stack:
 1. **Frontend:** React, Redux, Tailwind CSS  
 2. **Backend:** Node.js, Express, MongoDB
+3. 
