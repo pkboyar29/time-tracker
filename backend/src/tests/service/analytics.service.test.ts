@@ -1,8 +1,6 @@
 import analyticsService from '../../service/analytics.service';
 import activityService from '../../service/activity.service';
 
-jest.mock('../../service/activity.service');
-
 describe('analyticsService.getTimeBarType', () => {
   it('returns "hour" when range is exactly 1 day', () => {
     const start = new Date(2024, 6, 1); // July 1, 2024
@@ -269,14 +267,27 @@ describe('analyticsService.getTimeBars', () => {
 
 describe('analyticsService.getActivityDistributions', () => {
   const mockActivities = [
-    { name: 'Reading', activityGroup: { _id: '1', name: 'Study' } },
-    { name: 'Coding', activityGroup: { _id: '2', name: 'Work' } },
+    {
+      name: 'Reading',
+      activityGroup: { _id: '1', name: 'Study' },
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
+    },
+    {
+      name: 'Coding',
+      activityGroup: {
+        _id: '2',
+        name: 'Work',
+      },
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
+    },
   ];
 
   it('should return correct distribution when sessions and sessionParts match activities', async () => {
-    (activityService.getActivities as jest.Mock).mockResolvedValue(
-      mockActivities
-    );
+    jest
+      .spyOn(activityService, 'getActivities')
+      .mockResolvedValue(mockActivities);
 
     const completedSessions = [
       { activity: { name: 'Reading' } },
@@ -320,9 +331,9 @@ describe('analyticsService.getActivityDistributions', () => {
   });
 
   it('should not add "Without activity" if time and sessions match exactly', async () => {
-    (activityService.getActivities as jest.Mock).mockResolvedValue(
-      mockActivities
-    );
+    jest
+      .spyOn(activityService, 'getActivities')
+      .mockResolvedValue(mockActivities);
 
     const completedSessions = [{ activity: { name: 'Reading' } }];
 

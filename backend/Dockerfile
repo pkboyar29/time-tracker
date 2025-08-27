@@ -8,6 +8,7 @@ COPY ./package-lock.json ./
 RUN npm install
 COPY ./src ./src
 COPY ./index.ts ./
+COPY ./logger.ts ./
 # нам не нужен .env файл в контейнере?
 # COPY ./.env ./ 
 

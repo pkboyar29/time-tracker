@@ -2,8 +2,6 @@ import activityService from '../../service/activity.service';
 import mongoose from 'mongoose';
 import Activity from '../../model/activity.model';
 
-jest.mock('../../model/activity.model');
-
 describe('activityService.existsActivity', () => {
   const mockActivity = {
     _id: 'someObjectId',
@@ -27,7 +25,7 @@ describe('activityService.existsActivity', () => {
   });
 
   it('returns false if activity is not found in database', async () => {
-    (Activity.findById as jest.Mock).mockResolvedValue(null);
+    jest.spyOn(Activity, 'findById').mockResolvedValue(null);
 
     const exists = await activityService.existsActivity(
       new mongoose.Types.ObjectId().toString(),
@@ -38,7 +36,7 @@ describe('activityService.existsActivity', () => {
   });
 
   it('returns false if activity is marked as deleted', async () => {
-    (Activity.findById as jest.Mock).mockResolvedValue({
+    jest.spyOn(Activity, 'findById').mockResolvedValue({
       ...mockActivity,
       deleted: true,
     });
@@ -52,7 +50,7 @@ describe('activityService.existsActivity', () => {
   });
 
   it('returns false if activity belongs to another user', async () => {
-    (Activity.findById as jest.Mock).mockResolvedValue(mockActivity);
+    jest.spyOn(Activity, 'findById').mockResolvedValue(mockActivity);
 
     const exists = await activityService.existsActivity(
       new mongoose.Types.ObjectId().toString(),
@@ -63,7 +61,7 @@ describe('activityService.existsActivity', () => {
   });
 
   it('returns true if activity is valid, not deleted, and owned by user', async () => {
-    (Activity.findById as jest.Mock).mockResolvedValue(mockActivity);
+    jest.spyOn(Activity, 'findById').mockResolvedValue(mockActivity);
 
     const exists = await activityService.existsActivity(
       new mongoose.Types.ObjectId().toString(),
