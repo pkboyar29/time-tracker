@@ -4,6 +4,7 @@ import UserTopActivity from '../model/userTopActivity.model';
 import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
+import { HttpError } from '../helpers/HttpError';
 
 interface PopulatedActivity {
   name: string;
@@ -40,7 +41,7 @@ export default {
   ) {
     try {
       if (!(await activityService.existsActivity(activityId, userId))) {
-        throw new Error('Activity For Session Not Found');
+        throw new HttpError(404, 'Activity For Session Not Found');
       }
 
       const filter: Record<string, unknown> = {
@@ -59,7 +60,7 @@ export default {
   async getSession(sessionId: string, userId: string) {
     try {
       if (!(await this.existsSession(sessionId, userId))) {
-        throw new Error('Session Not Found');
+        throw new HttpError(404, 'Session Not Found');
       }
 
       return await Session.findById(sessionId).populate<{
@@ -108,12 +109,9 @@ export default {
         if (
           !(await activityService.existsActivity(sessionDTO.activity, userId))
         ) {
-          // TODO: возвращать HttpError
-          throw new Error('Activity Not Found');
+          throw new HttpError(404, 'Activity Not Found');
         }
       }
-
-      // TODO: возвращать валидационные ошибки с 400 кодом
 
       const newSession = new Session({
         totalTimeSeconds: sessionDTO.totalTimeSeconds,
@@ -122,7 +120,18 @@ export default {
         user: userId,
       });
 
+      const validationError = newSession.validateSync();
+      if (validationError) {
+        if (validationError.errors.totalTimeSeconds) {
+          throw new HttpError(
+            400,
+            validationError.errors.totalTimeSeconds.toString()
+          );
+        }
+      }
+
       // TODO: надо поддерживать максимум 5 элементов атомарно (использовать атомарный вариант с upsert)
+      // TODO: также это можно вынести в отдельный метод
       if (sessionDTO.activity) {
         const userTopActivities = await UserTopActivity.find({ userId }).sort({
           createdDate: 1,
@@ -157,44 +166,69 @@ export default {
   ) {
     try {
       if (!(await this.existsSession(sessionId, userId))) {
-        throw new Error('Session Not Found');
+        throw new HttpError(404, 'Session Not Found');
       }
 
-      if (sessionDTO.note && sessionDTO.note.length > 1600) {
-        throw new Error(
-          'Note is too long. Maximum allowed length is 1600 characters'
+      if (
+        Number(sessionDTO.spentTimeSeconds) >
+        Number(sessionDTO.totalTimeSeconds)
+      ) {
+        throw new HttpError(
+          400,
+          'Total time must be greater or equal spent time'
         );
       }
 
-      if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
-        throw new Error('Total time must be greater or equal spent time');
-      }
-
-      let completed: boolean = false;
-      if (sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds) {
-        completed = true;
-      }
-
       const session = await Session.findById(sessionId);
-      if (session) {
-        let partSpentTimeSeconds: number =
-          sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
-        const newSessionPart = new SessionPart({
-          spentTimeSeconds: partSpentTimeSeconds,
-          session: sessionId,
-          user: userId,
-          createdDate: Date.now(),
-        });
-        await newSessionPart.save();
 
-        await session.updateOne({
-          totalTimeSeconds: sessionDTO.totalTimeSeconds,
-          spentTimeSeconds: sessionDTO.spentTimeSeconds,
-          note: sessionDTO.note,
-          completed: completed,
-          updatedDate: Date.now(),
-        });
+      if (session!.completed) {
+        throw new HttpError(
+          400,
+          'You cannot update an already completed session'
+        );
       }
+
+      if (session!.spentTimeSeconds > sessionDTO.spentTimeSeconds) {
+        throw new HttpError(
+          400,
+          "You cannot reduce a session's spentTimeSeconds"
+        );
+      }
+
+      let partSpentTimeSeconds: number =
+        sessionDTO.spentTimeSeconds - session!.spentTimeSeconds;
+      const newSessionPart = new SessionPart({
+        spentTimeSeconds: partSpentTimeSeconds,
+        session: sessionId,
+        user: userId,
+        createdDate: Date.now(),
+      });
+      await newSessionPart.save();
+
+      session!.totalTimeSeconds = sessionDTO.totalTimeSeconds;
+      session!.spentTimeSeconds = sessionDTO.spentTimeSeconds;
+      session!.note = sessionDTO.note;
+      session!.completed =
+        sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds;
+      session!.updatedDate = new Date();
+
+      const validationError = session!.validateSync();
+      if (validationError) {
+        const fields = [
+          'totalTimeSeconds',
+          'spentTimeSeconds',
+          'note',
+        ] as const;
+
+        for (const field of fields) {
+          const err = validationError.errors[field];
+          if (err) {
+            throw new HttpError(400, err.toString());
+          }
+        }
+      }
+
+      await session!.save();
 
       return await this.getSession(sessionId, userId);
     } catch (e) {
@@ -205,7 +239,7 @@ export default {
   async deleteSession(sessionId: string, userId: string) {
     try {
       if (!(await this.existsSession(sessionId, userId))) {
-        throw new Error('Session Not Found');
+        throw new HttpError(404, 'Session Not Found');
       }
 
       await Session.findById(sessionId).updateOne({
@@ -222,8 +256,8 @@ export default {
   },
 
   handleError(e: unknown) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
+    if (e instanceof Error || e instanceof HttpError) {
+      throw e;
     }
   },
 };

@@ -11,6 +11,7 @@ import {
 import { useAppSelector } from '../redux/store';
 import { getTimeHoursMinutes } from '../helpers/timeHelpers';
 import { getRangeType } from '../helpers/dateHelpers';
+import { colors } from '../../design-tokens';
 
 import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
 
@@ -36,7 +37,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload }) => {
     >
       {isVisible && (
         <div className="flex flex-col gap-2.5">
-          <p className="text-[#EF4444] text-[15px]">{`${payload[0].payload.barDetailedName}`}</p>
+          <p className="text-primary text-[15px]">{`${payload[0].payload.barDetailedName}`}</p>
           {payload[0].payload.spentTimeSeconds == 0 ? (
             <p className="text-gray-800">No session activity this period</p>
           ) : (
@@ -86,7 +87,7 @@ const ColumnChartBox: FC<ColumnChartBoxProps> = ({ timeBars }) => {
             const color =
               getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
               bar.spentTimeSeconds > dailyGoalSeconds
-                ? '#EF4444'
+                ? colors.primary
                 : '#E5E7EB';
             return <Cell key={index} fill={color} />;
           })}

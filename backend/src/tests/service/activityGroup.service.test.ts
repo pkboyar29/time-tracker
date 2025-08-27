@@ -2,8 +2,6 @@ import activityGroupService from '../../service/activityGroup.service';
 import mongoose from 'mongoose';
 import ActivityGroup from '../../model/activityGroup.model';
 
-jest.mock('../../model/activityGroup.model');
-
 describe('activityGroupService.existsActvityGroup', () => {
   const mockActivityGroup = {
     _id: 'someObjectId',
@@ -26,7 +24,7 @@ describe('activityGroupService.existsActvityGroup', () => {
   });
 
   it('returns false if activity group is not found in database', async () => {
-    (ActivityGroup.findById as jest.Mock).mockResolvedValue(null);
+    jest.spyOn(ActivityGroup, 'findById').mockResolvedValue(null);
 
     const exists = await activityGroupService.existsActivityGroup(
       new mongoose.Types.ObjectId().toString(),
@@ -37,7 +35,7 @@ describe('activityGroupService.existsActvityGroup', () => {
   });
 
   it('returns false if activity group is marked as deleted', async () => {
-    (ActivityGroup.findById as jest.Mock).mockResolvedValue({
+    jest.spyOn(ActivityGroup, 'findById').mockResolvedValue({
       ...mockActivityGroup,
       deleted: true,
     });
@@ -51,7 +49,7 @@ describe('activityGroupService.existsActvityGroup', () => {
   });
 
   it('returns false if activity group belongs to another user', async () => {
-    (ActivityGroup.findById as jest.Mock).mockResolvedValue(mockActivityGroup);
+    jest.spyOn(ActivityGroup, 'findById').mockResolvedValue(mockActivityGroup);
 
     const exists = await activityGroupService.existsActivityGroup(
       new mongoose.Types.ObjectId().toString(),
@@ -62,7 +60,7 @@ describe('activityGroupService.existsActvityGroup', () => {
   });
 
   it('returns true if activity group is valid, not deleted, and owned by user', async () => {
-    (ActivityGroup.findById as jest.Mock).mockResolvedValue(mockActivityGroup);
+    jest.spyOn(ActivityGroup, 'findById').mockResolvedValue(mockActivityGroup);
 
     const exists = await activityGroupService.existsActivityGroup(
       new mongoose.Types.ObjectId().toString(),

@@ -27,7 +27,7 @@ const SessionItem: FC<SessionItemProps> = ({
   return (
     <div
       className={`p-5 w-96 border border-solid rounded-xl ${
-        isActive ? 'border-red-500' : 'border-black'
+        isActive ? 'border-primary' : 'border-black'
       }`}
     >
       <div className="flex items-start gap-20">

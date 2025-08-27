@@ -18,6 +18,7 @@ services:
       - REFRESH_TOKEN_SECRET=zc,43sdszxckl;;
     depends_on:
       - mongo_db
+    command: npm run dev
 
 volumes:
   mongo_db: {}

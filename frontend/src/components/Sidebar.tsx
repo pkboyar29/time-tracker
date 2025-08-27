@@ -38,8 +38,8 @@ const Sidebar: FC = () => {
                 to="/timer"
                 className="flex items-center gap-4 pt-4 group"
               >
-                <TimerIcon className="transition duration-300 group-hover:stroke-red-500" />
-                <div className="transition duration-300 group-hover:text-red-500">
+                <TimerIcon className="transition duration-300 group-hover:stroke-primary" />
+                <div className="transition duration-300 group-hover:text-primary">
                   Timer
                 </div>
               </NavLink>
@@ -50,8 +50,8 @@ const Sidebar: FC = () => {
                 to="/activity-groups"
                 className="flex items-center gap-4 group"
               >
-                <BookIcon className="transition duration-300 group-hover:stroke-red-500" />
-                <div className="transition duration-300 group-hover:text-red-500">
+                <BookIcon className="transition duration-300 group-hover:stroke-primary" />
+                <div className="transition duration-300 group-hover:text-primary">
                   Activities
                 </div>
               </NavLink>
@@ -62,8 +62,8 @@ const Sidebar: FC = () => {
                 to="/analytics"
                 className="flex items-center gap-4 group"
               >
-                <AnalyticsIcon className="transition duration-300 group-hover:stroke-red-500" />
-                <div className="transition duration-300 group-hover:text-red-500">
+                <AnalyticsIcon className="transition duration-300 group-hover:stroke-primary" />
+                <div className="transition duration-300 group-hover:text-primary">
                   Analytics
                 </div>
               </NavLink>
@@ -75,8 +75,8 @@ const Sidebar: FC = () => {
               className="flex items-center gap-4 group"
               onClick={() => setSettingsModal(true)}
             >
-              <SettingsIcon className="transition duration-300 group-hover:stroke-red-500" />
-              <div className="transition duration-300 group-hover:text-red-500">
+              <SettingsIcon className="transition duration-300 group-hover:stroke-primary" />
+              <div className="transition duration-300 group-hover:text-primary">
                 Settings
               </div>
             </button>

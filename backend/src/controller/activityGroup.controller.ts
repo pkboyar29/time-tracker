@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import activityGroupService from '../service/activityGroup.service';
-import { HttpError } from '../helpers/HttpError';
+import { sendErrorResponse } from '../helpers/sendErrorResponse';
 
 const router = Router();
 
@@ -11,9 +11,7 @@ router.get('/', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -25,11 +23,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof HttpError) {
-      res.status(e.status).send(e.message);
-    } else if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -41,11 +35,7 @@ router.post('/', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof HttpError) {
-      res.status(e.status).send(e.message);
-    } else if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -58,11 +48,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof HttpError) {
-      res.status(e.status).send(e.message);
-    } else if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
+    sendErrorResponse(e, res);
   }
 });
 
@@ -74,11 +60,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     );
     res.status(200).json(data);
   } catch (e) {
-    if (e instanceof HttpError) {
-      res.status(e.status).send(e.message);
-    } else if (e instanceof Error) {
-      res.status(500).send(e.message);
-    }
+    sendErrorResponse(e, res);
   }
 });
 

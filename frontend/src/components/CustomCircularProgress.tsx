@@ -1,4 +1,5 @@
 import { FC, useMemo } from 'react';
+import { colors } from '../../design-tokens';
 
 import { CircularProgress, Box } from '@mui/material';
 
@@ -56,7 +57,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
 
       <CircularProgress
         sx={{
-          color: () => '#ef4444',
+          color: () => colors.primary,
           position: 'absolute',
           left: 0,
         }}

@@ -11,7 +11,7 @@ import ActivityCommonUpdateForm from '../components/forms/ActivityCommonUpdateFo
 import ActivityItem from '../components/ActivityItem';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
-import { ClipLoader } from 'react-spinners';
+import PrimaryClipLoader from '../components/PrimaryClipLoader';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { ModalState } from '../ts/interfaces/ModalState';
@@ -138,7 +138,7 @@ const ActivityGroupPage: FC = () => {
 
       {isLoading ? (
         <div className="mt-5 text-center">
-          <ClipLoader color="#EF4444" />
+          <PrimaryClipLoader />
         </div>
       ) : (
         currentActivityGroup &&
@@ -147,7 +147,7 @@ const ActivityGroupPage: FC = () => {
             <div>
               <span
                 onClick={() => navigate('/activity-groups')}
-                className="transition duration-300 cursor-pointer hover:text-red-500"
+                className="transition duration-300 cursor-pointer hover:text-primary"
               >
                 Activity groups
               </span>{' '}
@@ -173,7 +173,7 @@ const ActivityGroupPage: FC = () => {
                   <input
                     value={searchString}
                     onChange={(e) => setSearchString(e.target.value)}
-                    className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-red-500"
+                    className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-primary"
                     type="text"
                     placeholder="Search..."
                   />

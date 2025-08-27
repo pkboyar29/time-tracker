@@ -3,6 +3,9 @@ import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { logger } from './logger';
+import winston from 'winston';
+import expressWinston from 'express-winston';
 import * as sessionRouter from './src/controller/session.controller';
 import * as activityRouter from './src/controller/activity.controller';
 import * as activityGroupRouter from './src/controller/activityGroup.controller';
@@ -17,12 +20,44 @@ const MONGO_URL = process.env.MONGO_URL || '';
 const PORT = process.env.PORT || 7000;
 
 mongoose.connect(MONGO_URL).then(() => {
-  console.log('connection with database is successful');
+  logger.info('connection with database is successful');
 });
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+
+// logging middleware
+app.use(
+  expressWinston.logger({
+    format: winston.format.combine(
+      winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+      winston.format.json()
+    ),
+    transports: [
+      new winston.transports.Console(),
+      new winston.transports.File({
+        filename: `error.log`,
+        level: 'error',
+      }),
+      new winston.transports.File({
+        filename: `${new Date().toLocaleDateString()}.log`,
+      }),
+    ],
+    level: (req, res) => {
+      if (res.statusCode >= 500) {
+        return 'error';
+      }
+      if (res.statusCode >= 400) {
+        return 'warn';
+      }
+      return 'info';
+    },
+    meta: true,
+    msg: 'User {{res.locals.userId}}: HTTP {{req.method}} {{res.statusCode}} {{res.responseTime}}ms {{req.url}}',
+    colorize: false,
+  })
+);
 
 // authorization middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
@@ -61,7 +96,7 @@ app.use('/users/', userRouter.default);
 
 function startServer() {
   app.listen(PORT, () => {
-    console.log(`[server]: Server is running at http://localhost:${PORT}`);
+    logger.info(`[server]: Server is running at http://localhost:${PORT}`);
   });
 }
 

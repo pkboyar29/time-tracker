@@ -109,16 +109,16 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         <div className="flex gap-2.5 text-[15px]">
           <button
             onClick={onTableBarClick}
-            className={`transition duration-300 hover:text-red-500 ${
-              activeBar == 'table' && 'text-red-500'
+            className={`transition duration-300 hover:text-primary ${
+              activeBar == 'table' && 'text-primary'
             }`}
           >
             Table
           </button>
           <button
             onClick={onChartBarClick}
-            className={`transition duration-300 hover:text-red-500 ${
-              activeBar == 'chart' && 'text-red-500'
+            className={`transition duration-300 hover:text-primary ${
+              activeBar == 'chart' && 'text-primary'
             }`}
           >
             Chart
