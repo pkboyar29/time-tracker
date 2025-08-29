@@ -4,6 +4,7 @@ export interface IUser {
   lastName: string;
   email: string;
   dailyGoal: number;
+  showTimerInTitle: boolean;
 }
 
 export interface ISignIn {

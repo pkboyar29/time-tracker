@@ -162,7 +162,7 @@ export default {
 
   async getProfileInfo(userId: string): Promise<UserResponseDTO> {
     const profileInfo = await User.findById(userId).select(
-      'username firstName lastName email dailyGoal'
+      'username firstName lastName email dailyGoal showTimerInTitle'
     );
     return profileInfo as UserResponseDTO;
   },
@@ -174,10 +174,7 @@ export default {
       user!.dailyGoal = newDailyGoal;
       const validationError = user!.validateSync();
       if (validationError) {
-        throw new HttpError(
-          400,
-          'Daily goal should be set between 1 minute and 24 hours'
-        );
+        throw new HttpError(400, validationError.message);
       }
 
       user!.save();
@@ -187,8 +184,29 @@ export default {
       };
       return message;
     } catch (e) {
-      if (e instanceof Error) {
-        throw new Error(e.message);
+      if (e instanceof Error || e instanceof HttpError) {
+        throw e;
+      }
+    }
+  },
+
+  async updateShowTimerInTitle(showTimerInTitle: boolean, userId: string) {
+    try {
+      const user = await User.findById(userId);
+      user!.showTimerInTitle = showTimerInTitle;
+      const validationError = user!.validateSync();
+      if (validationError) {
+        throw new HttpError(400, validationError.message);
+      }
+      user!.save();
+
+      const message = {
+        message: 'Updated successfully',
+      };
+      return message;
+    } catch (e) {
+      if (e instanceof Error || e instanceof HttpError) {
+        throw e;
       }
     }
   },

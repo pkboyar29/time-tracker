@@ -53,6 +53,18 @@ router.put('/updateDailyGoal', async (req: Request, res: Response) => {
   }
 });
 
+router.put('/updateShowTimerInTitle', async (req: Request, res: Response) => {
+  try {
+    const data = await userService.updateShowTimerInTitle(
+      req.body.showTimerInTitle,
+      res.locals.userId
+    );
+    res.status(200).json(data);
+  } catch (e) {
+    sendErrorResponse(e, res);
+  }
+});
+
 router.get('/export', async (req: Request, res: Response) => {
   try {
     const buffer = await userService.exportUserData(res.locals.userId);

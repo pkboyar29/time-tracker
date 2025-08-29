@@ -31,6 +31,11 @@ describe('getRemainingTimeHoursMinutesSeconds', () => {
     expect(result).toBe('00:59:59');
   });
 
+  it('returns only minutes and seconds when less than an hour remains and short is true', () => {
+    const result = getRemainingTimeHoursMinutesSeconds(3599, 0, true); // 59m 59s
+    expect(result).toBe('59:59');
+  });
+
   it('returns "00:00" when no time remains', () => {
     const result = getRemainingTimeHoursMinutesSeconds(100, 100);
     expect(result).toBe('00:00:00');

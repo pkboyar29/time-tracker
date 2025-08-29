@@ -1,7 +1,11 @@
 import { FC, useState, useEffect } from 'react';
 import { clearSession } from '../../helpers/authHelpers';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
-import { logOutUser, updateDailyGoal } from '../../redux/slices/userSlice';
+import {
+  logOutUser,
+  updateDailyGoal,
+  updateShowTimerInTitle,
+} from '../../redux/slices/userSlice';
 import {
   updateSession,
   resetSessionState,
@@ -11,19 +15,20 @@ import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
 
 import Button from '../Button';
 import Modal from './Modal';
+import ToggleButton from '../ToggleButton';
 
 interface SettingsModalProps {
   onCloseModal: () => void;
 }
 
 const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
-  const [dailyGoalInput, setDailyGoalInput] = useState<number>(0);
-
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((state) => state.users.user);
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
   );
+
+  const [dailyGoalInput, setDailyGoalInput] = useState<number>(0);
 
   useEffect(() => {
     if (userInfo) {
@@ -51,6 +56,10 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
     if (!Number.isNaN(dailyGoalInput)) {
       dispatch(updateDailyGoal(dailyGoalInput * 60));
     }
+  };
+
+  const showTimerInTitleButtonClick = async (newState: boolean) => {
+    dispatch(updateShowTimerInTitle(newState));
   };
 
   const downloadUserDataFile = async () => {
@@ -85,6 +94,16 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
               className="w-16 bg-transparent border-b border-gray-400 border-solid"
             />
           </div>
+
+          {userInfo && (
+            <div className="flex justify-between gap-4 text-lg">
+              <div>Show timer in title</div>
+              <ToggleButton
+                isChecked={userInfo.showTimerInTitle}
+                setIsChecked={showTimerInTitleButtonClick}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3">
