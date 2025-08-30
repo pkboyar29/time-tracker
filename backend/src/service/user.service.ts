@@ -31,6 +31,22 @@ export default {
       }
     });
 
+    if (userSignUpDTO.password.length < 4) {
+      throw new HttpError(400, 'password minimum length is 4 characters');
+    }
+    if (userSignUpDTO.password.length > 20) {
+      throw new HttpError(400, 'password maximum length is 20 characters');
+    }
+    const passwordRegex =
+      /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/;
+    const isValidFormat = passwordRegex.test(userSignUpDTO.password);
+    if (!isValidFormat) {
+      throw new HttpError(
+        400,
+        'password - must have one uppercase, one lowercase letters, one number and one special symbol (!@#$%^&*)'
+      );
+    }
+
     const salt = genSaltSync(10);
     const hashedPassword = hashSync(userSignUpDTO.password, salt);
 
@@ -39,6 +55,18 @@ export default {
       dailyGoal: 10800, // 3 hours
       password: hashedPassword,
     });
+
+    const validationError = newUser.validateSync();
+    if (validationError) {
+      const fields = ['firstName', 'lastName', 'email', 'username'] as const;
+
+      for (const field of fields) {
+        const err = validationError.errors[field];
+        if (err) {
+          throw new HttpError(400, err.message);
+        }
+      }
+    }
 
     const newUserWithId = await newUser.save();
 
