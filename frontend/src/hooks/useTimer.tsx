@@ -111,7 +111,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     } else {
       document.title = 'Time Tracker';
     }
-  }, [enabled, currentSession]);
+  }, [enabled, currentUser, currentSession]);
 
   useEffect(() => {
     const checkIfTimePassed = async () => {

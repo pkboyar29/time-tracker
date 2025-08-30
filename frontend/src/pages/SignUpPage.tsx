@@ -93,8 +93,8 @@ const SignUpPage: FC = () => {
           validationRules={{
             required: 'Field is required',
             minLength: {
-              value: 4,
-              message: 'Minimum symbols: 4',
+              value: 2,
+              message: 'Minimum symbols: 2',
             },
             maxLength: {
               value: 20,
@@ -122,8 +122,8 @@ const SignUpPage: FC = () => {
           validationRules={{
             required: 'Field is required',
             minLength: {
-              value: 4,
-              message: 'Minimum symbols: 4',
+              value: 2,
+              message: 'Minimum symbols: 2',
             },
             maxLength: {
               value: 20,

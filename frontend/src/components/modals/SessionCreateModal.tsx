@@ -1,22 +1,20 @@
 import { FC, useState, ReactNode } from 'react';
-import { useAppDispatch } from '../../redux/store';
-import { createSession } from '../../redux/slices/sessionSlice';
-import { saveSessionToLocalStorage } from '../../helpers/localstorageHelpers';
+import { useAppDispatch, useAppSelector } from '../../redux/store';
+import { createSession, updateSession } from '../../redux/slices/sessionSlice';
 import { useQuery } from '@tanstack/react-query';
 import { fetchActivities } from '../../api/activityApi';
 import { toast } from 'react-toastify';
+import { useStartSession } from '../../hooks/useStartSession';
 
 import Modal from './Modal';
 import Button from '../Button';
 import RangeSlider from '../RangeSlider';
 import PrimaryClipLoader from '../PrimaryClipLoader';
 
-import { ISession } from '../../ts/interfaces/Session/ISession';
-
 interface SessionCreateModalProps {
   onCloseModal: () => void;
   modalTitle: ReactNode;
-  afterSubmitHandler: (session: ISession) => void;
+  afterSubmitHandler: () => void;
   defaultActivity?: string;
 }
 
@@ -26,6 +24,12 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   onCloseModal,
   modalTitle,
 }) => {
+  const dispatch = useAppDispatch();
+  const currentSession = useAppSelector(
+    (state) => state.sessions.currentSession
+  );
+  const { startSession } = useStartSession();
+
   const { data: activitiesToChoose, isLoading: isLoadingActivities } = useQuery(
     {
       queryKey: ['activitiesToChoose'],
@@ -39,20 +43,22 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
     defaultActivity ? defaultActivity : ''
   );
 
-  const dispatch = useAppDispatch();
-
   const onSubmit = async () => {
     try {
-      const payload = await dispatch(
+      if (currentSession) {
+        dispatch(updateSession(currentSession));
+      }
+
+      const newSession = await dispatch(
         createSession({
           totalTimeSeconds: selectedMinutes * 60,
           spentTimeSeconds: 0,
           activity: selectedActivityId !== '' ? selectedActivityId : undefined,
         })
       ).unwrap();
-      saveSessionToLocalStorage(payload.id);
+      startSession(newSession);
 
-      afterSubmitHandler(payload);
+      afterSubmitHandler();
     } catch (e) {
       toast('A server error occurred while creating new session', {
         type: 'error',
@@ -87,36 +93,36 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
           />
         </div>
 
-        {/* TODO: как-то отображать в контейнере с одной высотой, чтобы не дергался контент */}
-        {isLoadingActivities ? (
-          <PrimaryClipLoader size="25px" />
-        ) : (
-          activitiesToChoose &&
-          activitiesToChoose.remainingActivities.length > 0 && (
-            <div className="flex flex-col gap-3">
-              <div>Activity</div>
+        <div className="h-[42px]">
+          {isLoadingActivities ? (
+            <PrimaryClipLoader size="25px" />
+          ) : (
+            activitiesToChoose &&
+            activitiesToChoose.remainingActivities.length > 0 && (
+              <div className="flex flex-col gap-3">
+                <div>Activity</div>
 
-              <select
-                value={selectedActivityId}
-                className="px-2 py-1 border border-black border-solid rounded-xl"
-                onChange={(e) => {
-                  setSelectedActivityId(e.target.value);
-                }}
-              >
-                <option value="">Choose activity (optional)</option>
-                {[
-                  ...activitiesToChoose.topActivities,
-                  ...activitiesToChoose.remainingActivities,
-                ].map((activity) => (
-                  <option key={activity.id} value={activity.id}>
-                    {activity.activityGroup.name} / {activity.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )
-        )}
-
+                <select
+                  value={selectedActivityId}
+                  className="px-2 py-1 border border-black border-solid rounded-xl"
+                  onChange={(e) => {
+                    setSelectedActivityId(e.target.value);
+                  }}
+                >
+                  <option value="">Choose activity (optional)</option>
+                  {[
+                    ...activitiesToChoose.topActivities,
+                    ...activitiesToChoose.remainingActivities,
+                  ].map((activity) => (
+                    <option key={activity.id} value={activity.id}>
+                      {activity.activityGroup.name} / {activity.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )
+          )}
+        </div>
         <div className="flex w-full">
           <Button onClick={onSubmit}>Start new session</Button>
         </div>

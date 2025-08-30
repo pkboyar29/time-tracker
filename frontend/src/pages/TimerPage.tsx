@@ -10,7 +10,6 @@ import { useAppDispatch, useAppSelector } from '../redux/store';
 import { useQuery } from '@tanstack/react-query';
 import { fetchActivities } from '../api/activityApi';
 import {
-  saveSessionToLocalStorage,
   removeSessionFromLocalStorage,
   getSessionIdFromLocalStorage,
 } from '../helpers/localstorageHelpers';
@@ -19,7 +18,8 @@ import {
   getTimeHoursMinutes,
 } from '../helpers/timeHelpers';
 import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
-import { useTimer } from '../context/TimerContext';
+import { useTimer } from '../hooks/useTimer';
+import { useStartSession } from '../hooks/useStartSession';
 import { toast } from 'react-toastify';
 
 import PrimaryClipLoader from '../components/PrimaryClipLoader';
@@ -54,6 +54,7 @@ const TimerPage: FC = () => {
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');
 
   const { toggleTimer, stopTimer, enabled } = useTimer();
+  const { startSession } = useStartSession();
 
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
@@ -109,11 +110,9 @@ const TimerPage: FC = () => {
           activity: selectedActivityId !== '' ? selectedActivityId : undefined,
         })
       ).unwrap();
-      saveSessionToLocalStorage(newSession.id);
+      startSession(newSession);
 
       setUncompletedSessions([...uncompletedSessions, newSession]);
-
-      toggleTimer(0);
     } catch (e) {
       toast('A server error occurred while starting new session', {
         type: 'error',

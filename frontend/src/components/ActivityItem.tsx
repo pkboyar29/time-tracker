@@ -1,12 +1,9 @@
-import { act, FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { updateActivityGroup } from '../api/activityGroupApi';
 import { updateActivity } from '../api/activityApi';
 import { getTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../redux/store';
-import { updateSession } from '../redux/slices/sessionSlice';
-import { useTimer } from '../context/TimerContext';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
@@ -32,6 +29,8 @@ const ActivityItem: FC<ActivityBoxProps> = ({
   deleteHandler,
   afterUpdateHandler,
 }) => {
+  const navigate = useNavigate();
+
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [name, setName] = useState<string>(activityCommon.name);
 
@@ -39,14 +38,6 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     status: false,
     selectedItemId: null,
   });
-
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
-
-  const { toggleTimer } = useTimer();
 
   const inputChangeHandler = async (e: React.FormEvent<HTMLInputElement>) => {
     setName(e.currentTarget.value);
@@ -102,12 +93,8 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     }
   };
 
+  // TODO: логику по обновлению текущей сессии, а также старту таймера перенести в SessionCreateModal
   const afterCreateSessionHandler = () => {
-    if (currentSession) {
-      dispatch(updateSession(currentSession));
-    }
-
-    toggleTimer(0);
     navigate('/timer');
   };
 
