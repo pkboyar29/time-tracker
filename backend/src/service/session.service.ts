@@ -1,6 +1,5 @@
 import Session from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
-import UserTopActivity from '../model/userTopActivity.model';
 import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
@@ -130,27 +129,11 @@ export default {
         }
       }
 
-      // TODO: надо поддерживать максимум 5 элементов атомарно (использовать атомарный вариант с upsert)
-      // TODO: также это можно вынести в отдельный метод
       if (sessionDTO.activity) {
-        const userTopActivities = await UserTopActivity.find({ userId }).sort({
-          createdDate: 1,
-        });
-
-        const isActivityInUserTop = userTopActivities.find((topActivity) =>
-          topActivity.activityId.equals(sessionDTO.activity)
+        await activityService.addActivityToLastActivities(
+          sessionDTO.activity,
+          userId
         );
-        if (!isActivityInUserTop) {
-          if (userTopActivities.length == 5) {
-            await userTopActivities[0].deleteOne();
-          }
-
-          await new UserTopActivity({
-            userId,
-            activityId: sessionDTO.activity,
-            createdDate: new Date(),
-          }).save();
-        }
       }
 
       return (await newSession.save()).populate(activityPopulateConfig);
