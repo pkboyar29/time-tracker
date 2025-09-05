@@ -248,6 +248,32 @@ export default {
     }
   },
 
+  // TODO: надо поддерживать максимум 5 элементов атомарно (использовать атомарный вариант с upsert)
+  async addActivityToLastActivities(activityId: string, userId: string) {
+    const userLastActivities = await UserTopActivity.find({ userId }).sort({
+      createdDate: 1,
+    });
+
+    const foundLastActivity = userLastActivities.find((lastActivity) =>
+      lastActivity.activityId.equals(activityId)
+    );
+    if (!foundLastActivity) {
+      if (userLastActivities.length == 5) {
+        await userLastActivities[0].deleteOne();
+      }
+
+      await new UserTopActivity({
+        userId,
+        activityId,
+        createdDate: new Date(),
+      }).save();
+    } else {
+      // TODO: таким обновлением может идти два запроса к БД?
+      foundLastActivity.createdDate = new Date();
+      await foundLastActivity.save();
+    }
+  },
+
   handleError(e: unknown) {
     if (e instanceof Error || e instanceof HttpError) {
       throw e;

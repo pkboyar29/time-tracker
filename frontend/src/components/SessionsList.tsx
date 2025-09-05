@@ -1,12 +1,9 @@
 import { FC, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/store';
-import { useTimer } from '../context/TimerContext';
-import {
-  deleteSession,
-  setCurrentSession,
-  updateSession,
-} from '../redux/slices/sessionSlice';
-import { saveSessionToLocalStorage } from '../helpers/localstorageHelpers';
+import { useTimer } from '../hooks/useTimer';
+import { useStartSession } from '../hooks/useStartSession';
+import { deleteSession, updateSession } from '../redux/slices/sessionSlice';
+import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
 import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -30,14 +27,17 @@ const SessionsList: FC<SessionsListProps> = ({
   updateSessionsListHandler,
 }) => {
   const dispatch = useAppDispatch();
-  const { stopTimer, toggleTimer, enabled } = useTimer();
+  const { enabled } = useTimer();
+  const { startSession } = useStartSession();
 
+  const sessionIdFromLocalStorage = getSessionIdFromLocalStorage();
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
   );
+
   // removing current session from the list
-  const filteredSessions = sessions.filter(
-    (session) => session.id !== currentSession?.id
+  const sessionsWithoutCurrent = sessions.filter(
+    (session) => session.id !== sessionIdFromLocalStorage
   );
 
   const [deleteModal, setDeleteModal] = useState<ModalState>({
@@ -48,31 +48,22 @@ const SessionsList: FC<SessionsListProps> = ({
   const [less, setLess] = useState<boolean>(false); // less - true, more - false
 
   const handleSessionClick = async (session: ISession) => {
-    if (currentSession) {
-      // updating the previous session if it's not paused
-      if (enabled) {
-        try {
-          const updatedSession = await dispatch(
-            updateSession(currentSession)
-          ).unwrap();
+    // updating the previous session if it's not paused
+    if (currentSession && enabled) {
+      try {
+        const updatedSession = await dispatch(
+          updateSession(currentSession)
+        ).unwrap();
 
-          updateSessionsListHandler(
-            getSessionsListAfterSessionUpdate(sessions, updatedSession)
-          );
-        } catch (e) {
-          console.log(e);
-        }
+        updateSessionsListHandler(
+          getSessionsListAfterSessionUpdate(sessions, updatedSession)
+        );
+      } catch (e) {
+        console.log(e);
       }
-
-      dispatch(setCurrentSession(session));
-      saveSessionToLocalStorage(session.id);
-      // TODO: если было enabled (не стояло на паузе), то новая выбранная сессия будет стоять в паузе
-      toggleTimer(session.spentTimeSeconds);
-    } else {
-      dispatch(setCurrentSession(session));
-      saveSessionToLocalStorage(session.id);
-      toggleTimer(session.spentTimeSeconds);
     }
+
+    startSession(session);
   };
 
   const handleSessionDelete = (sessionId: string) => {
@@ -106,7 +97,7 @@ const SessionsList: FC<SessionsListProps> = ({
             })
           }
         >
-          <p className="mb-4 text-[15px]">
+          <p className="mb-4 text-[15px] dark:text-textDark">
             Are you sure you want to delete this session?
           </p>
           <Button
@@ -120,11 +111,11 @@ const SessionsList: FC<SessionsListProps> = ({
         </Modal>
       )}
 
-      {filteredSessions.length !== 0 && (
+      {sessionsWithoutCurrent.length !== 0 && (
         <div className="flex flex-col items-end">
           <button
             onClick={() => setLess(!less)}
-            className="sticky top-0 flex items-center justify-end gap-1 my-5 text-xl font-bold bg-white z-[5000] w-full"
+            className="sticky top-0 flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"
           >
             {title}
             {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}
@@ -132,7 +123,7 @@ const SessionsList: FC<SessionsListProps> = ({
 
           {!less && (
             <div className="flex flex-col gap-5 mt-5 w-96">
-              {filteredSessions.map((session) => (
+              {sessionsWithoutCurrent.map((session) => (
                 <SessionItem
                   isActive={currentSession?.id === session.id}
                   isEnabled={enabled}

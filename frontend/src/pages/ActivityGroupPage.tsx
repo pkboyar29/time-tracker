@@ -5,7 +5,7 @@ import { fetchActivityGroup } from '../api/activityGroupApi';
 import { fetchGroupActivities, deleteActivity } from '../api/activityApi';
 import { toast } from 'react-toastify';
 
-import CloseIcon from '@mui/icons-material/Close';
+import CrossIcon from '../icons/CrossIcon';
 import ActivityCreateForm from '../components/forms/ActivityCreateForm';
 import ActivityCommonUpdateForm from '../components/forms/ActivityCommonUpdateForm';
 import ActivityItem from '../components/ActivityItem';
@@ -122,7 +122,7 @@ const ActivityGroupPage: FC = () => {
             setDeleteModal({ status: false, selectedItemId: null })
           }
         >
-          <p className="mb-4 text-[15px]">
+          <p className="mb-4 text-[15px] dark:text-textDark">
             Are you sure you want to delete this activity?
           </p>
           <Button
@@ -144,7 +144,7 @@ const ActivityGroupPage: FC = () => {
         currentActivityGroup &&
         activities && (
           <div className="container my-5">
-            <div>
+            <div className="dark:text-textDark">
               <span
                 onClick={() => navigate('/activity-groups')}
                 className="transition duration-300 cursor-pointer hover:text-primary"
@@ -173,7 +173,7 @@ const ActivityGroupPage: FC = () => {
                   <input
                     value={searchString}
                     onChange={(e) => setSearchString(e.target.value)}
-                    className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-primary"
+                    className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-primary dark:text-textDark"
                     type="text"
                     placeholder="Search..."
                   />
@@ -182,7 +182,7 @@ const ActivityGroupPage: FC = () => {
                       className="absolute right-0 z-10 top-[6px]"
                       onClick={() => setSearchString('')}
                     >
-                      <CloseIcon />
+                      <CrossIcon />
                     </button>
                   )}
                 </div>
@@ -192,7 +192,9 @@ const ActivityGroupPage: FC = () => {
               </div>
             </div>
 
-            <div className="my-5 text-xl font-bold">All activities</div>
+            <div className="my-5 text-xl font-bold dark:text-textDark">
+              All activities
+            </div>
             <div className="flex flex-wrap gap-4">
               {activities.filter((activity) =>
                 activity.name.toLowerCase().includes(searchString.toLowerCase())
@@ -228,7 +230,7 @@ const ActivityGroupPage: FC = () => {
                     />
                   ))
               ) : (
-                <>Not found</>
+                <div className="dark:text-textDark">Not found</div>
               )}
             </div>
           </div>

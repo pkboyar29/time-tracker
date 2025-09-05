@@ -31,6 +31,16 @@ export const updateDailyGoal = createAsyncThunk(
   }
 );
 
+export const updateShowTimerInTitle = createAsyncThunk(
+  'users/updateShowTimerInTitle',
+  async (showTimerInTitle: boolean) => {
+    const { data } = await axios.put('/users/updateShowTimerInTitle', {
+      showTimerInTitle,
+    });
+    return data;
+  }
+);
+
 const userSlice = createSlice({
   name: 'users',
   initialState,
@@ -58,6 +68,11 @@ const userSlice = createSlice({
             ...state.user,
             dailyGoal: action.meta.arg,
           };
+        }
+      })
+      .addCase(updateShowTimerInTitle.fulfilled, (state, action) => {
+        if (state.user) {
+          state.user = { ...state.user, showTimerInTitle: action.meta.arg };
         }
       });
   },

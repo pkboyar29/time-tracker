@@ -57,16 +57,16 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
       <div className="flex justify-between w-full gap-1 px-4 pb-1">
         <button
           onClick={leftArrowClickHandler}
-          className="p-[6px] border border-gray-400 border-solid rounded-md hover:bg-gray-200 transition duration-300"
+          className="rounded-md p-[6px] border border-solid border-gray-400 dark:border-gray-500 transition duration-300 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover"
         >
           <LeftChevronIcon />
         </button>
-        <div className="flex items-center justify-center w-full text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md hover:bg-gray-200">
+        <div className="flex items-center justify-center w-full text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md dark:border-gray-500 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover dark:text-textDark">
           {currentDay.toDateString()}
         </div>
         <button
           onClick={rightArrowClickHandler}
-          className="p-[6px] border border-gray-400 border-solid rounded-md hover:bg-gray-200 transition duration-300"
+          className="rounded-md p-[6px] border border-solid border-gray-400 dark:border-gray-500 transition duration-300 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover"
         >
           <RightChevronIcon />
         </button>
@@ -76,16 +76,16 @@ const DaysOfWeekBox: FC<DaysOfWeekBoxProps> = ({ currentDay }) => {
         {daysOfWeek.map((dayOfWeek, index) => (
           <div
             onClick={() => dayClickHandler(dayOfWeek)}
-            className={`w-12 flex flex-col items-center gap-1 py-1 px-2 rounded-[4px] bg-gray-200 cursor-pointer transition duration-300 hover:bg-gray-300 ${
+            className={`w-12 flex flex-col items-center gap-1 py-1 px-2 rounded-[4px] bg-gray-200 dark:bg-surfaceDark cursor-pointer transition duration-300 hover:bg-gray-300 dark:hover:bg-surfaceDarkHover ${
               currentDay.toDateString() == dayOfWeek.toDateString() &&
-              'bg-gray-300'
+              'bg-gray-300 dark:bg-surfaceDarkHover'
             } ${today.toDateString() == dayOfWeek.toDateString() && 'red-dot'}`}
             key={index}
           >
-            <div className="text-[13px] font-medium text-gray-500">
+            <div className="text-[13px] font-medium text-gray-500 dark:text-textDarkSecondary">
               {getDayOfWeekName(dayOfWeek.getDay())}
             </div>
-            <div className="text-lg font-semibold">
+            <div className="text-lg font-semibold dark:text-textDark">
               {dayOfWeek.getDate().toString().length === 2
                 ? dayOfWeek.getDate()
                 : `0${dayOfWeek.getDate()}`}

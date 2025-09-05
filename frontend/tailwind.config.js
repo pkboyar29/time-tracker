@@ -5,11 +5,7 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      colors: {
-        primary: colors.primary,
-        'primary-hover': colors.primaryHover,
-        'gray-rgba': 'rgba(49, 49, 49, .8)',
-      },
+      colors,
     },
     container: {
       center: true,
@@ -23,4 +19,5 @@ export default {
     },
   },
   plugins: [],
+  darkMode: 'class',
 };

@@ -18,7 +18,7 @@ const Button: FC<ButtonProps> = ({
       <button
         type={type}
         onClick={clickHandler}
-        className={`cursor-pointer text-[14px] p-3 w-full text-white transition duration-300 bg-primary hover:bg-primary-hover rounded-xl ${className}`}
+        className={`cursor-pointer text-[14px] p-3 w-full text-white dark:text-textDark transition duration-300 bg-primary hover:bg-primaryHover rounded-xl ${className}`}
         {...otherProps}
       >
         {children}

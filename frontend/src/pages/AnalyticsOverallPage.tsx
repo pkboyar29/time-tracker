@@ -43,9 +43,9 @@ const AnalyticsOverallPage: FC = () => {
   }, [isError]);
 
   return (
-    <div className="h-screen py-5 overflow-y-hidden bg-custom">
+    <div className="h-screen py-5 overflow-y-hidden">
       <div className="container h-full">
-        <Title>Session statistics</Title>
+        <Title>Overall session analytics</Title>
 
         <div className="flex justify-between h-full gap-2 mt-5">
           {isLoading && (

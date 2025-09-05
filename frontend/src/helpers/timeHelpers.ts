@@ -1,6 +1,7 @@
 export const getRemainingTimeHoursMinutesSeconds = (
   totalTimeSeconds: number,
-  spentTimeSeconds: number
+  spentTimeSeconds: number,
+  short: boolean = false
 ): string => {
   const remainingSeconds = totalTimeSeconds - spentTimeSeconds;
 
@@ -18,6 +19,10 @@ export const getRemainingTimeHoursMinutesSeconds = (
 
   if (spentTimeSeconds > totalTimeSeconds) {
     return '00:00';
+  }
+
+  if (short == true && formattedHours === '00') {
+    return `${formattedMinutes}:${formattedSeconds}`;
   }
 
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;

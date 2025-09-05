@@ -27,23 +27,27 @@ const SessionItem: FC<SessionItemProps> = ({
   return (
     <div
       className={`p-5 w-96 border border-solid rounded-xl ${
-        isActive ? 'border-primary' : 'border-black'
+        isActive ? 'border-primary' : 'border-black dark:border-gray-500'
       }`}
     >
       <div className="flex items-start gap-20">
         <div className="flex gap-5">
           <div className="flex flex-col gap-3 ml-auto">
             <div className="flex flex-col gap-2">
-              <div className="text-lg font-bold">Durability</div>
-              <div>
+              <div className="text-lg font-bold dark:text-textDark">
+                Durability
+              </div>
+              <div className="dark:text-textDarkSecondary">
                 {session.totalTimeSeconds >= 3600
                   ? getTimeHoursMinutes(session.totalTimeSeconds, true)
                   : getTimeHoursMinutes(session.totalTimeSeconds, false)}
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <div className="text-lg font-bold">Activity</div>
-              <div>
+              <div className="text-lg font-bold dark:text-textDark">
+                Activity
+              </div>
+              <div className="dark:text-textDarkSecondary">
                 {session.activity ? session.activity.name : 'without activity'}
               </div>
             </div>
@@ -53,7 +57,7 @@ const SessionItem: FC<SessionItemProps> = ({
         <div className="flex flex-col gap-5 ml-auto">
           <div className="flex gap-3">
             <button
-              className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
+              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
               onClick={() => sessionClickHandler?.(session)}
             >
               {isActive ? (
@@ -68,7 +72,7 @@ const SessionItem: FC<SessionItemProps> = ({
             </button>
 
             <button
-              className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
+              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
               onClick={() => sessionDeleteHandler(session.id)}
             >
               <DeleteIcon />

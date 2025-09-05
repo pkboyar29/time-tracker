@@ -15,6 +15,7 @@ import {
 } from '../redux/slices/sessionSlice';
 import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
+import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 
 import { toast } from 'react-toastify';
 
@@ -44,8 +45,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
   );
+  const currentUser = useAppSelector((state) => state.users.user);
   const dispatch = useAppDispatch();
 
+  // TODO: не должны ли мы при нажатии на паузу устанавливать startTimestamp и startSpentSeconds на 0?
   const toggleTimer = (startSpentSeconds: number) => {
     if (!enabled) {
       setStartTimestamp(Date.now());
@@ -84,14 +87,22 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   useEffect(() => {
     if (currentSession) {
+      const timerInTitle = currentUser?.showTimerInTitle
+        ? `${getRemainingTimeHoursMinutesSeconds(
+            currentSession.totalTimeSeconds,
+            currentSession.spentTimeSeconds,
+            true
+          )}`
+        : '';
+
       if (enabled) {
-        document.title = `Focus | ${
+        document.title = `${timerInTitle} Focus | ${
           currentSession.activity
             ? currentSession.activity.name
             : 'Without activity'
         }`;
       } else {
-        document.title = `Paused | ${
+        document.title = `${timerInTitle} Paused | ${
           currentSession.activity
             ? currentSession.activity.name
             : 'Without activity'
@@ -100,7 +111,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     } else {
       document.title = 'Time Tracker';
     }
-  }, [enabled, currentSession]);
+  }, [enabled, currentUser, currentSession]);
 
   useEffect(() => {
     const checkIfTimePassed = async () => {
@@ -109,7 +120,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
       ) {
         try {
-          // TODO: останавливать таймер, воспроизводить музыку надо до того, как запрос завершиться? просто когда 1 секунду идет запрос, а музыки все еще нет, это странно
+          // TODO: останавливать таймер и воспроизводить музыку надо до того, как запрос завершиться? просто когда 1 секунду идет запрос, а музыки все еще нет, это странно. Также странно то, что таймер не выглядит остановленным, пока не завершился запрос
           await dispatch(
             updateSession({
               ...currentSession,
@@ -123,6 +134,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           dispatch(resetCurrentSession());
           removeSessionFromLocalStorage();
         } catch (e) {
+          // TODO: тут можно писать: но время все равно сохранилось
           toast('A server error occurred while updating session', {
             type: 'error',
           });
@@ -134,20 +146,24 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     checkIfTimePassed();
   }, [currentSession?.spentTimeSeconds]);
 
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      if (currentSession) {
-        dispatch(updateSession(currentSession));
-      }
-    };
+  const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    event.preventDefault();
+    if (currentSession) {
+      dispatch(updateSession(currentSession));
+    }
+  };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+  useEffect(() => {
+    if (enabled) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    } else {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    }
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [currentSession, dispatch]);
+  }, [currentSession?.spentTimeSeconds, enabled, dispatch]);
 
   return (
     <TimerContext.Provider value={{ toggleTimer, stopTimer, enabled }}>

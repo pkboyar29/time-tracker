@@ -22,7 +22,7 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
 
   return (
     dailyGoalSeconds && (
-      <div className="px-10 py-5 bg-white border border-solid rounded-lg border-gray-300/80">
+      <div className="px-10 py-5 bg-white border border-solid rounded-lg dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
         <div className="flex flex-col items-center gap-5">
           <CustomCircularProgress
             valuePercent={dailyGoalPercent}
@@ -30,7 +30,7 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
             size="big"
           />
 
-          <div className="text-xl text-center">
+          <div className="text-xl text-center dark:text-textDark">
             You acheived{' '}
             <span className="font-bold">
               {getTimeHoursMinutes(spentTimeSeconds, false)} (

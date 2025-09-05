@@ -15,5 +15,6 @@ export interface UserResponseDTO {
   username: string;
   firstName: string;
   lastName: string;
+  showTimerInTitle: boolean;
   email: string;
 }

@@ -8,7 +8,7 @@ const SettingsIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
       fill="none"
       viewBox="0 0 24 24"
       strokeWidth="1.5"
-      className={`size-7 stroke-black ${props.className}`}
+      className={`size-7 stroke-black dark:stroke-textDark ${props.className}`}
     >
       <path
         strokeLinecap="round"

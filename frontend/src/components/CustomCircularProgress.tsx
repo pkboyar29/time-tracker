@@ -46,9 +46,13 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
     <Box sx={{ position: 'relative', width: circleSize, height: circleSize }}>
       <CircularProgress
         variant="determinate"
+        className="text-[#eeeeee] dark:text-[#424242]"
         sx={{
           // 800 если темный
-          color: (theme) => theme.palette.grey[200],
+          color: (theme) =>
+            localStorage.getItem('theme') === 'dark'
+              ? theme.palette.grey[800]
+              : theme.palette.grey[200],
         }}
         size={circleSize}
         thickness={circleThinkness}
@@ -81,7 +85,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
           height: '100%',
         }}
       >
-        <div className={labelClassnames}>{label}</div>
+        <div className={`${labelClassnames} dark:text-textDark`}>{label}</div>
       </Box>
     </Box>
   );

@@ -70,7 +70,7 @@ const SignInPage: FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center w-full mt-32">
-      <div className="text-2xl text-primary">Sign in</div>
+      <div className="text-2xl text-primary dark:text-textDark">Sign in</div>
 
       <form
         className="flex flex-col items-center gap-5 mt-3 w-[225px]"
@@ -116,7 +116,7 @@ const SignInPage: FC = () => {
         </Button>
 
         <a
-          className="text-base text-center transition-all delay-100 cursor-pointer hover:text-primary"
+          className="text-base text-center transition duration-300 cursor-pointer dark:text-textDark hover:text-primary dark:hover:text-primary"
           onClick={() => navigate('/sign-up')}
         >
           Don't have account?
