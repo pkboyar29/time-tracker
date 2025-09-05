@@ -10,8 +10,6 @@ export const useStartSession = () => {
   const { toggleTimer } = useTimer();
 
   const startSession = (session: ISession) => {
-    console.log(session);
-
     dispatch(setCurrentSession(session));
     saveSessionToLocalStorage(session.id);
     toggleTimer(session.spentTimeSeconds); // TODO: если было enabled (не стояло на паузе), то новая выбранная сессия будет стоять в паузе

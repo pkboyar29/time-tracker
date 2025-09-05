@@ -146,20 +146,24 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     checkIfTimePassed();
   }, [currentSession?.spentTimeSeconds]);
 
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      if (currentSession) {
-        dispatch(updateSession(currentSession));
-      }
-    };
+  const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    event.preventDefault();
+    if (currentSession) {
+      dispatch(updateSession(currentSession));
+    }
+  };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
+  useEffect(() => {
+    if (enabled) {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    } else {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    }
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [currentSession, dispatch]);
+  }, [currentSession?.spentTimeSeconds, enabled, dispatch]);
 
   return (
     <TimerContext.Provider value={{ toggleTimer, stopTimer, enabled }}>
