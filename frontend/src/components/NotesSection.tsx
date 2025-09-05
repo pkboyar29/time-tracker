@@ -59,7 +59,7 @@ const NotesSection: FC = () => {
       onFocus={handleFocusNoteInput}
       onBlur={handleBlurNoteInput}
       maxLength={1600}
-      className="flex-grow p-3 text-base font-medium border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+      className="flex-grow p-3 text-base font-medium bg-white border border-gray-300 rounded-lg resize-none dark:text-textDark dark:bg-surfaceDarkHover dark:border-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
     />
   );
 };

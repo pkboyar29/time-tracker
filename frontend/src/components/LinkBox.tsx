@@ -12,9 +12,11 @@ const LinkBox: FC<LinkBoxProps> = ({ children, link }) => {
   return (
     <Link
       to={link}
-      className="flex items-center justify-between gap-10 py-3.5 transition duration-300 bg-primary cursor-pointer px-7 hover:bg-primary-hover rounded-2xl"
+      className="flex items-center justify-between gap-10 py-3.5 transition duration-300 bg-primary cursor-pointer px-7 hover:bg-primaryHover rounded-2xl"
     >
-      <div className="text-xl font-bold text-white">{children}</div>
+      <div className="text-xl font-bold text-white dark:text-textDark">
+        {children}
+      </div>
       <RightArrowIcon />
     </Link>
   );

@@ -13,7 +13,6 @@ import Button from './Button';
 import DeleteIcon from '../icons/DeleteIcon';
 import EditIcon from '../icons/EditIcon';
 import SaveIcon from '../icons/SaveIcon';
-import PlayIcon from '../icons/PlayIcon';
 import SessionCreateModal from './modals/SessionCreateModal';
 
 interface ActivityBoxProps {
@@ -93,7 +92,6 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     }
   };
 
-  // TODO: логику по обновлению текущей сессии, а также старту таймера перенести в SessionCreateModal
   const afterCreateSessionHandler = () => {
     navigate('/timer');
   };
@@ -120,14 +118,16 @@ const ActivityItem: FC<ActivityBoxProps> = ({
         />
       )}
 
-      <div className="p-5 bg-white border border-gray-300/80 border-solid rounded-xl w-[320px] min-h-[150px] flex flex-col">
+      <div className="p-5 bg-surfaceLight dark:bg-surfaceDark border border-gray-300/80 dark:border-gray-500 border-solid rounded-xl w-[320px] min-h-[150px] flex flex-col">
         <div className="flex items-start justify-between flex-1 gap-5">
           <input
             value={name}
             onChange={inputChangeHandler}
             onBlur={editButtonClickHandler}
-            className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-primary ${
-              isEditing ? 'border-gray-300' : 'border-transparent text-ellipsis'
+            className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-primary dark:text-textDark ${
+              isEditing
+                ? 'border-gray-300 dark:border-gray-500'
+                : 'border-transparent text-ellipsis'
             }`}
             minLength={1}
             maxLength={50}
@@ -136,13 +136,13 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
           <div className="flex gap-2">
             <button
-              className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
+              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
               onClick={editButtonClickHandler}
             >
               {isEditing ? <SaveIcon /> : <EditIcon />}
             </button>
             <button
-              className="p-1 rounded-lg hover:bg-[#F1F1F1] transition duration-300"
+              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
               onClick={deleteButtonClickHandler}
             >
               <DeleteIcon />
@@ -163,7 +163,6 @@ const ActivityItem: FC<ActivityBoxProps> = ({
               >
                 <div className="flex gap-[6px] items-center">
                   <span>Start session</span>
-                  <PlayIcon />
                 </div>
               </Button>
             </div>
@@ -172,14 +171,20 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
         <div className="flex justify-center gap-6 mt-6">
           <div className="text-center">
-            <div className="font-bold">{activityCommon.sessionsAmount}</div>
-            <div className="text-[13px]">sessions</div>
+            <div className="font-bold dark:text-textDark">
+              {activityCommon.sessionsAmount}
+            </div>
+            <div className="text-[13px] dark:text-textDarkSecondary">
+              sessions
+            </div>
           </div>
           <div className="text-center">
-            <div className="font-bold">
+            <div className="font-bold dark:text-textDark">
               {getTimeHoursMinutesSeconds(activityCommon.spentTimeSeconds)}
             </div>
-            <div className="text-[13px]">spent time</div>
+            <div className="text-[13px] dark:text-textDarkSecondary">
+              spent time
+            </div>
           </div>
         </div>
       </div>

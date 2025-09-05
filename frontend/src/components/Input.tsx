@@ -11,7 +11,7 @@ interface InputProps {
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   errorMessage: string;
   inputType?: 'text' | 'password';
-  bg?: 'white' | 'red';
+  bg?: boolean;
   isTextArea?: boolean;
 }
 
@@ -23,7 +23,7 @@ const Input: FC<InputProps> = ({
   inputProps,
   errorMessage,
   inputType = 'text',
-  bg = 'white',
+  bg = false,
   isTextArea = false,
 }) => {
   const [toggledType, setToggledType] = useState<'text' | 'password'>(
@@ -46,9 +46,9 @@ const Input: FC<InputProps> = ({
             className={`w-full px-4 py-2 border border-solid rounded-lg focus:shadow-lg ${
               errorMessage && 'border-primary'
             } ${
-              bg === 'white'
-                ? 'bg-transparent border-black'
-                : 'bg-primary placeholder-white text-white'
+              bg
+                ? 'bg-backgroundLight dark:bg-surfaceDarkHover border-transparent dark:placeholder-textDark dark:text-textDark'
+                : 'dark:text-textDark bg-transparent border-black dark:border-gray-500'
             }`}
             placeholder={placeHolder}
             {...register(fieldName, validationRules)}
@@ -60,9 +60,9 @@ const Input: FC<InputProps> = ({
             className={`w-full h-20 px-4 py-2 border border-solid rounded-lg focus:shadow-lg ${
               errorMessage && 'border-primary'
             } ${
-              bg === 'white'
-                ? 'bg-white border-black'
-                : 'bg-primary placeholder-white text-white'
+              bg
+                ? 'bg-backgroundLight dark:bg-surfaceDarkHover border-transparent dark:placeholder-textDark dark:text-textDark'
+                : 'dark:text-textDark bg-transparent border-black dark:border-gray-500'
             }`}
             placeholder={placeHolder}
             {...register(fieldName, validationRules)}
@@ -76,9 +76,15 @@ const Input: FC<InputProps> = ({
             onClick={handleToggleTypeClick}
           >
             {toggledType === 'password' ? (
-              <Visibility style={{ fontSize: '19px' }} />
+              <Visibility
+                className="dark:fill-textDark"
+                style={{ fontSize: '19px' }}
+              />
             ) : (
-              <VisibilityOff style={{ fontSize: '19px' }} />
+              <VisibilityOff
+                className="dark:fill-textDark"
+                style={{ fontSize: '19px' }}
+              />
             )}
           </button>
         )}

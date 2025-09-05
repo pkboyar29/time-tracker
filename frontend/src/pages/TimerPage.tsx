@@ -153,22 +153,12 @@ const TimerPage: FC = () => {
   };
 
   return (
-    <div className="h-full bg-white">
+    <div className="h-full bg-surfaceLight dark:bg-backgroundDark">
       <div className="container flex items-stretch justify-between h-full gap-10 py-5">
         {sessionIdFromLocalStorage && !currentSession ? null : (
           <div className="sticky top-0 flex text-lg gap-28">
             {/* Left part of timer */}
             <div className="flex flex-col items-center flex-1 gap-2">
-              <div>
-                Session{' '}
-                {getTimeHoursMinutes(
-                  currentSession
-                    ? currentSession.totalTimeSeconds
-                    : selectedSeconds,
-                  false
-                )}
-              </div>
-
               {currentSession ? (
                 <CustomCircularProgress
                   valuePercent={
@@ -197,21 +187,21 @@ const TimerPage: FC = () => {
                 <>
                   <div className="flex mt-2 gap-7">
                     <button
-                      className="bg-[#F1F1F1] hover:bg-[#B5B5B5] transition duration-300 rounded-full p-1.5 flex"
+                      className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5 flex"
                       onClick={handleToggleButtonClick}
                     >
                       {enabled ? <PauseIcon /> : <PlayIcon />}
                     </button>
 
                     <button
-                      className="bg-[#F1F1F1] hover:bg-[#B5B5B5] transition duration-300 rounded-full p-1.5"
+                      className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5"
                       onClick={handleStopButtonClick}
                     >
                       <StopIcon />
                     </button>
                   </div>
 
-                  {!enabled && <div>Paused</div>}
+                  {!enabled && <div className="dark:text-textDark">Paused</div>}
                 </>
               ) : (
                 <div className="mt-2">
@@ -223,10 +213,20 @@ const TimerPage: FC = () => {
             </div>
 
             {/* Right part of timer */}
-            <div className="flex flex-col p-6 rounded-lg shadow-md w-96 bg-[#F1F1F1]">
-              <div className="flex flex-col flex-grow gap-6 overflow-auto">
+            <div className="flex flex-col p-6 rounded-lg shadow-md w-96 bg-surfaceLightHover dark:bg-surfaceDark">
+              <div className="flex flex-col flex-grow gap-5 overflow-auto">
+                {currentSession && (
+                  <div className="text-lg font-semibold dark:text-textDark">
+                    Session{' '}
+                    {getTimeHoursMinutes(
+                      currentSession.totalTimeSeconds,
+                      false
+                    )}
+                  </div>
+                )}
+
                 <div>
-                  <span className="block mb-2 text-lg font-semibold">
+                  <span className="block mb-2 text-lg font-semibold dark:text-textDark">
                     Activity
                   </span>
                   {!currentSession ? (
@@ -247,11 +247,11 @@ const TimerPage: FC = () => {
                       )}
                     </div>
                   ) : currentSession.activity ? (
-                    <div className="text-base">
+                    <div className="text-base dark:text-textDark">
                       {currentSession.activity.name}
                     </div>
                   ) : (
-                    <div className="text-base italic text-gray-500">
+                    <div className="text-base italic text-gray-500 dark:text-textDarkSecondary">
                       Without activity
                     </div>
                   )}
@@ -259,7 +259,7 @@ const TimerPage: FC = () => {
 
                 {!currentSession && (
                   <div>
-                    <span className="block mb-2 text-lg font-semibold">
+                    <span className="block mb-2 text-lg font-semibold dark:text-textDark">
                       Session duration (minutes)
                     </span>
                     <RangeSlider
@@ -275,7 +275,9 @@ const TimerPage: FC = () => {
 
                 {currentSession && (
                   <div className="flex flex-col flex-grow">
-                    <div className="mb-2 text-xl font-bold">Notes</div>
+                    <div className="mb-2 text-xl font-bold dark:text-textDark">
+                      Notes
+                    </div>
                     <NotesSection />
                   </div>
                 )}

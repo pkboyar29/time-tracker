@@ -5,10 +5,8 @@
 @tailwind components;
 @tailwind utilities;
 
-.bg-custom {
-  /* background: #d5ced0; */
-  /* background: #f9faf5; */
-  background: #f0f0f0;
+* {
+  @apply transition-colors duration-300;
 }
 
 @layer components {
@@ -27,8 +25,8 @@
   /* range slider */
 
   .range {
+    @apply bg-[#f0f2f5] dark:bg-surfaceDarkHover;
     -webkit-appearance: none;
-    background: #f0f2f5;
     box-shadow: inset 0px 0px 4px rgba(0, 0, 0, 0.2);
     height: 12px;
     border-radius: 25px;
@@ -36,15 +34,15 @@
 
   .range::-webkit-slider-thumb {
     -webkit-appearance: none;
-    @apply appearance-none w-[25px] h-[25px] border-[3px] border-solid border-primary bg-white rounded-full cursor-pointer;
+    @apply appearance-none w-[25px] h-[25px] border-[3px] border-solid border-primary bg-white dark:bg-[#333333] rounded-full cursor-pointer;
   }
 
   .active svg {
-    @apply stroke-primary;
+    @apply stroke-primary dark:stroke-primary;
   }
 
   .active div {
-    @apply text-primary;
+    @apply text-primary dark:text-primary;
   }
 }
 

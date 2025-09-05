@@ -80,7 +80,7 @@ const SignUpPage: FC = () => {
 
   return (
     <div className="flex flex-col items-center mt-32">
-      <div className="text-2xl text-primary">Sign up</div>
+      <div className="text-2xl text-primary dark:text-textDark">Sign up</div>
 
       <form
         className="flex flex-col items-center gap-5 mt-3 w-[225px]"
@@ -239,7 +239,7 @@ const SignUpPage: FC = () => {
         </Button>
 
         <a
-          className="text-base text-center transition-all delay-100 cursor-pointer hover:text-primary"
+          className="text-base text-center transition duration-300 cursor-pointer dark:text-textDark hover:text-primary dark:hover:text-primary"
           onClick={() => navigate('/sign-in')}
         >
           Already sign up?

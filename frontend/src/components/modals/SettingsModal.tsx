@@ -78,11 +78,11 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
     <Modal title="Settings" onCloseModal={onCloseModal}>
       <div className="h-[40vh] flex flex-col gap-4 justify-between">
         <div className="flex flex-col gap-4">
-          <div className="text-lg">
+          <div className="text-lg dark:text-textDark">
             {userInfo?.firstName} {userInfo?.lastName}
           </div>
 
-          <div className="flex gap-4 text-lg">
+          <div className="flex gap-4 text-lg dark:text-textDark">
             <div>Change your daily goal (minutes)</div>
             <input
               value={dailyGoalInput}
@@ -96,7 +96,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
           </div>
 
           {userInfo && (
-            <div className="flex justify-between gap-4 text-lg">
+            <div className="flex justify-between gap-4 text-lg dark:text-textDark">
               <div>Show timer in title</div>
               <ToggleButton
                 isChecked={userInfo.showTimerInTitle}

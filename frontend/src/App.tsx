@@ -36,7 +36,7 @@ const App: FC = () => {
 
       <div
         id="app"
-        className={`App h-screen bg-custom ${
+        className={`App h-screen bg-backgroundLight dark:bg-backgroundDark ${
           requiredAuth ? 'grid grid-cols-[auto,1fr]' : ''
         }`}
       >

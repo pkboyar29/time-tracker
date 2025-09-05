@@ -10,7 +10,9 @@ const ToggleButton: FC<ToggleButtonProps> = ({ isChecked, setIsChecked }) => {
     <button
       onClick={() => setIsChecked(!isChecked)}
       className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${
-        isChecked ? 'bg-primary' : 'bg-[#F1F1F1]'
+        isChecked
+          ? 'bg-primary'
+          : 'bg-surfaceLightHover dark:bg-surfaceDarkHover'
       }`}
     >
       <div

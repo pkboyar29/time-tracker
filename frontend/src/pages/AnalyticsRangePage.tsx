@@ -10,7 +10,7 @@ import ActivityDistributionBox from '../components/ActivityDistributionBox';
 import PrimaryClipLoader from '../components/PrimaryClipLoader';
 // TODO: использовать lazy loading
 import DailyGoalBox from '../components/DailyGoalBox';
-import ColumnChartBox from '../components/ColumnChartBox';
+import PeriodDistributionBox from '../components/PeriodDistributionBox';
 import DaysOfWeekBox from '../components/analyticsRangeBoxes/DaysOfWeekBox';
 import WeeksBox from '../components/analyticsRangeBoxes/WeeksBox';
 import MonthsBox from '../components/analyticsRangeBoxes/MonthsBox';
@@ -62,9 +62,9 @@ const AnalyticsRangePage: FC = () => {
   }, [isError]);
 
   return (
-    <div className="flex flex-col h-screen overflow-y-hidden bg-custom">
+    <div className="flex flex-col h-screen overflow-y-hidden">
       {fromDate && toDate && (
-        <div className="flex justify-center py-5 border-b border-solid border-b-gray-400">
+        <div className="flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
           {rangeType == 'days' ? (
             <DaysOfWeekBox currentDay={fromDate} />
           ) : rangeType == 'weeks' ? (
@@ -88,7 +88,7 @@ const AnalyticsRangePage: FC = () => {
       ) : rangeAnalytics &&
         rangeAnalytics.sessionStatistics.spentTimeSeconds !== 0 ? (
         <div className="flex h-full">
-          <div className="flex flex-col w-1/2 h-full gap-5 px-4 pt-5 border-r border-gray-400 border-solid">
+          <div className="flex flex-col w-1/2 h-full gap-5 px-4 pt-5 border-r border-gray-400 border-solid dark:border-gray-500">
             {rangeAnalytics.sessionStatistics && (
               <SessionStatisticsBox
                 statistics={rangeAnalytics.sessionStatistics}
@@ -115,12 +115,12 @@ const AnalyticsRangePage: FC = () => {
               />
             )}
             {rangeType != 'days' && (
-              <ColumnChartBox timeBars={rangeAnalytics.timeBars} />
+              <PeriodDistributionBox timeBars={rangeAnalytics.timeBars} />
             )}
           </div>
         </div>
       ) : (
-        <div className="mt-10 text-2xl font-bold text-center">
+        <div className="mt-10 text-2xl font-bold text-center dark:text-textDark">
           No session activity for the specified dates
         </div>
       )}

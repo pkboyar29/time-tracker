@@ -7,8 +7,8 @@ import {
   deleteActivityGroup,
 } from '../api/activityGroupApi';
 
+import CrossIcon from '../icons/CrossIcon';
 import PrimaryClipLoader from '../components/PrimaryClipLoader';
-import CloseIcon from '@mui/icons-material/Close';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
 import Title from '../components/Title';
@@ -113,7 +113,7 @@ const ActivityGroupsPage: FC = () => {
             setDeleteModal({ status: false, selectedItemId: null })
           }
         >
-          <p className="mb-4 text-[15px]">
+          <p className="mb-4 text-[15px] dark:text-textDark">
             Are you sure you want to delete this activity group?
           </p>
           <Button onClick={handleDeleteActivityGroupModal}>
@@ -130,7 +130,7 @@ const ActivityGroupsPage: FC = () => {
               <input
                 value={searchString}
                 onChange={(e) => setSearchString(e.target.value)}
-                className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-primary"
+                className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-primary dark:text-textDark"
                 type="text"
                 placeholder="Search..."
               />
@@ -139,7 +139,7 @@ const ActivityGroupsPage: FC = () => {
                   className="absolute right-0 z-10 top-[6px]"
                   onClick={() => setSearchString('')}
                 >
-                  <CloseIcon />
+                  <CrossIcon />
                 </button>
               )}
             </div>
@@ -177,7 +177,7 @@ const ActivityGroupsPage: FC = () => {
                     />
                   ))
               ) : (
-                <div className="text-base">Not found</div>
+                <div className="text-base dark:text-textDark">Not found</div>
               )}
             </div>
           )

@@ -70,7 +70,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
     <Modal title={modalTitle} onCloseModal={onCloseModal}>
       <form className="flex flex-col items-start gap-10">
         <div className="flex flex-col w-full gap-3">
-          <div className="flex gap-1">
+          <div className="flex gap-1 dark:text-textDark">
             <div>{selectedMinutes} minutes</div>
             {selectedMinutes > 60 && (
               <div>
@@ -99,12 +99,12 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
           ) : (
             activitiesToChoose &&
             activitiesToChoose.remainingActivities.length > 0 && (
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 dark:text-textDark">
                 <div>Activity</div>
 
                 <select
                   value={selectedActivityId}
-                  className="px-2 py-1 border border-black border-solid rounded-xl"
+                  className="px-2 py-1 border border-black border-solid dark:border-gray-500 rounded-xl dark:bg-surfaceDark"
                   onChange={(e) => {
                     setSelectedActivityId(e.target.value);
                   }}

@@ -33,7 +33,6 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
     mode: 'onBlur',
   });
 
-  // TODO: попробовать все-таки это сделать декларативно, через defaultValues
   useEffect(() => {
     setValue('name', activityCommon.name);
     setValue('descr', activityCommon.descr);
@@ -93,7 +92,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
           onBlur={handleSubmit(onSubmit)}
           type="text"
           className={
-            'p-1 text-xl font-bold rounded-lg border border-solid border-transparent focus:border-blue-700 hover:bg-gray-100 bg-transparent focus:bg-transparent' +
+            'p-1 text-xl font-bold rounded-lg dark:text-textDark border border-solid border-transparent focus:border-blue-700 hover:bg-gray-100 dark:hover:bg-surfaceDarkHover bg-transparent focus:bg-transparent' +
             (errors.name ? 'focus:border-primary' : '')
           }
         />
@@ -106,7 +105,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
           onFocus={handleFocus}
           onBlur={handleSubmit(onSubmit)}
           className={
-            'p-1 text-base font-medium rounded-lg h-28 border border-solid border-gray-300 focus:border-blue-700 bg-transparent' +
+            'p-1 text-base font-medium rounded-lg dark:text-textDark h-28 border border-solid border-gray-300 dark:border-gray-500 focus:border-blue-700 bg-transparent' +
             (errors.descr ? 'focus:border-primary' : '')
           }
         />

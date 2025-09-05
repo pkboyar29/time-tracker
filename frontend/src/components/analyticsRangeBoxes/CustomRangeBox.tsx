@@ -18,7 +18,6 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
-  // FOCUS: тут string надо преобразовывать в ISO string
   const handleApply = () => {
     const fromDate = new Date(from);
     const toDate = new Date(to);
@@ -36,7 +35,7 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
 
   return (
     <div className="relative flex gap-4">
-      <label className="flex flex-col gap-1 text-lg text-gray-700">
+      <label className="flex flex-col gap-1 text-lg text-gray-700 dark:text-textDarkSecondary">
         From:
         <input
           value={from}
@@ -44,12 +43,12 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
             setIsEditing(true);
             setFrom(e.target.value);
           }}
-          className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm"
+          className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-gray-500"
           type="datetime-local"
         />
       </label>
 
-      <label className="flex flex-col gap-1 text-lg text-gray-700">
+      <label className="flex flex-col gap-1 text-lg text-gray-700 dark:text-textDarkSecondary">
         To:
         <input
           value={to}
@@ -57,7 +56,7 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
             setIsEditing(true);
             setTo(e.target.value);
           }}
-          className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm"
+          className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-gray-500"
           type="datetime-local"
         />
       </label>

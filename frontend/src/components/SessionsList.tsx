@@ -97,7 +97,7 @@ const SessionsList: FC<SessionsListProps> = ({
             })
           }
         >
-          <p className="mb-4 text-[15px]">
+          <p className="mb-4 text-[15px] dark:text-textDark">
             Are you sure you want to delete this session?
           </p>
           <Button
@@ -115,7 +115,7 @@ const SessionsList: FC<SessionsListProps> = ({
         <div className="flex flex-col items-end">
           <button
             onClick={() => setLess(!less)}
-            className="sticky top-0 flex items-center justify-end gap-1 my-5 text-xl font-bold bg-white z-[5000] w-full"
+            className="sticky top-0 flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"
           >
             {title}
             {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}
