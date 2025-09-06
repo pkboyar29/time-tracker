@@ -41,7 +41,7 @@ app.use(
         level: 'error',
       }),
       new winston.transports.File({
-        filename: `${new Date().toLocaleDateString()}.log`,
+        filename: new Date().toISOString().split('T')[0] + '.log',
       }),
     ],
     level: (req, res) => {

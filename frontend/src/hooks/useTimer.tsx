@@ -11,7 +11,7 @@ import {
   changeSpentSeconds,
   updateSession,
   resetCurrentSession,
-  setCompletedSessionId,
+  setLastCompletedSessionId,
 } from '../redux/slices/sessionSlice';
 import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
@@ -130,7 +130,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
           stopTimer();
           playAudio(0.35);
-          dispatch(setCompletedSessionId(currentSession.id));
+          dispatch(setLastCompletedSessionId(currentSession.id)); // TODO: delete
           dispatch(resetCurrentSession());
           removeSessionFromLocalStorage();
         } catch (e) {

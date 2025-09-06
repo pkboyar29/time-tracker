@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from 'react';
 import {
   fetchSessions,
   updateSession,
-  resetCompletedSessionId,
   resetCurrentSession,
   createSession,
 } from '../redux/slices/sessionSlice';
@@ -17,7 +16,6 @@ import {
   getRemainingTimeHoursMinutesSeconds,
   getTimeHoursMinutes,
 } from '../helpers/timeHelpers';
-import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 import { useTimer } from '../hooks/useTimer';
 import { useStartSession } from '../hooks/useStartSession';
 import { toast } from 'react-toastify';
@@ -47,6 +45,7 @@ const TimerPage: FC = () => {
       queryKey: ['activitiesToChoose'],
       queryFn: () => fetchActivities(),
       retry: false,
+      refetchOnWindowFocus: false,
     }
   );
 
@@ -58,10 +57,6 @@ const TimerPage: FC = () => {
 
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
-  );
-  // TODO: вспомнить, зачем нужно это состояние (исключительно для заполнения массива uncompletedSessions? подумать как можно обойтись без него)
-  const completedSessionId = useAppSelector(
-    (state) => state.sessions.completedSessionId
   );
 
   const dispatch = useAppDispatch();
@@ -91,16 +86,6 @@ const TimerPage: FC = () => {
     fetchAllUncompletedSessions();
   }, []);
 
-  useEffect(() => {
-    if (completedSessionId) {
-      setUncompletedSessions((prevSessions) =>
-        prevSessions.filter((s) => s.id !== completedSessionId)
-      );
-
-      dispatch(resetCompletedSessionId());
-    }
-  }, [completedSessionId]);
-
   const onStartSessionClick = async () => {
     try {
       const newSession = await dispatch(
@@ -111,8 +96,6 @@ const TimerPage: FC = () => {
         })
       ).unwrap();
       startSession(newSession);
-
-      setUncompletedSessions([...uncompletedSessions, newSession]);
     } catch (e) {
       toast('A server error occurred while starting new session', {
         type: 'error',
@@ -127,9 +110,6 @@ const TimerPage: FC = () => {
   const handleToggleButtonClick = () => {
     if (currentSession) {
       if (enabled) {
-        setUncompletedSessions(
-          getSessionsListAfterSessionUpdate(uncompletedSessions, currentSession)
-        );
         dispatch(updateSession(currentSession));
       }
 
@@ -141,9 +121,6 @@ const TimerPage: FC = () => {
     stopTimer();
 
     if (currentSession) {
-      setUncompletedSessions(
-        getSessionsListAfterSessionUpdate(uncompletedSessions, currentSession)
-      );
       // TODO: если сессию не удалось обновить?
       dispatch(updateSession(currentSession));
     }
@@ -287,13 +264,11 @@ const TimerPage: FC = () => {
         )}
 
         <div className="ml-auto overflow-auto">
-          {uncompletedSessions.length > 0 && (
-            <SessionsList
-              title="Uncompleted sessions"
-              sessions={uncompletedSessions}
-              updateSessionsListHandler={setUncompletedSessions}
-            />
-          )}
+          <SessionsList
+            title="Uncompleted sessions"
+            sessions={uncompletedSessions}
+            updateSessionsListHandler={setUncompletedSessions}
+          />
         </div>
       </div>
     </div>

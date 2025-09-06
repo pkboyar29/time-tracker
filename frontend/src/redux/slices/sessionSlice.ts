@@ -6,12 +6,12 @@ import { ISessionCreate } from '../../ts/interfaces/Session/ISessionCreate';
 
 interface SessionState {
   currentSession: ISession | null;
-  completedSessionId: string | null;
+  lastCompletedSessionId: string | null;
 }
 
 const initialState: SessionState = {
   currentSession: null,
-  completedSessionId: null,
+  lastCompletedSessionId: null,
 };
 
 export const loadCurrentSession = createAsyncThunk<ISession, string>(
@@ -90,11 +90,8 @@ const sessionSlice = createSlice({
         state.currentSession.note = action.payload;
       }
     },
-    setCompletedSessionId(state, action: PayloadAction<string>) {
-      state.completedSessionId = action.payload;
-    },
-    resetCompletedSessionId(state) {
-      state.completedSessionId = null;
+    setLastCompletedSessionId(state, action: PayloadAction<string>) {
+      state.lastCompletedSessionId = action.payload;
     },
     reset() {
       return initialState;
@@ -116,8 +113,7 @@ export const {
   resetCurrentSession,
   changeSpentSeconds,
   changeNote,
-  setCompletedSessionId,
-  resetCompletedSessionId,
+  setLastCompletedSessionId,
   reset: resetSessionState,
 } = sessionSlice.actions;
 export default sessionSlice.reducer;
