@@ -112,29 +112,25 @@ export default {
   },
 
   createAccessToken(userId: string): string {
-    let accessToken = '';
-
-    if (process.env.ACCESS_TOKEN_SECRET) {
-      accessToken = this.createToken(
-        userId,
-        'access',
-        process.env.ACCESS_TOKEN_SECRET
-      );
-    }
+    let accessToken = this.createToken(
+      userId,
+      'access',
+      process.env.ACCESS_TOKEN_SECRET
+        ? process.env.ACCESS_TOKEN_SECRET
+        : 'default-access-secret'
+    );
 
     return accessToken;
   },
 
   createRefreshToken(userId: string): string {
-    let refreshToken: string = '';
-
-    if (process.env.REFRESH_TOKEN_SECRET) {
-      refreshToken = this.createToken(
-        userId,
-        'refresh',
-        process.env.REFRESH_TOKEN_SECRET
-      );
-    }
+    let refreshToken = this.createToken(
+      userId,
+      'refresh',
+      process.env.REFRESH_TOKEN_SECRET
+        ? process.env.REFRESH_TOKEN_SECRET
+        : 'default-refresh-secret'
+    );
 
     return refreshToken;
   },

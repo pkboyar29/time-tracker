@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import Session from '../../model/session.model';
+import Session from '../../../model/session.model';
 
 describe('Session model validation', () => {
   it('should fail if totalTimeSeconds < 1', async () => {

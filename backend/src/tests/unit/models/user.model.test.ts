@@ -1,4 +1,4 @@
-import User from '../../model/user.model';
+import User from '../../../model/user.model';
 
 describe('User model validation', () => {
   it('should validate a correct user', () => {

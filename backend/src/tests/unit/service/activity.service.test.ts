@@ -1,6 +1,6 @@
-import activityService from '../../service/activity.service';
+import activityService from '../../../service/activity.service';
 import mongoose from 'mongoose';
-import Activity from '../../model/activity.model';
+import Activity from '../../../model/activity.model';
 
 describe('activityService.existsActivity', () => {
   const mockActivity = {

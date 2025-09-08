@@ -1,5 +1,5 @@
-import analyticsService from '../../service/analytics.service';
-import activityService from '../../service/activity.service';
+import analyticsService from '../../../service/analytics.service';
+import activityService from '../../../service/activity.service';
 
 describe('analyticsService.getTimeBarType', () => {
   it('returns "hour" when range is exactly 1 day', () => {
