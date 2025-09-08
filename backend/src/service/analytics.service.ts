@@ -231,6 +231,15 @@ export default {
       let spentTimeSeconds: number = 0;
       let sessionsAmount: number = 0;
 
+      if (startOfRange > new Date()) {
+        return {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          activityDistribution: [],
+          timeBars: [],
+        };
+      }
+
       const sessionPartsForRange =
         await sessionPartService.getSessionPartsInDateRange(
           startOfRange,
