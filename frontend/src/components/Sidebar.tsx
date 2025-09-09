@@ -35,19 +35,19 @@ const Sidebar: FC = () => {
       <div className="w-[150px] p-5 border-r border-solid border-r-gray-500">
         <ul className="flex flex-col items-center justify-between h-full">
           <div className="flex flex-col items-center gap-5">
-            <li className="flex flex-col items-center gap-2 dark:text-textDark">
+            <li className="flex flex-col items-center min-h-[32px]">
               {currentSession && (
-                <>
+                <div className="px-4 py-2 text-sm shadow-sm rounded-xl bg-primary/10 text-primary dark:bg-surfaceDark dark:text-textDark">
                   {getRemainingTimeHoursMinutesSeconds(
                     currentSession.totalTimeSeconds,
                     currentSession.spentTimeSeconds
                   )}
-                </>
+                </div>
               )}
-              <NavLink
-                to="/timer"
-                className="flex items-center gap-4 pt-4 group"
-              >
+            </li>
+
+            <li>
+              <NavLink to="/timer" className="flex items-center gap-4 group">
                 <TimerIcon className="transition duration-300 group-hover:stroke-primary" />
                 <div className="transition duration-300 group-hover:text-primary dark:text-textDark">
                   Timer

@@ -120,7 +120,9 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
       ) {
         try {
-          // TODO: останавливать таймер и воспроизводить музыку надо до того, как запрос завершиться? просто когда 1 секунду идет запрос, а музыки все еще нет, это странно. Также странно то, что таймер не выглядит остановленным, пока не завершился запрос
+          stopTimer();
+          playAudio(0.35);
+
           await dispatch(
             updateSession({
               ...currentSession,
@@ -128,9 +130,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
             })
           ).unwrap();
 
-          stopTimer();
-          playAudio(0.35);
-          dispatch(setLastCompletedSessionId(currentSession.id)); // TODO: delete
+          dispatch(setLastCompletedSessionId(currentSession.id));
           dispatch(resetCurrentSession());
           removeSessionFromLocalStorage();
         } catch (e) {
