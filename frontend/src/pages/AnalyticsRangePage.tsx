@@ -11,10 +11,7 @@ import PrimaryClipLoader from '../components/PrimaryClipLoader';
 // TODO: использовать lazy loading
 import DailyGoalBox from '../components/DailyGoalBox';
 import PeriodDistributionBox from '../components/PeriodDistributionBox';
-import DaysOfWeekBox from '../components/analyticsRangeBoxes/DaysOfWeekBox';
-import WeeksBox from '../components/analyticsRangeBoxes/WeeksBox';
-import MonthsBox from '../components/analyticsRangeBoxes/MonthsBox';
-import YearsBox from '../components/analyticsRangeBoxes/YearsBox';
+import RangeBox from '../components/analyticsRangeBoxes/RangeBox';
 import CustomRangeBox from '../components/analyticsRangeBoxes/CustomRangeBox';
 
 const AnalyticsRangePage: FC = () => {
@@ -65,18 +62,14 @@ const AnalyticsRangePage: FC = () => {
     <div className="flex flex-col h-screen overflow-y-hidden">
       {fromDate && toDate && (
         <div className="flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
-          {rangeType == 'days' ? (
-            <DaysOfWeekBox currentDay={fromDate} />
-          ) : rangeType == 'weeks' ? (
-            <WeeksBox fromDate={fromDate} toDate={toDate} />
-          ) : rangeType == 'months' ? (
-            <MonthsBox currentMonth={fromDate} />
-          ) : rangeType == 'years' ? (
-            <YearsBox currentYear={fromDate} />
-          ) : rangeType == 'custom' ? (
+          {rangeType == 'custom' ? (
             <CustomRangeBox fromDate={fromDate} toDate={toDate} />
           ) : (
-            <></>
+            <RangeBox
+              rangeType={rangeType}
+              fromDate={fromDate}
+              toDate={toDate}
+            />
           )}
         </div>
       )}

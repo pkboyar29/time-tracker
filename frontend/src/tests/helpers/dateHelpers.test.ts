@@ -12,7 +12,6 @@ import {
   isStartOfDay,
   isEndOfDay,
   isSameDay,
-  getRangeType,
   toLocalISOString,
 } from '../../helpers/dateHelpers';
 
