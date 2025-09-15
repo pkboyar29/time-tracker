@@ -36,13 +36,7 @@ export default {
 
       return filteredSessionsParts;
     } catch (e) {
-      this.handleError(e);
-    }
-  },
-
-  handleError(e: unknown) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
+      throw e;
     }
   },
 };

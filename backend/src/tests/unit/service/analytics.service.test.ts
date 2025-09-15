@@ -1,5 +1,7 @@
 import analyticsService from '../../../service/analytics.service';
 import activityService from '../../../service/activity.service';
+import { IActivity } from '../../../model/activity.model';
+import mongoose from 'mongoose';
 
 describe('analyticsService.getTimeBarType', () => {
   it('returns "hour" when range is exactly 1 day', () => {
@@ -266,21 +268,24 @@ describe('analyticsService.getTimeBars', () => {
 });
 
 describe('analyticsService.getActivityDistributions', () => {
-  const mockActivities = [
+  const mockActivities: IActivity[] = [
     {
+      _id: new mongoose.Types.ObjectId(),
       name: 'Reading',
-      activityGroup: { _id: '1', name: 'Study' },
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      user: new mongoose.Types.ObjectId(),
+      activityGroup: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
+      updatedDate: new Date(),
+      deleted: false,
     },
     {
+      _id: new mongoose.Types.ObjectId(),
       name: 'Coding',
-      activityGroup: {
-        _id: '2',
-        name: 'Work',
-      },
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      user: new mongoose.Types.ObjectId(),
+      activityGroup: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
+      updatedDate: new Date(),
+      deleted: false,
     },
   ];
 
@@ -311,19 +316,16 @@ describe('analyticsService.getActivityDistributions', () => {
     expect(result).toEqual([
       {
         activityName: 'Reading',
-        activityGroup: { _id: '1', name: 'Study' },
         sessionsAmount: 2,
         spentTimeSeconds: 100,
       },
       {
         activityName: 'Coding',
-        activityGroup: { _id: '2', name: 'Work' },
         sessionsAmount: 1,
         spentTimeSeconds: 200,
       },
       {
         activityName: 'Without activity',
-        activityGroup: { _id: '0', name: 'wo' },
         sessionsAmount: 1, // 4 - 3
         spentTimeSeconds: 100, // 400 - (100+200)
       },

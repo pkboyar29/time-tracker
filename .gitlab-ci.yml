@@ -6,12 +6,19 @@ stages:
   - deploy
 
 # Test
-backend_test:
+backend_unit_test:
   stage: test
   script:
     - cd backend
     - npm ci
-    - npm run test
+    - npm run test:unit
+
+backend_integration_test:
+  stage: test
+  script:
+    - cd backend
+    - npm ci
+    - npm run test:integration
 
 frontend_test:
   stage: test

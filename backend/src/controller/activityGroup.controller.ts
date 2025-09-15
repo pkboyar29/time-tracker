@@ -7,7 +7,8 @@ const router = Router();
 router.get('/', async (req: Request, res: Response) => {
   try {
     const data = await activityGroupService.getActivityGroups(
-      res.locals.userId
+      res.locals.userId,
+      false
     );
     res.status(200).json(data);
   } catch (e) {
@@ -19,7 +20,8 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const data = await activityGroupService.getActivityGroup(
       req.params.id,
-      res.locals.userId
+      res.locals.userId,
+      false
     );
     res.status(200).json(data);
   } catch (e) {

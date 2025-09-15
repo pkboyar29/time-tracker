@@ -9,7 +9,7 @@ import activityService from './activity.service';
 import sessionService from './session.service';
 import User from '../model/user.model';
 import ActivityGroup from '../model/activityGroup.model';
-import Activity from '../model/activity.model';
+import Activity, { IDetailedActivity } from '../model/activity.model';
 import Session from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 
@@ -265,14 +265,15 @@ export default {
 
         const activities =
           group._id &&
-          (await activityService.getActivitiesForActivityGroup(
-            group._id.toString(),
+          (await activityService.getActivitiesForActivityGroup({
+            activityGroupId: group._id.toString(),
             userId,
-            true
-          ));
+            detailed: true,
+            onlyCompleted: true,
+          }));
         let activitiesContent = '';
-        activities?.forEach((activity, index) => {
-          if (activity?.name) {
+        (activities as IDetailedActivity[]).forEach((activity, index) => {
+          if (activity.name) {
             activitiesContent = activitiesContent.concat(
               `${index + 1}. `,
               activity.name,

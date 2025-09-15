@@ -24,14 +24,15 @@ export default {
   ): Promise<ActivityDistribution[]> {
     let activityDistributions: ActivityDistribution[] = [];
 
-    const activities = await activityService.getActivities(userId);
-    if (activities && activities.length !== 0) {
+    const activities = await activityService.getActivities({
+      userId,
+    });
+    if (activities.length > 0) {
       activityDistributions = activities
         .filter((activity) => activity && activity.name)
         .map((activity) => {
           const activityDistribution: ActivityDistribution = {
             activityName: activity?.name || '',
-            activityGroup: activity?.activityGroup!,
             sessionsAmount: 0,
             spentTimeSeconds: 0,
           };
@@ -84,7 +85,6 @@ export default {
     const woActivitySeconds = allSpentTimeSeconds - activitiesSeconds;
     if (woActivitySeconds > 0) {
       activityDistributions.push({
-        activityGroup: { _id: '0', name: 'wo' },
         activityName: 'Without activity',
         sessionsAmount: woActivitySessions,
         spentTimeSeconds: woActivitySeconds,
@@ -221,6 +221,7 @@ export default {
     return timeBars;
   },
 
+  // TODO: получать просто POJO объекты (dehydration, вызов lean метода)
   async getAnalyticsForRange(
     startOfRange: Date,
     endOfRange: Date,
@@ -289,13 +290,7 @@ export default {
         timeBars,
       };
     } catch (e) {
-      this.handleError(e);
-    }
-  },
-
-  handleError(e: unknown) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
+      throw e;
     }
   },
 };

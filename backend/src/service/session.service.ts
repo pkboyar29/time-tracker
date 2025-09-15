@@ -29,7 +29,7 @@ export default {
 
       return sessions;
     } catch (e) {
-      this.handleError(e);
+      throw e;
     }
   },
 
@@ -52,7 +52,7 @@ export default {
 
       return await this.getSessions(filter, userId);
     } catch (e) {
-      this.handleError(e);
+      throw e;
     }
   },
 
@@ -66,11 +66,11 @@ export default {
         activity: PopulatedActivity;
       }>(activityPopulateConfig);
     } catch (e) {
-      this.handleError(e);
+      throw e;
     }
   },
 
-  async existsSession(sessionId: string, userId: string) {
+  async existsSession(sessionId: string, userId: string): Promise<boolean> {
     if (!mongoose.Types.ObjectId.isValid(sessionId)) {
       return false;
     }
@@ -138,7 +138,7 @@ export default {
 
       return (await newSession.save()).populate(activityPopulateConfig);
     } catch (e) {
-      this.handleError(e);
+      throw e;
     }
   },
 
@@ -215,7 +215,7 @@ export default {
 
       return await this.getSession(sessionId, userId);
     } catch (e) {
-      this.handleError(e);
+      throw e;
     }
   },
 
@@ -234,12 +234,6 @@ export default {
       };
       return message;
     } catch (e) {
-      this.handleError(e);
-    }
-  },
-
-  handleError(e: unknown) {
-    if (e instanceof Error || e instanceof HttpError) {
       throw e;
     }
   },

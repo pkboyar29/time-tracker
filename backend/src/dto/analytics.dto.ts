@@ -1,6 +1,5 @@
 interface ActivityDistribution {
   activityName: string;
-  activityGroup: { _id: string; name: string };
   sessionsAmount: number;
   spentTimeSeconds: number;
 }
