@@ -16,27 +16,29 @@ const sessionPopulateConfig = {
   },
 };
 
+async function getSessionPartsInDateRange(
+  startRange: Date,
+  endRange: Date,
+  userId: string
+) {
+  try {
+    const sessionParts = await SessionPart.find({
+      createdDate: { $gte: startRange, $lte: endRange },
+      user: userId,
+    }).populate<{
+      session: PopulatedSession;
+    }>(sessionPopulateConfig);
+
+    const filteredSessionsParts = sessionParts.filter(
+      (sessionPart) => !sessionPart.session.deleted
+    );
+
+    return filteredSessionsParts;
+  } catch (e) {
+    throw e;
+  }
+}
+
 export default {
-  async getSessionPartsInDateRange(
-    startRange: Date,
-    endRange: Date,
-    userId: string
-  ) {
-    try {
-      const sessionParts = await SessionPart.find({
-        createdDate: { $gte: startRange, $lte: endRange },
-        user: userId,
-      }).populate<{
-        session: PopulatedSession;
-      }>(sessionPopulateConfig);
-
-      const filteredSessionsParts = sessionParts.filter(
-        (sessionPart) => !sessionPart.session.deleted
-      );
-
-      return filteredSessionsParts;
-    } catch (e) {
-      throw e;
-    }
-  },
+  getSessionPartsInDateRange,
 };
