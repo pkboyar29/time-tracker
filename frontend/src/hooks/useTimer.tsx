@@ -20,7 +20,7 @@ import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { toast } from 'react-toastify';
 
 interface TimerContextType {
-  toggleTimer: (startSpentSeconds: number) => void;
+  toggleTimer: (startSpentSeconds: number, mode: 'toggle' | 'enable') => void;
   stopTimer: (afterDelete?: boolean) => void;
   enabled: boolean;
 }
@@ -49,12 +49,20 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const dispatch = useAppDispatch();
 
   // TODO: не должны ли мы при нажатии на паузу устанавливать startTimestamp и startSpentSeconds на 0?
-  const toggleTimer = (startSpentSeconds: number) => {
+  const toggleTimer = (
+    startSpentSeconds: number,
+    mode: 'toggle' | 'enable' = 'toggle'
+  ) => {
     if (!enabled) {
       setStartTimestamp(Date.now());
       setStartSpentSeconds(startSpentSeconds);
     }
-    setEnabled((enabled) => !enabled);
+
+    if (mode === 'enable') {
+      setEnabled(true);
+    } else {
+      setEnabled((enabled) => !enabled);
+    }
   };
 
   const stopTimer = () => {

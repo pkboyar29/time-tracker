@@ -12,7 +12,7 @@ export const useStartSession = () => {
   const startSession = (session: ISession) => {
     dispatch(setCurrentSession(session));
     saveSessionToLocalStorage(session.id);
-    toggleTimer(session.spentTimeSeconds); // TODO: если было enabled (не стояло на паузе), то новая выбранная сессия будет стоять в паузе
+    toggleTimer(session.spentTimeSeconds, 'enable');
   };
 
   return { startSession };

@@ -113,7 +113,7 @@ const TimerPage: FC = () => {
         dispatch(updateSession(currentSession));
       }
 
-      toggleTimer(currentSession.spentTimeSeconds);
+      toggleTimer(currentSession.spentTimeSeconds, 'toggle');
     }
   };
 

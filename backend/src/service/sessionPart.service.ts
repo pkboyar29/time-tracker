@@ -34,7 +34,6 @@ async function getSessionPartsInDateRange({
     }).populate<{
       session: PopulatedSession;
     }>(sessionPopulateConfig);
-    // TODO: populate не работает? почему-то не могу получить activity из session (session: { _id: new ObjectId('68c823e5fed1645ee4017257'), deleted: false }) только эта инфа отображатеся. Но это лишь иногда да
 
     const filteredSessionsParts = sessionParts.filter(
       (sessionPart) => !sessionPart.session.deleted
