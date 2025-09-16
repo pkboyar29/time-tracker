@@ -97,6 +97,18 @@ async function getDetailedActivities({
   }
 }
 
+async function getActivitiesForActivityGroup(options: {
+  activityGroupId: string;
+  userId: string;
+  onlyCompleted?: boolean;
+  detailed: true;
+}): Promise<IDetailedActivity[]>;
+async function getActivitiesForActivityGroup(options: {
+  activityGroupId: string;
+  userId: string;
+  onlyCompleted?: boolean;
+  detailed: false;
+}): Promise<IActivity[]>;
 async function getActivitiesForActivityGroup({
   activityGroupId,
   userId,
@@ -205,14 +217,14 @@ async function getDetailedActivity({
           onlyCompleted
         )
       : await sessionService.getSessionsForActivity(activityId, userId);
-    const spentTimeSeconds = sessions?.reduce(
+    const spentTimeSeconds = sessions.reduce(
       (total: number, session) => total + session.spentTimeSeconds,
       0
     );
 
     return {
       ...activity!.toObject(),
-      sessionsAmount: sessions?.length ?? 0,
+      sessionsAmount: sessions.length ?? 0,
       spentTimeSeconds: spentTimeSeconds ?? 0,
     };
   } catch (e) {
@@ -351,10 +363,9 @@ async function deleteActivity(
       deleted: true,
     });
 
-    const message = {
+    return {
       message: 'Deleted successful',
     };
-    return message;
   } catch (e) {
     throw e;
   }

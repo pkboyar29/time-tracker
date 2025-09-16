@@ -252,47 +252,41 @@ async function exportUserData(userId: string): Promise<Buffer> {
     )} minutes, ${Math.floor(info.spentTimeSeconds / 3600)} hours)`;
   };
 
-  const activityGroups = await activityGroupService.getActivityGroups(
+  const activityGroups = await activityGroupService.getDetailedActivityGroups({
     userId,
-    true
-  );
-  for (const group of activityGroups || []) {
-    if (group?.name) {
-      fileContent = fileContent.concat(
-        '# ',
-        group.name,
+    onlyCompleted: true,
+  });
+  for (const group of activityGroups) {
+    fileContent = fileContent.concat(
+      '# ',
+      group.name,
+      getSessionsInfoInBrackets({
+        sessionsAmount: group.sessionsAmount,
+        spentTimeSeconds: group.spentTimeSeconds,
+      }),
+      '\n'
+    );
+
+    const activities = await activityService.getActivitiesForActivityGroup({
+      activityGroupId: group._id.toString(),
+      userId,
+      detailed: true,
+      onlyCompleted: true,
+    });
+    let activitiesContent = '';
+    activities.forEach((activity, index) => {
+      activitiesContent = activitiesContent.concat(
+        `${index + 1}. `,
+        activity.name,
         getSessionsInfoInBrackets({
-          sessionsAmount: group.sessionsAmount,
-          spentTimeSeconds: group.spentTimeSeconds,
+          sessionsAmount: activity.sessionsAmount,
+          spentTimeSeconds: activity.spentTimeSeconds,
         }),
         '\n'
       );
+    });
 
-      const activities =
-        group._id &&
-        (await activityService.getActivitiesForActivityGroup({
-          activityGroupId: group._id.toString(),
-          userId,
-          detailed: true,
-          onlyCompleted: true,
-        }));
-      let activitiesContent = '';
-      (activities as IDetailedActivity[]).forEach((activity, index) => {
-        if (activity.name) {
-          activitiesContent = activitiesContent.concat(
-            `${index + 1}. `,
-            activity.name,
-            getSessionsInfoInBrackets({
-              sessionsAmount: activity.sessionsAmount,
-              spentTimeSeconds: activity.spentTimeSeconds,
-            }),
-            '\n'
-          );
-        }
-      });
-
-      fileContent = fileContent.concat(activitiesContent);
-    }
+    fileContent = fileContent.concat(activitiesContent);
   }
 
   const sessionsWithoutActivity = await sessionService.getSessions(

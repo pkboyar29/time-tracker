@@ -6,17 +6,24 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    let data;
     const detailedParam = req.query.detailed === 'true';
-
     const activityGroupIdParam = req.query.activityGroupId;
+
+    let data;
     if (activityGroupIdParam) {
-      data = await activityService.getActivitiesForActivityGroup({
-        activityGroupId: activityGroupIdParam.toString(),
-        userId: res.locals.userId,
-        detailed: detailedParam,
-        onlyCompleted: false,
-      });
+      data = detailedParam
+        ? await activityService.getActivitiesForActivityGroup({
+            activityGroupId: activityGroupIdParam.toString(),
+            userId: res.locals.userId,
+            detailed: true,
+            onlyCompleted: false,
+          })
+        : await activityService.getActivitiesForActivityGroup({
+            activityGroupId: activityGroupIdParam.toString(),
+            userId: res.locals.userId,
+            detailed: false,
+            onlyCompleted: false,
+          });
     } else {
       data = detailedParam
         ? await activityService.getSplitActivities({

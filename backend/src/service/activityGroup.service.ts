@@ -1,36 +1,67 @@
 import mongoose from 'mongoose';
-import ActivityGroup from '../model/activityGroup.model';
+import ActivityGroup, {
+  IActivityGroup,
+  IDetailedActivityGroup,
+} from '../model/activityGroup.model';
 import { ActivityGroupDTO } from '../dto/activityGroup.dto';
 import activityService from './activity.service';
 import { HttpError } from '../helpers/HttpError';
-import { IDetailedActivity } from '../model/activity.model';
 
-// TODO: добавить return type
-async function getActivityGroups(userId: string, onlyCompleted: boolean) {
+interface GetActivityGroupsOptions {
+  userId: string;
+}
+
+interface GetDetailedActivityGroupsOptions {
+  userId: string;
+  onlyCompleted: boolean;
+}
+
+interface GetDetailedActivityGroupOptions {
+  activityGroupId: string;
+  userId: string;
+  onlyCompleted: boolean;
+}
+
+async function getActivityGroups({
+  userId,
+}: GetActivityGroupsOptions): Promise<IActivityGroup[]> {
   try {
-    const activityGroups = await ActivityGroup.find({
+    const filter = {
       deleted: false,
       user: userId,
-    }).sort({ createdDate: -1 });
+    };
+    const groups = await ActivityGroup.find(filter).sort({ createdDate: -1 });
 
-    const detailedActivityGroups = await Promise.all(
-      activityGroups.map(async (activityGroup) =>
-        getActivityGroup(activityGroup._id.toString(), userId, true)
-      )
-    );
-
-    return detailedActivityGroups;
+    return groups;
   } catch (e) {
     throw e;
   }
 }
 
-// TODO: добавить return type
-async function getActivityGroup(
-  activityGroupId: string,
-  userId: string,
-  onlyCompleted: boolean
-) {
+async function getDetailedActivityGroups({
+  userId,
+  onlyCompleted,
+}: GetDetailedActivityGroupsOptions): Promise<IDetailedActivityGroup[]> {
+  const groups = await getActivityGroups({ userId });
+
+  const detailedGroups = await Promise.all(
+    groups.map(async (group) =>
+      getDetailedActivityGroup({
+        activityGroupId: group._id.toString(),
+        userId,
+        onlyCompleted,
+      })
+    )
+  );
+
+  return detailedGroups;
+}
+
+async function getDetailedActivityGroup({
+  activityGroupId,
+  userId,
+  onlyCompleted,
+}: GetDetailedActivityGroupOptions): Promise<IDetailedActivityGroup> {
   try {
     if (!(await existsActivityGroup(activityGroupId, userId))) {
       throw new HttpError(404, 'Activity Group Not Found');
@@ -45,17 +76,13 @@ async function getActivityGroup(
     });
     let sessionsAmount: number = 0;
     let spentTimeSeconds: number = 0;
-    if (activities) {
-      (activities as IDetailedActivity[]).forEach((activity) => {
-        if (activity.sessionsAmount && activity.spentTimeSeconds) {
-          sessionsAmount += activity.sessionsAmount;
-          spentTimeSeconds += activity.spentTimeSeconds;
-        }
-      });
-    }
+    activities.forEach((activity) => {
+      sessionsAmount += activity.sessionsAmount;
+      spentTimeSeconds += activity.spentTimeSeconds;
+    });
 
     return {
-      ...activityGroup?.toObject(),
+      ...activityGroup!.toObject(),
       sessionsAmount,
       spentTimeSeconds,
     };
@@ -88,11 +115,10 @@ async function existsActivityGroup(
   return true;
 }
 
-// TODO: добавить return type
 async function createActivityGroup(
   activityGroupDTO: ActivityGroupDTO,
   userId: string
-) {
+): Promise<IDetailedActivityGroup> {
   try {
     const newActivityGroup = new ActivityGroup({
       name: activityGroupDTO.name,
@@ -112,22 +138,21 @@ async function createActivityGroup(
 
     const newActivityGroupWithId = await newActivityGroup.save();
 
-    return getActivityGroup(
-      newActivityGroupWithId._id.toString(),
+    return getDetailedActivityGroup({
+      activityGroupId: newActivityGroupWithId._id.toString(),
       userId,
-      true
-    );
+      onlyCompleted: false,
+    });
   } catch (e) {
     throw e;
   }
 }
 
-// TODO: добавить return type
 async function updateActivityGroup(
   activityGroupId: string,
   activityGroupDTO: ActivityGroupDTO,
   userId: string
-) {
+): Promise<IDetailedActivityGroup> {
   try {
     if (!(await existsActivityGroup(activityGroupId, userId))) {
       throw new HttpError(404, 'Activity Group Not Found');
@@ -150,14 +175,20 @@ async function updateActivityGroup(
 
     await activityGroup!.save();
 
-    return getActivityGroup(activityGroupId, userId, true);
+    return getDetailedActivityGroup({
+      activityGroupId,
+      userId,
+      onlyCompleted: false,
+    });
   } catch (e) {
     throw e;
   }
 }
 
-// TODO: добавить return type
-async function deleteActivityGroup(activityGroupId: string, userId: string) {
+async function deleteActivityGroup(
+  activityGroupId: string,
+  userId: string
+): Promise<{ message: string }> {
   try {
     if (!(await existsActivityGroup(activityGroupId, userId))) {
       throw new HttpError(404, 'Activity Group Not Found');
@@ -168,29 +199,19 @@ async function deleteActivityGroup(activityGroupId: string, userId: string) {
       userId,
       detailed: false,
     });
-    if (activities && activities.length > 0) {
-      await Promise.all(
-        activities?.map(async (activity) => {
-          if (activity) {
-            if (activity._id) {
-              await activityService.deleteActivity(
-                activity._id.toString(),
-                userId
-              );
-            }
-          }
-        })
-      );
-    }
+    await Promise.all(
+      activities.map(async (activity) => {
+        await activityService.deleteActivity(activity._id.toString(), userId);
+      })
+    );
 
     await ActivityGroup.findById(activityGroupId).updateOne({
       deleted: true,
     });
 
-    const message = {
+    return {
       message: 'Deleted successful',
     };
-    return message;
   } catch (e) {
     throw e;
   }
@@ -198,7 +219,8 @@ async function deleteActivityGroup(activityGroupId: string, userId: string) {
 
 export default {
   getActivityGroups,
-  getActivityGroup,
+  getDetailedActivityGroups,
+  getDetailedActivityGroup,
   existsActivityGroup,
   createActivityGroup,
   updateActivityGroup,

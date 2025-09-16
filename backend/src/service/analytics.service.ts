@@ -26,18 +26,14 @@ async function getActivityDistributions(
   const activities = await activityService.getActivities({
     userId,
   });
-  if (activities.length > 0) {
-    activityDistributions = activities
-      .filter((activity) => activity && activity.name)
-      .map((activity) => {
-        const activityDistribution: ActivityDistribution = {
-          activityName: activity?.name || '',
-          sessionsAmount: 0,
-          spentTimeSeconds: 0,
-        };
-        return activityDistribution;
-      });
-  }
+  activityDistributions = activities.map((activity) => {
+    const activityDistribution: ActivityDistribution = {
+      activityName: activity.name,
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
+    };
+    return activityDistribution;
+  });
 
   let activitiesSeconds: number = 0;
   let activitiesSessions: number = 0;
@@ -218,7 +214,6 @@ function getTimeBars(
   return timeBars;
 }
 
-// TODO: получать просто POJO объекты (dehydration, вызов lean метода)
 async function getAnalyticsForRange(
   startOfRange: Date,
   endOfRange: Date,
