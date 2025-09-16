@@ -42,6 +42,14 @@ interface GetAnalyticsForRangeOptions {
   timezone: string;
 }
 
+const analyticsService = {
+  getSessionsStatistics,
+  getActivityDistributions,
+  getTimeBarType,
+  getTimeBars,
+  getAnalyticsForRange,
+};
+
 async function getSessionsStatistics({
   sessionParts,
   completedSessions,
@@ -285,25 +293,27 @@ async function getAnalyticsForRange({
       userId,
     });
 
-    const { sessionsAmount, spentTimeSeconds } = await getSessionsStatistics({
-      sessionParts: sessionPartsForRange,
-      completedSessions: completedSessionsForRange,
-    });
+    const { sessionsAmount, spentTimeSeconds } =
+      await analyticsService.getSessionsStatistics({
+        sessionParts: sessionPartsForRange,
+        completedSessions: completedSessionsForRange,
+      });
 
-    const activityDistribution = await getActivityDistributions({
-      allSessionsAmount: sessionsAmount,
-      allSpentTimeSeconds: spentTimeSeconds,
-      sessionParts: sessionPartsForRange,
-      completedSessions: completedSessionsForRange,
-      userId,
-    });
+    const activityDistribution =
+      await analyticsService.getActivityDistributions({
+        allSessionsAmount: sessionsAmount,
+        allSpentTimeSeconds: spentTimeSeconds,
+        sessionParts: sessionPartsForRange,
+        completedSessions: completedSessionsForRange,
+        userId,
+      });
 
-    const timeBars = getTimeBars({
+    const timeBars = analyticsService.getTimeBars({
       startOfRange,
       endOfRange,
       sessionParts: sessionPartsForRange,
       completedSessions: completedSessionsForRange,
-      barType: getTimeBarType(startOfRange, endOfRange),
+      barType: analyticsService.getTimeBarType(startOfRange, endOfRange),
       timezone,
     });
 
@@ -318,10 +328,4 @@ async function getAnalyticsForRange({
   }
 }
 
-export default {
-  getSessionsStatistics,
-  getActivityDistributions,
-  getTimeBarType,
-  getTimeBars,
-  getAnalyticsForRange,
-};
+export default analyticsService;

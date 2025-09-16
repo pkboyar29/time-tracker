@@ -44,6 +44,19 @@ interface GetSplitActivitiesOptions {
   detailed: boolean;
 }
 
+const activityService = {
+  getActivities,
+  getDetailedActivities,
+  getActivitiesForActivityGroup,
+  getSplitActivities,
+  getDetailedActivity,
+  existsActivity,
+  createActivity,
+  updateActivity,
+  deleteActivity,
+  addActivityToLastActivities,
+};
+
 async function getActivities({
   userId,
   activityGroupId,
@@ -78,12 +91,12 @@ async function getDetailedActivities({
       userId,
       ...(activityGroupId && { activityGroupId }),
     };
-    const allActivities = await getActivities(filter);
+    const allActivities = await activityService.getActivities(filter);
 
     // TODO: вместо вызова по отдельности getDetailedActivity как-то это делать более оптимизированно, чтобы не было такого количества запросов к БД
     const detailedAllActivities = await Promise.all(
       allActivities.map(async (a) =>
-        getDetailedActivity({
+        activityService.getDetailedActivity({
           activityId: a._id.toString(),
           userId,
           onlyCompleted,
@@ -124,14 +137,14 @@ async function getActivitiesForActivityGroup({
 
     if (detailed) {
       let onlyCompletedParam = onlyCompleted ? onlyCompleted : false;
-      return await getDetailedActivities({
+      return await activityService.getDetailedActivities({
         userId,
         activityGroupId,
         onlyCompleted: onlyCompletedParam,
       });
     }
 
-    return await getActivities({
+    return await activityService.getActivities({
       userId,
       activityGroupId,
       sortByCreatedDate: true,
@@ -161,12 +174,12 @@ async function getSplitActivities({
 }: GetSplitActivitiesOptions) {
   let allActivities = [];
   if (detailed) {
-    allActivities = await getDetailedActivities({
+    allActivities = await activityService.getDetailedActivities({
       userId,
       onlyCompleted: false,
     });
   } else {
-    allActivities = await getActivities({ userId });
+    allActivities = await activityService.getActivities({ userId });
   }
 
   const userTopActivities = await UserTopActivity.find(
@@ -199,7 +212,7 @@ async function getDetailedActivity({
   onlyCompleted,
 }: GetDetailedActivityOptions): Promise<IDetailedActivity> {
   try {
-    if (!(await existsActivity(activityId, userId))) {
+    if (!(await activityService.existsActivity(activityId, userId))) {
       throw new HttpError(404, 'Activity Not Found');
     }
 
@@ -290,7 +303,7 @@ async function createActivity(
 
     const newActivityWithId = await newActivity.save();
 
-    return getDetailedActivity({
+    return activityService.getDetailedActivity({
       activityId: newActivityWithId._id.toString(),
       userId,
       onlyCompleted: false,
@@ -307,7 +320,7 @@ async function updateActivity(
   userId: string
 ): Promise<IDetailedActivity> {
   try {
-    if (!(await existsActivity(activityId, userId))) {
+    if (!(await activityService.existsActivity(activityId, userId))) {
       throw new HttpError(404, 'Activity Not Found');
     }
 
@@ -328,7 +341,7 @@ async function updateActivity(
 
     await activity!.save();
 
-    return getDetailedActivity({
+    return activityService.getDetailedActivity({
       activityId,
       userId,
       onlyCompleted: false,
@@ -343,7 +356,7 @@ async function deleteActivity(
   userId: string
 ): Promise<{ message: string }> {
   try {
-    if (!(await existsActivity(activityId, userId))) {
+    if (!(await activityService.existsActivity(activityId, userId))) {
       throw new HttpError(404, 'Activity Not Found');
     }
 
@@ -395,15 +408,4 @@ async function addActivityToLastActivities(activityId: string, userId: string) {
   }
 }
 
-export default {
-  getActivities,
-  getDetailedActivities,
-  getActivitiesForActivityGroup,
-  getSplitActivities,
-  getDetailedActivity,
-  existsActivity,
-  createActivity,
-  updateActivity,
-  deleteActivity,
-  addActivityToLastActivities,
-};
+export default activityService;

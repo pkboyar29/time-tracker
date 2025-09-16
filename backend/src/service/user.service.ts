@@ -18,6 +18,23 @@ interface AuthorizeResponse {
   refresh: string;
 }
 
+const userService = {
+  signUp,
+  signIn,
+  createTokens,
+  createToken,
+  createAccessToken,
+  createRefreshToken,
+  checkToken,
+  decodeAccessToken,
+  refreshAccessToken,
+  getProfileInfo,
+  updateDailyGoal,
+  updateShowTimerInTitle,
+  exportUserData,
+  importFile,
+};
+
 async function signUp(
   userSignUpDTO: UserSignUpDTO
 ): Promise<AuthorizeResponse> {
@@ -70,7 +87,7 @@ async function signUp(
 
   const newUserWithId = await newUser.save();
 
-  return createTokens(newUserWithId.id);
+  return userService.createTokens(newUserWithId.id);
 }
 
 async function signIn(
@@ -85,13 +102,13 @@ async function signIn(
     throw new HttpError(400, 'Password incorrect');
   }
 
-  return createTokens(user[0].id);
+  return userService.createTokens(user[0].id);
 }
 
 function createTokens(userId: string): AuthorizeResponse {
   return {
-    access: createAccessToken(userId),
-    refresh: createRefreshToken(userId),
+    access: userService.createAccessToken(userId),
+    refresh: userService.createRefreshToken(userId),
   };
 }
 
@@ -141,7 +158,7 @@ function checkToken(jwt: string, checkingTokenType: 'access' | 'refresh') {
 }
 
 function createAccessToken(userId: string): string {
-  let accessToken = createToken(
+  let accessToken = userService.createToken(
     userId,
     'access',
     process.env.ACCESS_TOKEN_SECRET
@@ -153,7 +170,7 @@ function createAccessToken(userId: string): string {
 }
 
 function createRefreshToken(userId: string): string {
-  let refreshToken = createToken(
+  let refreshToken = userService.createToken(
     userId,
     'refresh',
     process.env.REFRESH_TOKEN_SECRET
@@ -165,7 +182,7 @@ function createRefreshToken(userId: string): string {
 }
 
 function decodeAccessToken(jwt: string): JwtPayload | null {
-  checkToken(jwt, 'access');
+  userService.checkToken(jwt, 'access');
 
   const payload: JwtPayload | null = jsonwebtoken.decode(jwt, {
     json: true,
@@ -175,13 +192,13 @@ function decodeAccessToken(jwt: string): JwtPayload | null {
 }
 
 function refreshAccessToken(refreshToken: string): string | undefined {
-  checkToken(refreshToken, 'refresh');
+  userService.checkToken(refreshToken, 'refresh');
 
   const refreshPayload: JwtPayload | null = jsonwebtoken.decode(refreshToken, {
     json: true,
   });
   if (refreshPayload) {
-    return createAccessToken(refreshPayload.userId);
+    return userService.createAccessToken(refreshPayload.userId);
   }
 }
 
@@ -396,19 +413,4 @@ async function importFile(
   return 'Импорт успешен';
 }
 
-export default {
-  signUp,
-  signIn,
-  createTokens,
-  createToken,
-  createAccessToken,
-  createRefreshToken,
-  checkToken,
-  decodeAccessToken,
-  refreshAccessToken,
-  getProfileInfo,
-  updateDailyGoal,
-  updateShowTimerInTitle,
-  exportUserData,
-  importFile,
-};
+export default userService;

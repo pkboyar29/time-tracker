@@ -22,6 +22,10 @@ interface GetSessionPartsInDateRangeOptions {
   userId: string;
 }
 
+const sessionPartService = {
+  getSessionPartsInDateRange,
+};
+
 async function getSessionPartsInDateRange({
   startRange,
   endRange,
@@ -45,6 +49,4 @@ async function getSessionPartsInDateRange({
   }
 }
 
-export default {
-  getSessionPartsInDateRange,
-};
+export default sessionPartService;

@@ -29,6 +29,16 @@ interface GetSessionsForActivityOptions {
   completed?: boolean;
 }
 
+const sessionService = {
+  getSessions,
+  getSessionsForActivity,
+  getSession,
+  existsSession,
+  createSession,
+  updateSession,
+  deleteSession,
+};
+
 async function getSessions({
   filter = {},
   userId,
@@ -58,13 +68,12 @@ async function getSessionsForActivity({
 
     const filter: Record<string, unknown> = {
       activity: activityId,
-      getSessions,
     };
     if (completed !== undefined) {
       filter.completed = completed;
     }
 
-    return await getSessions({ filter, userId });
+    return await sessionService.getSessions({ filter, userId });
   } catch (e) {
     throw e;
   }
@@ -75,7 +84,7 @@ async function getSession(
   userId: string
 ): Promise<ISession> {
   try {
-    if (!(await existsSession(sessionId, userId))) {
+    if (!(await sessionService.existsSession(sessionId, userId))) {
       throw new HttpError(404, 'Session Not Found');
     }
 
@@ -172,7 +181,7 @@ async function updateSession(
   userId: string
 ): Promise<ISession> {
   try {
-    if (!(await existsSession(sessionId, userId))) {
+    if (!(await sessionService.existsSession(sessionId, userId))) {
       throw new HttpError(404, 'Session Not Found');
     }
 
@@ -232,7 +241,7 @@ async function updateSession(
 
     await session!.save();
 
-    return await getSession(sessionId, userId);
+    return await sessionService.getSession(sessionId, userId);
   } catch (e) {
     throw e;
   }
@@ -243,7 +252,7 @@ async function deleteSession(
   userId: string
 ): Promise<{ message: string }> {
   try {
-    if (!(await existsSession(sessionId, userId))) {
+    if (!(await sessionService.existsSession(sessionId, userId))) {
       throw new HttpError(404, 'Session Not Found');
     }
 
@@ -259,12 +268,4 @@ async function deleteSession(
   }
 }
 
-export default {
-  getSessions,
-  getSessionsForActivity,
-  getSession,
-  existsSession,
-  createSession,
-  updateSession,
-  deleteSession,
-};
+export default sessionService;

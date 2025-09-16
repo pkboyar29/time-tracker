@@ -22,6 +22,16 @@ interface GetDetailedActivityGroupOptions {
   onlyCompleted: boolean;
 }
 
+const activityGroupService = {
+  getActivityGroups,
+  getDetailedActivityGroups,
+  getDetailedActivityGroup,
+  existsActivityGroup,
+  createActivityGroup,
+  updateActivityGroup,
+  deleteActivityGroup,
+};
+
 async function getActivityGroups({
   userId,
 }: GetActivityGroupsOptions): Promise<IActivityGroup[]> {
@@ -42,11 +52,11 @@ async function getDetailedActivityGroups({
   userId,
   onlyCompleted,
 }: GetDetailedActivityGroupsOptions): Promise<IDetailedActivityGroup[]> {
-  const groups = await getActivityGroups({ userId });
+  const groups = await activityGroupService.getActivityGroups({ userId });
 
   const detailedGroups = await Promise.all(
     groups.map(async (group) =>
-      getDetailedActivityGroup({
+      activityGroupService.getDetailedActivityGroup({
         activityGroupId: group._id.toString(),
         userId,
         onlyCompleted,
@@ -63,7 +73,9 @@ async function getDetailedActivityGroup({
   onlyCompleted,
 }: GetDetailedActivityGroupOptions): Promise<IDetailedActivityGroup> {
   try {
-    if (!(await existsActivityGroup(activityGroupId, userId))) {
+    if (
+      !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
+    ) {
       throw new HttpError(404, 'Activity Group Not Found');
     }
     const activityGroup = await ActivityGroup.findById(activityGroupId);
@@ -138,7 +150,7 @@ async function createActivityGroup(
 
     const newActivityGroupWithId = await newActivityGroup.save();
 
-    return getDetailedActivityGroup({
+    return activityGroupService.getDetailedActivityGroup({
       activityGroupId: newActivityGroupWithId._id.toString(),
       userId,
       onlyCompleted: false,
@@ -154,7 +166,9 @@ async function updateActivityGroup(
   userId: string
 ): Promise<IDetailedActivityGroup> {
   try {
-    if (!(await existsActivityGroup(activityGroupId, userId))) {
+    if (
+      !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
+    ) {
       throw new HttpError(404, 'Activity Group Not Found');
     }
 
@@ -175,7 +189,7 @@ async function updateActivityGroup(
 
     await activityGroup!.save();
 
-    return getDetailedActivityGroup({
+    return activityGroupService.getDetailedActivityGroup({
       activityGroupId,
       userId,
       onlyCompleted: false,
@@ -190,7 +204,9 @@ async function deleteActivityGroup(
   userId: string
 ): Promise<{ message: string }> {
   try {
-    if (!(await existsActivityGroup(activityGroupId, userId))) {
+    if (
+      !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
+    ) {
       throw new HttpError(404, 'Activity Group Not Found');
     }
 
@@ -217,12 +233,4 @@ async function deleteActivityGroup(
   }
 }
 
-export default {
-  getActivityGroups,
-  getDetailedActivityGroups,
-  getDetailedActivityGroup,
-  existsActivityGroup,
-  createActivityGroup,
-  updateActivityGroup,
-  deleteActivityGroup,
-};
+export default activityGroupService;
