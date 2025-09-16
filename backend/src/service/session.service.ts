@@ -1,4 +1,4 @@
-import Session from '../model/session.model';
+import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
@@ -18,229 +18,253 @@ const activityPopulateConfig = {
   },
 };
 
-export default {
-  async getSessions(filter: Record<string, unknown> = {}, userId: string) {
-    try {
-      const sessions = await Session.find({
-        deleted: false,
-        user: userId,
-        ...filter,
-      }).populate<{ activity: PopulatedActivity }>(activityPopulateConfig);
+interface GetSessionsOptions {
+  filter: Record<string, unknown>;
+  userId: string;
+}
 
-      return sessions;
-    } catch (e) {
-      this.handleError(e);
+interface GetSessionsForActivityOptions {
+  activityId: string;
+  userId: string;
+  completed?: boolean;
+}
+
+async function getSessions({
+  filter = {},
+  userId,
+}: GetSessionsOptions): Promise<ISession[]> {
+  try {
+    const sessions = await Session.find({
+      deleted: false,
+      user: userId,
+      ...filter,
+    }).populate<{ activity: PopulatedActivity }>(activityPopulateConfig);
+
+    return sessions;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function getSessionsForActivity({
+  activityId,
+  userId,
+  completed,
+}: GetSessionsForActivityOptions): Promise<ISession[]> {
+  try {
+    if (!(await activityService.existsActivity(activityId, userId))) {
+      throw new HttpError(404, 'Activity For Session Not Found');
     }
-  },
 
-  async getSessionsForActivity(
-    activityId: string,
-    userId: string,
-    completed?: boolean
-  ) {
-    try {
-      if (!(await activityService.existsActivity(activityId, userId))) {
-        throw new HttpError(404, 'Activity For Session Not Found');
-      }
-
-      const filter: Record<string, unknown> = {
-        activity: activityId,
-      };
-      if (completed !== undefined) {
-        filter.completed = completed;
-      }
-
-      return await this.getSessions(filter, userId);
-    } catch (e) {
-      this.handleError(e);
+    const filter: Record<string, unknown> = {
+      activity: activityId,
+      getSessions,
+    };
+    if (completed !== undefined) {
+      filter.completed = completed;
     }
-  },
 
-  async getSession(sessionId: string, userId: string) {
-    try {
-      if (!(await this.existsSession(sessionId, userId))) {
-        throw new HttpError(404, 'Session Not Found');
-      }
+    return await getSessions({ filter, userId });
+  } catch (e) {
+    throw e;
+  }
+}
 
-      return await Session.findById(sessionId).populate<{
-        activity: PopulatedActivity;
-      }>(activityPopulateConfig);
-    } catch (e) {
-      this.handleError(e);
+async function getSession(
+  sessionId: string,
+  userId: string
+): Promise<ISession> {
+  try {
+    if (!(await existsSession(sessionId, userId))) {
+      throw new HttpError(404, 'Session Not Found');
     }
-  },
 
-  async existsSession(sessionId: string, userId: string) {
-    if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+    const session = await Session.findById(sessionId).populate<{
+      activity: PopulatedActivity;
+    }>(activityPopulateConfig);
+    return session!;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function existsSession(
+  sessionId: string,
+  userId: string
+): Promise<boolean> {
+  if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+    return false;
+  }
+
+  const session = await Session.findById(sessionId);
+  if (!session) {
+    return false;
+  }
+
+  if (session.deleted) {
+    return false;
+  }
+
+  if (session.activity) {
+    if (
+      !(await activityService.existsActivity(
+        session.activity.toString(),
+        userId
+      ))
+    ) {
       return false;
+    }
+  }
+
+  if (session.user.toString() !== userId) {
+    return false;
+  }
+
+  return true;
+}
+
+async function createSession(
+  sessionDTO: SessionCreateDTO,
+  userId: string
+): Promise<ISession> {
+  try {
+    if (sessionDTO.activity) {
+      if (
+        !(await activityService.existsActivity(sessionDTO.activity, userId))
+      ) {
+        throw new HttpError(404, 'Activity Not Found');
+      }
+    }
+
+    const newSession = new Session({
+      totalTimeSeconds: sessionDTO.totalTimeSeconds,
+      spentTimeSeconds: 0,
+      activity: sessionDTO.activity,
+      user: userId,
+    });
+
+    const validationError = newSession.validateSync();
+    if (validationError) {
+      if (validationError.errors.totalTimeSeconds) {
+        throw new HttpError(
+          400,
+          validationError.errors.totalTimeSeconds.toString()
+        );
+      }
+    }
+
+    if (sessionDTO.activity) {
+      await activityService.addActivityToLastActivities(
+        sessionDTO.activity,
+        userId
+      );
+    }
+
+    return (await newSession.save()).populate(activityPopulateConfig);
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function updateSession(
+  sessionId: string,
+  sessionDTO: SessionUpdateDTO,
+  userId: string
+): Promise<ISession> {
+  try {
+    if (!(await existsSession(sessionId, userId))) {
+      throw new HttpError(404, 'Session Not Found');
+    }
+
+    if (
+      Number(sessionDTO.spentTimeSeconds) > Number(sessionDTO.totalTimeSeconds)
+    ) {
+      throw new HttpError(
+        400,
+        'Total time must be greater or equal spent time'
+      );
     }
 
     const session = await Session.findById(sessionId);
-    if (!session) {
-      return false;
+
+    if (session!.completed) {
+      throw new HttpError(
+        400,
+        'You cannot update an already completed session'
+      );
     }
 
-    if (session.deleted) {
-      return false;
+    if (session!.spentTimeSeconds > sessionDTO.spentTimeSeconds) {
+      throw new HttpError(
+        400,
+        "You cannot reduce a session's spentTimeSeconds"
+      );
     }
 
-    if (session.activity) {
-      if (
-        !(await activityService.existsActivity(
-          session.activity.toString(),
-          userId
-        ))
-      ) {
-        return false;
-      }
-    }
+    let partSpentTimeSeconds: number =
+      sessionDTO.spentTimeSeconds - session!.spentTimeSeconds;
+    const newSessionPart = new SessionPart({
+      spentTimeSeconds: partSpentTimeSeconds,
+      session: sessionId,
+      user: userId,
+      createdDate: Date.now(),
+    });
+    await newSessionPart.save();
 
-    if (session.user.toString() !== userId) {
-      return false;
-    }
+    session!.totalTimeSeconds = sessionDTO.totalTimeSeconds;
+    session!.spentTimeSeconds = sessionDTO.spentTimeSeconds;
+    session!.note = sessionDTO.note;
+    session!.completed =
+      sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds;
+    session!.updatedDate = new Date();
 
-    return true;
-  },
+    const validationError = session!.validateSync();
+    if (validationError) {
+      const fields = ['totalTimeSeconds', 'spentTimeSeconds', 'note'] as const;
 
-  async createSession(sessionDTO: SessionCreateDTO, userId: string) {
-    try {
-      if (sessionDTO.activity) {
-        if (
-          !(await activityService.existsActivity(sessionDTO.activity, userId))
-        ) {
-          throw new HttpError(404, 'Activity Not Found');
+      for (const field of fields) {
+        const err = validationError.errors[field];
+        if (err) {
+          throw new HttpError(400, err.toString());
         }
       }
-
-      const newSession = new Session({
-        totalTimeSeconds: sessionDTO.totalTimeSeconds,
-        spentTimeSeconds: 0,
-        activity: sessionDTO.activity,
-        user: userId,
-      });
-
-      const validationError = newSession.validateSync();
-      if (validationError) {
-        if (validationError.errors.totalTimeSeconds) {
-          throw new HttpError(
-            400,
-            validationError.errors.totalTimeSeconds.toString()
-          );
-        }
-      }
-
-      if (sessionDTO.activity) {
-        await activityService.addActivityToLastActivities(
-          sessionDTO.activity,
-          userId
-        );
-      }
-
-      return (await newSession.save()).populate(activityPopulateConfig);
-    } catch (e) {
-      this.handleError(e);
     }
-  },
 
-  async updateSession(
-    sessionId: string,
-    sessionDTO: SessionUpdateDTO,
-    userId: string
-  ) {
-    try {
-      if (!(await this.existsSession(sessionId, userId))) {
-        throw new HttpError(404, 'Session Not Found');
-      }
+    await session!.save();
 
-      if (
-        Number(sessionDTO.spentTimeSeconds) >
-        Number(sessionDTO.totalTimeSeconds)
-      ) {
-        throw new HttpError(
-          400,
-          'Total time must be greater or equal spent time'
-        );
-      }
+    return await getSession(sessionId, userId);
+  } catch (e) {
+    throw e;
+  }
+}
 
-      const session = await Session.findById(sessionId);
-
-      if (session!.completed) {
-        throw new HttpError(
-          400,
-          'You cannot update an already completed session'
-        );
-      }
-
-      if (session!.spentTimeSeconds > sessionDTO.spentTimeSeconds) {
-        throw new HttpError(
-          400,
-          "You cannot reduce a session's spentTimeSeconds"
-        );
-      }
-
-      let partSpentTimeSeconds: number =
-        sessionDTO.spentTimeSeconds - session!.spentTimeSeconds;
-      const newSessionPart = new SessionPart({
-        spentTimeSeconds: partSpentTimeSeconds,
-        session: sessionId,
-        user: userId,
-        createdDate: Date.now(),
-      });
-      await newSessionPart.save();
-
-      session!.totalTimeSeconds = sessionDTO.totalTimeSeconds;
-      session!.spentTimeSeconds = sessionDTO.spentTimeSeconds;
-      session!.note = sessionDTO.note;
-      session!.completed =
-        sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds;
-      session!.updatedDate = new Date();
-
-      const validationError = session!.validateSync();
-      if (validationError) {
-        const fields = [
-          'totalTimeSeconds',
-          'spentTimeSeconds',
-          'note',
-        ] as const;
-
-        for (const field of fields) {
-          const err = validationError.errors[field];
-          if (err) {
-            throw new HttpError(400, err.toString());
-          }
-        }
-      }
-
-      await session!.save();
-
-      return await this.getSession(sessionId, userId);
-    } catch (e) {
-      this.handleError(e);
+async function deleteSession(
+  sessionId: string,
+  userId: string
+): Promise<{ message: string }> {
+  try {
+    if (!(await existsSession(sessionId, userId))) {
+      throw new HttpError(404, 'Session Not Found');
     }
-  },
 
-  async deleteSession(sessionId: string, userId: string) {
-    try {
-      if (!(await this.existsSession(sessionId, userId))) {
-        throw new HttpError(404, 'Session Not Found');
-      }
+    await Session.findById(sessionId).updateOne({
+      deleted: true,
+    });
 
-      await Session.findById(sessionId).updateOne({
-        deleted: true,
-      });
+    return {
+      message: 'Deleted successful',
+    };
+  } catch (e) {
+    throw e;
+  }
+}
 
-      const message = {
-        message: 'Deleted successful',
-      };
-      return message;
-    } catch (e) {
-      this.handleError(e);
-    }
-  },
-
-  handleError(e: unknown) {
-    if (e instanceof Error || e instanceof HttpError) {
-      throw e;
-    }
-  },
+export default {
+  getSessions,
+  getSessionsForActivity,
+  getSession,
+  existsSession,
+  createSession,
+  updateSession,
+  deleteSession,
 };

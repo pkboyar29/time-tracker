@@ -1,5 +1,9 @@
-import analyticsService from '../../service/analytics.service';
-import activityService from '../../service/activity.service';
+import analyticsService from '../../../service/analytics.service';
+import activityService from '../../../service/activity.service';
+import { IActivity } from '../../../model/activity.model';
+import mongoose from 'mongoose';
+import { ISessionPart } from '../../../model/sessionPart.model';
+import { ISession } from '../../../model/session.model';
 
 describe('analyticsService.getTimeBarType', () => {
   it('returns "hour" when range is exactly 1 day', () => {
@@ -58,44 +62,77 @@ describe('analyticsService.getTimeBarType', () => {
 });
 
 describe('analyticsService.getTimeBars', () => {
-  const sessionParts = [
+  const sessionParts: ISessionPart[] = [
     {
-      createdDate: new Date('2025-07-01T10:00:00Z'),
+      _id: new mongoose.Types.ObjectId(),
+      session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 1200,
+      createdDate: new Date('2025-07-01T10:00:00Z'),
+      user: new mongoose.Types.ObjectId(),
     },
     {
-      createdDate: new Date('2025-07-01T12:00:00Z'),
+      _id: new mongoose.Types.ObjectId(),
+      session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 600,
+      createdDate: new Date('2025-07-01T12:00:00Z'),
+      user: new mongoose.Types.ObjectId(),
     },
     {
-      createdDate: new Date('2025-07-02T09:00:00Z'),
+      _id: new mongoose.Types.ObjectId(),
+      session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 900,
+      createdDate: new Date('2025-07-02T09:00:00Z'),
+      user: new mongoose.Types.ObjectId(),
     },
   ];
 
-  const completedSessions = [
+  const completedSessions: ISession[] = [
     {
+      _id: new mongoose.Types.ObjectId(),
+      activity: { name: 'Reading' },
+      totalTimeSeconds: 0,
+      spentTimeSeconds: 0,
+      completed: false,
+      user: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
       updatedDate: new Date('2025-07-01T13:00:00Z'),
+      deleted: false,
     },
     {
+      _id: new mongoose.Types.ObjectId(),
+      activity: { name: 'Reading' },
+      totalTimeSeconds: 0,
+      spentTimeSeconds: 0,
+      completed: false,
+      user: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
       updatedDate: new Date('2025-07-02T14:00:00Z'),
+      deleted: false,
     },
     {
+      _id: new mongoose.Types.ObjectId(),
+      activity: { name: 'Reading' },
+      totalTimeSeconds: 0,
+      spentTimeSeconds: 0,
+      completed: false,
+      user: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
       updatedDate: new Date('2025-07-02T15:00:00Z'),
+      deleted: false,
     },
   ];
   it('should return correct day-based time bars', () => {
     const start = new Date('2025-07-01T00:00:00Z');
     const end = new Date('2025-07-03T00:00:00Z');
 
-    const result = analyticsService.getTimeBars(
-      start,
-      end,
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
       sessionParts,
       completedSessions,
-      'day',
-      'UTC'
-    );
+      barType: 'day',
+      timezone: 'UTC',
+    });
 
     expect(result).toHaveLength(2);
 
@@ -118,14 +155,14 @@ describe('analyticsService.getTimeBars', () => {
     const start = new Date('2025-07-01T00:00:00Z');
     const end = new Date('2025-07-02T18:00:00Z');
 
-    const result = analyticsService.getTimeBars(
-      start,
-      end,
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
       sessionParts,
       completedSessions,
-      'day',
-      'UTC'
-    );
+      barType: 'day',
+      timezone: 'UTC',
+    });
 
     expect(result).toHaveLength(2);
 
@@ -148,14 +185,14 @@ describe('analyticsService.getTimeBars', () => {
     const start = new Date('2025-07-01T12:00:00Z');
     const end = new Date('2025-07-03T00:00:00Z');
 
-    const result = analyticsService.getTimeBars(
-      start,
-      end,
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
       sessionParts,
       completedSessions,
-      'day',
-      'UTC'
-    );
+      barType: 'day',
+      timezone: 'UTC',
+    });
 
     expect(result).toHaveLength(2);
 
@@ -178,14 +215,14 @@ describe('analyticsService.getTimeBars', () => {
     const start = new Date('2025-07-01T00:00:00Z');
     const end = new Date('2025-09-01T00:00:00Z');
 
-    const result = analyticsService.getTimeBars(
-      start,
-      end,
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
       sessionParts,
       completedSessions,
-      'month',
-      'UTC'
-    );
+      barType: 'month',
+      timezone: 'UTC',
+    });
 
     expect(result).toHaveLength(2);
 
@@ -208,14 +245,14 @@ describe('analyticsService.getTimeBars', () => {
     const start = new Date('2025-07-01T00:00:00Z');
     const end = new Date('2025-08-10T00:00:00Z');
 
-    const result = analyticsService.getTimeBars(
-      start,
-      end,
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
       sessionParts,
       completedSessions,
-      'month',
-      'UTC'
-    );
+      barType: 'month',
+      timezone: 'UTC',
+    });
 
     expect(result).toHaveLength(2);
 
@@ -238,14 +275,14 @@ describe('analyticsService.getTimeBars', () => {
     const start = new Date('2025-05-10T12:00:00Z');
     const end = new Date('2025-07-01T00:00:00Z');
 
-    const result = analyticsService.getTimeBars(
-      start,
-      end,
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
       sessionParts,
       completedSessions,
-      'month',
-      'UTC'
-    );
+      barType: 'month',
+      timezone: 'UTC',
+    });
 
     expect(result).toHaveLength(2);
 
@@ -266,21 +303,24 @@ describe('analyticsService.getTimeBars', () => {
 });
 
 describe('analyticsService.getActivityDistributions', () => {
-  const mockActivities = [
+  const mockActivities: IActivity[] = [
     {
+      _id: new mongoose.Types.ObjectId(),
       name: 'Reading',
-      activityGroup: { _id: '1', name: 'Study' },
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      user: new mongoose.Types.ObjectId(),
+      activityGroup: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
+      updatedDate: new Date(),
+      deleted: false,
     },
     {
+      _id: new mongoose.Types.ObjectId(),
       name: 'Coding',
-      activityGroup: {
-        _id: '2',
-        name: 'Work',
-      },
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      user: new mongoose.Types.ObjectId(),
+      activityGroup: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
+      updatedDate: new Date(),
+      deleted: false,
     },
   ];
 
@@ -289,41 +329,80 @@ describe('analyticsService.getActivityDistributions', () => {
       .spyOn(activityService, 'getActivities')
       .mockResolvedValue(mockActivities);
 
-    const completedSessions = [
-      { activity: { name: 'Reading' } },
-      { activity: { name: 'Reading' } },
-      { activity: { name: 'Coding' } },
+    const completedSessions: ISession[] = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        activity: { name: 'Reading' },
+        totalTimeSeconds: 0,
+        spentTimeSeconds: 0,
+        completed: false,
+        user: new mongoose.Types.ObjectId(),
+        createdDate: new Date(),
+        updatedDate: new Date(),
+        deleted: false,
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
+        activity: { name: 'Reading' },
+        totalTimeSeconds: 0,
+        spentTimeSeconds: 0,
+        completed: false,
+        user: new mongoose.Types.ObjectId(),
+        createdDate: new Date(),
+        updatedDate: new Date(),
+        deleted: false,
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
+        activity: { name: 'Coding' },
+        totalTimeSeconds: 0,
+        spentTimeSeconds: 0,
+        completed: false,
+        user: new mongoose.Types.ObjectId(),
+        createdDate: new Date(),
+        updatedDate: new Date(),
+        deleted: false,
+      },
     ];
 
-    const sessionParts = [
-      { session: { activity: { name: 'Reading' } }, spentTimeSeconds: 100 },
-      { session: { activity: { name: 'Coding' } }, spentTimeSeconds: 200 },
+    const sessionParts: ISessionPart[] = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        session: { activity: { name: 'Reading' } },
+        spentTimeSeconds: 100,
+        createdDate: new Date(),
+        user: new mongoose.Types.ObjectId(),
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
+        session: { activity: { name: 'Coding' } },
+        spentTimeSeconds: 200,
+        createdDate: new Date(),
+        user: new mongoose.Types.ObjectId(),
+      },
     ];
 
-    const result = await analyticsService.getActivityDistributions(
-      4, // allSessionsAmount
-      400, // allSpentTimeSeconds
+    const result = await analyticsService.getActivityDistributions({
+      allSessionsAmount: 4,
+      allSpentTimeSeconds: 400,
       sessionParts,
       completedSessions,
-      'user123'
-    );
+      userId: 'user123',
+    });
 
     expect(result).toEqual([
       {
         activityName: 'Reading',
-        activityGroup: { _id: '1', name: 'Study' },
         sessionsAmount: 2,
         spentTimeSeconds: 100,
       },
       {
         activityName: 'Coding',
-        activityGroup: { _id: '2', name: 'Work' },
         sessionsAmount: 1,
         spentTimeSeconds: 200,
       },
       {
         activityName: 'Without activity',
-        activityGroup: { _id: '0', name: 'wo' },
         sessionsAmount: 1, // 4 - 3
         spentTimeSeconds: 100, // 400 - (100+200)
       },
@@ -335,19 +414,37 @@ describe('analyticsService.getActivityDistributions', () => {
       .spyOn(activityService, 'getActivities')
       .mockResolvedValue(mockActivities);
 
-    const completedSessions = [{ activity: { name: 'Reading' } }];
-
-    const sessionParts = [
-      { session: { activity: { name: 'Reading' } }, spentTimeSeconds: 300 },
+    const completedSessions: ISession[] = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        activity: { name: 'Reading' },
+        totalTimeSeconds: 0,
+        spentTimeSeconds: 0,
+        completed: false,
+        user: new mongoose.Types.ObjectId(),
+        createdDate: new Date(),
+        updatedDate: new Date(),
+        deleted: false,
+      },
     ];
 
-    const result = await analyticsService.getActivityDistributions(
-      1,
-      300,
+    const sessionParts: ISessionPart[] = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        session: { activity: { name: 'Reading' } },
+        spentTimeSeconds: 300,
+        createdDate: new Date(),
+        user: new mongoose.Types.ObjectId(),
+      },
+    ];
+
+    const result = await analyticsService.getActivityDistributions({
+      allSessionsAmount: 1,
+      allSpentTimeSeconds: 300,
       sessionParts,
       completedSessions,
-      'user123'
-    );
+      userId: 'user123',
+    });
 
     expect(result).toHaveLength(1); // only one activity - reading, even if there are many activities returned in getActivities
 

@@ -6,6 +6,7 @@ import { useAppDispatch } from './redux/store';
 import { loadCurrentSession } from './redux/slices/sessionSlice';
 import { fetchProfileInfo } from './redux/slices/userSlice';
 import { getSessionIdFromLocalStorage } from './helpers/localstorageHelpers';
+import { colors } from '../design-tokens';
 
 import { ToastContainer } from 'react-toastify';
 import Sidebar from './components/Sidebar';
@@ -32,7 +33,11 @@ const App: FC = () => {
 
   return (
     <>
-      <ToastContainer position="top-right" limit={3} />
+      <ToastContainer
+        theme={localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'}
+        position="top-right"
+        limit={3}
+      />
 
       <div
         id="app"

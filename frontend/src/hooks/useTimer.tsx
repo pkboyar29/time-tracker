@@ -11,7 +11,7 @@ import {
   changeSpentSeconds,
   updateSession,
   resetCurrentSession,
-  setCompletedSessionId,
+  setLastCompletedSessionId,
 } from '../redux/slices/sessionSlice';
 import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
@@ -20,7 +20,7 @@ import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { toast } from 'react-toastify';
 
 interface TimerContextType {
-  toggleTimer: (startSpentSeconds: number) => void;
+  toggleTimer: (startSpentSeconds: number, mode: 'toggle' | 'enable') => void;
   stopTimer: (afterDelete?: boolean) => void;
   enabled: boolean;
 }
@@ -49,12 +49,20 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const dispatch = useAppDispatch();
 
   // TODO: не должны ли мы при нажатии на паузу устанавливать startTimestamp и startSpentSeconds на 0?
-  const toggleTimer = (startSpentSeconds: number) => {
+  const toggleTimer = (
+    startSpentSeconds: number,
+    mode: 'toggle' | 'enable' = 'toggle'
+  ) => {
     if (!enabled) {
       setStartTimestamp(Date.now());
       setStartSpentSeconds(startSpentSeconds);
     }
-    setEnabled((enabled) => !enabled);
+
+    if (mode === 'enable') {
+      setEnabled(true);
+    } else {
+      setEnabled((enabled) => !enabled);
+    }
   };
 
   const stopTimer = () => {
@@ -120,7 +128,9 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
       ) {
         try {
-          // TODO: останавливать таймер и воспроизводить музыку надо до того, как запрос завершиться? просто когда 1 секунду идет запрос, а музыки все еще нет, это странно. Также странно то, что таймер не выглядит остановленным, пока не завершился запрос
+          stopTimer();
+          playAudio(0.35);
+
           await dispatch(
             updateSession({
               ...currentSession,
@@ -128,9 +138,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
             })
           ).unwrap();
 
-          stopTimer();
-          playAudio(0.35);
-          dispatch(setCompletedSessionId(currentSession.id));
+          dispatch(setLastCompletedSessionId(currentSession.id));
           dispatch(resetCurrentSession());
           removeSessionFromLocalStorage();
         } catch (e) {

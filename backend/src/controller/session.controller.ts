@@ -19,16 +19,16 @@ router.get('/', async (req: Request, res: Response) => {
     }
 
     if (req.query.activityId) {
-      data = await sessionService.getSessionsForActivity(
-        req.query.activityId.toString(),
-        res.locals.userId,
-        completed
-      );
+      data = await sessionService.getSessionsForActivity({
+        activityId: req.query.activityId.toString(),
+        userId: res.locals.userId,
+        completed: completed,
+      });
     } else {
-      data = await sessionService.getSessions(
-        completed !== undefined ? { completed: completed } : {},
-        res.locals.userId
-      );
+      data = await sessionService.getSessions({
+        filter: completed !== undefined ? { completed: completed } : {},
+        userId: res.locals.userId,
+      });
     }
 
     res.json(data);

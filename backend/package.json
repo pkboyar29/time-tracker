@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "nodemon index.ts",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
+    "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --testPathPatterns=unit",
+    "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --testPathPatterns=integration",
     "build": "tsc",
-    "start": "npm run build && pm2 start ./build/index.js --name api --no-daemon"
+    "start": "npm run build && pm2 start ./build/index.js --name api --no-daemon",
+    "types": "tsc --noEmit --project ./tsconfig.json && tsc --noEmit --project ./tsconfig.node.json"
   },
   "author": "",
   "license": "ISC",
@@ -37,8 +40,11 @@
     "@types/luxon": "^3.6.2",
     "@types/multer": "^1.4.12",
     "@types/node": "^20.14.9",
+    "@types/supertest": "^6.0.3",
     "cross-env": "^7.0.3",
     "jest": "^30.0.2",
+    "mongodb-memory-server": "^10.2.0",
+    "supertest": "^7.1.4",
     "ts-jest": "^29.4.0"
   }
 }

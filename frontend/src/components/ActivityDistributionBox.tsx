@@ -52,7 +52,6 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
       pieItems = [
         ...pieItems,
         {
-          activityGroup: { _id: '', name: '' },
           activityName: 'Others',
           sessionsAmount: othersSessionsAmount,
           spentTimeSeconds: othersSpentTimeSeconds,

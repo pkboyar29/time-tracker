@@ -123,7 +123,8 @@ const ActivityGroupPage: FC = () => {
           }
         >
           <p className="mb-4 text-[15px] dark:text-textDark">
-            Are you sure you want to delete this activity?
+            Are you sure you want to delete this activity? Activity sessions
+            will not be included in analytics.
           </p>
           <Button
             onClick={() =>

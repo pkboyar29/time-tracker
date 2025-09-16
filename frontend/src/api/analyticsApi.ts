@@ -21,7 +21,6 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
       (unmappedDistr: any) => {
         return {
           activityName: unmappedDistr.activityName,
-          activityGroup: unmappedDistr.activityGroup,
           sessionsAmount: unmappedDistr.sessionsAmount,
           spentTimeSeconds: unmappedDistr.spentTimeSeconds,
           spentTimePercentage: parseFloat(

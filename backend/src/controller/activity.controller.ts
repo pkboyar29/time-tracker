@@ -6,17 +6,36 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    let data;
-
+    const detailedParam = req.query.detailed === 'true';
     const activityGroupIdParam = req.query.activityGroupId;
+
+    let data;
     if (activityGroupIdParam) {
-      data = await activityService.getActivitiesForActivityGroup(
-        activityGroupIdParam.toString(),
-        res.locals.userId
-      );
+      data = detailedParam
+        ? await activityService.getActivitiesForActivityGroup({
+            activityGroupId: activityGroupIdParam.toString(),
+            userId: res.locals.userId,
+            detailed: true,
+            onlyCompleted: false,
+          })
+        : await activityService.getActivitiesForActivityGroup({
+            activityGroupId: activityGroupIdParam.toString(),
+            userId: res.locals.userId,
+            detailed: false,
+            onlyCompleted: false,
+          });
     } else {
-      data = await activityService.getSplitActivities(res.locals.userId);
+      data = detailedParam
+        ? await activityService.getSplitActivities({
+            userId: res.locals.userId,
+            detailed: true,
+          })
+        : await activityService.getSplitActivities({
+            userId: res.locals.userId,
+            detailed: false,
+          });
     }
+
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);
@@ -25,10 +44,11 @@ router.get('/', async (req: Request, res: Response) => {
 
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await activityService.getActivity(
-      req.params.id,
-      res.locals.userId
-    );
+    const data = await activityService.getDetailedActivity({
+      activityId: req.params.id,
+      userId: res.locals.userId,
+      onlyCompleted: false,
+    });
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);

@@ -14,7 +14,7 @@ const mapResponseData = (unmappedActivityGroup: any): IActivityGroup => {
 };
 
 export const fetchActivityGroups = async (): Promise<IActivityGroup[]> => {
-  const { data } = await axios.get('/activity-groups');
+  const { data } = await axios.get('/activity-groups?detailed=true');
 
   return data.map((unmappedGroup: any) => mapResponseData(unmappedGroup));
 };

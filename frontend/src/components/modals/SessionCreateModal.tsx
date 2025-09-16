@@ -115,7 +115,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
                     ...activitiesToChoose.remainingActivities,
                   ].map((activity) => (
                     <option key={activity.id} value={activity.id}>
-                      {activity.activityGroup.name} / {activity.name}
+                      {activity.name}
                     </option>
                   ))}
                 </select>

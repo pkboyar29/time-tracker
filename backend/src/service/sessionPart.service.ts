@@ -1,4 +1,4 @@
-import SessionPart from '../model/sessionPart.model';
+import SessionPart, { ISessionPart } from '../model/sessionPart.model';
 
 interface PopulatedSession {
   deleted: boolean;
@@ -16,33 +16,35 @@ const sessionPopulateConfig = {
   },
 };
 
+interface GetSessionPartsInDateRangeOptions {
+  startRange: Date;
+  endRange: Date;
+  userId: string;
+}
+
+async function getSessionPartsInDateRange({
+  startRange,
+  endRange,
+  userId,
+}: GetSessionPartsInDateRangeOptions): Promise<ISessionPart[]> {
+  try {
+    const sessionParts = await SessionPart.find({
+      createdDate: { $gte: startRange, $lte: endRange },
+      user: userId,
+    }).populate<{
+      session: PopulatedSession;
+    }>(sessionPopulateConfig);
+
+    const filteredSessionsParts = sessionParts.filter(
+      (sessionPart) => !sessionPart.session.deleted
+    );
+
+    return filteredSessionsParts;
+  } catch (e) {
+    throw e;
+  }
+}
+
 export default {
-  async getSessionPartsInDateRange(
-    startRange: Date,
-    endRange: Date,
-    userId: string
-  ) {
-    try {
-      const sessionParts = await SessionPart.find({
-        createdDate: { $gte: startRange, $lte: endRange },
-        user: userId,
-      }).populate<{
-        session: PopulatedSession;
-      }>(sessionPopulateConfig);
-
-      const filteredSessionsParts = sessionParts.filter(
-        (sessionPart) => !sessionPart.session.deleted
-      );
-
-      return filteredSessionsParts;
-    } catch (e) {
-      this.handleError(e);
-    }
-  },
-
-  handleError(e: unknown) {
-    if (e instanceof Error) {
-      throw new Error(e.message);
-    }
-  },
+  getSessionPartsInDateRange,
 };

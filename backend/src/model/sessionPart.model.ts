@@ -1,6 +1,14 @@
-import mongoose, { InferSchemaType } from 'mongoose';
+import { Schema, model, Types, InferSchemaType } from 'mongoose';
 
-const sessionPartSchema = new mongoose.Schema({
+export interface ISessionPart {
+  _id: Types.ObjectId;
+  spentTimeSeconds: number;
+  session: { activity: { name: string } };
+  user: Types.ObjectId;
+  createdDate: Date;
+}
+
+const sessionPartSchema = new Schema({
   spentTimeSeconds: {
     type: Number,
     required: true,
@@ -8,12 +16,12 @@ const sessionPartSchema = new mongoose.Schema({
     max: [36000, 'SpentTimeSeconds should be maximum 10 hours'],
   },
   session: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'Session',
     required: true,
   },
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
@@ -24,11 +32,7 @@ const sessionPartSchema = new mongoose.Schema({
   },
 });
 
-const SessionPart = mongoose.model(
-  'SessionPart',
-  sessionPartSchema,
-  'session_parts'
-);
+const SessionPart = model('SessionPart', sessionPartSchema, 'session_parts');
 
 export default SessionPart;
 

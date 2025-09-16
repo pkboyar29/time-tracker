@@ -1,10 +1,9 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { useTimer } from '../hooks/useTimer';
 import { useStartSession } from '../hooks/useStartSession';
 import { deleteSession, updateSession } from '../redux/slices/sessionSlice';
 import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
-import { getSessionsListAfterSessionUpdate } from '../helpers/sessionHelpers';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -21,6 +20,15 @@ interface SessionsListProps {
   updateSessionsListHandler: (updatedSessions: ISession[]) => void;
 }
 
+const getSessionsListAfterSessionUpdate = (
+  oldList: ISession[],
+  updatedSession: ISession
+) => {
+  return oldList.map((session) =>
+    updatedSession.id == session.id ? updatedSession : session
+  );
+};
+
 const SessionsList: FC<SessionsListProps> = ({
   title,
   sessions,
@@ -34,6 +42,9 @@ const SessionsList: FC<SessionsListProps> = ({
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
   );
+  const lastCompletedSessionId = useAppSelector(
+    (state) => state.sessions.lastCompletedSessionId
+  );
 
   // removing current session from the list
   const sessionsWithoutCurrent = sessions.filter(
@@ -46,6 +57,30 @@ const SessionsList: FC<SessionsListProps> = ({
   });
 
   const [less, setLess] = useState<boolean>(false); // less - true, more - false
+
+  useEffect(() => {
+    if (currentSession) {
+      const isCurrentSessionInList = sessions.find(
+        (s) => s.id === currentSession.id
+      );
+
+      if (isCurrentSessionInList) {
+        updateSessionsListHandler(
+          getSessionsListAfterSessionUpdate(sessions, currentSession)
+        );
+      } else {
+        updateSessionsListHandler([...sessions, currentSession]);
+      }
+    }
+  }, [currentSession]);
+
+  useEffect(() => {
+    if (lastCompletedSessionId) {
+      updateSessionsListHandler(
+        sessions.filter((s) => s.id !== lastCompletedSessionId)
+      );
+    }
+  }, [lastCompletedSessionId]);
 
   const handleSessionClick = async (session: ISession) => {
     // updating the previous session if it's not paused
@@ -98,7 +133,8 @@ const SessionsList: FC<SessionsListProps> = ({
           }
         >
           <p className="mb-4 text-[15px] dark:text-textDark">
-            Are you sure you want to delete this session?
+            Are you sure you want to delete this session? The time spent on this
+            session will not be included in analytics.
           </p>
           <Button
             onClick={() =>

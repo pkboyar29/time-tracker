@@ -36,6 +36,7 @@ export const fetchGroupActivities = async (
 ): Promise<IActivity[]> => {
   const searchParams = new URLSearchParams();
   searchParams.append('activityGroupId', activityGroupId);
+  searchParams.append('detailed', 'true');
 
   const { data } = await axios.get(`/activities/?${searchParams.toString()}`);
 

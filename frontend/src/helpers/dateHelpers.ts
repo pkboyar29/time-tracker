@@ -92,8 +92,7 @@ export const getMonthDetailedName = (date: Date) => {
   return `${months[date.getMonth()]} ${date.getFullYear()}`;
 };
 
-// TODO: можно указать такой тип [Date, Date][]
-export const getMonthWeeks = (date: Date): Date[][] => {
+export const getMonthWeeks = (date: Date): [Date, Date][] => {
   date = new Date(date);
 
   // находим дату понедельника
@@ -129,7 +128,7 @@ export const getMonthWeeks = (date: Date): Date[][] => {
   firstWeekMonday.setMilliseconds(0);
 
   // определяем четыре недели
-  let weeks: Date[][] = [];
+  let weeks: [Date, Date][] = [];
   let monday: Date = new Date(firstWeekMonday);
   let sunday: Date = new Date(firstWeekMonday);
   sunday.setDate(sunday.getDate() + 7);
@@ -375,4 +374,36 @@ export const toLocalISOString = (date: Date) => {
   const seconds = pad(date.getSeconds());
 
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+};
+
+export const isCurrentDay = (dayDate: Date): boolean => {
+  const now = new Date();
+
+  return (
+    now.getDate() == dayDate.getDate() &&
+    now.getMonth() == dayDate.getMonth() &&
+    now.getFullYear() == dayDate.getFullYear()
+  );
+};
+
+export const isCurrentWeek = (weekDate: [Date, Date]): boolean => {
+  const now = new Date();
+
+  return (
+    now.getTime() > weekDate[0].getTime() &&
+    now.getTime() < weekDate[1].getTime()
+  );
+};
+
+export const isCurrentMonth = (monthDate: Date): boolean => {
+  const now = new Date();
+
+  return (
+    now.getMonth() == monthDate.getMonth() &&
+    now.getFullYear() == monthDate.getFullYear()
+  );
+};
+
+export const isCurrentYear = (yearDate: Date): boolean => {
+  return new Date().getFullYear() == yearDate.getFullYear();
 };

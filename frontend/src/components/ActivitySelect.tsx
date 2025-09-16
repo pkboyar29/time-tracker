@@ -31,7 +31,7 @@ const ActivitySelect: FC<ActivitySelectProps> = ({
         >
           {topActivities.map((activity) => (
             <option key={activity.id} value={activity.id} className="text-base">
-              {activity.activityGroup.name} / {activity.name}
+              {activity.name}
             </option>
           ))}
         </optgroup>
@@ -40,7 +40,7 @@ const ActivitySelect: FC<ActivitySelectProps> = ({
       <optgroup label="All activities" className="text-sm font-semibold ">
         {remainingActivities.map((activity) => (
           <option key={activity.id} value={activity.id} className="text-base">
-            {activity.activityGroup.name} / {activity.name}
+            {activity.name}
           </option>
         ))}
       </optgroup>

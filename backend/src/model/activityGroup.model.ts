@@ -1,6 +1,28 @@
-import mongoose from 'mongoose';
+import { Types, Schema, model } from 'mongoose';
 
-const activityGroupSchema = new mongoose.Schema({
+export interface IActivityGroup {
+  _id: Types.ObjectId;
+  name: string;
+  descr?: string | null;
+  user: Types.ObjectId;
+  deleted: boolean;
+  createdDate: Date;
+  updatedDate: Date;
+}
+
+export interface IDetailedActivityGroup {
+  _id: Types.ObjectId;
+  name: string;
+  descr?: string;
+  user: Types.ObjectId;
+  deleted: boolean;
+  createdDate: Date;
+  updatedDate: Date;
+  sessionsAmount: number;
+  spentTimeSeconds: number;
+}
+
+const activityGroupSchema = new Schema({
   name: {
     type: String,
     maxLength: [50, 'Name maximum length is 50 characters'],
@@ -13,7 +35,7 @@ const activityGroupSchema = new mongoose.Schema({
     required: false,
   },
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
@@ -34,7 +56,7 @@ const activityGroupSchema = new mongoose.Schema({
   },
 });
 
-const ActivityGroup = mongoose.model(
+const ActivityGroup = model(
   'ActivityGroup',
   activityGroupSchema,
   'activity_groups'

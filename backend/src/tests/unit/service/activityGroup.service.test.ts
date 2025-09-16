@@ -1,6 +1,6 @@
-import activityGroupService from '../../service/activityGroup.service';
+import activityGroupService from '../../../service/activityGroup.service';
 import mongoose from 'mongoose';
-import ActivityGroup from '../../model/activityGroup.model';
+import ActivityGroup from '../../../model/activityGroup.model';
 
 describe('activityGroupService.existsActvityGroup', () => {
   const mockActivityGroup = {

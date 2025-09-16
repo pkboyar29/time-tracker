@@ -6,7 +6,7 @@ export const logger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
     new winston.transports.File({
-      filename: `${new Date().toLocaleDateString()}.log`,
+      filename: new Date().toISOString().split('T')[0] + '.log',
     }),
   ],
 });

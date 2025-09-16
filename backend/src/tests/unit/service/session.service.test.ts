@@ -1,9 +1,9 @@
-import sessionService from '../../service/session.service';
-import activityService from '../../service/activity.service';
+import sessionService from '../../../service/session.service';
+import activityService from '../../../service/activity.service';
 import mongoose from 'mongoose';
-import Session from '../../model/session.model';
-import SessionPart from '../../model/sessionPart.model';
-import { HttpError } from '../../helpers/HttpError';
+import Session from '../../../model/session.model';
+import SessionPart from '../../../model/sessionPart.model';
+import { HttpError } from '../../../helpers/HttpError';
 
 describe('sessionService.existsSession', () => {
   const mockSession = {
