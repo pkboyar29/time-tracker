@@ -133,7 +133,8 @@ const SessionsList: FC<SessionsListProps> = ({
           }
         >
           <p className="mb-4 text-[15px] dark:text-textDark">
-            Are you sure you want to delete this session?
+            Are you sure you want to delete this session? The time spent on this
+            session will not be included in analytics.
           </p>
           <Button
             onClick={() =>

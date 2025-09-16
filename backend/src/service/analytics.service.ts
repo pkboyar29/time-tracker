@@ -6,21 +6,69 @@ import {
   ActivityDistribution,
   TimeBar,
 } from '../dto/analytics.dto';
-import { PopulatedSessionPartType } from '../model/sessionPart.model';
-import { PopulatedSessionType } from '../model/session.model';
+import { ISessionPart } from '../model/sessionPart.model';
+import { ISession } from '../model/session.model';
 
 import { DateTime } from 'luxon';
 
 type TimeBarType = 'hour' | 'day' | 'month' | 'year';
 
-// TODO: убрать тип any
-async function getActivityDistributions(
-  allSessionsAmount: number,
-  allSpentTimeSeconds: number,
-  sessionParts: any,
-  completedSessions: any,
-  userId: string
-): Promise<ActivityDistribution[]> {
+interface GetSessionsStatistics {
+  sessionParts: ISessionPart[];
+  completedSessions: ISession[];
+}
+
+interface GetActivityDistributionsOptions {
+  allSessionsAmount: number;
+  allSpentTimeSeconds: number;
+  sessionParts: ISessionPart[];
+  completedSessions: ISession[];
+  userId: string;
+}
+
+interface GetTimeBarsOptions {
+  startOfRange: Date;
+  endOfRange: Date;
+  sessionParts: ISessionPart[];
+  completedSessions: ISession[];
+  barType: TimeBarType;
+  timezone: string;
+}
+
+interface GetAnalyticsForRangeOptions {
+  startOfRange: Date;
+  endOfRange: Date;
+  userId: string;
+  timezone: string;
+}
+
+async function getSessionsStatistics({
+  sessionParts,
+  completedSessions,
+}: GetSessionsStatistics): Promise<{
+  sessionsAmount: number;
+  spentTimeSeconds: number;
+}> {
+  const sessionsAmount = completedSessions.length;
+  const spentTimeSeconds = sessionParts.reduce(
+    (spentTimeSeconds, sessionPart) =>
+      spentTimeSeconds + sessionPart.spentTimeSeconds,
+    0
+  );
+
+  return {
+    sessionsAmount,
+    spentTimeSeconds,
+  };
+}
+
+async function getActivityDistributions({
+  allSessionsAmount,
+  allSpentTimeSeconds,
+  sessionParts,
+  completedSessions,
+  userId,
+}: GetActivityDistributionsOptions): Promise<ActivityDistribution[]> {
   let activityDistributions: ActivityDistribution[] = [];
 
   const activities = await activityService.getActivities({
@@ -39,7 +87,7 @@ async function getActivityDistributions(
   let activitiesSessions: number = 0;
 
   // set sessionsAmount to activityDistributions
-  completedSessions?.forEach((session: PopulatedSessionType) => {
+  completedSessions.forEach((session) => {
     if (session.activity) {
       const activityDistributionIndex: number = activityDistributions.findIndex(
         (activityDistribution) =>
@@ -52,7 +100,7 @@ async function getActivityDistributions(
   });
 
   // set spentTimeSeconds to activityDistributions
-  sessionParts?.forEach((sessionPart: PopulatedSessionPartType) => {
+  sessionParts.forEach((sessionPart) => {
     if (sessionPart.session.activity) {
       const activityDistributionIndex: number = activityDistributions.findIndex(
         (activityDistribution) =>
@@ -102,15 +150,14 @@ function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
   }
 }
 
-// TODO: убрать тип any
-function getTimeBars(
-  startOfRange: Date,
-  endOfRange: Date,
-  sessionParts: any,
-  completedSessions: any,
-  barType: TimeBarType,
-  timezone: string
-): TimeBar[] {
+function getTimeBars({
+  startOfRange,
+  endOfRange,
+  barType,
+  timezone,
+  sessionParts,
+  completedSessions,
+}: GetTimeBarsOptions): TimeBar[] {
   let timeBars: TimeBar[] = [];
 
   let prevPeriod = new Date(startOfRange);
@@ -151,37 +198,31 @@ function getTimeBars(
   }
 
   while (true) {
-    const filteredSessionParts = sessionParts?.filter(
-      (sessionPart: PopulatedSessionPartType) => {
-        const createdDate = sessionPart.createdDate.getTime();
+    const filteredSessionParts = sessionParts.filter((sessionPart) => {
+      const createdDate = sessionPart.createdDate.getTime();
 
-        return (
-          createdDate >= prevPeriod.getTime() &&
-          createdDate < nextPeriod.getTime()
-        );
-      }
+      return (
+        createdDate >= prevPeriod.getTime() &&
+        createdDate < nextPeriod.getTime()
+      );
+    });
+    const filteredSessions = completedSessions.filter((session) => {
+      const completedDate = session.updatedDate.getTime();
+
+      return (
+        completedDate >= prevPeriod.getTime() &&
+        completedDate < nextPeriod.getTime()
+      );
+    });
+
+    const barSpentTimeSeconds = filteredSessionParts.reduce(
+      (total: number, sessionPart) => total + sessionPart.spentTimeSeconds,
+      0
     );
-    const filteredSessions = completedSessions?.filter(
-      (session: PopulatedSessionType) => {
-        const completedDate = session.updatedDate.getTime();
-
-        return (
-          completedDate >= prevPeriod.getTime() &&
-          completedDate < nextPeriod.getTime()
-        );
-      }
+    const barSessionsAmount = filteredSessions.reduce(
+      (total: number) => total + 1,
+      0
     );
-
-    const barSpentTimeSeconds = filteredSessionParts
-      ? filteredSessionParts.reduce(
-          (total: number, sessionPart: PopulatedSessionPartType) =>
-            total + sessionPart.spentTimeSeconds,
-          0
-        )
-      : 0;
-    const barSessionsAmount = filteredSessions
-      ? filteredSessions.reduce((total: number) => total + 1, 0)
-      : 0;
 
     if (nextPeriod.getTime() > endOfRange.getTime()) {
       nextPeriod = new Date(endOfRange);
@@ -214,16 +255,13 @@ function getTimeBars(
   return timeBars;
 }
 
-async function getAnalyticsForRange(
-  startOfRange: Date,
-  endOfRange: Date,
-  userId: string,
-  timezone: string
-): Promise<AnalyticsForRangeDTO | undefined> {
+async function getAnalyticsForRange({
+  startOfRange,
+  endOfRange,
+  userId,
+  timezone,
+}: GetAnalyticsForRangeOptions): Promise<AnalyticsForRangeDTO | undefined> {
   try {
-    let spentTimeSeconds: number = 0;
-    let sessionsAmount: number = 0;
-
     if (startOfRange > new Date()) {
       return {
         sessionsAmount: 0,
@@ -234,51 +272,45 @@ async function getAnalyticsForRange(
     }
 
     const sessionPartsForRange =
-      await sessionPartService.getSessionPartsInDateRange(
-        startOfRange,
-        endOfRange,
-        userId
-      );
-    if (sessionPartsForRange && sessionPartsForRange.length > 0) {
-      spentTimeSeconds = sessionPartsForRange.reduce(
-        (spentTimeSeconds, sessionPart) =>
-          spentTimeSeconds + sessionPart.spentTimeSeconds,
-        0
-      );
-    }
-
-    const completedSessionsForRange = await sessionService.getSessions(
-      {
+      await sessionPartService.getSessionPartsInDateRange({
+        startRange: startOfRange,
+        endRange: endOfRange,
+        userId,
+      });
+    const completedSessionsForRange = await sessionService.getSessions({
+      filter: {
         updatedDate: { $gte: startOfRange, $lte: endOfRange },
         completed: true,
       },
-      userId
-    );
-    if (completedSessionsForRange && completedSessionsForRange.length > 0) {
-      sessionsAmount = completedSessionsForRange.length;
-    }
+      userId,
+    });
 
-    const activityDistributions = await getActivityDistributions(
-      sessionsAmount,
-      spentTimeSeconds,
-      sessionPartsForRange,
-      completedSessionsForRange,
-      userId
-    );
+    const { sessionsAmount, spentTimeSeconds } = await getSessionsStatistics({
+      sessionParts: sessionPartsForRange,
+      completedSessions: completedSessionsForRange,
+    });
 
-    const timeBars = getTimeBars(
+    const activityDistribution = await getActivityDistributions({
+      allSessionsAmount: sessionsAmount,
+      allSpentTimeSeconds: spentTimeSeconds,
+      sessionParts: sessionPartsForRange,
+      completedSessions: completedSessionsForRange,
+      userId,
+    });
+
+    const timeBars = getTimeBars({
       startOfRange,
       endOfRange,
-      sessionPartsForRange,
-      completedSessionsForRange,
-      getTimeBarType(startOfRange, endOfRange),
-      timezone
-    );
+      sessionParts: sessionPartsForRange,
+      completedSessions: completedSessionsForRange,
+      barType: getTimeBarType(startOfRange, endOfRange),
+      timezone,
+    });
 
     return {
       sessionsAmount,
       spentTimeSeconds,
-      activityDistribution: activityDistributions,
+      activityDistribution,
       timeBars,
     };
   } catch (e) {
@@ -287,6 +319,7 @@ async function getAnalyticsForRange(
 }
 
 export default {
+  getSessionsStatistics,
   getActivityDistributions,
   getTimeBarType,
   getTimeBars,

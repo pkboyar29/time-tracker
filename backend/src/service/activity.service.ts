@@ -211,20 +211,20 @@ async function getDetailedActivity({
       .exec();
 
     const sessions = onlyCompleted
-      ? await sessionService.getSessionsForActivity(
+      ? await sessionService.getSessionsForActivity({
           activityId,
           userId,
-          onlyCompleted
-        )
-      : await sessionService.getSessionsForActivity(activityId, userId);
+          completed: onlyCompleted,
+        })
+      : await sessionService.getSessionsForActivity({ activityId, userId });
+    const sessionsAmount = sessions.length;
     const spentTimeSeconds = sessions.reduce(
       (total: number, session) => total + session.spentTimeSeconds,
       0
     );
-
     return {
       ...activity!.toObject(),
-      sessionsAmount: sessions.length ?? 0,
+      sessionsAmount: sessionsAmount ?? 0,
       spentTimeSeconds: spentTimeSeconds ?? 0,
     };
   } catch (e) {
@@ -347,17 +347,15 @@ async function deleteActivity(
       throw new HttpError(404, 'Activity Not Found');
     }
 
-    const sessions = await sessionService.getSessionsForActivity(
+    const sessions = await sessionService.getSessionsForActivity({
       activityId,
-      userId
+      userId,
+    });
+    await Promise.all(
+      sessions.map(async (session) => {
+        await sessionService.deleteSession(session._id.toString(), userId);
+      })
     );
-    if (sessions && sessions.length > 0) {
-      await Promise.all(
-        sessions?.map(async (session) => {
-          await sessionService.deleteSession(session._id.toString(), userId);
-        })
-      );
-    }
 
     await Activity.findById(activityId).updateOne({
       deleted: true,

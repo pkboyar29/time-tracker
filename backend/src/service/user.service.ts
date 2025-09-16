@@ -9,7 +9,7 @@ import activityService from './activity.service';
 import sessionService from './session.service';
 import User from '../model/user.model';
 import ActivityGroup from '../model/activityGroup.model';
-import Activity, { IDetailedActivity } from '../model/activity.model';
+import Activity from '../model/activity.model';
 import Session from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 
@@ -174,8 +174,7 @@ function decodeAccessToken(jwt: string): JwtPayload | null {
   return payload;
 }
 
-// TODO: добавивть return type
-function refreshAccessToken(refreshToken: string) {
+function refreshAccessToken(refreshToken: string): string | undefined {
   checkToken(refreshToken, 'refresh');
 
   const refreshPayload: JwtPayload | null = jsonwebtoken.decode(refreshToken, {
@@ -289,14 +288,14 @@ async function exportUserData(userId: string): Promise<Buffer> {
     fileContent = fileContent.concat(activitiesContent);
   }
 
-  const sessionsWithoutActivity = await sessionService.getSessions(
-    { activity: undefined, completed: true },
-    userId
-  );
+  const sessionsWithoutActivity = await sessionService.getSessions({
+    filter: { activity: undefined, completed: true },
+    userId,
+  });
   const sessionsWithoutActivityAmount: number =
-    sessionsWithoutActivity?.length ?? 0;
+    sessionsWithoutActivity.length ?? 0;
   let sessionsWithoutActivitySpentTimeSeconds: number = 0;
-  sessionsWithoutActivity?.forEach((s) => {
+  sessionsWithoutActivity.forEach((s) => {
     sessionsWithoutActivitySpentTimeSeconds += s.spentTimeSeconds;
   });
 

@@ -1,6 +1,19 @@
-import mongoose, { InferSchemaType } from 'mongoose';
+import { InferSchemaType, Schema, Types, model } from 'mongoose';
 
-const sessionSchema = new mongoose.Schema({
+export interface ISession {
+  _id: Types.ObjectId;
+  totalTimeSeconds: number;
+  spentTimeSeconds: number;
+  note?: string | null;
+  completed: boolean;
+  activity: { name: string };
+  user: Types.ObjectId;
+  createdDate: Date;
+  updatedDate: Date;
+  deleted: boolean;
+}
+
+const sessionSchema = new Schema({
   totalTimeSeconds: {
     type: Number,
     required: true,
@@ -28,12 +41,12 @@ const sessionSchema = new mongoose.Schema({
     required: true,
   },
   activity: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'Activity',
     required: false,
   },
   user: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
@@ -54,7 +67,7 @@ const sessionSchema = new mongoose.Schema({
   },
 });
 
-const Session = mongoose.model('Session', sessionSchema, 'sessions');
+const Session = model('Session', sessionSchema, 'sessions');
 
 export default Session;
 

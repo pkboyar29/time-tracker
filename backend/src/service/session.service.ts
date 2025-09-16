@@ -1,4 +1,4 @@
-import Session from '../model/session.model';
+import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
@@ -18,11 +18,21 @@ const activityPopulateConfig = {
   },
 };
 
-// TODO: добавить return type
-async function getSessions(
-  filter: Record<string, unknown> = {},
-  userId: string
-) {
+interface GetSessionsOptions {
+  filter: Record<string, unknown>;
+  userId: string;
+}
+
+interface GetSessionsForActivityOptions {
+  activityId: string;
+  userId: string;
+  completed?: boolean;
+}
+
+async function getSessions({
+  filter = {},
+  userId,
+}: GetSessionsOptions): Promise<ISession[]> {
   try {
     const sessions = await Session.find({
       deleted: false,
@@ -36,12 +46,11 @@ async function getSessions(
   }
 }
 
-// TODO: добавить return type
-async function getSessionsForActivity(
-  activityId: string,
-  userId: string,
-  completed?: boolean
-) {
+async function getSessionsForActivity({
+  activityId,
+  userId,
+  completed,
+}: GetSessionsForActivityOptions): Promise<ISession[]> {
   try {
     if (!(await activityService.existsActivity(activityId, userId))) {
       throw new HttpError(404, 'Activity For Session Not Found');
@@ -49,27 +58,31 @@ async function getSessionsForActivity(
 
     const filter: Record<string, unknown> = {
       activity: activityId,
+      getSessions,
     };
     if (completed !== undefined) {
       filter.completed = completed;
     }
 
-    return await getSessions(filter, userId);
+    return await getSessions({ filter, userId });
   } catch (e) {
     throw e;
   }
 }
 
-// TODO: добавить return type
-async function getSession(sessionId: string, userId: string) {
+async function getSession(
+  sessionId: string,
+  userId: string
+): Promise<ISession> {
   try {
     if (!(await existsSession(sessionId, userId))) {
       throw new HttpError(404, 'Session Not Found');
     }
 
-    return await Session.findById(sessionId).populate<{
+    const session = await Session.findById(sessionId).populate<{
       activity: PopulatedActivity;
     }>(activityPopulateConfig);
+    return session!;
   } catch (e) {
     throw e;
   }
@@ -110,8 +123,10 @@ async function existsSession(
   return true;
 }
 
-// TODO: добавить return type
-async function createSession(sessionDTO: SessionCreateDTO, userId: string) {
+async function createSession(
+  sessionDTO: SessionCreateDTO,
+  userId: string
+): Promise<ISession> {
   try {
     if (sessionDTO.activity) {
       if (
@@ -151,12 +166,11 @@ async function createSession(sessionDTO: SessionCreateDTO, userId: string) {
   }
 }
 
-// TODO: добавить return type
 async function updateSession(
   sessionId: string,
   sessionDTO: SessionUpdateDTO,
   userId: string
-) {
+): Promise<ISession> {
   try {
     if (!(await existsSession(sessionId, userId))) {
       throw new HttpError(404, 'Session Not Found');
@@ -224,8 +238,10 @@ async function updateSession(
   }
 }
 
-// TODO: добавить return type
-async function deleteSession(sessionId: string, userId: string) {
+async function deleteSession(
+  sessionId: string,
+  userId: string
+): Promise<{ message: string }> {
   try {
     if (!(await existsSession(sessionId, userId))) {
       throw new HttpError(404, 'Session Not Found');
@@ -235,10 +251,9 @@ async function deleteSession(sessionId: string, userId: string) {
       deleted: true,
     });
 
-    const message = {
+    return {
       message: 'Deleted successful',
     };
-    return message;
   } catch (e) {
     throw e;
   }
