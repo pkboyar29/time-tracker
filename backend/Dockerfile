@@ -1,7 +1,4 @@
-# проверить работоспособность копирования
-
-# TODO: надо использовать конкретную версию?
-FROM node:alpine
+FROM node:22-alpine
 WORKDIR /usr/src/app
 COPY ./package.json ./
 COPY ./package-lock.json ./

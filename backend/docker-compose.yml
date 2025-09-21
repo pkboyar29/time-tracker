@@ -7,10 +7,20 @@ services:
     volumes:
       - mongo_db:/data/db
 
+  redis:
+    image: redis:7.2.8
+    volumes:
+      - ./run/redis_volume_data:/data
+    ports:
+      - 6379:6379
+
   node_app:
     build: .
     ports:
       - '8003:8000'
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     environment:
       - PORT=8000
       - MONGO_URL=mongodb://mongo_db:27017/time_tracker

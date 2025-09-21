@@ -67,6 +67,8 @@ const sessionSchema = new Schema({
   },
 });
 
+sessionSchema.index({ user: 1, updatedDate: 1 });
+
 const Session = model('Session', sessionSchema, 'sessions');
 
 export default Session;

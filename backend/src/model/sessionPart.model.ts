@@ -32,6 +32,8 @@ const sessionPartSchema = new Schema({
   },
 });
 
+sessionPartSchema.index({ user: 1, createdDate: 1 });
+
 const SessionPart = model('SessionPart', sessionPartSchema, 'session_parts');
 
 export default SessionPart;
