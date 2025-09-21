@@ -42,7 +42,7 @@ router.get('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const data = await analyticsService.getAnalyticsForRange({
+    const data = await analyticsService.getAnalyticsForRangeWithCache({
       startOfRange: fromDate,
       endOfRange: toDate,
       userId: res.locals.userId,
