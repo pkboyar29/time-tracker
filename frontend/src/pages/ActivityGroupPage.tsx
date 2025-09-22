@@ -1,6 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivityGroup } from '../api/activityGroupApi';
 import { fetchGroupActivities, deleteActivity } from '../api/activityApi';
 import { toast } from 'react-toastify';
@@ -26,19 +27,17 @@ const ActivityGroupPage: FC = () => {
     data: currentActivityGroup,
     isLoading: isLoadingGroup,
     isError: isErrorGroup,
-  } = useQuery({
+  } = useQueryCustom({
     queryKey: ['activityGroup', activityGroupId],
     queryFn: () => fetchActivityGroup(activityGroupId!),
-    retry: false,
   });
   const {
     data: activities,
     isLoading: isLoadingActivity,
     isError: isErrorActivities,
-  } = useQuery({
+  } = useQueryCustom({
     queryKey: ['activities', activityGroupId],
     queryFn: () => fetchGroupActivities(activityGroupId!),
-    retry: false,
   });
 
   const isLoading = isLoadingActivity || isLoadingGroup;

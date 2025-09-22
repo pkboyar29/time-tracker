@@ -6,7 +6,7 @@ import {
   createSession,
 } from '../redux/slices/sessionSlice';
 import { useAppDispatch, useAppSelector } from '../redux/store';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivities } from '../api/activityApi';
 import {
   removeSessionFromLocalStorage,
@@ -40,14 +40,11 @@ const TimerPage: FC = () => {
     []
   );
 
-  const { data: activitiesToChoose, isLoading: isLoadingActivities } = useQuery(
-    {
+  const { data: activitiesToChoose, isLoading: isLoadingActivities } =
+    useQueryCustom({
       queryKey: ['activitiesToChoose'],
       queryFn: () => fetchActivities(),
-      retry: false,
-      refetchOnWindowFocus: false,
-    }
-  );
+    });
 
   const [selectedSeconds, setSelectedSeconds] = useState<number>(1500);
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');

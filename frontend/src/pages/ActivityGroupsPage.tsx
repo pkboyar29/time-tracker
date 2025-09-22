@@ -1,7 +1,8 @@
 import { FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import { useQueryCustom } from '../hooks/useQueryCustom';
 import {
   fetchActivityGroups,
   deleteActivityGroup,
@@ -26,10 +27,9 @@ const ActivityGroupsPage: FC = () => {
     data: activityGroups,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQueryCustom({
     queryKey: ['activityGroups'],
     queryFn: () => fetchActivityGroups(),
-    retry: false,
   });
 
   const [createModal, setCreateModal] = useState<boolean>(false);
