@@ -4,10 +4,12 @@ import Activity, {
 } from '../model/activity.model';
 import UserTopActivity from '../model/userTopActivity.model';
 import { ActivityCreateDTO, ActivityUpdateDTO } from '../dto/activity.dto';
-import mongoose from 'mongoose';
 import sessionService from './session.service';
 import activityGroupService from './activityGroup.service';
+import analyticsService from './analytics.service';
 import { HttpError } from '../helpers/HttpError';
+
+import mongoose from 'mongoose';
 
 interface PopulatedActivityGroup {
   _id: string;
@@ -341,6 +343,8 @@ async function updateActivity(
 
     await activity!.save();
 
+    await analyticsService.invalidateAnalyticsCache(userId);
+
     return activityService.getDetailedActivity({
       activityId,
       userId,
@@ -373,6 +377,8 @@ async function deleteActivity(
     await Activity.findById(activityId).updateOne({
       deleted: true,
     });
+
+    await analyticsService.invalidateAnalyticsCache(userId);
 
     return {
       message: 'Deleted successful',
