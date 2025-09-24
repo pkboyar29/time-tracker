@@ -4,6 +4,7 @@ import { updateActivity } from '../api/activityApi';
 import { getTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { AxiosError } from 'axios';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
@@ -69,9 +70,20 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
         afterUpdateHandler && afterUpdateHandler(updatedData);
       } catch (e) {
-        toast('A server error occurred while updating activity', {
-          type: 'error',
-        });
+        if (e instanceof AxiosError) {
+          toast(
+            e.response
+              ? e.response.data
+              : 'A server error occurred while updating activity',
+            {
+              type: 'error',
+            }
+          );
+        } else {
+          toast('A server error occurred while updating activity', {
+            type: 'error',
+          });
+        }
         setName(activityCommon.name);
       }
     } else {
@@ -84,9 +96,20 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
         afterUpdateHandler && afterUpdateHandler(updatedData);
       } catch (e) {
-        toast('A server error occurred while updating activity group', {
-          type: 'error',
-        });
+        if (e instanceof AxiosError) {
+          toast(
+            e.response
+              ? e.response.data
+              : 'A server error occurred while updating activity group',
+            {
+              type: 'error',
+            }
+          );
+        } else {
+          toast('A server error occurred while updating activity group', {
+            type: 'error',
+          });
+        }
         setName(activityCommon.name);
       }
     }

@@ -1,6 +1,7 @@
 import { FC, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import { AxiosError } from 'axios';
 
 import { updateActivityGroup } from '../../api/activityGroupApi';
 import { updateActivity } from '../../api/activityApi';
@@ -29,9 +30,12 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
     handleSubmit,
     setValue,
     formState: { errors },
+    watch,
   } = useForm<ActivityCommonFields>({
     mode: 'onBlur',
   });
+  const name = watch('name');
+  const descr = watch('descr');
 
   useEffect(() => {
     setValue('name', activityCommon.name);
@@ -47,6 +51,12 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
     }, 0);
   };
 
+  const handleBlur = () => {
+    if (name != activityCommon.name || descr != activityCommon.descr) {
+      handleSubmit(onSubmit)();
+    }
+  };
+
   const onSubmit = async (data: ActivityCommonFields) => {
     if ('activityGroup' in activityCommon) {
       // IActivity
@@ -58,9 +68,21 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
 
         afterUpdateHandler(updatedData);
       } catch (e) {
-        toast('A server error occurred while updating activity', {
-          type: 'error',
-        });
+        if (e instanceof AxiosError) {
+          toast(
+            e.response
+              ? e.response.data
+              : 'A server error occurred while updating activity',
+            {
+              type: 'error',
+            }
+          );
+        } else {
+          toast('A server error occurred while updating activity', {
+            type: 'error',
+          });
+        }
+        setValue('name', activityCommon.name);
       }
     } else {
       // IActivityGroup
@@ -72,9 +94,21 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
 
         afterUpdateHandler(updatedData);
       } catch (e) {
-        toast('A server error occurred while updating activity group', {
-          type: 'error',
-        });
+        if (e instanceof AxiosError) {
+          toast(
+            e.response
+              ? e.response.data
+              : 'A server error occurred while updating activity group',
+            {
+              type: 'error',
+            }
+          );
+        } else {
+          toast('A server error occurred while updating activity group', {
+            type: 'error',
+          });
+        }
+        setValue('name', activityCommon.name);
       }
     }
   };
@@ -89,7 +123,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
             minLength: 1,
           })}
           onFocus={handleFocus}
-          onBlur={handleSubmit(onSubmit)}
+          onBlur={handleBlur}
           type="text"
           className={
             'p-1 text-xl font-bold rounded-lg dark:text-textDark border border-solid border-transparent focus:border-blue-700 hover:bg-gray-100 dark:hover:bg-surfaceDarkHover bg-transparent focus:bg-transparent' +
@@ -103,7 +137,7 @@ const ActivityCommonUpdateForm: FC<ActivityCommonUpdateFormProps> = ({
             maxLength: 500,
           })}
           onFocus={handleFocus}
-          onBlur={handleSubmit(onSubmit)}
+          onBlur={handleBlur}
           className={
             'p-1 text-base font-medium rounded-lg dark:text-textDark h-28 border border-solid border-gray-300 dark:border-gray-500 focus:border-blue-700 bg-transparent' +
             (errors.descr ? 'focus:border-primary' : '')

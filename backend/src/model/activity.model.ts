@@ -29,6 +29,7 @@ const activitySchema = new Schema<IActivity>({
     type: String,
     maxLength: [50, 'Name maximum length is 50 characters'],
     minLength: [1, 'Name minimum length is 1 characters'],
+    match: [/.*\S.*/, 'Name cannot consist only of spaces'],
     required: true,
   },
   descr: {
