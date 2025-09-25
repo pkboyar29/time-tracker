@@ -113,13 +113,15 @@ const ActivityGroupsPage: FC = () => {
             setDeleteModal({ status: false, selectedItemId: null })
           }
         >
-          <p className="mb-4 text-[15px] dark:text-textDark">
+          <p className="text-base/6 dark:text-textDark">
             Are you sure you want to delete this activity group? Activity group
             sessions will not be included in analytics.
           </p>
-          <Button onClick={handleDeleteActivityGroupModal}>
-            Delete activity group
-          </Button>
+          <div className="mt-10 ml-auto w-fit">
+            <Button onClick={handleDeleteActivityGroupModal}>
+              Delete activity group
+            </Button>
+          </div>
         </Modal>
       )}
 

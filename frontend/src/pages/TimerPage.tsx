@@ -179,7 +179,7 @@ const TimerPage: FC = () => {
                 </>
               ) : (
                 <div className="mt-2">
-                  <Button onClick={onStartSessionClick} className="py-2">
+                  <Button onClick={onStartSessionClick} className="py-1.5">
                     Start new session
                   </Button>
                 </div>
@@ -260,13 +260,11 @@ const TimerPage: FC = () => {
           </div>
         )}
 
-        <div className="ml-auto overflow-auto">
-          <SessionsList
-            title="Uncompleted sessions"
-            sessions={uncompletedSessions}
-            updateSessionsListHandler={setUncompletedSessions}
-          />
-        </div>
+        <SessionsList
+          title="Uncompleted sessions"
+          sessions={uncompletedSessions}
+          updateSessionsListHandler={setUncompletedSessions}
+        />
       </div>
     </div>
   );

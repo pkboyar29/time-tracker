@@ -120,7 +120,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
             )
           )}
         </div>
-        <div className="flex w-full">
+        <div className="ml-auto w-fit">
           <Button onClick={onSubmit}>Start new session</Button>
         </div>
       </form>

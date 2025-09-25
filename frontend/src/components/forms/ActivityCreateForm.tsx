@@ -81,7 +81,7 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
         }
       />
 
-      <div className="flex justify-end w-full">
+      <div className="ml-auto w-fit">
         <Button type="submit">Create activity</Button>
       </div>
     </form>
