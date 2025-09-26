@@ -343,7 +343,7 @@ async function updateActivity(
 
     await activity!.save();
 
-    await analyticsService.invalidateAnalyticsCache(userId);
+    await analyticsService.invalidateCache(userId);
 
     return activityService.getDetailedActivity({
       activityId,
@@ -378,7 +378,7 @@ async function deleteActivity(
       deleted: true,
     });
 
-    await analyticsService.invalidateAnalyticsCache(userId);
+    await analyticsService.invalidateCache(userId);
 
     return {
       message: 'Deleted successful',

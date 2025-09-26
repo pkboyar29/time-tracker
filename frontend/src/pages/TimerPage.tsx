@@ -60,17 +60,32 @@ const TimerPage: FC = () => {
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.tagName === 'SELECT' ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
       if (event.code == 'Space') {
-        handleToggleButtonClick();
+        if (currentSession) {
+          handleToggleButtonClick();
+        } else {
+          onStartSessionClick();
+        }
+      } else if (event.code == 'Escape') {
+        handleStopButtonClick();
       }
     };
 
     window.addEventListener('keyup', handleKeyClick);
-
     return () => {
       window.removeEventListener('keyup', handleKeyClick);
     };
-  }, []);
+  }, [currentSession, enabled, selectedSeconds, selectedActivityId]);
 
   useEffect(() => {
     const fetchAllUncompletedSessions = async () => {
@@ -106,24 +121,25 @@ const TimerPage: FC = () => {
 
   const handleToggleButtonClick = () => {
     if (currentSession) {
+      toggleTimer(currentSession.spentTimeSeconds, 'toggle');
+
       if (enabled) {
+        // TODO: если сессию не удалось обновить?
         dispatch(updateSession(currentSession));
       }
-
-      toggleTimer(currentSession.spentTimeSeconds, 'toggle');
     }
   };
 
   const handleStopButtonClick = () => {
-    stopTimer();
-
     if (currentSession) {
+      stopTimer();
+
       // TODO: если сессию не удалось обновить?
       dispatch(updateSession(currentSession));
-    }
 
-    dispatch(resetCurrentSession());
-    removeSessionFromLocalStorage();
+      dispatch(resetCurrentSession());
+      removeSessionFromLocalStorage();
+    }
   };
 
   return (
@@ -161,15 +177,23 @@ const TimerPage: FC = () => {
                 <>
                   <div className="flex mt-2 gap-7">
                     <button
+                      tabIndex={-1}
                       className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5 flex"
-                      onClick={handleToggleButtonClick}
+                      onClick={(e) => {
+                        e.currentTarget.blur();
+                        handleToggleButtonClick();
+                      }}
                     >
                       {enabled ? <PauseIcon /> : <PlayIcon />}
                     </button>
 
                     <button
+                      tabIndex={-1}
                       className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5"
-                      onClick={handleStopButtonClick}
+                      onClick={(e) => {
+                        e.currentTarget.blur();
+                        handleStopButtonClick();
+                      }}
                     >
                       <StopIcon />
                     </button>
@@ -179,7 +203,14 @@ const TimerPage: FC = () => {
                 </>
               ) : (
                 <div className="mt-2">
-                  <Button onClick={onStartSessionClick} className="py-1.5">
+                  <Button
+                    tabIndex={-1}
+                    onClick={(e) => {
+                      e.currentTarget.blur();
+                      onStartSessionClick();
+                    }}
+                    className="py-1.5"
+                  >
                     Start new session
                   </Button>
                 </div>

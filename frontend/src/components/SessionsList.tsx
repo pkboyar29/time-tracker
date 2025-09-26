@@ -83,7 +83,7 @@ const SessionsList: FC<SessionsListProps> = ({
   }, [lastCompletedSessionId]);
 
   const handleSessionClick = async (session: ISession) => {
-    // updating the previous session if it's not paused
+    // updating the previous current session if it's not paused
     if (currentSession && enabled) {
       try {
         const updatedSession = await dispatch(
@@ -94,6 +94,7 @@ const SessionsList: FC<SessionsListProps> = ({
           getSessionsListAfterSessionUpdate(sessions, updatedSession)
         );
       } catch (e) {
+        // TODO: сообщать в тосте, что не удалось обновить сессию
         console.log(e);
       }
     }
@@ -151,7 +152,7 @@ const SessionsList: FC<SessionsListProps> = ({
       )}
 
       {sessionsWithoutCurrent.length !== 0 && (
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end ml-auto">
           <button
             onClick={() => setLess(!less)}
             className="flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"

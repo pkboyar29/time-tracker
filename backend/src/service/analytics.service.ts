@@ -60,7 +60,7 @@ const analyticsService = {
   getAnalyticsForRange,
   getAnalyticsForRangeWithCache,
   mergeAnalytics,
-  invalidateAnalyticsCache,
+  invalidateCache,
 };
 
 function getSessionsStatistics({
@@ -610,7 +610,7 @@ function mergeAnalytics({
 
 // TODO: делать инвалидацию более эффективно. 1)надо использовать scan вместо keys,
 // 2)после изменения названия активности, достаточно просто везде поменять его название, удалять все ключи не надо. пока не знаю, является ли норм практикой модификация значения ключа
-async function invalidateAnalyticsCache(userId: string) {
+async function invalidateCache(userId: string) {
   const userKeys = await redisClient.keys(`analytics:${userId}*`);
   await redisClient.del(userKeys);
 }

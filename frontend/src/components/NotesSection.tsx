@@ -15,11 +15,7 @@ const NotesSection: FC = () => {
     if (currentSession) {
       // TODO: зачем второе условие?
       if (!isFocusedNote) {
-        if (currentSession.note) {
-          setNote(currentSession.note);
-        } else {
-          setNote('');
-        }
+        setNote(currentSession.note ? currentSession.note : '');
       }
     }
   }, [currentSession]);
