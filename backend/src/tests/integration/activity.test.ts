@@ -21,7 +21,7 @@ describe('Activity controller endpoints', () => {
 
   test('update activity endpoint returns ok', async () => {
     jest
-      .spyOn(analyticsService, 'invalidateAnalyticsCache')
+      .spyOn(analyticsService, 'invalidateCache')
       .mockResolvedValue(undefined);
 
     const {
@@ -42,7 +42,7 @@ describe('Activity controller endpoints', () => {
 
   test('delete activity endpoint returns ok', async () => {
     jest
-      .spyOn(analyticsService, 'invalidateAnalyticsCache')
+      .spyOn(analyticsService, 'invalidateCache')
       .mockResolvedValue(undefined);
 
     const {
