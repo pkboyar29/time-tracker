@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchRangeAnalytics } from '../api/analyticsApi';
 import { toast } from 'react-toastify';
 import { getRangeType, RangeType } from '../helpers/dateHelpers';
@@ -39,10 +39,9 @@ const AnalyticsRangePage: FC = () => {
     data: rangeAnalytics,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQueryCustom({
     queryKey: ['rangeAnalytics', fromDate, toDate],
     queryFn: () => fetchRangeAnalytics(fromDate, toDate),
-    retry: false,
   });
 
   useEffect(() => {

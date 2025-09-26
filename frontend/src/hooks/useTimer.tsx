@@ -1,6 +1,7 @@
 import {
   createContext,
   useState,
+  useRef,
   useEffect,
   ReactNode,
   FC,
@@ -21,7 +22,7 @@ import { toast } from 'react-toastify';
 
 interface TimerContextType {
   toggleTimer: (startSpentSeconds: number, mode: 'toggle' | 'enable') => void;
-  stopTimer: (afterDelete?: boolean) => void;
+  stopTimer: () => void;
   enabled: boolean;
 }
 
@@ -38,9 +39,8 @@ interface TimerProviderProps {
 const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const [enabled, setEnabled] = useState<boolean>(false);
 
-  const [startTimestamp, setStartTimestamp] = useState<number>(0); // here we store timestamp
-
-  const [startSpentSeconds, setStartSpentSeconds] = useState<number>(0); // here we store seconds
+  const startTimestamp = useRef<number>(0); // here we store timestamp
+  const startSpentSeconds = useRef<number>(0); // here we store seconds
 
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
@@ -48,14 +48,16 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const currentUser = useAppSelector((state) => state.users.user);
   const dispatch = useAppDispatch();
 
-  // TODO: не должны ли мы при нажатии на паузу устанавливать startTimestamp и startSpentSeconds на 0?
   const toggleTimer = (
-    startSpentSeconds: number,
+    newStartSpentSeconds: number,
     mode: 'toggle' | 'enable' = 'toggle'
   ) => {
-    if (!enabled) {
-      setStartTimestamp(Date.now());
-      setStartSpentSeconds(startSpentSeconds);
+    if (mode == 'toggle' && enabled == true) {
+      startTimestamp.current = 0;
+      startSpentSeconds.current = 0;
+    } else {
+      startTimestamp.current = Date.now();
+      startSpentSeconds.current = newStartSpentSeconds;
     }
 
     if (mode === 'enable') {
@@ -67,21 +69,24 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const stopTimer = () => {
     setEnabled(false);
-    setStartTimestamp(0);
-    setStartSpentSeconds(0);
+    startTimestamp.current = 0;
+    startSpentSeconds.current = 0;
   };
 
   useEffect(() => {
-    let intervalId: number;
+    let intervalId: ReturnType<typeof setInterval>;
 
     if (enabled) {
       intervalId = setInterval(() => {
         if (currentSession) {
-          const startTimestampSeconds = Math.floor(startTimestamp / 1000);
+          const startTimestampSeconds = Math.floor(
+            startTimestamp.current / 1000
+          );
           const nowTimestampSeconds = Math.floor(Date.now() / 1000);
 
           const newSpentSeconds =
-            startSpentSeconds + (nowTimestampSeconds - startTimestampSeconds);
+            startSpentSeconds.current +
+            (nowTimestampSeconds - startTimestampSeconds);
 
           dispatch(changeSpentSeconds(newSpentSeconds));
         }

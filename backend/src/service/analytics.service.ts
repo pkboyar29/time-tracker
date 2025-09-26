@@ -60,6 +60,7 @@ const analyticsService = {
   getAnalyticsForRange,
   getAnalyticsForRangeWithCache,
   mergeAnalytics,
+  invalidateCache,
 };
 
 function getSessionsStatistics({
@@ -356,8 +357,8 @@ async function getAnalyticsForRangeWithCache({
     // if it's today analytics
     if (startOfRange >= startOfToday && endOfRange <= startOfTomorrow) {
       const analyticsForToday = await analyticsService.getAnalyticsForRange({
-        startOfRange: startOfToday,
-        endOfRange: startOfTomorrow,
+        startOfRange,
+        endOfRange,
         userId,
         timezone,
       });
@@ -605,6 +606,13 @@ function mergeAnalytics({
   finalObj.timeBars = finalObjTimeBars;
 
   return finalObj;
+}
+
+// TODO: делать инвалидацию более эффективно. 1)надо использовать scan вместо keys,
+// 2)после изменения названия активности, достаточно просто везде поменять его название, удалять все ключи не надо. пока не знаю, является ли норм практикой модификация значения ключа
+async function invalidateCache(userId: string) {
+  const userKeys = await redisClient.keys(`analytics:${userId}*`);
+  await redisClient.del(userKeys);
 }
 
 export default analyticsService;

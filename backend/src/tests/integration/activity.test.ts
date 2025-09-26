@@ -1,6 +1,8 @@
 import { setupIntegrationHooks } from './setupIntegrationHooks';
 import { authorizedRequest } from './authorizedRequest';
 
+import analyticsService from '../../service/analytics.service';
+
 describe('Activity controller endpoints', () => {
   const { getAccessToken } = setupIntegrationHooks();
 
@@ -18,6 +20,10 @@ describe('Activity controller endpoints', () => {
   });
 
   test('update activity endpoint returns ok', async () => {
+    jest
+      .spyOn(analyticsService, 'invalidateAnalyticsCache')
+      .mockResolvedValue(undefined);
+
     const {
       body: { _id },
     } = await authorizedRequest(getAccessToken())
@@ -35,6 +41,10 @@ describe('Activity controller endpoints', () => {
   });
 
   test('delete activity endpoint returns ok', async () => {
+    jest
+      .spyOn(analyticsService, 'invalidateAnalyticsCache')
+      .mockResolvedValue(undefined);
+
     const {
       body: { _id },
     } = await authorizedRequest(getAccessToken())

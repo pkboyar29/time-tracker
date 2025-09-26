@@ -18,7 +18,7 @@ const getSize = (size: CircularSize) => {
     case 'big':
       return 200;
     default:
-      return 60;
+      return 65;
   }
 };
 
@@ -38,7 +38,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
         ? 'text-[18px] font-medium'
         : size == 'verybig'
         ? 'text-[24px] font-medium'
-        : 'text-[14px]',
+        : 'text-[12px] font-medium',
     [size]
   );
 

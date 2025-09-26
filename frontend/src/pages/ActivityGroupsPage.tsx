@@ -1,7 +1,8 @@
 import { FC, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import { useQueryCustom } from '../hooks/useQueryCustom';
 import {
   fetchActivityGroups,
   deleteActivityGroup,
@@ -26,10 +27,9 @@ const ActivityGroupsPage: FC = () => {
     data: activityGroups,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQueryCustom({
     queryKey: ['activityGroups'],
     queryFn: () => fetchActivityGroups(),
-    retry: false,
   });
 
   const [createModal, setCreateModal] = useState<boolean>(false);
@@ -113,13 +113,15 @@ const ActivityGroupsPage: FC = () => {
             setDeleteModal({ status: false, selectedItemId: null })
           }
         >
-          <p className="mb-4 text-[15px] dark:text-textDark">
+          <p className="text-base/6 dark:text-textDark">
             Are you sure you want to delete this activity group? Activity group
             sessions will not be included in analytics.
           </p>
-          <Button onClick={handleDeleteActivityGroupModal}>
-            Delete activity group
-          </Button>
+          <div className="mt-10 ml-auto w-fit">
+            <Button onClick={handleDeleteActivityGroupModal}>
+              Delete activity group
+            </Button>
+          </div>
         </Modal>
       )}
 

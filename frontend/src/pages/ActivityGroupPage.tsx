@@ -1,6 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
+import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivityGroup } from '../api/activityGroupApi';
 import { fetchGroupActivities, deleteActivity } from '../api/activityApi';
 import { toast } from 'react-toastify';
@@ -26,19 +27,17 @@ const ActivityGroupPage: FC = () => {
     data: currentActivityGroup,
     isLoading: isLoadingGroup,
     isError: isErrorGroup,
-  } = useQuery({
+  } = useQueryCustom({
     queryKey: ['activityGroup', activityGroupId],
     queryFn: () => fetchActivityGroup(activityGroupId!),
-    retry: false,
   });
   const {
     data: activities,
     isLoading: isLoadingActivity,
     isError: isErrorActivities,
-  } = useQuery({
+  } = useQueryCustom({
     queryKey: ['activities', activityGroupId],
     queryFn: () => fetchGroupActivities(activityGroupId!),
-    retry: false,
   });
 
   const isLoading = isLoadingActivity || isLoadingGroup;
@@ -122,18 +121,20 @@ const ActivityGroupPage: FC = () => {
             setDeleteModal({ status: false, selectedItemId: null })
           }
         >
-          <p className="mb-4 text-[15px] dark:text-textDark">
+          <p className="text-base/6 dark:text-textDark">
             Are you sure you want to delete this activity? Activity sessions
             will not be included in analytics.
           </p>
-          <Button
-            onClick={() =>
-              deleteModal.selectedItemId &&
-              handleDeleteActivityClick(deleteModal.selectedItemId)
-            }
-          >
-            Delete activity
-          </Button>
+          <div className="mt-10 ml-auto w-fit">
+            <Button
+              onClick={() =>
+                deleteModal.selectedItemId &&
+                handleDeleteActivityClick(deleteModal.selectedItemId)
+              }
+            >
+              Delete activity
+            </Button>
+          </div>
         </Modal>
       )}
 

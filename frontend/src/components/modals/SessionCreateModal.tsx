@@ -1,7 +1,7 @@
 import { FC, useState, ReactNode } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { createSession, updateSession } from '../../redux/slices/sessionSlice';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryCustom } from '../../hooks/useQueryCustom';
 import { fetchActivities } from '../../api/activityApi';
 import { toast } from 'react-toastify';
 import { useStartSession } from '../../hooks/useStartSession';
@@ -30,13 +30,11 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   );
   const { startSession } = useStartSession();
 
-  const { data: activitiesToChoose, isLoading: isLoadingActivities } = useQuery(
-    {
+  const { data: activitiesToChoose, isLoading: isLoadingActivities } =
+    useQueryCustom({
       queryKey: ['activitiesToChoose'],
       queryFn: () => fetchActivities(),
-      retry: false,
-    }
-  );
+    });
 
   const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
   const [selectedActivityId, setSelectedActivityId] = useState<string>(
@@ -97,8 +95,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
           {isLoadingActivities ? (
             <PrimaryClipLoader size="25px" />
           ) : (
-            activitiesToChoose &&
-            activitiesToChoose.remainingActivities.length > 0 && (
+            activitiesToChoose && (
               <div className="flex flex-col gap-3 dark:text-textDark">
                 <div>Activity</div>
 
@@ -123,7 +120,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
             )
           )}
         </div>
-        <div className="flex w-full">
+        <div className="ml-auto w-fit">
           <Button onClick={onSubmit}>Start new session</Button>
         </div>
       </form>

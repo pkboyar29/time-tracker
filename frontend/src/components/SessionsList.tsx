@@ -83,7 +83,7 @@ const SessionsList: FC<SessionsListProps> = ({
   }, [lastCompletedSessionId]);
 
   const handleSessionClick = async (session: ISession) => {
-    // updating the previous session if it's not paused
+    // updating the previous current session if it's not paused
     if (currentSession && enabled) {
       try {
         const updatedSession = await dispatch(
@@ -94,6 +94,7 @@ const SessionsList: FC<SessionsListProps> = ({
           getSessionsListAfterSessionUpdate(sessions, updatedSession)
         );
       } catch (e) {
+        // TODO: сообщать в тосте, что не удалось обновить сессию
         console.log(e);
       }
     }
@@ -132,33 +133,38 @@ const SessionsList: FC<SessionsListProps> = ({
             })
           }
         >
-          <p className="mb-4 text-[15px] dark:text-textDark">
+          <p className="text-base/6 dark:text-textDark">
             Are you sure you want to delete this session? The time spent on this
             session will not be included in analytics.
           </p>
-          <Button
-            onClick={() =>
-              deleteModal.selectedItemId &&
-              handleSessionDelete(deleteModal.selectedItemId)
-            }
-          >
-            Delete session
-          </Button>
+
+          <div className="mt-10 ml-auto w-fit">
+            <Button
+              onClick={() =>
+                deleteModal.selectedItemId &&
+                handleSessionDelete(deleteModal.selectedItemId)
+              }
+            >
+              Delete session
+            </Button>
+          </div>
         </Modal>
       )}
 
       {sessionsWithoutCurrent.length !== 0 && (
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col items-end ml-auto">
           <button
             onClick={() => setLess(!less)}
-            className="sticky top-0 flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"
+            className="flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"
           >
             {title}
             {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}
           </button>
 
           {!less && (
-            <div className="flex flex-col gap-5 mt-5 w-96">
+            <div
+              className={`flex flex-col gap-5 w-96 overflow-y-auto overflow-x-hidden`}
+            >
               {sessionsWithoutCurrent.map((session) => (
                 <SessionItem
                   isActive={currentSession?.id === session.id}

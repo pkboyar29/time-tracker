@@ -1,5 +1,8 @@
 import { FC } from 'react';
-import { getTimeHoursMinutes } from '../helpers/timeHelpers';
+import {
+  getTimeHoursMinutes,
+  getRemainingTimeHoursMinutesSeconds,
+} from '../helpers/timeHelpers';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -83,11 +86,10 @@ const SessionItem: FC<SessionItemProps> = ({
             valuePercent={
               (session.spentTimeSeconds / session.totalTimeSeconds) * 100
             }
-            label={
-              session.spentTimeSeconds >= 3600
-                ? getTimeHoursMinutes(session.spentTimeSeconds, true)
-                : `${Math.round(session.spentTimeSeconds / 60)} min`
-            }
+            label={getRemainingTimeHoursMinutesSeconds(
+              session.totalTimeSeconds,
+              session.spentTimeSeconds
+            )}
           />
         </div>
       </div>

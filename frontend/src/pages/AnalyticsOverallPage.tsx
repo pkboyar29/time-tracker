@@ -1,5 +1,5 @@
 import { FC, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchOverallAnalytics } from '../api/analyticsApi';
 import {
   getDayRange,
@@ -28,10 +28,9 @@ const AnalyticsOverallPage: FC = () => {
     data: overallAnalytics,
     isLoading,
     isError,
-  } = useQuery({
+  } = useQueryCustom({
     queryKey: ['overallAnalytics'],
     queryFn: fetchOverallAnalytics,
-    retry: false,
   });
 
   useEffect(() => {
