@@ -14,15 +14,6 @@ const initialState: SessionState = {
   lastCompletedSessionId: null,
 };
 
-export const loadCurrentSession = createAsyncThunk<ISession, string>(
-  'sessions/loadCurrentSession',
-  async (sessionId) => {
-    const { data: unmappedData } = await axios.get(`/sessions/${sessionId}`);
-
-    return mapSessionFromResponse(unmappedData);
-  }
-);
-
 export const fetchSessions = createAsyncThunk<
   ISession[],
   Record<string, unknown>
@@ -49,7 +40,7 @@ export const createSession = createAsyncThunk<ISession, ISessionCreate>(
   }
 );
 
-// TODO: тут тоже надо как-то ошибки обрабатывать?
+// TODO: тут надо как-то глобально обрабатывать ошибки?
 export const updateSession = createAsyncThunk<ISession, ISession>(
   'sessions/updateSession',
   async (existingSessionData) => {
@@ -98,13 +89,9 @@ const sessionSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder
-      .addCase(createSession.fulfilled, (state, action) => {
-        state.currentSession = action.payload;
-      })
-      .addCase(loadCurrentSession.fulfilled, (state, action) => {
-        state.currentSession = action.payload;
-      });
+    builder.addCase(createSession.fulfilled, (state, action) => {
+      state.currentSession = action.payload;
+    });
   },
 });
 

@@ -209,7 +209,7 @@ const TimerPage: FC = () => {
                       e.currentTarget.blur();
                       onStartSessionClick();
                     }}
-                    className="py-1.5"
+                    className="py-[6.5px]"
                   >
                     Start new session
                   </Button>
