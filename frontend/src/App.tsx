@@ -34,7 +34,11 @@ const App: FC = () => {
       if (requiredAuth && currentSessionId) {
         try {
           const currentSession = await fetchSession(currentSessionId);
-          dispatch(setCurrentSession(currentSession));
+          if (!currentSession.completed) {
+            dispatch(setCurrentSession(currentSession));
+          }
+
+          removeSessionFromLocalStorage();
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
             removeSessionFromLocalStorage();
