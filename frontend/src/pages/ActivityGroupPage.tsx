@@ -2,8 +2,11 @@ import { FC, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueryCustom } from '../hooks/useQueryCustom';
-import { fetchActivityGroup } from '../api/activityGroupApi';
-import { fetchGroupActivities, deleteActivity } from '../api/activityApi';
+import {
+  fetchActivityGroup,
+  archiveAllActivities,
+} from '../api/activityGroupApi';
+import { fetchGroupActivities } from '../api/activityApi';
 import { toast } from 'react-toastify';
 
 import CrossIcon from '../icons/CrossIcon';
@@ -15,7 +18,6 @@ import Modal from '../components/modals/Modal';
 import PrimaryClipLoader from '../components/PrimaryClipLoader';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
-import { ModalState } from '../ts/interfaces/ModalState';
 
 const ActivityGroupPage: FC = () => {
   const queryClient = useQueryClient();
@@ -43,10 +45,6 @@ const ActivityGroupPage: FC = () => {
   const isLoading = isLoadingActivity || isLoadingGroup;
 
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<ModalState>({
-    status: false,
-    selectedItemId: null,
-  });
   const [searchString, setSearchString] = useState<string>('');
 
   useEffect(() => {
@@ -65,20 +63,19 @@ const ActivityGroupPage: FC = () => {
     }
   }, [isErrorActivities]);
 
-  const handleDeleteActivityClick = async (activityId: string) => {
+  const onArchiveAllActivities = async () => {
+    // TODO: отображать серверную ошибку
+
     try {
-      await deleteActivity(activityId);
+      await archiveAllActivities(currentActivityGroup!.id);
 
       queryClient.setQueryData(
         ['activities', activityGroupId],
         (oldData: IActivity[]) =>
-          oldData.filter((activity) => activity.id !== activityId)
+          oldData.map((activity) => ({ ...activity, archived: true }))
       );
-
-      setDeleteModal({ status: false, selectedItemId: null });
     } catch (e) {
-      setDeleteModal({ status: false, selectedItemId: null });
-      toast('A server error occurred while deleting activity', {
+      toast('A server error occurred while archiving all activities', {
         type: 'error',
       });
     }
@@ -111,30 +108,6 @@ const ActivityGroupPage: FC = () => {
               activityGroupId={currentActivityGroup.id}
             />
           )}
-        </Modal>
-      )}
-
-      {deleteModal.status && (
-        <Modal
-          title="Deleting activity"
-          onCloseModal={() =>
-            setDeleteModal({ status: false, selectedItemId: null })
-          }
-        >
-          <p className="text-base/6 dark:text-textDark">
-            Are you sure you want to delete this activity? Activity sessions
-            will not be included in analytics.
-          </p>
-          <div className="mt-10 ml-auto w-fit">
-            <Button
-              onClick={() =>
-                deleteModal.selectedItemId &&
-                handleDeleteActivityClick(deleteModal.selectedItemId)
-              }
-            >
-              Delete activity
-            </Button>
-          </div>
         </Modal>
       )}
 
@@ -194,10 +167,19 @@ const ActivityGroupPage: FC = () => {
               </div>
             </div>
 
-            <div className="my-5 text-xl font-bold dark:text-textDark">
-              All activities
+            <div className="flex items-end gap-7 mt-7">
+              <div className="text-xl font-bold dark:text-textDark">
+                Activities
+              </div>
+
+              <div className="w-fit">
+                <Button onClick={onArchiveAllActivities}>
+                  Archive all activities
+                </Button>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-4">
+
+            <div className="flex flex-wrap gap-4 mt-7">
               {activities.filter((activity) =>
                 activity.name.toLowerCase().includes(searchString.toLowerCase())
               ).length !== 0 ? (
@@ -223,12 +205,15 @@ const ActivityGroupPage: FC = () => {
                             )
                         );
                       }}
-                      deleteHandler={(activityId: string) =>
-                        setDeleteModal({
-                          status: true,
-                          selectedItemId: activityId,
-                        })
-                      }
+                      afterDeleteHandler={(deletedItemId) => {
+                        queryClient.setQueryData(
+                          ['activities', activityGroupId],
+                          (oldData: IActivity[]) =>
+                            oldData.filter(
+                              (activity) => activity.id !== deletedItemId
+                            )
+                        );
+                      }}
                     />
                   ))
               ) : (

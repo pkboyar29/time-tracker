@@ -6,7 +6,7 @@ const EditIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
       fill="none"
       viewBox="0 0 24 24"
       strokeWidth="1.5"
-      className="size-6 stroke-black dark:stroke-textDark"
+      className="size-[20px] stroke-black dark:stroke-textDark"
       {...props}
     >
       <path

@@ -3,16 +3,22 @@ import routeConfig from './router/routeConfig';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './router/ProtectedRoute';
 import { useAppDispatch } from './redux/store';
-import { loadCurrentSession } from './redux/slices/sessionSlice';
+import { fetchSession } from './api/sessionApi';
+import { setCurrentSession } from './redux/slices/sessionSlice';
+import { useTimer } from './hooks/useTimer';
 import { fetchProfileInfo } from './redux/slices/userSlice';
-import { getSessionIdFromLocalStorage } from './helpers/localstorageHelpers';
-import { colors } from '../design-tokens';
+import {
+  getSessionIdFromLocalStorage,
+  removeSessionFromLocalStorage,
+} from './helpers/localstorageHelpers';
+import { AxiosError } from 'axios';
 
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
+  const { startTimer } = useTimer();
 
   const location = useLocation();
   const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
@@ -25,15 +31,37 @@ const App: FC = () => {
   }, []);
 
   useEffect(() => {
-    const currentSessionId = getSessionIdFromLocalStorage();
-    if (requiredAuth && currentSessionId) {
-      dispatch(loadCurrentSession(currentSessionId));
-    }
+    const fetchCurrentSession = async () => {
+      const currentSessionId = getSessionIdFromLocalStorage();
+      if (requiredAuth && currentSessionId) {
+        try {
+          const currentSession = await fetchSession(currentSessionId);
+          if (currentSession.completed) {
+            removeSessionFromLocalStorage();
+            return;
+          }
+
+          dispatch(setCurrentSession(currentSession));
+          startTimer(currentSession.spentTimeSeconds, true);
+        } catch (e) {
+          if (e instanceof AxiosError && e.response?.status === 404) {
+            removeSessionFromLocalStorage();
+          } else {
+            toast('A server error occurred while getting current session', {
+              type: 'error',
+            });
+          }
+        }
+      }
+    };
+
+    fetchCurrentSession();
   }, []);
 
   return (
     <>
       <ToastContainer
+        className="z-[200000]"
         theme={localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'}
         position="top-right"
         limit={3}

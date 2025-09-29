@@ -20,16 +20,20 @@ import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 
 import { toast } from 'react-toastify';
 
+type TimerState = 'idle' | 'running' | 'paused';
+
 interface TimerContextType {
-  toggleTimer: (startSpentSeconds: number, mode: 'toggle' | 'enable') => void;
+  startTimer: (startSpentSeconds: number, paused?: boolean) => void;
+  toggleTimer: (startSpentSeconds: number) => void;
   stopTimer: () => void;
-  enabled: boolean;
+  timerState: TimerState;
 }
 
 const TimerContext = createContext<TimerContextType>({
+  startTimer: () => {},
   toggleTimer: () => {},
   stopTimer: () => {},
-  enabled: false,
+  timerState: 'idle',
 });
 
 interface TimerProviderProps {
@@ -37,7 +41,7 @@ interface TimerProviderProps {
 }
 
 const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
-  const [enabled, setEnabled] = useState<boolean>(false);
+  const [timerState, setTimerState] = useState<TimerState>('idle');
 
   const startTimestamp = useRef<number>(0); // here we store timestamp
   const startSpentSeconds = useRef<number>(0); // here we store seconds
@@ -48,27 +52,36 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const currentUser = useAppSelector((state) => state.users.user);
   const dispatch = useAppDispatch();
 
-  const toggleTimer = (
-    newStartSpentSeconds: number,
-    mode: 'toggle' | 'enable' = 'toggle'
-  ) => {
-    if (mode == 'toggle' && enabled == true) {
-      startTimestamp.current = 0;
-      startSpentSeconds.current = 0;
+  const startTimer = (newStartSpentSeconds: number, paused?: boolean) => {
+    // TODO: после вызова dispatch(setCurrentSession) currentSession не устанавливается сразу
+    // if (currentSession) {
+    // }
+    if (paused) {
+      setTimerState('paused');
     } else {
       startTimestamp.current = Date.now();
       startSpentSeconds.current = newStartSpentSeconds;
-    }
 
-    if (mode === 'enable') {
-      setEnabled(true);
-    } else {
-      setEnabled((enabled) => !enabled);
+      setTimerState('running');
+    }
+  };
+
+  const toggleTimer = (newStartSpentSeconds: number) => {
+    if (timerState == 'running') {
+      startTimestamp.current = 0;
+      startSpentSeconds.current = 0;
+
+      setTimerState('paused');
+    } else if (timerState == 'paused') {
+      startTimestamp.current = Date.now();
+      startSpentSeconds.current = newStartSpentSeconds;
+
+      setTimerState('running');
     }
   };
 
   const stopTimer = () => {
-    setEnabled(false);
+    setTimerState('idle');
     startTimestamp.current = 0;
     startSpentSeconds.current = 0;
   };
@@ -76,7 +89,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   useEffect(() => {
     let intervalId: ReturnType<typeof setInterval>;
 
-    if (enabled) {
+    if (timerState == 'running') {
       intervalId = setInterval(() => {
         if (currentSession) {
           const startTimestampSeconds = Math.floor(
@@ -96,10 +109,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     return () => {
       clearInterval(intervalId);
     };
-  }, [enabled, dispatch]);
+  }, [timerState, dispatch]);
 
   useEffect(() => {
-    if (currentSession) {
+    if (timerState != 'idle' && currentSession) {
       const timerInTitle = currentUser?.showTimerInTitle
         ? `${getRemainingTimeHoursMinutesSeconds(
             currentSession.totalTimeSeconds,
@@ -108,13 +121,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           )}`
         : '';
 
-      if (enabled) {
+      if (timerState == 'running') {
         document.title = `${timerInTitle} Focus | ${
           currentSession.activity
             ? currentSession.activity.name
             : 'Without activity'
         }`;
-      } else {
+      } else if (timerState == 'paused') {
         document.title = `${timerInTitle} Paused | ${
           currentSession.activity
             ? currentSession.activity.name
@@ -124,7 +137,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     } else {
       document.title = 'Time Tracker';
     }
-  }, [enabled, currentUser, currentSession]);
+  }, [timerState, currentUser, currentSession]);
 
   useEffect(() => {
     const checkIfTimePassed = async () => {
@@ -134,7 +147,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       ) {
         try {
           stopTimer();
-          playAudio(0.35);
+          playAudio();
 
           await dispatch(
             updateSession({
@@ -167,19 +180,21 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    if (enabled) {
+    if (timerState == 'running') {
       window.addEventListener('beforeunload', handleBeforeUnload);
-    } else {
+    } else if (timerState == 'paused') {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     }
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [currentSession?.spentTimeSeconds, enabled, dispatch]);
+  }, [currentSession?.spentTimeSeconds, timerState, dispatch]);
 
   return (
-    <TimerContext.Provider value={{ toggleTimer, stopTimer, enabled }}>
+    <TimerContext.Provider
+      value={{ startTimer, toggleTimer, stopTimer, timerState }}
+    >
       {children}
     </TimerContext.Provider>
   );

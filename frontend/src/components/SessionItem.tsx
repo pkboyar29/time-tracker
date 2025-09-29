@@ -12,6 +12,7 @@ import PauseIcon from '../icons/PauseIcon';
 import ResumeIcon from '../icons/ResumeIcon';
 import CustomCircularProgress from './CustomCircularProgress';
 
+// TODO: что за состояние isEnabled
 interface SessionItemProps {
   isActive: boolean;
   isEnabled?: boolean;

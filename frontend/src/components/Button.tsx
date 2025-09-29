@@ -23,6 +23,8 @@ const Button: FC<ButtonProps> = ({
         px-4 py-2.5 w-full
         text-white dark:text-textDark
         bg-primary hover:bg-primaryHover
+        disabled:bg-primaryHover
+        disabled:cursor-not-allowed
         rounded-2xl shadow-sm hover:shadow-md
         transition duration-300 ease-in-out
         ${className}

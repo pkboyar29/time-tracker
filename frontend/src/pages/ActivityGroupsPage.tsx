@@ -3,10 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueryCustom } from '../hooks/useQueryCustom';
-import {
-  fetchActivityGroups,
-  deleteActivityGroup,
-} from '../api/activityGroupApi';
+import { fetchActivityGroups } from '../api/activityGroupApi';
 
 import CrossIcon from '../icons/CrossIcon';
 import PrimaryClipLoader from '../components/PrimaryClipLoader';
@@ -17,7 +14,6 @@ import ActivityItem from '../components/ActivityItem';
 import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm';
 
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
-import { ModalState } from '../ts/interfaces/ModalState';
 
 const ActivityGroupsPage: FC = () => {
   const queryClient = useQueryClient();
@@ -33,10 +29,6 @@ const ActivityGroupsPage: FC = () => {
   });
 
   const [createModal, setCreateModal] = useState<boolean>(false);
-  const [deleteModal, setDeleteModal] = useState<ModalState>({
-    status: false,
-    selectedItemId: null,
-  });
 
   const [searchString, setSearchString] = useState<string>('');
 
@@ -50,40 +42,6 @@ const ActivityGroupsPage: FC = () => {
 
   const handleEditActivityGroupClick = (activityGroupId: string) => {
     navigate(`${activityGroupId}`);
-  };
-
-  const handleDeleteActivityGroupClick = (activityGroupId: string) => {
-    setDeleteModal({
-      status: true,
-      selectedItemId: activityGroupId,
-    });
-  };
-
-  const handleDeleteActivityGroupModal = async () => {
-    if (deleteModal.selectedItemId) {
-      try {
-        await deleteActivityGroup(deleteModal.selectedItemId);
-
-        queryClient.setQueryData(
-          ['activityGroups'],
-          (oldData: IActivityGroup[]) =>
-            oldData.filter((group) => group.id !== deleteModal.selectedItemId)
-        );
-
-        setDeleteModal({
-          status: false,
-          selectedItemId: null,
-        });
-      } catch (e) {
-        setDeleteModal({
-          status: false,
-          selectedItemId: null,
-        });
-        toast('A server error occurred while deleting activity group', {
-          type: 'error',
-        });
-      }
-    }
   };
 
   return (
@@ -103,25 +61,6 @@ const ActivityGroupsPage: FC = () => {
               setCreateModal(false);
             }}
           />
-        </Modal>
-      )}
-
-      {deleteModal.status && (
-        <Modal
-          title="Deleting activity group"
-          onCloseModal={() =>
-            setDeleteModal({ status: false, selectedItemId: null })
-          }
-        >
-          <p className="text-base/6 dark:text-textDark">
-            Are you sure you want to delete this activity group? Activity group
-            sessions will not be included in analytics.
-          </p>
-          <div className="mt-10 ml-auto w-fit">
-            <Button onClick={handleDeleteActivityGroupModal}>
-              Delete activity group
-            </Button>
-          </div>
         </Modal>
       )}
 
@@ -176,7 +115,15 @@ const ActivityGroupsPage: FC = () => {
                       key={activityGroup.id}
                       activityCommon={activityGroup}
                       editHandler={handleEditActivityGroupClick}
-                      deleteHandler={handleDeleteActivityGroupClick}
+                      afterDeleteHandler={(deletedItemId) => {
+                        queryClient.setQueryData(
+                          ['activityGroups'],
+                          (oldData: IActivityGroup[]) =>
+                            oldData.filter(
+                              (group) => group.id !== deletedItemId
+                            )
+                        );
+                      }}
                     />
                   ))
               ) : (

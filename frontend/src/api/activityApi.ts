@@ -4,6 +4,7 @@ import {
   IActivity,
   IActivityCreate,
   IActivityUpdate,
+  IActivityArchive,
 } from '../ts/interfaces/Activity/IActivity';
 
 const mapResponseData = (unmappedActivity: any): IActivity => {
@@ -63,6 +64,17 @@ export const updateActivity = async (
   const { data } = await axios.put(`/activities/${payload.id}`, payload);
 
   return mapResponseData(data);
+};
+
+export const archiveActivity = async (
+  payload: IActivityArchive
+): Promise<string> => {
+  const { data } = await axios.patch(
+    `/activities/${payload.id}/archive`,
+    payload
+  );
+
+  return data;
 };
 
 export const deleteActivity = async (activityId: string): Promise<string> => {

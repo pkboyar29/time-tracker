@@ -49,7 +49,8 @@ const TimerPage: FC = () => {
   const [selectedSeconds, setSelectedSeconds] = useState<number>(1500);
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');
 
-  const { toggleTimer, stopTimer, enabled } = useTimer();
+  const { toggleTimer, stopTimer, timerState } = useTimer();
+  const isTimerStarted = timerState != 'idle';
   const { startSession } = useStartSession();
 
   const currentSession = useAppSelector(
@@ -74,7 +75,7 @@ const TimerPage: FC = () => {
         if (currentSession) {
           handleToggleButtonClick();
         } else {
-          onStartSessionClick();
+          handleStartSessionClick();
         }
       } else if (event.code == 'Escape') {
         handleStopButtonClick();
@@ -85,7 +86,7 @@ const TimerPage: FC = () => {
     return () => {
       window.removeEventListener('keyup', handleKeyClick);
     };
-  }, [currentSession, enabled, selectedSeconds, selectedActivityId]);
+  }, [currentSession, timerState, selectedSeconds, selectedActivityId]);
 
   useEffect(() => {
     const fetchAllUncompletedSessions = async () => {
@@ -98,7 +99,7 @@ const TimerPage: FC = () => {
     fetchAllUncompletedSessions();
   }, []);
 
-  const onStartSessionClick = async () => {
+  const handleStartSessionClick = async () => {
     try {
       const newSession = await dispatch(
         createSession({
@@ -121,9 +122,10 @@ const TimerPage: FC = () => {
 
   const handleToggleButtonClick = () => {
     if (currentSession) {
-      toggleTimer(currentSession.spentTimeSeconds, 'toggle');
+      toggleTimer(currentSession.spentTimeSeconds);
 
-      if (enabled) {
+      // TODO: почему это условие стоит после toggleTimer, вспомнить
+      if (timerState == 'running') {
         // TODO: если сессию не удалось обновить?
         dispatch(updateSession(currentSession));
       }
@@ -149,20 +151,7 @@ const TimerPage: FC = () => {
           <div className="sticky top-0 flex text-lg gap-28">
             {/* Left part of timer */}
             <div className="flex flex-col items-center flex-1 gap-2">
-              {currentSession ? (
-                <CustomCircularProgress
-                  valuePercent={
-                    (currentSession.spentTimeSeconds /
-                      currentSession.totalTimeSeconds) *
-                    100
-                  }
-                  label={`${getRemainingTimeHoursMinutesSeconds(
-                    currentSession.totalTimeSeconds,
-                    currentSession.spentTimeSeconds
-                  )}`}
-                  size="verybig"
-                />
-              ) : (
+              {!isTimerStarted ? (
                 <CustomCircularProgress
                   valuePercent={0}
                   label={`${getRemainingTimeHoursMinutesSeconds(
@@ -171,9 +160,35 @@ const TimerPage: FC = () => {
                   )}`}
                   size="verybig"
                 />
+              ) : (
+                <CustomCircularProgress
+                  valuePercent={
+                    (currentSession!.spentTimeSeconds /
+                      currentSession!.totalTimeSeconds) *
+                    100
+                  }
+                  label={`${getRemainingTimeHoursMinutesSeconds(
+                    currentSession!.totalTimeSeconds,
+                    currentSession!.spentTimeSeconds
+                  )}`}
+                  size="verybig"
+                />
               )}
 
-              {currentSession ? (
+              {!isTimerStarted ? (
+                <div className="mt-2">
+                  <Button
+                    tabIndex={-1}
+                    onClick={(e) => {
+                      e.currentTarget.blur();
+                      handleStartSessionClick();
+                    }}
+                    className="py-[6.5px]"
+                  >
+                    Start new session
+                  </Button>
+                </div>
+              ) : (
                 <>
                   <div className="flex mt-2 gap-7">
                     <button
@@ -184,7 +199,7 @@ const TimerPage: FC = () => {
                         handleToggleButtonClick();
                       }}
                     >
-                      {enabled ? <PauseIcon /> : <PlayIcon />}
+                      {timerState == 'running' ? <PauseIcon /> : <PlayIcon />}
                     </button>
 
                     <button
@@ -199,32 +214,21 @@ const TimerPage: FC = () => {
                     </button>
                   </div>
 
-                  {!enabled && <div className="dark:text-textDark">Paused</div>}
+                  {timerState == 'paused' && (
+                    <div className="dark:text-textDark">Paused</div>
+                  )}
                 </>
-              ) : (
-                <div className="mt-2">
-                  <Button
-                    tabIndex={-1}
-                    onClick={(e) => {
-                      e.currentTarget.blur();
-                      onStartSessionClick();
-                    }}
-                    className="py-1.5"
-                  >
-                    Start new session
-                  </Button>
-                </div>
               )}
             </div>
 
             {/* Right part of timer */}
             <div className="flex flex-col p-6 rounded-lg shadow-md w-96 bg-surfaceLightHover dark:bg-surfaceDark">
               <div className="flex flex-col flex-grow gap-5 overflow-auto">
-                {currentSession && (
+                {isTimerStarted && (
                   <div className="text-lg font-semibold dark:text-textDark">
                     Session{' '}
                     {getTimeHoursMinutes(
-                      currentSession.totalTimeSeconds,
+                      currentSession!.totalTimeSeconds,
                       false
                     )}
                   </div>
@@ -234,7 +238,7 @@ const TimerPage: FC = () => {
                   <span className="block mb-2 text-lg font-semibold dark:text-textDark">
                     Activity
                   </span>
-                  {!currentSession ? (
+                  {!isTimerStarted ? (
                     <div className="h-[42px] flex items-center">
                       {isLoadingActivities ? (
                         <PrimaryClipLoader size="25px" />
@@ -251,9 +255,9 @@ const TimerPage: FC = () => {
                         )
                       )}
                     </div>
-                  ) : currentSession.activity ? (
+                  ) : currentSession!.activity ? (
                     <div className="text-base dark:text-textDark">
-                      {currentSession.activity.name}
+                      {currentSession!.activity.name}
                     </div>
                   ) : (
                     <div className="text-base italic text-gray-500 dark:text-textDarkSecondary">
@@ -262,7 +266,7 @@ const TimerPage: FC = () => {
                   )}
                 </div>
 
-                {!currentSession && (
+                {!isTimerStarted && (
                   <div>
                     <span className="block mb-2 text-lg font-semibold dark:text-textDark">
                       Session duration (minutes)
@@ -278,7 +282,7 @@ const TimerPage: FC = () => {
                   </div>
                 )}
 
-                {currentSession && (
+                {isTimerStarted && (
                   <div className="flex flex-col flex-grow">
                     <div className="mb-2 text-xl font-bold dark:text-textDark">
                       Notes

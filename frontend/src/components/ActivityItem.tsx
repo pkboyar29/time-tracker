@@ -1,6 +1,13 @@
-import { FC, useState } from 'react';
-import { updateActivityGroup } from '../api/activityGroupApi';
-import { updateActivity } from '../api/activityApi';
+import { FC, useState, useEffect, useRef } from 'react';
+import {
+  updateActivityGroup,
+  deleteActivityGroup,
+} from '../api/activityGroupApi';
+import {
+  updateActivity,
+  archiveActivity,
+  deleteActivity,
+} from '../api/activityApi';
 import { getTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
@@ -8,36 +15,59 @@ import { AxiosError } from 'axios';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
-import { ModalState } from '../ts/interfaces/ModalState';
 
 import Button from './Button';
 import DeleteIcon from '../icons/DeleteIcon';
 import EditIcon from '../icons/EditIcon';
 import SaveIcon from '../icons/SaveIcon';
+import ArchiveIcon from '../icons/ArchiveIcon';
+import UnarchiveIcon from '../icons/UnarchiveIcon';
+import KebabHorizontalIcon from '../icons/KebabHorizontalIcon';
 import SessionCreateModal from './modals/SessionCreateModal';
+import Modal from './modals/Modal';
+import DropdownMenu from './DropdownMenu';
 
 interface ActivityBoxProps {
   activityCommon: IActivity | IActivityGroup;
   editHandler: (activityId: string) => void;
-  deleteHandler: (activityId: string) => void;
   afterUpdateHandler?: (updatedActivity: IActivity | IActivityGroup) => void;
+  afterDeleteHandler: (deletedActivityCommonId: string) => void;
 }
 
 const ActivityItem: FC<ActivityBoxProps> = ({
   activityCommon,
   editHandler,
-  deleteHandler,
   afterUpdateHandler,
+  afterDeleteHandler,
 }) => {
   const navigate = useNavigate();
+
+  const isActivity = 'activityGroup' in activityCommon;
+
+  const [deleteModal, setDeleteModal] = useState<boolean>(false);
+  const [startSessionModal, setStartSessionModal] = useState<boolean>(false);
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [name, setName] = useState<string>(activityCommon.name);
 
-  const [startSessionModal, setStartSessionModal] = useState<ModalState>({
-    status: false,
-    selectedItemId: null,
-  });
+  const [dropdown, setDropdown] = useState<boolean>(false);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
+        setDropdown(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const inputChangeHandler = async (e: React.FormEvent<HTMLInputElement>) => {
     setName(e.currentTarget.value);
@@ -46,7 +76,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
   const editButtonClickHandler = () => {
     if (afterUpdateHandler) {
       if (isEditing && name != activityCommon.name) {
-        onSubmit();
+        onUpdateActivityCommon();
       }
 
       setIsEditing((isEditing) => !isEditing);
@@ -55,13 +85,52 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     }
   };
 
-  const deleteButtonClickHandler = () => {
-    deleteHandler(activityCommon.id);
+  const archiveButtonClickHandler = async (archived: boolean) => {
+    if (isActivity) {
+      try {
+        await archiveActivity({ id: activityCommon.id, archived });
+
+        afterUpdateHandler &&
+          afterUpdateHandler({ ...activityCommon, archived });
+
+        toast(`Activity ${archived ? 'archived' : 'unarchived'} successfully`, {
+          type: 'success',
+        });
+      } catch (e) {
+        toast('A server error occurred while archiving activity', {
+          type: 'error',
+        });
+      }
+    }
   };
 
-  const onSubmit = async () => {
-    if ('activityGroup' in activityCommon) {
-      // IActivity
+  const deleteButtonClickHandler = () => {
+    setDeleteModal(true);
+  };
+
+  const onDeleteActivityCommon = async () => {
+    try {
+      if (isActivity) {
+        await deleteActivity(activityCommon.id);
+      } else {
+        await deleteActivityGroup(activityCommon.id);
+      }
+      afterDeleteHandler(activityCommon.id);
+      setDeleteModal(false);
+    } catch (e) {
+      toast(
+        isActivity
+          ? 'A server error occurred while deleting activity'
+          : 'A server error occurred while deleting activity group',
+        {
+          type: 'error',
+        }
+      );
+    }
+  };
+
+  const onUpdateActivityCommon = async () => {
+    if (isActivity) {
       try {
         const updatedData = await updateActivity({
           id: activityCommon.id,
@@ -87,7 +156,6 @@ const ActivityItem: FC<ActivityBoxProps> = ({
         setName(activityCommon.name);
       }
     } else {
-      // IActivityGroup
       try {
         const updatedData = await updateActivityGroup({
           id: activityCommon.id,
@@ -121,7 +189,25 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
   return (
     <>
-      {startSessionModal.status && (
+      {deleteModal && (
+        <Modal
+          title={isActivity ? 'Deleting activity' : 'Deleting activity group'}
+          onCloseModal={() => setDeleteModal(false)}
+        >
+          <p className="text-base/6 dark:text-textDark">
+            {isActivity
+              ? 'Are you sure you want to delete this activity? Activity sessions will not be included in analytics.'
+              : 'Are you sure you want to delete this activity group? Activity group sessions will not be included in analytics.'}
+          </p>
+          <div className="mt-10 ml-auto w-fit">
+            <Button onClick={onDeleteActivityCommon}>
+              {isActivity ? 'Delete activity' : 'Delete activity group'}
+            </Button>
+          </div>
+        </Modal>
+      )}
+
+      {startSessionModal && (
         <SessionCreateModal
           modalTitle={
             <div>
@@ -130,13 +216,9 @@ const ActivityItem: FC<ActivityBoxProps> = ({
             </div>
           }
           onCloseModal={() => {
-            setStartSessionModal({ status: false, selectedItemId: null });
+            setStartSessionModal(false);
           }}
-          defaultActivity={
-            startSessionModal.selectedItemId
-              ? startSessionModal.selectedItemId
-              : undefined
-          }
+          defaultActivity={activityCommon.id}
           afterSubmitHandler={afterCreateSessionHandler}
         />
       )}
@@ -164,29 +246,78 @@ const ActivityItem: FC<ActivityBoxProps> = ({
             >
               {isEditing ? <SaveIcon /> : <EditIcon />}
             </button>
-            <button
-              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
-              onClick={deleteButtonClickHandler}
-            >
-              <DeleteIcon />
-            </button>
+            {isActivity ? (
+              <div className="relative">
+                <button
+                  onClick={() => setDropdown((dropdown) => !dropdown)}
+                  className={`p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover ${
+                    dropdown && 'bg-surfaceLightHover dark:bg-surfaceDarkHover'
+                  }`}
+                >
+                  <KebabHorizontalIcon />
+                </button>
+
+                {dropdown && (
+                  <DropdownMenu ref={dropdownRef}>
+                    <div className="flex flex-col gap-1.5">
+                      <button
+                        className="flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
+                        title="An archived activity will remain in analytics, but you cannot start session with this activity"
+                        onClick={() => {
+                          setDropdown(false);
+                          archiveButtonClickHandler(!activityCommon.archived);
+                        }}
+                      >
+                        {activityCommon.archived ? (
+                          <>
+                            <div className="w-24 dark:text-textDark">
+                              Unarchive
+                            </div>
+                            <UnarchiveIcon />
+                          </>
+                        ) : (
+                          <>
+                            <div className="w-24 dark:text-textDark">
+                              Archive
+                            </div>
+                            <ArchiveIcon />
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        className="flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-primaryHover/35 dark:hover:bg-primaryHover/35"
+                        onClick={() => {
+                          setDropdown(false);
+                          deleteButtonClickHandler();
+                        }}
+                      >
+                        <div className="w-24 dark:text-textDark">Delete</div>
+                        <DeleteIcon />
+                      </button>
+                    </div>
+                  </DropdownMenu>
+                )}
+              </div>
+            ) : (
+              <button
+                className="p-1 transition duration-300 rounded-lg hover:bg-primaryHover/35 dark:hover:bg-primaryHover/35"
+                onClick={deleteButtonClickHandler}
+              >
+                <DeleteIcon />
+              </button>
+            )}
           </div>
         </div>
 
-        {'activityGroup' in activityCommon && (
+        {isActivity && (
           <div className="flex justify-end mt-4">
             <div className="w-fit">
               <Button
-                onClick={() =>
-                  setStartSessionModal({
-                    status: true,
-                    selectedItemId: activityCommon.id,
-                  })
-                }
+                disabled={activityCommon.archived}
+                onClick={() => setStartSessionModal(true)}
               >
-                <div className="flex gap-[6px] items-center">
-                  <span>Start session</span>
-                </div>
+                <span>Start session</span>
               </Button>
             </div>
           </div>

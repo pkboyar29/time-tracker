@@ -8,6 +8,7 @@ router.get('/', async (req: Request, res: Response) => {
   try {
     let data;
 
+    // TODO: вызывать convertParamToBoolean
     const completedParam = req.query.completed;
     let completed: boolean | undefined;
     if (typeof completedParam === 'string') {

@@ -429,6 +429,7 @@ describe('analyticsService.getActivityDistributions', () => {
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
+      archived: false,
     },
     {
       _id: new mongoose.Types.ObjectId(),
@@ -438,6 +439,7 @@ describe('analyticsService.getActivityDistributions', () => {
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
+      archived: false,
     },
   ];
 

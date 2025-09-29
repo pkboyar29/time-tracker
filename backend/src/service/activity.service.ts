@@ -20,12 +20,14 @@ interface GetActivitiesOptions {
   userId: string;
   activityGroupId?: string;
   sortByCreatedDate?: boolean; // true - -1 (descending), false - without sorting
+  archived?: boolean;
 }
 
 interface GetDetailedActivitiesOptions {
   userId: string;
   activityGroupId?: string;
   onlyCompleted: boolean; // true - only completed sessions in detailed info, false - all sessions in detailed info
+  archived?: boolean;
 }
 
 interface GetDetailedActivityOptions {
@@ -55,6 +57,7 @@ const activityService = {
   existsActivity,
   createActivity,
   updateActivity,
+  archiveActivity,
   deleteActivity,
   addActivityToLastActivities,
 };
@@ -63,12 +66,14 @@ async function getActivities({
   userId,
   activityGroupId,
   sortByCreatedDate,
+  archived,
 }: GetActivitiesOptions): Promise<IActivity[]> {
   try {
     const filter: Record<string, unknown> = {
       deleted: false,
       user: userId,
       ...(activityGroupId && { activityGroup: activityGroupId }),
+      ...(archived !== undefined && { archived }),
     };
 
     // TODO: вызывать метод lean?
@@ -87,11 +92,13 @@ async function getDetailedActivities({
   userId,
   activityGroupId,
   onlyCompleted,
+  archived,
 }: GetDetailedActivitiesOptions): Promise<IDetailedActivity[]> {
   try {
     const filter = {
       userId,
       ...(activityGroupId && { activityGroupId }),
+      ...(archived !== undefined && { archived }),
     };
     const allActivities = await activityService.getActivities(filter);
 
@@ -179,9 +186,13 @@ async function getSplitActivities({
     allActivities = await activityService.getDetailedActivities({
       userId,
       onlyCompleted: false,
+      archived: false,
     });
   } else {
-    allActivities = await activityService.getActivities({ userId });
+    allActivities = await activityService.getActivities({
+      userId,
+      archived: false,
+    });
   }
 
   const userTopActivities = await UserTopActivity.find(
@@ -203,8 +214,8 @@ async function getSplitActivities({
   );
 
   return {
-    topActivities: topActivities,
-    remainingActivities: remainingActivities,
+    topActivities,
+    remainingActivities,
   };
 }
 
@@ -355,6 +366,22 @@ async function updateActivity(
   }
 }
 
+async function archiveActivity(
+  activityId: string,
+  archived: boolean,
+  userId: string
+): Promise<IActivity> {
+  if (!(await activityService.existsActivity(activityId, userId))) {
+    throw new HttpError(404, 'Activity Not Found');
+  }
+
+  const activity = await Activity.findById(activityId);
+  activity!.archived = archived;
+  activity!.save();
+
+  return activity!;
+}
+
 async function deleteActivity(
   activityId: string,
   userId: string
@@ -364,6 +391,7 @@ async function deleteActivity(
       throw new HttpError(404, 'Activity Not Found');
     }
 
+    // TODO: удалять через updateMany
     const sessions = await sessionService.getSessionsForActivity({
       activityId,
       userId,
@@ -390,6 +418,12 @@ async function deleteActivity(
 
 // TODO: надо поддерживать максимум 5 элементов атомарно (использовать атомарный вариант с upsert)
 async function addActivityToLastActivities(activityId: string, userId: string) {
+  // TODO: добавить проверку на существование активности
+  const activity = await Activity.findById(activityId);
+  if (activity?.archived) {
+    return;
+  }
+
   const userLastActivities = await UserTopActivity.find({ userId }).sort({
     createdDate: 1,
   });

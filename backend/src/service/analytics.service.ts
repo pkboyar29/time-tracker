@@ -612,7 +612,9 @@ function mergeAnalytics({
 // 2)после изменения названия активности, достаточно просто везде поменять его название, удалять все ключи не надо. пока не знаю, является ли норм практикой модификация значения ключа
 async function invalidateCache(userId: string) {
   const userKeys = await redisClient.keys(`analytics:${userId}*`);
-  await redisClient.del(userKeys);
+  if (userKeys.length > 0) {
+    await redisClient.del(userKeys);
+  }
 }
 
 export default analyticsService;

@@ -3,6 +3,7 @@ import ActivityGroup, {
   IActivityGroup,
   IDetailedActivityGroup,
 } from '../model/activityGroup.model';
+import Activity from '../model/activity.model';
 import { ActivityGroupDTO } from '../dto/activityGroup.dto';
 import activityService from './activity.service';
 import { HttpError } from '../helpers/HttpError';
@@ -29,6 +30,7 @@ const activityGroupService = {
   existsActivityGroup,
   createActivityGroup,
   updateActivityGroup,
+  archiveGroupActivities,
   deleteActivityGroup,
 };
 
@@ -199,6 +201,24 @@ async function updateActivityGroup(
   }
 }
 
+async function archiveGroupActivities(
+  activityGroupId: string,
+  userId: string
+): Promise<{ message: string }> {
+  if (
+    !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
+  ) {
+    throw new HttpError(404, 'Activity Group Not Found');
+  }
+
+  await Activity.updateMany(
+    { activityGroup: activityGroupId },
+    { archived: true }
+  );
+
+  return { message: 'Archived all activities successful' };
+}
+
 async function deleteActivityGroup(
   activityGroupId: string,
   userId: string
@@ -210,6 +230,7 @@ async function deleteActivityGroup(
       throw new HttpError(404, 'Activity Group Not Found');
     }
 
+    // TODO: удалять через updateMany, только тут как-то еще сессии для каждой активности удалять через updateMany
     const activities = await activityService.getActivitiesForActivityGroup({
       activityGroupId,
       userId,

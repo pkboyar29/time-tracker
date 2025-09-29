@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import activityService from '../service/activity.service';
 import { sendErrorResponse } from '../helpers/sendErrorResponse';
+import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 
 const router = Router();
 
@@ -72,6 +73,19 @@ router.put('/:id', async (req: Request, res: Response) => {
     const data = await activityService.updateActivity(
       req.params.id,
       req.body,
+      res.locals.userId
+    );
+    res.status(200).json(data);
+  } catch (e) {
+    sendErrorResponse(e, res);
+  }
+});
+
+router.patch('/:id/archive', async (req: Request, res: Response) => {
+  try {
+    const data = await activityService.archiveActivity(
+      req.params.id,
+      convertParamToBoolean(req.body.archived),
       res.locals.userId
     );
     res.status(200).json(data);
