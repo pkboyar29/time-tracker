@@ -35,7 +35,7 @@ const SessionsList: FC<SessionsListProps> = ({
   updateSessionsListHandler,
 }) => {
   const dispatch = useAppDispatch();
-  const { enabled } = useTimer();
+  const { timerState } = useTimer();
   const { startSession } = useStartSession();
 
   const sessionIdFromLocalStorage = getSessionIdFromLocalStorage();
@@ -84,7 +84,7 @@ const SessionsList: FC<SessionsListProps> = ({
 
   const handleSessionClick = async (session: ISession) => {
     // updating the previous current session if it's not paused
-    if (currentSession && enabled) {
+    if (currentSession && timerState == 'running') {
       try {
         const updatedSession = await dispatch(
           updateSession(currentSession)
@@ -168,7 +168,7 @@ const SessionsList: FC<SessionsListProps> = ({
               {sessionsWithoutCurrent.map((session) => (
                 <SessionItem
                   isActive={currentSession?.id === session.id}
-                  isEnabled={enabled}
+                  isEnabled={timerState == 'running'}
                   key={session.id}
                   session={session}
                   sessionClickHandler={handleSessionClick}

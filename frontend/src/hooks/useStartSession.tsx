@@ -7,12 +7,12 @@ import { ISession } from '../ts/interfaces/Session/ISession';
 
 export const useStartSession = () => {
   const dispatch = useAppDispatch();
-  const { toggleTimer } = useTimer();
+  const { startTimer } = useTimer();
 
   const startSession = (session: ISession) => {
     dispatch(setCurrentSession(session));
     saveSessionToLocalStorage(session.id);
-    toggleTimer(session.spentTimeSeconds, 'enable');
+    startTimer(session.spentTimeSeconds);
   };
 
   return { startSession };

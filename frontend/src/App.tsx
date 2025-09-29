@@ -5,6 +5,7 @@ import ProtectedRoute from './router/ProtectedRoute';
 import { useAppDispatch } from './redux/store';
 import { fetchSession } from './api/sessionApi';
 import { setCurrentSession } from './redux/slices/sessionSlice';
+import { useTimer } from './hooks/useTimer';
 import { fetchProfileInfo } from './redux/slices/userSlice';
 import {
   getSessionIdFromLocalStorage,
@@ -17,6 +18,7 @@ import Sidebar from './components/Sidebar';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
+  const { startTimer } = useTimer();
 
   const location = useLocation();
   const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
@@ -34,11 +36,13 @@ const App: FC = () => {
       if (requiredAuth && currentSessionId) {
         try {
           const currentSession = await fetchSession(currentSessionId);
-          if (!currentSession.completed) {
-            dispatch(setCurrentSession(currentSession));
+          if (currentSession.completed) {
+            removeSessionFromLocalStorage();
+            return;
           }
 
-          removeSessionFromLocalStorage();
+          dispatch(setCurrentSession(currentSession));
+          startTimer(currentSession.spentTimeSeconds, true);
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
             removeSessionFromLocalStorage();
