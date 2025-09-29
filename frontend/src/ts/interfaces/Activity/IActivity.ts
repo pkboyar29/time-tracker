@@ -2,6 +2,7 @@ export interface IActivity {
   id: string;
   name: string;
   descr?: string;
+  archived: boolean;
   sessionsAmount: number;
   spentTimeSeconds: number;
   activityGroup: {
@@ -20,4 +21,9 @@ export interface IActivityUpdate {
   id: string;
   name: string;
   descr?: string;
+}
+
+export interface IActivityArchive {
+  id: string;
+  archived: boolean;
 }

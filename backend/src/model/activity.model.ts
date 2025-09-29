@@ -8,6 +8,7 @@ export interface IActivity {
   activityGroup: Types.ObjectId;
   createdDate: Date;
   updatedDate: Date;
+  archived: boolean;
   deleted: boolean;
 }
 
@@ -19,6 +20,7 @@ export interface IDetailedActivity {
   activityGroup: { _id: Types.ObjectId; name: string };
   createdDate: Date;
   updatedDate: Date;
+  archived: boolean;
   deleted: boolean;
   sessionsAmount: number;
   spentTimeSeconds: number;
@@ -55,6 +57,11 @@ const activitySchema = new Schema<IActivity>({
   updatedDate: {
     type: Date,
     default: Date.now(),
+    required: true,
+  },
+  archived: {
+    type: Boolean,
+    default: false,
     required: true,
   },
   deleted: {

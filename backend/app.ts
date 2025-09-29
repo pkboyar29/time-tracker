@@ -3,6 +3,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import winston from 'winston';
 import expressWinston from 'express-winston';
+import DailyRotateFile from 'winston-daily-rotate-file';
 
 import * as sessionRouter from './src/controller/session.controller';
 import * as activityRouter from './src/controller/activity.controller';
@@ -26,12 +27,12 @@ app.use(
     ),
     transports: [
       new winston.transports.Console(),
-      new winston.transports.File({
-        filename: `error.log`,
-        level: 'error',
-      }),
-      new winston.transports.File({
-        filename: new Date().toISOString().split('T')[0] + '.log',
+      new DailyRotateFile({
+        filename: 'logs/%DATE%.log',
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: false,
+        maxSize: '20m',
+        maxFiles: '14d', // store 14 days
       }),
     ],
     level: (req, res) => {

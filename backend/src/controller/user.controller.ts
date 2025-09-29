@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import userService from '../service/user.service';
 import { upload } from '../helpers/multer';
 import { sendErrorResponse } from '../helpers/sendErrorResponse';
+import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 
 const router = Router();
 
@@ -56,7 +57,7 @@ router.put('/updateDailyGoal', async (req: Request, res: Response) => {
 router.put('/updateShowTimerInTitle', async (req: Request, res: Response) => {
   try {
     const data = await userService.updateShowTimerInTitle(
-      req.body.showTimerInTitle,
+      convertParamToBoolean(req.body.showTimerInTitle),
       res.locals.userId
     );
     res.status(200).json(data);

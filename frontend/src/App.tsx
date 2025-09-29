@@ -57,6 +57,7 @@ const App: FC = () => {
   return (
     <>
       <ToastContainer
+        className="z-[200000]"
         theme={localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'}
         position="top-right"
         limit={3}

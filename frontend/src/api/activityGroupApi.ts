@@ -43,6 +43,16 @@ export const updateActivityGroup = async (
   return mapResponseData(data);
 };
 
+export const archiveAllActivities = async (
+  activityGroupId: string
+): Promise<string> => {
+  const { data } = await axios.put(
+    `/activity-groups/${activityGroupId}/activities/archive`
+  );
+
+  return data;
+};
+
 export const deleteActivityGroup = async (
   activityGroupId: string
 ): Promise<string> => {

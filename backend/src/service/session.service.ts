@@ -1,5 +1,6 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
+import Activity from '../model/activity.model';
 import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
@@ -143,6 +144,14 @@ async function createSession(
       ) {
         throw new HttpError(404, 'Activity Not Found');
       }
+
+      const activity = await Activity.findById(sessionDTO.activity);
+      if (activity!.archived) {
+        throw new HttpError(
+          400,
+          'Cannot create session with archived activity'
+        );
+      }
     }
 
     const newSession = new Session({
@@ -259,6 +268,8 @@ async function deleteSession(
     await Session.findById(sessionId).updateOne({
       deleted: true,
     });
+
+    // TODO: удалять session parts, удалять через deleteMany? а в getSessionPartsInDateRange не фильтровать среди удаленных
 
     return {
       message: 'Deleted successful',
