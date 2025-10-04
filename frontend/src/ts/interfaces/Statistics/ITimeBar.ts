@@ -1,3 +1,5 @@
+import { IActivityDistribution } from './IActivityDistribution';
+
 export interface ITimeBar {
   startOfRange: Date;
   endOfRange: Date;
@@ -5,4 +7,5 @@ export interface ITimeBar {
   barDetailedName: string;
   sessionsAmount: number;
   spentTimeSeconds: number;
+  activityDistributionItems: IActivityDistribution[];
 }

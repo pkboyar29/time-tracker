@@ -9,6 +9,7 @@ interface TimeBar {
   endOfRange: Date;
   sessionsAmount: number;
   spentTimeSeconds: number;
+  activityDistribution: ActivityDistribution[];
 }
 
 interface AnalyticsForRangeDTO {

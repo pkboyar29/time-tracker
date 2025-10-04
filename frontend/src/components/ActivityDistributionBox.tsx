@@ -56,24 +56,12 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           sessionsAmount: othersSessionsAmount,
           spentTimeSeconds: othersSpentTimeSeconds,
           spentTimePercentage: othersSpentTimePercentage,
+          fill: '#4287f5',
         },
       ];
     }
 
-    // TODO: можно установить исключения для нескольких цветов, которые есть в самом интерфейсе
-    const hexColors = Array.from(
-      { length: pieItems.length },
-      () =>
-        '#' +
-        Math.floor(Math.random() * 0xffffff)
-          .toString(16)
-          .padStart(6, '0')
-    );
-
-    return pieItems.map((item, index) => ({
-      ...item,
-      fill: hexColors[index],
-    }));
+    return pieItems;
   }, [sortedItems]);
 
   const onTableBarClick = () => {
@@ -129,6 +117,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           </button>
         </div>
 
+        {/* TODO: странно указывать mb-4 тут */}
         <div className="inline-block px-4 py-1 mb-4 ml-auto mr-0 text-lg font-medium tracking-wide text-right text-gray-800 bg-gray-200 rounded-lg dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
           Activity distribution
         </div>
