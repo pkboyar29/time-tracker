@@ -4,7 +4,11 @@ import { IActivity } from '../../../model/activity.model';
 import mongoose from 'mongoose';
 import { ISessionPart } from '../../../model/sessionPart.model';
 import { ISession } from '../../../model/session.model';
-import { AnalyticsForRangeDTO } from '../../../dto/analytics.dto';
+import {
+  ActivityDistribution,
+  AnalyticsForRangeDTO,
+  TimeBar,
+} from '../../../dto/analytics.dto';
 import * as dateUtils from '../../../helpers/getTodayRange';
 
 describe('analyticsService.getSessionStatistics', () => {
@@ -127,6 +131,29 @@ describe('analyticsService.getTimeBarType', () => {
 });
 
 describe('analyticsService.getTimeBars', () => {
+  const mockActivities: IActivity[] = [
+    {
+      _id: new mongoose.Types.ObjectId(),
+      name: 'Reading',
+      user: new mongoose.Types.ObjectId(),
+      activityGroup: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
+      updatedDate: new Date(),
+      deleted: false,
+      archived: false,
+    },
+    {
+      _id: new mongoose.Types.ObjectId(),
+      name: 'Coding',
+      user: new mongoose.Types.ObjectId(),
+      activityGroup: new mongoose.Types.ObjectId(),
+      createdDate: new Date(),
+      updatedDate: new Date(),
+      deleted: false,
+      archived: false,
+    },
+  ];
+
   const sessionParts: ISessionPart[] = [
     {
       _id: new mongoose.Types.ObjectId(),
@@ -176,7 +203,7 @@ describe('analyticsService.getTimeBars', () => {
     },
     {
       _id: new mongoose.Types.ObjectId(),
-      activity: { name: 'Reading' },
+      activity: { name: 'Coding' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
@@ -186,6 +213,7 @@ describe('analyticsService.getTimeBars', () => {
       deleted: false,
     },
   ];
+
   it('should return correct day-based time bars', () => {
     const start = new Date('2025-07-01T00:00:00Z');
     const end = new Date('2025-07-03T00:00:00Z');
@@ -197,23 +225,20 @@ describe('analyticsService.getTimeBars', () => {
       completedSessions,
       barType: 'day',
       timezone: 'UTC',
+      userActivities: mockActivities,
     });
 
     expect(result).toHaveLength(2);
 
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2025-07-01T00:00:00Z'),
-      endOfRange: new Date('2025-07-02T00:00:00Z'),
-      spentTimeSeconds: 1800,
-      sessionsAmount: 1,
-    });
+    expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
+    expect(result[0].spentTimeSeconds).toBe(1800);
+    expect(result[0].sessionsAmount).toBe(1);
 
-    expect(result[1]).toEqual({
-      startOfRange: new Date('2025-07-02T00:00:00Z'),
-      endOfRange: new Date('2025-07-03T00:00:00Z'),
-      spentTimeSeconds: 900,
-      sessionsAmount: 2,
-    });
+    expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-07-03T00:00:00Z'));
+    expect(result[1].spentTimeSeconds).toBe(900);
+    expect(result[1].sessionsAmount).toBe(2);
   });
 
   it('should return correct day-based time bars and cut last period to end of range', () => {
@@ -227,23 +252,20 @@ describe('analyticsService.getTimeBars', () => {
       completedSessions,
       barType: 'day',
       timezone: 'UTC',
+      userActivities: mockActivities,
     });
 
     expect(result).toHaveLength(2);
 
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2025-07-01T00:00:00Z'),
-      endOfRange: new Date('2025-07-02T00:00:00Z'),
-      spentTimeSeconds: 1800,
-      sessionsAmount: 1,
-    });
+    expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
+    expect(result[0].spentTimeSeconds).toBe(1800);
+    expect(result[0].sessionsAmount).toBe(1);
 
-    expect(result[1]).toEqual({
-      startOfRange: new Date('2025-07-02T00:00:00Z'),
-      endOfRange: new Date('2025-07-02T18:00:00Z'),
-      spentTimeSeconds: 900,
-      sessionsAmount: 2,
-    });
+    expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-07-02T18:00:00Z'));
+    expect(result[1].spentTimeSeconds).toBe(900);
+    expect(result[1].sessionsAmount).toBe(2);
   });
 
   it('should split time bars correctly when range starts mid-day', () => {
@@ -257,23 +279,20 @@ describe('analyticsService.getTimeBars', () => {
       completedSessions,
       barType: 'day',
       timezone: 'UTC',
+      userActivities: mockActivities,
     });
 
     expect(result).toHaveLength(2);
 
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2025-07-01T12:00:00Z'),
-      endOfRange: new Date('2025-07-02T00:00:00Z'),
-      spentTimeSeconds: 600,
-      sessionsAmount: 1,
-    });
+    expect(result[0].startOfRange).toEqual(new Date('2025-07-01T12:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
+    expect(result[0].spentTimeSeconds).toBe(600);
+    expect(result[0].sessionsAmount).toBe(1);
 
-    expect(result[1]).toEqual({
-      startOfRange: new Date('2025-07-02T00:00:00Z'),
-      endOfRange: new Date('2025-07-03T00:00:00Z'),
-      spentTimeSeconds: 900,
-      sessionsAmount: 2,
-    });
+    expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-07-03T00:00:00Z'));
+    expect(result[1].spentTimeSeconds).toBe(900);
+    expect(result[1].sessionsAmount).toBe(2);
   });
 
   it('should return correct month-based time bars', () => {
@@ -287,23 +306,20 @@ describe('analyticsService.getTimeBars', () => {
       completedSessions,
       barType: 'month',
       timezone: 'UTC',
+      userActivities: mockActivities,
     });
 
     expect(result).toHaveLength(2);
 
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2025-07-01T00:00:00Z'),
-      endOfRange: new Date('2025-08-01T00:00:00Z'),
-      spentTimeSeconds: 2700,
-      sessionsAmount: 3,
-    });
+    expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
+    expect(result[0].spentTimeSeconds).toBe(2700);
+    expect(result[0].sessionsAmount).toBe(3);
 
-    expect(result[1]).toEqual({
-      startOfRange: new Date('2025-08-01T00:00:00Z'),
-      endOfRange: new Date('2025-09-01T00:00:00Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
-    });
+    expect(result[1].startOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-09-01T00:00:00Z'));
+    expect(result[1].spentTimeSeconds).toBe(0);
+    expect(result[1].sessionsAmount).toBe(0);
   });
 
   it('should return correct month-based time bars and cut last period to end of range', () => {
@@ -317,23 +333,20 @@ describe('analyticsService.getTimeBars', () => {
       completedSessions,
       barType: 'month',
       timezone: 'UTC',
+      userActivities: mockActivities,
     });
 
     expect(result).toHaveLength(2);
 
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2025-07-01T00:00:00Z'),
-      endOfRange: new Date('2025-08-01T00:00:00Z'),
-      spentTimeSeconds: 2700,
-      sessionsAmount: 3,
-    });
+    expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
+    expect(result[0].spentTimeSeconds).toBe(2700);
+    expect(result[0].sessionsAmount).toBe(3);
 
-    expect(result[1]).toEqual({
-      startOfRange: new Date('2025-08-01T00:00:00Z'),
-      endOfRange: new Date('2025-08-10T00:00:00Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
-    });
+    expect(result[1].startOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-08-10T00:00:00Z'));
+    expect(result[1].spentTimeSeconds).toBe(0);
+    expect(result[1].sessionsAmount).toBe(0);
   });
 
   it('should split month time bars correctly when range starts mid-month', () => {
@@ -347,6 +360,7 @@ describe('analyticsService.getTimeBars', () => {
       completedSessions,
       barType: 'month',
       timezone: 'UTC',
+      userActivities: mockActivities,
     });
 
     expect(result).toHaveLength(2);
@@ -356,6 +370,7 @@ describe('analyticsService.getTimeBars', () => {
       endOfRange: new Date('2025-06-01T00:00:00Z'),
       spentTimeSeconds: 0,
       sessionsAmount: 0,
+      activityDistribution: [],
     });
 
     expect(result[1]).toEqual({
@@ -363,6 +378,7 @@ describe('analyticsService.getTimeBars', () => {
       endOfRange: new Date('2025-07-01T00:00:00Z'),
       spentTimeSeconds: 0,
       sessionsAmount: 0,
+      activityDistribution: [],
     });
   });
 
@@ -377,6 +393,7 @@ describe('analyticsService.getTimeBars', () => {
       completedSessions: [],
       barType: 'month',
       timezone: 'Europe/Moscow',
+      userActivities: mockActivities,
     });
 
     expect(result.length).toBe(6);
@@ -385,37 +402,78 @@ describe('analyticsService.getTimeBars', () => {
       endOfRange: new Date('2024-07-31T21:00:00.000Z'),
       spentTimeSeconds: 0,
       sessionsAmount: 0,
+      activityDistribution: [],
     });
     expect(result[1]).toEqual({
       startOfRange: new Date('2024-07-31T21:00:00.000Z'),
       endOfRange: new Date('2024-08-31T21:00:00.000Z'),
       spentTimeSeconds: 0,
       sessionsAmount: 0,
+      activityDistribution: [],
     });
     expect(result[2]).toEqual({
       startOfRange: new Date('2024-08-31T21:00:00.000Z'),
       endOfRange: new Date('2024-09-30T21:00:00.000Z'),
       spentTimeSeconds: 0,
       sessionsAmount: 0,
+      activityDistribution: [],
     });
     expect(result[3]).toEqual({
       startOfRange: new Date('2024-09-30T21:00:00.000Z'),
       endOfRange: new Date('2024-10-31T21:00:00.000Z'),
       spentTimeSeconds: 0,
       sessionsAmount: 0,
+      activityDistribution: [],
     });
     expect(result[4]).toEqual({
       startOfRange: new Date('2024-10-31T21:00:00.000Z'),
       endOfRange: new Date('2024-11-30T21:00:00.000Z'),
       spentTimeSeconds: 0,
       sessionsAmount: 0,
+      activityDistribution: [],
     });
     expect(result[5]).toEqual({
       startOfRange: new Date('2024-11-30T21:00:00.000Z'),
       endOfRange: new Date('2024-12-31T21:00:00.000Z'),
       spentTimeSeconds: 0,
       sessionsAmount: 0,
+      activityDistribution: [],
     });
+  });
+
+  it('should return correct activity distributions in time bars', () => {
+    const start = new Date('2025-07-01T00:00:00.000Z');
+    const end = new Date('2025-07-03T00:00:00.000Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      sessionParts,
+      completedSessions,
+      barType: 'day',
+      timezone: 'UTC',
+      userActivities: mockActivities,
+    });
+
+    expect(result[0].activityDistribution).toEqual([
+      {
+        activityName: 'Reading',
+        sessionsAmount: 1,
+        spentTimeSeconds: 1800,
+      },
+    ]);
+    expect(result[1].activityDistribution).toEqual([
+      {
+        activityName: 'Reading',
+        sessionsAmount: 1,
+        spentTimeSeconds: 900,
+      },
+      {
+        activityName: 'Coding',
+        sessionsAmount: 1,
+        spentTimeSeconds: 0,
+      },
+    ]);
   });
 });
 
@@ -444,10 +502,6 @@ describe('analyticsService.getActivityDistributions', () => {
   ];
 
   it('should return correct distribution when sessions and sessionParts match activities', async () => {
-    jest
-      .spyOn(activityService, 'getActivities')
-      .mockResolvedValue(mockActivities);
-
     const completedSessions: ISession[] = [
       {
         _id: new mongoose.Types.ObjectId(),
@@ -501,12 +555,12 @@ describe('analyticsService.getActivityDistributions', () => {
       },
     ];
 
-    const result = await analyticsService.getActivityDistributions({
+    const result = analyticsService.getActivityDistributions({
       allSessionsAmount: 4,
       allSpentTimeSeconds: 400,
       sessionParts,
       completedSessions,
-      userId: 'user123',
+      userActivities: mockActivities,
     });
 
     expect(result).toEqual([
@@ -529,10 +583,6 @@ describe('analyticsService.getActivityDistributions', () => {
   });
 
   it('should not add "Without activity" if time and sessions match exactly', async () => {
-    jest
-      .spyOn(activityService, 'getActivities')
-      .mockResolvedValue(mockActivities);
-
     const completedSessions: ISession[] = [
       {
         _id: new mongoose.Types.ObjectId(),
@@ -557,12 +607,12 @@ describe('analyticsService.getActivityDistributions', () => {
       },
     ];
 
-    const result = await analyticsService.getActivityDistributions({
+    const result = analyticsService.getActivityDistributions({
       allSessionsAmount: 1,
       allSpentTimeSeconds: 300,
       sessionParts,
       completedSessions,
-      userId: 'user123',
+      userActivities: mockActivities,
     });
 
     expect(result).toHaveLength(1); // only one activity - reading, even if there are many activities returned in getActivities
@@ -572,6 +622,112 @@ describe('analyticsService.getActivityDistributions', () => {
         expect.objectContaining({ activityName: 'Without activity' }),
       ])
     );
+  });
+});
+
+describe('analyticsService.mergeActivityDistributions', () => {
+  const firstAd: ActivityDistribution[] = [
+    { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 100 },
+    { activityName: 'B', sessionsAmount: 1, spentTimeSeconds: 200 },
+  ];
+  const secondAd: ActivityDistribution[] = [
+    { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
+    { activityName: 'C', sessionsAmount: 1, spentTimeSeconds: 100 },
+  ];
+  const thirdAd: ActivityDistribution[] = [
+    { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
+    { activityName: 'B', sessionsAmount: 2, spentTimeSeconds: 200 },
+    { activityName: 'D', sessionsAmount: 1, spentTimeSeconds: 100 },
+  ];
+  const fourthAd: ActivityDistribution[] = [
+    { activityName: 'B', sessionsAmount: 2, spentTimeSeconds: 100 },
+    { activityName: 'D', sessionsAmount: 0, spentTimeSeconds: 300 },
+    { activityName: 'E', sessionsAmount: 2, spentTimeSeconds: 200 },
+  ];
+
+  it('should correctly handle an empty array input', () => {
+    const result = analyticsService.mergeActivityDistributions({
+      adsList: [],
+    });
+    expect(result).toEqual([]);
+  });
+
+  it('should correctly handle array with one ad', () => {
+    const result = analyticsService.mergeActivityDistributions({
+      adsList: [firstAd],
+    });
+    expect(result).toEqual(firstAd);
+  });
+
+  it('should merge two activityDistributions correctly', () => {
+    const result = analyticsService.mergeActivityDistributions({
+      adsList: [firstAd, secondAd],
+    });
+
+    expect(result).toHaveLength(3);
+
+    const activityA = result.find((a) => a.activityName === 'A');
+    expect(activityA).toEqual({
+      activityName: 'A',
+      sessionsAmount: 2,
+      spentTimeSeconds: 150,
+    });
+
+    const activityB = result.find((a) => a.activityName === 'B');
+    expect(activityB).toEqual({
+      activityName: 'B',
+      sessionsAmount: 1,
+      spentTimeSeconds: 200,
+    });
+
+    const activityC = result.find((a) => a.activityName === 'C');
+    expect(activityC).toEqual({
+      activityName: 'C',
+      sessionsAmount: 1,
+      spentTimeSeconds: 100,
+    });
+  });
+
+  it('should merge four activityDistributions correctly', () => {
+    const result = analyticsService.mergeActivityDistributions({
+      adsList: [firstAd, secondAd, thirdAd, fourthAd],
+    });
+
+    expect(result).toHaveLength(5);
+    const activityA = result.find((a) => a.activityName === 'A');
+    expect(activityA).toEqual({
+      activityName: 'A',
+      sessionsAmount: 3,
+      spentTimeSeconds: 200,
+    });
+
+    const activityB = result.find((a) => a.activityName === 'B');
+    expect(activityB).toEqual({
+      activityName: 'B',
+      sessionsAmount: 5,
+      spentTimeSeconds: 500,
+    });
+
+    const activityC = result.find((a) => a.activityName === 'C');
+    expect(activityC).toEqual({
+      activityName: 'C',
+      sessionsAmount: 1,
+      spentTimeSeconds: 100,
+    });
+
+    const activityD = result.find((a) => a.activityName === 'D');
+    expect(activityD).toEqual({
+      activityName: 'D',
+      sessionsAmount: 1,
+      spentTimeSeconds: 400,
+    });
+
+    const activityE = result.find((a) => a.activityName === 'E');
+    expect(activityE).toEqual({
+      activityName: 'E',
+      sessionsAmount: 2,
+      spentTimeSeconds: 200,
+    });
   });
 });
 
@@ -593,12 +749,14 @@ describe('analyticsService.mergeAnalytics', () => {
         endOfRange: new Date('2025-09-19T00:00:00Z'),
         sessionsAmount: 1,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-19T00:00:00Z'),
         endOfRange: new Date('2025-09-20T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
     ],
   };
@@ -608,7 +766,7 @@ describe('analyticsService.mergeAnalytics', () => {
     spentTimeSeconds: 150,
     activityDistribution: [
       { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
-      { activityName: 'C', sessionsAmount: 1, spentTimeSeconds: 100 },
+      { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
     ],
     timeBars: [],
   };
@@ -624,45 +782,6 @@ describe('analyticsService.mergeAnalytics', () => {
 
     expect(result.sessionsAmount).toBe(3);
     expect(result.spentTimeSeconds).toBe(450);
-  });
-
-  it('should merge activityDistribution correctly', () => {
-    const result = analyticsService.mergeAnalytics({
-      finalObjStartOfRange: new Date('2025-09-18T00:00:00Z'),
-      finalObjEndOfRange: new Date('2025-09-22T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
-      timezone,
-    });
-
-    expect(result.activityDistribution).toHaveLength(3);
-
-    const activityA = result.activityDistribution.find(
-      (a) => a.activityName === 'A'
-    );
-    expect(activityA).toEqual({
-      activityName: 'A',
-      sessionsAmount: 2,
-      spentTimeSeconds: 150,
-    });
-
-    const activityB = result.activityDistribution.find(
-      (a) => a.activityName === 'B'
-    );
-    expect(activityB).toEqual({
-      activityName: 'B',
-      sessionsAmount: 1,
-      spentTimeSeconds: 200,
-    });
-
-    const activityC = result.activityDistribution.find(
-      (a) => a.activityName === 'C'
-    );
-    expect(activityC).toEqual({
-      activityName: 'C',
-      sessionsAmount: 1,
-      spentTimeSeconds: 100,
-    });
   });
 
   it('should create correct day timeBars', () => {
@@ -687,36 +806,53 @@ describe('analyticsService.mergeAnalytics', () => {
       endOfRange: new Date('2025-09-19T00:00:00Z'),
       sessionsAmount: 1,
       spentTimeSeconds: 25,
+      activityDistribution: [],
     });
     expect(timeBars[1]).toEqual({
       startOfRange: new Date('2025-09-19T00:00:00Z'),
       endOfRange: new Date('2025-09-20T00:00:00Z'),
       sessionsAmount: 0,
       spentTimeSeconds: 25,
+      activityDistribution: [],
     });
     expect(timeBars[2]).toEqual({
       startOfRange: startOfToday,
       endOfRange: startOfTomorrow,
       sessionsAmount: 1,
       spentTimeSeconds: 150,
+      activityDistribution: [
+        {
+          activityName: 'A',
+          sessionsAmount: 1,
+          spentTimeSeconds: 50,
+        },
+        {
+          activityName: 'C',
+          sessionsAmount: 0,
+          spentTimeSeconds: 100,
+        },
+      ],
     });
     expect(timeBars[3]).toEqual({
       startOfRange: new Date('2025-09-21T00:00:00Z'),
       endOfRange: new Date('2025-09-22T00:00:00Z'),
       sessionsAmount: 0,
       spentTimeSeconds: 0,
+      activityDistribution: [],
     });
     expect(timeBars[4]).toEqual({
       startOfRange: new Date('2025-09-22T00:00:00Z'),
       endOfRange: new Date('2025-09-23T00:00:00Z'),
       sessionsAmount: 0,
       spentTimeSeconds: 0,
+      activityDistribution: [],
     });
     expect(timeBars[5]).toEqual({
       startOfRange: new Date('2025-09-23T00:00:00Z'),
       endOfRange: new Date('2025-09-24T00:00:00Z'),
       sessionsAmount: 0,
       spentTimeSeconds: 0,
+      activityDistribution: [],
     });
   });
 
@@ -739,54 +875,63 @@ describe('analyticsService.mergeAnalytics', () => {
           endOfRange: new Date('2025-02-01T00:00:00Z'),
           sessionsAmount: 10,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-02-01T00:00:00Z'),
           endOfRange: new Date('2025-03-01T00:00:00Z'),
           sessionsAmount: 0,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-03-01T00:00:00Z'),
           endOfRange: new Date('2025-04-01T00:00:00Z'),
           sessionsAmount: 0,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-04-01T00:00:00Z'),
           endOfRange: new Date('2025-05-01T00:00:00Z'),
           sessionsAmount: 0,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-05-01T00:00:00Z'),
           endOfRange: new Date('2025-06-01T00:00:00Z'),
           sessionsAmount: 0,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-06-01T00:00:00Z'),
           endOfRange: new Date('2025-07-01T00:00:00Z'),
           sessionsAmount: 0,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-07-01T00:00:00Z'),
           endOfRange: new Date('2025-08-01T00:00:00Z'),
           sessionsAmount: 0,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-08-01T00:00:00Z'),
           endOfRange: new Date('2025-09-01T00:00:00Z'),
           sessionsAmount: 0,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-09-01T00:00:00Z'),
           endOfRange: new Date('2025-09-20T00:00:00Z'),
           sessionsAmount: 0,
           spentTimeSeconds: 25,
+          activityDistribution: [],
         },
       ],
     };
@@ -808,72 +953,95 @@ describe('analyticsService.mergeAnalytics', () => {
         endOfRange: new Date('2025-02-01T00:00:00Z'),
         sessionsAmount: 10,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-02-01T00:00:00Z'),
         endOfRange: new Date('2025-03-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-03-01T00:00:00Z'),
         endOfRange: new Date('2025-04-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-04-01T00:00:00Z'),
         endOfRange: new Date('2025-05-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-05-01T00:00:00Z'),
         endOfRange: new Date('2025-06-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-06-01T00:00:00Z'),
         endOfRange: new Date('2025-07-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-07-01T00:00:00Z'),
         endOfRange: new Date('2025-08-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-08-01T00:00:00Z'),
         endOfRange: new Date('2025-09-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 25,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-01T00:00:00Z'),
         endOfRange: new Date('2025-10-01T00:00:00Z'),
         sessionsAmount: 1,
         spentTimeSeconds: 175,
+        activityDistribution: [
+          {
+            activityName: 'A',
+            sessionsAmount: 1,
+            spentTimeSeconds: 50,
+          },
+          {
+            activityName: 'C',
+            sessionsAmount: 0,
+            spentTimeSeconds: 100,
+          },
+        ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-12-01T00:00:00Z'),
         endOfRange: new Date('2026-01-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
     ]);
   });
@@ -907,18 +1075,32 @@ describe('analyticsService.mergeAnalytics', () => {
         endOfRange: new Date('2025-09-21T00:00:00Z'),
         sessionsAmount: 1,
         spentTimeSeconds: 150,
+        activityDistribution: [
+          {
+            activityName: 'A',
+            sessionsAmount: 1,
+            spentTimeSeconds: 50,
+          },
+          {
+            activityName: 'C',
+            sessionsAmount: 0,
+            spentTimeSeconds: 100,
+          },
+        ],
       },
       {
         startOfRange: new Date('2025-09-21T00:00:00Z'),
         endOfRange: new Date('2025-09-22T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-22T00:00:00Z'),
         endOfRange: new Date('2025-09-23T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
     ]);
   });
@@ -952,24 +1134,39 @@ describe('analyticsService.mergeAnalytics', () => {
         endOfRange: new Date('2025-09-20T00:00:00Z'),
         sessionsAmount: 1,
         spentTimeSeconds: 200,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-20T00:00:00Z'),
         endOfRange: new Date('2025-09-21T00:00:00Z'),
         sessionsAmount: 1,
         spentTimeSeconds: 150,
+        activityDistribution: [
+          {
+            activityName: 'A',
+            sessionsAmount: 1,
+            spentTimeSeconds: 50,
+          },
+          {
+            activityName: 'C',
+            sessionsAmount: 0,
+            spentTimeSeconds: 100,
+          },
+        ],
       },
       {
         startOfRange: new Date('2025-09-21T00:00:00Z'),
         endOfRange: new Date('2025-09-22T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-22T00:00:00Z'),
         endOfRange: new Date('2025-09-23T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
     ]);
   });
@@ -990,18 +1187,39 @@ describe('analyticsService.mergeAnalytics', () => {
           endOfRange: new Date('2025-09-18T00:00:00Z'),
           sessionsAmount: 1,
           spentTimeSeconds: 200,
+          activityDistribution: [
+            {
+              activityName: 'A',
+              sessionsAmount: 1,
+              spentTimeSeconds: 200,
+            },
+          ],
         },
         {
           startOfRange: new Date('2025-09-18T00:00:00Z'),
           endOfRange: new Date('2025-09-19T00:00:00Z'),
           sessionsAmount: 1,
           spentTimeSeconds: 200,
+          activityDistribution: [
+            {
+              activityName: 'A',
+              sessionsAmount: 1,
+              spentTimeSeconds: 200,
+            },
+          ],
         },
         {
           startOfRange: new Date('2025-09-19T00:00:00Z'),
           endOfRange: new Date('2025-09-20T00:00:00Z'),
           sessionsAmount: 1,
           spentTimeSeconds: 200,
+          activityDistribution: [
+            {
+              activityName: 'A',
+              sessionsAmount: 1,
+              spentTimeSeconds: 200,
+            },
+          ],
         },
       ],
     };
@@ -1022,24 +1240,39 @@ describe('analyticsService.mergeAnalytics', () => {
         endOfRange: new Date('2025-10-01T00:00:00Z'),
         sessionsAmount: 4,
         spentTimeSeconds: 750,
+        activityDistribution: [
+          {
+            activityName: 'A',
+            sessionsAmount: 4,
+            spentTimeSeconds: 650,
+          },
+          {
+            activityName: 'C',
+            sessionsAmount: 0,
+            spentTimeSeconds: 100,
+          },
+        ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-12-01T00:00:00Z'),
         endOfRange: new Date('2026-01-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
     ]);
   });
@@ -1073,24 +1306,31 @@ describe('analyticsService.mergeAnalytics', () => {
         endOfRange: new Date('2025-10-01T00:00:00Z'),
         sessionsAmount: 2,
         spentTimeSeconds: 250,
+        activityDistribution: [
+          { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
+          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+        ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-12-01T00:00:00Z'),
         endOfRange: new Date('2026-01-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
     ]);
   });
@@ -1124,24 +1364,197 @@ describe('analyticsService.mergeAnalytics', () => {
         endOfRange: new Date('2025-10-01T00:00:00Z'),
         sessionsAmount: 1,
         spentTimeSeconds: 150,
+        activityDistribution: [
+          { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
+          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+        ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-12-01T00:00:00Z'),
         endOfRange: new Date('2026-01-01T00:00:00Z'),
         sessionsAmount: 0,
         spentTimeSeconds: 0,
+        activityDistribution: [],
+      },
+    ]);
+  });
+
+  it('should create correct month time bars when today if start of month and start of range is few days before today', () => {
+    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
+      startOfToday: new Date('2025-10-01T00:00:00Z'),
+      startOfTomorrow: new Date('2025-10-02T:00:00:00Z'),
+    });
+
+    const untilTodayObj: AnalyticsForRangeDTO = {
+      sessionsAmount: 5,
+      spentTimeSeconds: 500,
+      activityDistribution: [
+        { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
+        { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+      ],
+      timeBars: [
+        {
+          startOfRange: new Date('2025-09-28T00:00:00Z'),
+          endOfRange: new Date('2025-09-29T00:00:00Z'),
+          sessionsAmount: 2,
+          spentTimeSeconds: 200,
+          activityDistribution: [
+            { activityName: 'A', sessionsAmount: 0, spentTimeSeconds: 0 },
+            { activityName: 'C', sessionsAmount: 1, spentTimeSeconds: 100 },
+          ],
+        },
+        {
+          startOfRange: new Date('2025-09-29T00:00:00Z'),
+          endOfRange: new Date('2025-09-30T00:00:00Z'),
+          sessionsAmount: 3,
+          spentTimeSeconds: 300,
+          activityDistribution: [
+            { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
+            { activityName: 'C', sessionsAmount: 1, spentTimeSeconds: 100 },
+          ],
+        },
+        {
+          startOfRange: new Date('2025-09-30T00:00:00Z'),
+          endOfRange: new Date('2025-10-01T00:00:00Z'),
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          activityDistribution: [],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeAnalytics({
+      finalObjStartOfRange: new Date('2025-09-28T00:00:00Z'),
+      finalObjEndOfRange: new Date('2025-12-01T00:00:00Z'),
+      untilTodayObj,
+      todayObj,
+      timezone,
+    });
+
+    const timeBars = result.timeBars;
+    expect(timeBars.length).toBe(3);
+    expect(timeBars).toEqual([
+      {
+        startOfRange: new Date('2025-09-28T00:00:00Z'),
+        endOfRange: new Date('2025-10-01T00:00:00Z'),
+        sessionsAmount: 5,
+        spentTimeSeconds: 500,
+        activityDistribution: [
+          { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
+          { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+        ],
+      },
+      {
+        startOfRange: new Date('2025-10-01T00:00:00Z'),
+        endOfRange: new Date('2025-11-01T00:00:00Z'),
+        sessionsAmount: 1,
+        spentTimeSeconds: 150,
+        activityDistribution: [
+          { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
+          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+        ],
+      },
+      {
+        startOfRange: new Date('2025-11-01T00:00:00Z'),
+        endOfRange: new Date('2025-12-01T00:00:00Z'),
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        activityDistribution: [],
+      },
+    ]);
+  });
+
+  it('should create correct month time bars when today if start of month and start of range is few months before today', () => {
+    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
+      startOfToday: new Date('2025-10-01T00:00:00Z'),
+      startOfTomorrow: new Date('2025-10-02T:00:00:00Z'),
+    });
+
+    const untilTodayObj: AnalyticsForRangeDTO = {
+      sessionsAmount: 5,
+      spentTimeSeconds: 500,
+      activityDistribution: [
+        { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
+        { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+      ],
+      timeBars: [
+        {
+          startOfRange: new Date('2025-08-01T00:00:00Z'),
+          endOfRange: new Date('2025-09-01T00:00:00Z'),
+          sessionsAmount: 3,
+          spentTimeSeconds: 300,
+          activityDistribution: [
+            { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
+            { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 0 },
+          ],
+        },
+        {
+          startOfRange: new Date('2025-09-01T00:00:00Z'),
+          endOfRange: new Date('2025-10-01T00:00:00Z'),
+          sessionsAmount: 2,
+          spentTimeSeconds: 200,
+          activityDistribution: [
+            { activityName: 'A', sessionsAmount: 0, spentTimeSeconds: 0 },
+            { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+          ],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeAnalytics({
+      finalObjStartOfRange: new Date('2025-08-01T00:00:00Z'),
+      finalObjEndOfRange: new Date('2025-11-01T00:00:00Z'),
+      untilTodayObj,
+      todayObj,
+      timezone,
+    });
+
+    const timeBars = result.timeBars;
+    expect(timeBars.length).toBe(3);
+    expect(timeBars).toEqual([
+      {
+        startOfRange: new Date('2025-08-01T00:00:00Z'),
+        endOfRange: new Date('2025-09-01T00:00:00Z'),
+        sessionsAmount: 3,
+        spentTimeSeconds: 300,
+        activityDistribution: [
+          { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
+          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 0 },
+        ],
+      },
+      {
+        startOfRange: new Date('2025-09-01T00:00:00Z'),
+        endOfRange: new Date('2025-10-01T00:00:00Z'),
+        sessionsAmount: 2,
+        spentTimeSeconds: 200,
+        activityDistribution: [
+          { activityName: 'A', sessionsAmount: 0, spentTimeSeconds: 0 },
+          { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+        ],
+      },
+      {
+        startOfRange: new Date('2025-10-01T00:00:00Z'),
+        endOfRange: new Date('2025-11-01T00:00:00Z'),
+        sessionsAmount: 1,
+        spentTimeSeconds: 150,
+        activityDistribution: [
+          { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
+          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+        ],
       },
     ]);
   });

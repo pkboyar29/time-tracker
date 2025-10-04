@@ -8,6 +8,7 @@ import {
 } from '../dto/analytics.dto';
 import { ISessionPart } from '../model/sessionPart.model';
 import { ISession } from '../model/session.model';
+import { IActivity } from '../model/activity.model';
 import { getTodayRange } from '../helpers/getTodayRange';
 
 import { redisClient } from '../../redisClient';
@@ -25,7 +26,7 @@ interface GetActivityDistributionsOptions {
   allSpentTimeSeconds: number;
   sessionParts: ISessionPart[];
   completedSessions: ISession[];
-  userId: string;
+  userActivities: IActivity[];
 }
 
 interface GetTimeBarsOptions {
@@ -35,6 +36,7 @@ interface GetTimeBarsOptions {
   completedSessions: ISession[];
   barType: TimeBarType;
   timezone: string;
+  userActivities: IActivity[];
 }
 
 interface GetAnalyticsForRangeOptions {
@@ -42,6 +44,10 @@ interface GetAnalyticsForRangeOptions {
   endOfRange: Date;
   userId: string;
   timezone: string;
+}
+
+interface MergeActivityDistributionsOptions {
+  adsList: ActivityDistribution[][];
 }
 
 interface MergeAnalyticsOptions {
@@ -59,6 +65,7 @@ const analyticsService = {
   getTimeBars,
   getAnalyticsForRange,
   getAnalyticsForRangeWithCache,
+  mergeActivityDistributions,
   mergeAnalytics,
   invalidateCache,
 };
@@ -83,19 +90,16 @@ function getSessionsStatistics({
   };
 }
 
-async function getActivityDistributions({
+function getActivityDistributions({
   allSessionsAmount,
   allSpentTimeSeconds,
   sessionParts,
   completedSessions,
-  userId,
-}: GetActivityDistributionsOptions): Promise<ActivityDistribution[]> {
+  userActivities,
+}: GetActivityDistributionsOptions): ActivityDistribution[] {
   let activityDistributions: ActivityDistribution[] = [];
 
-  const activities = await activityService.getActivities({
-    userId,
-  });
-  activityDistributions = activities.map((activity) => {
+  activityDistributions = userActivities.map((activity) => {
     const activityDistribution: ActivityDistribution = {
       activityName: activity.name,
       sessionsAmount: 0,
@@ -178,6 +182,7 @@ function getTimeBars({
   timezone,
   sessionParts,
   completedSessions,
+  userActivities,
 }: GetTimeBarsOptions): TimeBar[] {
   if (endOfRange.getTime() <= startOfRange.getTime()) {
     return [];
@@ -261,6 +266,13 @@ function getTimeBars({
       endOfRange: new Date(nextPeriod),
       spentTimeSeconds: barSpentTimeSeconds,
       sessionsAmount: barSessionsAmount,
+      activityDistribution: analyticsService.getActivityDistributions({
+        allSessionsAmount: barSessionsAmount,
+        allSpentTimeSeconds: barSpentTimeSeconds,
+        sessionParts: filteredSessionParts,
+        completedSessions: filteredSessions,
+        userActivities,
+      }),
     });
 
     if (nextPeriod.getTime() == endOfRange.getTime()) {
@@ -318,12 +330,14 @@ async function getAnalyticsForRange({
       completedSessions: completedSessionsForRange,
     });
 
+  const userActivities = await activityService.getActivities({ userId });
+
   const activityDistribution = await analyticsService.getActivityDistributions({
     allSessionsAmount: sessionsAmount,
     allSpentTimeSeconds: spentTimeSeconds,
     sessionParts: sessionPartsForRange,
     completedSessions: completedSessionsForRange,
-    userId,
+    userActivities,
   });
 
   const timeBars = analyticsService.getTimeBars({
@@ -333,12 +347,13 @@ async function getAnalyticsForRange({
     completedSessions: completedSessionsForRange,
     barType: analyticsService.getTimeBarType(startOfRange, endOfRange),
     timezone,
+    userActivities,
   });
 
   const analyticsForRange: AnalyticsForRangeDTO = {
     sessionsAmount,
     spentTimeSeconds,
-    activityDistribution,
+    activityDistribution: activityDistribution,
     timeBars,
   };
 
@@ -405,8 +420,11 @@ async function getAnalyticsForRangeWithCache({
       });
 
       const newCacheKey = `analytics:${userId}:${startOfRange.toISOString()}:${startOfToday.toISOString()}`;
-      redisClient.set(newCacheKey, JSON.stringify(analyticsUntilToday), {
-        expiration: { type: 'EXAT', value: startOfTomorrow.getTime() / 1000 }, // start of tomorrow (unix timestamp)
+      await redisClient.set(newCacheKey, JSON.stringify(analyticsUntilToday), {
+        expiration: {
+          type: 'EXAT',
+          value: Math.trunc(startOfTomorrow.getTime() / 1000),
+        }, // start of tomorrow (unix timestamp)
       });
 
       return analyticsService.mergeAnalytics({
@@ -432,7 +450,7 @@ async function getAnalyticsForRangeWithCache({
       });
 
       const newCacheKey = `analytics:${userId}:${startOfRange.toISOString()}:${endOfRange.toISOString()}`;
-      redisClient.set(newCacheKey, JSON.stringify(analyticsForRange), {
+      await redisClient.set(newCacheKey, JSON.stringify(analyticsForRange), {
         expiration: { type: 'EX', value: 604800 }, // 7 days
       });
 
@@ -441,6 +459,44 @@ async function getAnalyticsForRangeWithCache({
   } catch (e) {
     throw e;
   }
+}
+
+function mergeActivityDistributions({
+  adsList,
+}: MergeActivityDistributionsOptions): ActivityDistribution[] {
+  if (adsList.length == 0) {
+    return [];
+  }
+  if (adsList.length == 1) {
+    return adsList[0];
+  }
+
+  let finalAd: ActivityDistribution[] = adsList[0];
+  for (let i = 1; i < adsList.length; i++) {
+    finalAd = finalAd.map((ad) => {
+      for (let j = 0; j < adsList[i].length; j++) {
+        if (ad.activityName === adsList[i][j].activityName) {
+          const { activityName, sessionsAmount, spentTimeSeconds } =
+            adsList[i][j];
+          adsList[i] = adsList[i].filter(
+            (ad) => ad.activityName !== activityName
+          );
+
+          return {
+            activityName: ad.activityName,
+            sessionsAmount: ad.sessionsAmount + sessionsAmount,
+            spentTimeSeconds: ad.spentTimeSeconds + spentTimeSeconds,
+          };
+        }
+      }
+
+      return ad;
+    });
+
+    finalAd = finalAd.concat(adsList[i]);
+  }
+
+  return finalAd;
 }
 
 function mergeAnalytics({
@@ -458,31 +514,15 @@ function mergeAnalytics({
     timeBars: [],
   };
 
-  let untilTodayObjAD = untilTodayObj.activityDistribution;
-  let todayObjAD = todayObj.activityDistribution;
-  untilTodayObjAD = untilTodayObjAD.map((ad: ActivityDistribution) => {
-    for (let i = 0; i < todayObjAD.length; i++) {
-      if (ad.activityName === todayObjAD[i].activityName) {
-        const { activityName, sessionsAmount, spentTimeSeconds } =
-          todayObjAD[i];
-
-        todayObjAD = todayObjAD.filter(
-          (ad) => ad.activityName !== activityName
-        );
-
-        return {
-          activityName: ad.activityName,
-          sessionsAmount: ad.sessionsAmount + sessionsAmount,
-          spentTimeSeconds: ad.spentTimeSeconds + spentTimeSeconds,
-        };
-      }
-    }
-
-    return ad;
+  finalObj.activityDistribution = analyticsService.mergeActivityDistributions({
+    adsList: [
+      untilTodayObj.activityDistribution,
+      todayObj.activityDistribution,
+    ],
   });
-  finalObj.activityDistribution = untilTodayObjAD.concat(todayObjAD);
 
   const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
+
   const finalObjTimeBarType = analyticsService.getTimeBarType(
     finalObjStartOfRange,
     finalObjEndOfRange
@@ -494,34 +534,41 @@ function mergeAnalytics({
       untilTodayObjTimeBars.length == 0 &&
       finalObjStartOfRange < startOfToday
     ) {
-      // if until today obj is for day or less than day (when timeBarType is hour, there are no time bars)
+      // if until today obj is day or less than day (when timeBarType is hour, there are no time bars)
       untilTodayObjTimeBars.push({
         startOfRange: finalObjStartOfRange,
         endOfRange: startOfToday,
         sessionsAmount: untilTodayObj.sessionsAmount,
         spentTimeSeconds: untilTodayObj.spentTimeSeconds,
+        activityDistribution: untilTodayObj.activityDistribution,
       });
     }
 
+    const todayTimeBar: TimeBar = {
+      startOfRange: startOfToday,
+      endOfRange:
+        finalObjEndOfRange < startOfTomorrow
+          ? finalObjEndOfRange
+          : startOfTomorrow,
+      sessionsAmount: todayObj.sessionsAmount,
+      spentTimeSeconds: todayObj.spentTimeSeconds,
+      activityDistribution: todayObj.activityDistribution,
+    };
+
+    const afterTodayTimeBars: TimeBar[] = analyticsService.getTimeBars({
+      startOfRange: startOfTomorrow,
+      endOfRange: finalObjEndOfRange,
+      barType: 'day',
+      sessionParts: [],
+      completedSessions: [],
+      timezone,
+      userActivities: [],
+    });
+
     finalObjTimeBars = [
       ...untilTodayObjTimeBars,
-      {
-        startOfRange: startOfToday,
-        endOfRange:
-          finalObjEndOfRange < startOfTomorrow
-            ? finalObjEndOfRange
-            : startOfTomorrow,
-        sessionsAmount: todayObj.sessionsAmount,
-        spentTimeSeconds: todayObj.spentTimeSeconds,
-      },
-      ...analyticsService.getTimeBars({
-        startOfRange: startOfTomorrow,
-        endOfRange: finalObjEndOfRange,
-        barType: 'day',
-        sessionParts: [],
-        completedSessions: [],
-        timezone,
-      }),
+      todayTimeBar,
+      ...afterTodayTimeBars,
     ];
   } else if (finalObjTimeBarType == 'month') {
     const startOfNextMonth = DateTime.fromJSDate(startOfToday, {
@@ -530,77 +577,155 @@ function mergeAnalytics({
       .plus({ months: 1 })
       .startOf('month')
       .toJSDate();
+    const afterCurrentMonthTimeBars = analyticsService.getTimeBars({
+      startOfRange: startOfNextMonth,
+      endOfRange: finalObjEndOfRange,
+      barType: 'month',
+      sessionParts: [],
+      completedSessions: [],
+      timezone,
+      userActivities: [],
+    });
 
     let untilTodayTimeBars = untilTodayObj.timeBars;
-    if (
-      untilTodayTimeBars.length > 0 &&
+    if (untilTodayTimeBars.length == 0) {
+      // if until today obj is today or less than today
+
+      const currentMonthTimeBar: TimeBar = {
+        startOfRange:
+          finalObjStartOfRange > startOfToday
+            ? startOfToday
+            : finalObjStartOfRange,
+        endOfRange:
+          finalObjEndOfRange < startOfNextMonth
+            ? finalObjEndOfRange
+            : startOfNextMonth,
+        sessionsAmount: untilTodayObj.sessionsAmount + todayObj.sessionsAmount,
+        spentTimeSeconds:
+          untilTodayObj.spentTimeSeconds + todayObj.spentTimeSeconds,
+        activityDistribution: analyticsService.mergeActivityDistributions({
+          adsList: [
+            untilTodayObj.activityDistribution,
+            todayObj.activityDistribution,
+          ],
+        }),
+      };
+
+      finalObjTimeBars = [currentMonthTimeBar, ...afterCurrentMonthTimeBars];
+    } else if (
       analyticsService.getTimeBarType(
         new Date(untilTodayTimeBars[0].startOfRange),
         new Date(untilTodayTimeBars[0].endOfRange)
       ) == 'hour'
     ) {
-      const currentMonthTimeBar: TimeBar = {
-        startOfRange: untilTodayTimeBars[0].startOfRange,
-        endOfRange: startOfNextMonth,
-        sessionsAmount:
-          untilTodayTimeBars.reduce(
-            (totalSessionsAmount, timeBar) =>
-              totalSessionsAmount + timeBar.sessionsAmount,
-            0
-          ) + todayObj.sessionsAmount,
-        spentTimeSeconds:
-          untilTodayTimeBars.reduce(
-            (totalSpentTimeSeconds, timeBar) =>
-              totalSpentTimeSeconds + timeBar.spentTimeSeconds,
-            0
-          ) + todayObj.spentTimeSeconds,
-      };
+      // if until today obj is month or less than month (timeBarType is day)
+      const untilTodayTimeBarsSessionsAmount = untilTodayTimeBars.reduce(
+        (totalSessionsAmount, timeBar) =>
+          totalSessionsAmount + timeBar.sessionsAmount,
+        0
+      );
+      const untilTodayTimeBarsSpentSeconds = untilTodayTimeBars.reduce(
+        (totalSpentTimeSeconds, timeBar) =>
+          totalSpentTimeSeconds + timeBar.spentTimeSeconds,
+        0
+      );
+      const untilTodayTimeBarsAd = analyticsService.mergeActivityDistributions({
+        adsList: [
+          ...untilTodayTimeBars.map((timeBar) => timeBar.activityDistribution),
+        ],
+      });
 
-      finalObjTimeBars = [
-        currentMonthTimeBar,
-        ...analyticsService.getTimeBars({
-          startOfRange: startOfNextMonth,
-          endOfRange: finalObjEndOfRange,
-          barType: 'month',
-          sessionParts: [],
-          completedSessions: [],
-          timezone,
-        }),
-      ];
+      const startOfTodayLuxon = DateTime.fromJSDate(startOfToday, {
+        zone: timezone,
+      });
+      if (startOfTodayLuxon.day === 1) {
+        const untilTodayTimeBar: TimeBar = {
+          startOfRange: untilTodayTimeBars[0].startOfRange,
+          endOfRange: startOfToday,
+          sessionsAmount: untilTodayTimeBarsSessionsAmount,
+          spentTimeSeconds: untilTodayTimeBarsSpentSeconds,
+          activityDistribution: untilTodayTimeBarsAd,
+        };
+
+        const currentMonthTimeBar: TimeBar = {
+          startOfRange: startOfToday,
+          endOfRange: startOfNextMonth,
+          sessionsAmount: todayObj.sessionsAmount,
+          spentTimeSeconds: todayObj.spentTimeSeconds,
+          activityDistribution: todayObj.activityDistribution,
+        };
+
+        finalObjTimeBars = [
+          untilTodayTimeBar,
+          currentMonthTimeBar,
+          ...afterCurrentMonthTimeBars,
+        ];
+      } else {
+        // TODO: не всегда сбор всех дней в один таймбар будет означать, что все эти дни относятся к текущему месяцу
+        const currentMonthTimeBar: TimeBar = {
+          startOfRange: untilTodayTimeBars[0].startOfRange,
+          endOfRange: startOfNextMonth,
+          sessionsAmount:
+            untilTodayTimeBarsSessionsAmount + todayObj.sessionsAmount,
+          spentTimeSeconds:
+            untilTodayTimeBarsSpentSeconds + todayObj.spentTimeSeconds,
+          activityDistribution: analyticsService.mergeActivityDistributions({
+            adsList: [untilTodayTimeBarsAd, todayObj.activityDistribution],
+          }),
+        };
+
+        finalObjTimeBars = [currentMonthTimeBar, ...afterCurrentMonthTimeBars];
+      }
     } else {
-      const currentMonthTimeBar = untilTodayTimeBars.pop();
+      // if until today obj is more than month
+      const startOfTodayLuxon = DateTime.fromJSDate(startOfToday, {
+        zone: timezone,
+      });
+      if (startOfTodayLuxon.day === 1) {
+        const currentMonthTimeBar: TimeBar = {
+          startOfRange: startOfToday,
+          endOfRange:
+            finalObjEndOfRange < startOfNextMonth
+              ? finalObjEndOfRange
+              : startOfNextMonth,
+          sessionsAmount: todayObj.sessionsAmount,
+          spentTimeSeconds: todayObj.spentTimeSeconds,
+          activityDistribution: todayObj.activityDistribution,
+        };
 
-      // TODO: что-то сделать с этой логикой, как минимум разнести по отдельным переменным
-      finalObjTimeBars = [
-        ...untilTodayTimeBars,
-        {
-          startOfRange: currentMonthTimeBar
-            ? currentMonthTimeBar.startOfRange
-            : finalObjStartOfRange > startOfToday
-            ? startOfToday
-            : finalObjStartOfRange,
+        finalObjTimeBars = [
+          ...untilTodayTimeBars,
+          currentMonthTimeBar,
+          ...afterCurrentMonthTimeBars,
+        ];
+      } else {
+        const currentMonthUntilTodayTimeBar = untilTodayTimeBars.pop();
+        const currentMonthTimeBar: TimeBar = {
+          startOfRange: currentMonthUntilTodayTimeBar!.startOfRange,
           endOfRange:
             finalObjEndOfRange < startOfNextMonth
               ? finalObjEndOfRange
               : startOfNextMonth,
           sessionsAmount:
-            (currentMonthTimeBar
-              ? currentMonthTimeBar.sessionsAmount
-              : untilTodayObj.sessionsAmount) + todayObj.sessionsAmount,
+            currentMonthUntilTodayTimeBar!.sessionsAmount +
+            todayObj.sessionsAmount,
           spentTimeSeconds:
-            (currentMonthTimeBar
-              ? currentMonthTimeBar.spentTimeSeconds
-              : untilTodayObj.spentTimeSeconds) + todayObj.spentTimeSeconds,
-        },
-        ...analyticsService.getTimeBars({
-          startOfRange: startOfNextMonth,
-          endOfRange: finalObjEndOfRange,
-          barType: 'month',
-          sessionParts: [],
-          completedSessions: [],
-          timezone,
-        }),
-      ];
+            currentMonthUntilTodayTimeBar!.spentTimeSeconds +
+            todayObj.spentTimeSeconds,
+          activityDistribution: analyticsService.mergeActivityDistributions({
+            adsList: [
+              currentMonthUntilTodayTimeBar!.activityDistribution,
+              todayObj.activityDistribution,
+            ],
+          }),
+        };
+
+        finalObjTimeBars = [
+          ...untilTodayTimeBars,
+          currentMonthTimeBar,
+          ...afterCurrentMonthTimeBars,
+        ];
+      }
     }
   }
   finalObj.timeBars = finalObjTimeBars;
