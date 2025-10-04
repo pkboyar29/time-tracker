@@ -107,7 +107,12 @@ const AnalyticsRangePage: FC = () => {
               />
             )}
             {rangeType != 'days' && (
-              <PeriodDistributionBox timeBars={rangeAnalytics.timeBars} />
+              <PeriodDistributionBox
+                timeBars={rangeAnalytics.timeBars}
+                allActivityDistributionItems={
+                  rangeAnalytics.activityDistributionItems
+                }
+              />
             )}
           </div>
         </div>

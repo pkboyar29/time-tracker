@@ -12,25 +12,40 @@ interface IAnalytics {
 }
 
 const mapResponseData = (unmappedData: any): IAnalytics => {
+  // TODO: можно установить исключения для нескольких цветов, которые есть в самом интерфейсе
+  const activityFillMap = new Map();
+  unmappedData.activityDistribution.forEach((unmappedAd: any) => {
+    activityFillMap.set(
+      unmappedAd.activityName,
+      '#' +
+        Math.floor(Math.random() * 0xffffff)
+          .toString(16)
+          .padStart(6, '0')
+    );
+  });
+
+  const activityDistributionItems = unmappedData.activityDistribution.map(
+    (unmappedAd: any) => {
+      return {
+        activityName: unmappedAd.activityName,
+        sessionsAmount: unmappedAd.sessionsAmount,
+        spentTimeSeconds: unmappedAd.spentTimeSeconds,
+        spentTimePercentage: parseFloat(
+          (unmappedAd.spentTimeSeconds / unmappedData.spentTimeSeconds).toFixed(
+            2
+          )
+        ),
+        fill: activityFillMap.get(unmappedAd.activityName),
+      };
+    }
+  );
+
   return {
     sessionStatistics: {
       sessionsAmount: unmappedData.sessionsAmount,
       spentTimeSeconds: unmappedData.spentTimeSeconds,
     },
-    activityDistributionItems: unmappedData.activityDistribution.map(
-      (unmappedDistr: any) => {
-        return {
-          activityName: unmappedDistr.activityName,
-          sessionsAmount: unmappedDistr.sessionsAmount,
-          spentTimeSeconds: unmappedDistr.spentTimeSeconds,
-          spentTimePercentage: parseFloat(
-            (
-              unmappedDistr.spentTimeSeconds / unmappedData.spentTimeSeconds
-            ).toFixed(2)
-          ),
-        };
-      }
-    ),
+    activityDistributionItems,
     timeBars: unmappedData.timeBars.map((unmappedBar: any) => ({
       startOfRange: new Date(unmappedBar.startOfRange),
       endOfRange: new Date(unmappedBar.endOfRange),
@@ -38,6 +53,21 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
       spentTimeSeconds: unmappedBar.spentTimeSeconds,
       barName: getBarName(unmappedBar),
       barDetailedName: getBarDetailedName(unmappedBar),
+      activityDistributionItems: unmappedBar.activityDistribution.map(
+        (unmappedAd: any) => {
+          return {
+            activityName: unmappedAd.activityName,
+            sessionsAmount: unmappedAd.sessionsAmount,
+            spentTimeSeconds: unmappedAd.spentTimeSeconds,
+            spentTimePercentage: parseFloat(
+              (
+                unmappedAd.spentTimeSeconds / unmappedData.spentTimeSeconds
+              ).toFixed(2)
+            ),
+            fill: activityFillMap.get(unmappedAd.activityName),
+          };
+        }
+      ),
     })),
   };
 };

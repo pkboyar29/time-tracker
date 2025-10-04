@@ -3,4 +3,5 @@ export interface IActivityDistribution {
   sessionsAmount: number;
   spentTimeSeconds: number;
   spentTimePercentage: number;
+  fill: string;
 }
