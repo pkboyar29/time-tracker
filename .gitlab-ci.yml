@@ -5,6 +5,10 @@ stages:
   - build
   - deploy
 
+variables:
+  - FF_USE_FASTZIP: 'true'
+  - TRANSFER_METER_FREQUENCY: '2s'
+
 # Test
 backend_unit_test:
   stage: test
@@ -29,6 +33,7 @@ frontend_test:
   artifacts:
     paths:
       - frontend/node_modules
+    expire_in: 1 week
 
 # Build
 frontend_build:
@@ -39,6 +44,7 @@ frontend_build:
   artifacts:
     paths:
       - frontend/dist
+    expire_in: 1 week
 
 # Deploy
 frontend_deploy:
