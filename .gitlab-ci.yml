@@ -30,6 +30,13 @@ frontend_test:
     - cd frontend
     - npm ci
     - npm run test
+  cache:
+    key:
+      files:
+        - frontend/package-lock.json
+    paths:
+      - frontend/node_modules
+    policy: pull-push
   artifacts:
     paths:
       - frontend/node_modules
