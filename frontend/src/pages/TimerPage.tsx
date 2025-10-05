@@ -147,7 +147,7 @@ const TimerPage: FC = () => {
   return (
     <div className="h-full bg-surfaceLight dark:bg-backgroundDark">
       <div className="container flex items-stretch justify-between h-full gap-10 py-5">
-        {sessionIdFromLocalStorage && !currentSession ? null : (
+        {sessionIdFromLocalStorage && !isTimerStarted ? null : (
           <div className="sticky top-0 flex text-lg gap-28">
             {/* Left part of timer */}
             <div className="flex flex-col items-center flex-1 gap-2">

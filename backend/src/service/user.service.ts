@@ -125,7 +125,10 @@ function createToken(
   };
 
   token = jsonwebtoken.sign(payload, secretKey, {
-    expiresIn: tokenType === 'access' ? '1200s' : '20d',
+    expiresIn:
+      tokenType === 'access'
+        ? process.env.ACCESS_TOKEN_DURATION
+        : process.env.REFRESH_TOKEN_DURATION,
   });
   return token;
 }
