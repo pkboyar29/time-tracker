@@ -9,6 +9,13 @@ variables:
   FF_USE_FASTZIP: 'true'
   TRANSFER_METER_FREQUENCY: '2s'
 
+cache:
+  key:
+    files:
+      - frontend/package-lock.json
+  paths:
+    - frontend/node_modules
+
 # Test
 backend_unit_test:
   stage: test
@@ -30,10 +37,6 @@ frontend_test:
     - cd frontend
     - npm ci
     - npm run test
-  artifacts:
-    paths:
-      - frontend/node_modules
-    expire_in: 1 week
 
 # Build
 frontend_build:
