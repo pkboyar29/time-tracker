@@ -127,8 +127,8 @@ function createToken(
   token = jsonwebtoken.sign(payload, secretKey, {
     expiresIn:
       tokenType === 'access'
-        ? process.env.ACCESS_TOKEN_DURATION
-        : process.env.REFRESH_TOKEN_DURATION,
+        ? process.env.ACCESS_TOKEN_DURATION ?? '1800s'
+        : process.env.REFRESH_TOKEN_DURATION ?? '40d',
   });
   return token;
 }
