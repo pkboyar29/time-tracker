@@ -6,8 +6,8 @@ stages:
   - deploy
 
 variables:
-  - FF_USE_FASTZIP: 'true'
-  - TRANSFER_METER_FREQUENCY: '2s'
+  FF_USE_FASTZIP: 'true'
+  TRANSFER_METER_FREQUENCY: '2s'
 
 # Test
 backend_unit_test:
@@ -72,3 +72,4 @@ backend_build_and_deploy:
     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
   script:
     - ssh root@185.23.34.22 "cd ~/time-tracker/ && git pull --no-rebase && cd backend/ && docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d"
+
