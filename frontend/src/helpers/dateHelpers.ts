@@ -1,4 +1,76 @@
-export const getWeekDays = (date: Date): Date[] => {
+export const getDayRange = (date: Date): [Date, Date] => {
+  const startOfDay = new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate(),
+    0,
+    0,
+    0,
+    0
+  );
+
+  const endOfDay = new Date(startOfDay);
+  endOfDay.setDate(startOfDay.getDate() + 1);
+
+  return [startOfDay, endOfDay];
+};
+
+export const getWeekRange = (date: Date): [Date, Date] => {
+  const mondayDate = new Date(date);
+
+  // in case of sunday we are shifting the day to saturday (6)
+  if (mondayDate.getDay() == 0) {
+    mondayDate.setDate(mondayDate.getDate() - 1);
+  }
+
+  while (mondayDate.getDay() != 1) {
+    mondayDate.setDate(mondayDate.getDate() - 1);
+  }
+  mondayDate.setHours(0);
+  mondayDate.setMinutes(0);
+  mondayDate.setSeconds(0);
+  mondayDate.setMilliseconds(0);
+
+  const sundayDate = new Date(mondayDate);
+  sundayDate.setDate(sundayDate.getDate() + 6);
+  sundayDate.setHours(23);
+  sundayDate.setMinutes(59);
+  sundayDate.setSeconds(59);
+  sundayDate.setMilliseconds(999);
+
+  return [mondayDate, sundayDate];
+};
+
+export const getMonthRange = (date: Date): [Date, Date] => {
+  const startOfMonth = new Date(date);
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0);
+  startOfMonth.setMinutes(0);
+  startOfMonth.setSeconds(0);
+  startOfMonth.setMilliseconds(0);
+
+  const endOfMonth = new Date(startOfMonth);
+  endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+
+  return [startOfMonth, endOfMonth];
+};
+
+export const getYearRange = (date: Date): [Date, Date] => {
+  const startOfYear = new Date(date);
+  startOfYear.setMonth(0);
+  startOfYear.setDate(1);
+  startOfYear.setHours(0);
+  startOfYear.setMinutes(0);
+  startOfYear.setSeconds(0);
+  startOfYear.setMilliseconds(0);
+
+  const endOfYear = new Date(startOfYear);
+  endOfYear.setFullYear(startOfYear.getFullYear() + 1);
+
+  return [startOfYear, endOfYear];
+};
+
+export const getWeekDays = (date: Date): [Date, Date][] => {
   // find start of week in date format (start of week - 1 index - monday)
   let startOfWeekDate: Date = new Date(date);
   if (startOfWeekDate.getDay() == 0) {
@@ -9,11 +81,11 @@ export const getWeekDays = (date: Date): Date[] => {
   }
 
   // generate array of 7 dates starting from monday
-  let daysOfWeek: Date[] = [startOfWeekDate];
+  let daysOfWeek: [Date, Date][] = [getDayRange(startOfWeekDate)];
   let dateInLoop: Date = new Date(startOfWeekDate);
   for (let i = 1; i < 7; i++) {
     dateInLoop.setDate(dateInLoop.getDate() + 1);
-    daysOfWeek.push(new Date(dateInLoop));
+    daysOfWeek.push(getDayRange(new Date(dateInLoop)));
   }
 
   return daysOfWeek;
@@ -40,15 +112,19 @@ export const getDayOfWeekName = (dayNumber: number): string => {
   }
 };
 
-export const shiftWeekDays = (days: Date[], right: boolean): Date[] => {
-  let newDays: Date[] = [];
+export const shiftWeekDays = (
+  days: [Date, Date][],
+  right: boolean
+): [Date, Date][] => {
+  let newDays: [Date, Date][] = [];
   for (let i = 0; i < 7; i++) {
-    newDays.push(new Date(days[i]));
+    newDays.push([new Date(days[i][0]), new Date(days[i][1])]);
   }
 
   const step: number = right ? 7 : -7;
   for (let i = 0; i < 7; i++) {
-    newDays[i].setDate(newDays[i].getDate() + step);
+    newDays[i][0].setDate(newDays[i][0].getDate() + step);
+    newDays[i][1].setDate(newDays[i][1].getDate() + step);
   }
 
   return newDays;
@@ -161,130 +237,72 @@ export const getMonthWeeks = (date: Date): [Date, Date][] => {
   return weeks;
 };
 
-export const getFiveMonths = (middleDate: Date): Date[] => {
-  const fiveMonths: Date[] = [];
+export const getFiveMonths = (middleDate: Date): [Date, Date][] => {
+  const fiveMonths: [Date, Date][] = [];
 
   for (let i = 2; i > 0; i--) {
     const date: Date = new Date(middleDate);
     date.setMonth(date.getMonth() - i);
-    fiveMonths.push(date);
+    fiveMonths.push(getMonthRange(date));
   }
-  fiveMonths.push(new Date(middleDate));
+  fiveMonths.push(getMonthRange(new Date(middleDate)));
   for (let i = 1; i < 3; i++) {
     const date: Date = new Date(middleDate);
     date.setMonth(date.getMonth() + i);
-    fiveMonths.push(date);
+    fiveMonths.push(getMonthRange(date));
   }
 
   return fiveMonths;
 };
 
-export const shiftFiveMonths = (fiveMonths: Date[], right: boolean): Date[] => {
-  let newFiveMonths: Date[] = [];
+export const shiftFiveMonths = (
+  fiveMonths: [Date, Date][],
+  right: boolean
+): [Date, Date][] => {
+  let newFiveMonths: [Date, Date][] = [];
   for (let i = 0; i < 5; i++) {
-    newFiveMonths.push(fiveMonths[i]);
+    newFiveMonths.push([
+      new Date(fiveMonths[i][0]),
+      new Date(fiveMonths[i][1]),
+    ]);
   }
 
   const step: number = right ? 5 : -5;
   for (let i = 0; i < 5; i++) {
-    newFiveMonths[i].setMonth(newFiveMonths[i].getMonth() + step);
+    newFiveMonths[i][0].setMonth(newFiveMonths[i][0].getMonth() + step);
+    newFiveMonths[i][1].setMonth(newFiveMonths[i][1].getMonth() + step);
   }
 
   return newFiveMonths;
 };
 
-export const getTwoYears = (yearDate: Date): Date[] => {
+export const getTwoYears = (yearDate: Date): [Date, Date][] => {
   const previousYearDate: Date = new Date(yearDate);
   previousYearDate.setFullYear(yearDate.getFullYear() - 1);
 
-  const twoYears: Date[] = [previousYearDate, yearDate];
+  const twoYears: [Date, Date][] = [
+    getYearRange(previousYearDate),
+    getYearRange(yearDate),
+  ];
   return twoYears;
 };
 
-export const shiftTwoYears = (twoYears: Date[], right: boolean): Date[] => {
-  let newTwoYears: Date[] = [];
+export const shiftTwoYears = (
+  twoYears: [Date, Date][],
+  right: boolean
+): [Date, Date][] => {
+  let newTwoYears: [Date, Date][] = [];
   for (let i = 0; i < 2; i++) {
-    newTwoYears.push(twoYears[i]);
+    newTwoYears.push([new Date(twoYears[i][0]), new Date(twoYears[i][1])]);
   }
 
   const step: number = right ? 2 : -2;
   for (let i = 0; i < 2; i++) {
-    newTwoYears[i].setFullYear(newTwoYears[i].getFullYear() + step);
+    newTwoYears[i][0].setFullYear(newTwoYears[i][0].getFullYear() + step);
+    newTwoYears[i][1].setFullYear(newTwoYears[i][1].getFullYear() + step);
   }
 
   return newTwoYears;
-};
-
-export const getDayRange = (date: Date): [Date, Date] => {
-  const startOfDay = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    0,
-    0,
-    0,
-    0
-  );
-
-  const endOfDay = new Date(startOfDay);
-  endOfDay.setDate(startOfDay.getDate() + 1);
-
-  return [startOfDay, endOfDay];
-};
-
-export const getWeekRange = (date: Date): [Date, Date] => {
-  const mondayDate = new Date(date);
-
-  // in case of sunday we are shifting the day to saturday (6)
-  if (mondayDate.getDay() == 0) {
-    mondayDate.setDate(mondayDate.getDate() - 1);
-  }
-
-  while (mondayDate.getDay() != 1) {
-    mondayDate.setDate(mondayDate.getDate() - 1);
-  }
-  mondayDate.setHours(0);
-  mondayDate.setMinutes(0);
-  mondayDate.setSeconds(0);
-  mondayDate.setMilliseconds(0);
-
-  const sundayDate = new Date(mondayDate);
-  sundayDate.setDate(sundayDate.getDate() + 6);
-  sundayDate.setHours(23);
-  sundayDate.setMinutes(59);
-  sundayDate.setSeconds(59);
-  sundayDate.setMilliseconds(999);
-
-  return [mondayDate, sundayDate];
-};
-
-export const getMonthRange = (date: Date): [Date, Date] => {
-  const startOfMonth = new Date(date);
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0);
-  startOfMonth.setMinutes(0);
-  startOfMonth.setSeconds(0);
-  startOfMonth.setMilliseconds(0);
-
-  const endOfMonth = new Date(startOfMonth);
-  endOfMonth.setMonth(endOfMonth.getMonth() + 1);
-
-  return [startOfMonth, endOfMonth];
-};
-
-export const getYearRange = (date: Date): [Date, Date] => {
-  const startOfYear = new Date(date);
-  startOfYear.setMonth(0);
-  startOfYear.setDate(1);
-  startOfYear.setHours(0);
-  startOfYear.setMinutes(0);
-  startOfYear.setSeconds(0);
-  startOfYear.setMilliseconds(0);
-
-  const endOfYear = new Date(startOfYear);
-  endOfYear.setFullYear(startOfYear.getFullYear() + 1);
-
-  return [startOfYear, endOfYear];
 };
 
 export const isStartOfDay = (date: Date) => {

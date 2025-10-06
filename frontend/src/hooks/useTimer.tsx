@@ -135,7 +135,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         }`;
       }
     } else {
-      document.title = 'Time Tracker';
+      document.title = 'Session Tracker';
     }
   }, [timerState, currentUser, currentSession]);
 
