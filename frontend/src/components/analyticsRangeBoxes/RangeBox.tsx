@@ -14,6 +14,7 @@ import {
   isCurrentWeek,
   isCurrentMonth,
   isCurrentYear,
+  shiftTwoDates,
 } from '../../helpers/dateHelpers';
 import { RangeType } from '../../helpers/dateHelpers';
 
@@ -156,7 +157,6 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
     getRangeItems(rangeType, fromDate)
   );
 
-  // TODO: тут нету проблем с замыканиями?
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
       if (event.ctrlKey) {
@@ -166,17 +166,44 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
           rightArrowClickHandler();
         }
       } else {
-        // TODO: на ArrowLeft/ArrowRight менять сам элемент
-        // TODO: что, если мы находимся на первом или последнем элементе диапазона. тогда надо leftArrowClickHandler или rightArrowClickHandler вызывать
-
         if (event.code == 'ArrowLeft') {
-          console.log(rangeItems);
-          console.log(fromDate);
-          console.log(toDate);
+          const [newFromDate, newToDate] = shiftTwoDates(
+            fromDate,
+            toDate,
+            false
+          );
+          navigate(
+            `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
+            { replace: true }
+          );
+
+          const index = rangeItems.findIndex(
+            (rangeItem) =>
+              rangeItem[0].getTime() == fromDate.getTime() &&
+              rangeItem[1].getTime() == toDate.getTime()
+          );
+          if (index == 0) {
+            leftArrowClickHandler();
+          }
         } else if (event.code == 'ArrowRight') {
-          console.log(rangeItems);
-          console.log(fromDate);
-          console.log(toDate);
+          const [newFromDate, newToDate] = shiftTwoDates(
+            fromDate,
+            toDate,
+            true
+          );
+          navigate(
+            `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
+            { replace: true }
+          );
+
+          const index = rangeItems.findIndex(
+            (rangeItem) =>
+              rangeItem[0].getTime() == fromDate.getTime() &&
+              rangeItem[1].getTime() == toDate.getTime()
+          );
+          if (index == rangeItems.length - 1) {
+            rightArrowClickHandler();
+          }
         }
       }
     };
@@ -186,7 +213,7 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
     return () => {
       window.removeEventListener('keyup', handleKeyClick);
     };
-  }, []);
+  }, [rangeItems, fromDate, toDate]);
 
   function leftArrowClickHandler() {
     if (rangeType == 'days') {

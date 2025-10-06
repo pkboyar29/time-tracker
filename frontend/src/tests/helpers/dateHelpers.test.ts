@@ -13,6 +13,7 @@ import {
   isEndOfDay,
   isSameDay,
   toLocalISOString,
+  shiftTwoDates,
 } from '../../helpers/dateHelpers';
 
 describe('getDayRange', () => {
@@ -480,5 +481,87 @@ describe('toLocalISOString', () => {
     const date = new Date(2025, 6, 23, 15, 30, 45);
     const result = toLocalISOString(date);
     expect(result.length).toBe(19);
+  });
+});
+
+describe('shiftTwoDates', () => {
+  it('should shift both dates by +1 day when right is true for daily range', () => {
+    const from = new Date(2023, 7, 1); // Aug 1, 2023
+    const to = new Date(2023, 7, 2); // Aug 2, 2023
+
+    const [newFrom, newTo] = shiftTwoDates(from, to, true);
+
+    expect(newFrom).toEqual(new Date(2023, 7, 2));
+    expect(newTo).toEqual(new Date(2023, 7, 3));
+  });
+
+  it('should shift both dates by -1 day when right is false for daily range', () => {
+    const from = new Date(2023, 7, 1);
+    const to = new Date(2023, 7, 2);
+
+    const [newFrom, newTo] = shiftTwoDates(from, to, false);
+
+    expect(newFrom).toEqual(new Date(2023, 6, 31));
+    expect(newTo).toEqual(new Date(2023, 7, 1));
+  });
+
+  it('should shift both dates by +7 days when right is true for weekly range', () => {
+    const from = new Date(2023, 7, 7, 0, 0, 0, 0); // Monday
+    const to = new Date(2023, 7, 13, 23, 59, 59, 999); // Sunday end
+
+    const [newFrom, newTo] = shiftTwoDates(from, to, true);
+
+    expect(newFrom).toEqual(new Date(2023, 7, 14, 0, 0, 0, 0));
+    expect(newTo).toEqual(new Date(2023, 7, 20, 23, 59, 59, 999));
+  });
+
+  it('should shift both dates by -7 days when right is false for weekly range', () => {
+    const from = new Date(2023, 7, 7, 0, 0, 0, 0);
+    const to = new Date(2023, 7, 13, 23, 59, 59, 999);
+
+    const [newFrom, newTo] = shiftTwoDates(from, to, false);
+
+    expect(newFrom).toEqual(new Date(2023, 6, 31, 0, 0, 0, 0));
+    expect(newTo).toEqual(new Date(2023, 7, 6, 23, 59, 59, 999));
+  });
+
+  it('should shift both dates by +1 month when right is true for monthly range', () => {
+    const from = new Date(2023, 7, 1, 0, 0, 0, 0); // Aug 1
+    const to = new Date(2023, 8, 1, 0, 0, 0, 0); // Sep 1
+
+    const [newFrom, newTo] = shiftTwoDates(from, to, true);
+
+    expect(newFrom).toEqual(new Date(2023, 8, 1, 0, 0, 0, 0));
+    expect(newTo).toEqual(new Date(2023, 9, 1, 0, 0, 0, 0));
+  });
+
+  it('should shift both dates by -1 month when right is false for monthly range', () => {
+    const from = new Date(2023, 7, 1, 0, 0, 0, 0);
+    const to = new Date(2023, 8, 1, 0, 0, 0, 0);
+
+    const [newFrom, newTo] = shiftTwoDates(from, to, false);
+
+    expect(newFrom).toEqual(new Date(2023, 6, 1, 0, 0, 0, 0));
+    expect(newTo).toEqual(new Date(2023, 7, 1, 0, 0, 0, 0));
+  });
+
+  it('should shift both dates by +1 year when right is true for yearly range', () => {
+    const from = new Date(2023, 0, 1, 0, 0, 0, 0); // Jan 1, 2023
+    const to = new Date(2024, 0, 1, 0, 0, 0, 0); // Jan 1, 2024
+
+    const [newFrom, newTo] = shiftTwoDates(from, to, true);
+
+    expect(newFrom).toEqual(new Date(2024, 0, 1, 0, 0, 0, 0));
+    expect(newTo).toEqual(new Date(2025, 0, 1, 0, 0, 0, 0));
+  });
+
+  it('should shift both dates by -1 year when right is false for yearly range', () => {
+    const from = new Date(2023, 0, 1, 0, 0, 0, 0);
+    const to = new Date(2024, 0, 1, 0, 0, 0, 0);
+
+    const [newFrom, newTo] = shiftTwoDates(from, to, false);
+
+    expect(newFrom).toEqual(new Date(2022, 0, 1, 0, 0, 0, 0));
+    expect(newTo).toEqual(new Date(2023, 0, 1, 0, 0, 0, 0));
   });
 });

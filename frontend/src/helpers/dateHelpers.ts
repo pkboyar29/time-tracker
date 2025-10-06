@@ -425,3 +425,46 @@ export const isCurrentMonth = (monthDate: Date): boolean => {
 export const isCurrentYear = (yearDate: Date): boolean => {
   return new Date().getFullYear() == yearDate.getFullYear();
 };
+
+export const shiftTwoDates = (
+  fromDate: Date,
+  toDate: Date,
+  right: boolean
+): [Date, Date] => {
+  const rangeType = getRangeType(fromDate, toDate);
+
+  if (rangeType == 'days') {
+    const newFromDate = new Date(fromDate);
+    const newToDate = new Date(toDate);
+    newFromDate.setDate(newFromDate.getDate() + (right ? 1 : -1));
+    newToDate.setDate(newToDate.getDate() + (right ? 1 : -1));
+
+    return [newFromDate, newToDate];
+  }
+  if (rangeType == 'weeks') {
+    const newFromDate = new Date(fromDate);
+    const newToDate = new Date(toDate);
+    newFromDate.setDate(newFromDate.getDate() + (right ? 7 : -7));
+    newToDate.setDate(newToDate.getDate() + (right ? 7 : -7));
+
+    return [newFromDate, newToDate];
+  }
+  if (rangeType == 'months') {
+    const newFromDate = new Date(fromDate);
+    const newToDate = new Date(toDate);
+    newFromDate.setMonth(newFromDate.getMonth() + (right ? 1 : -1));
+    newToDate.setMonth(newToDate.getMonth() + (right ? 1 : -1));
+
+    return [newFromDate, newToDate];
+  }
+  if (rangeType == 'years') {
+    const newFromDate = new Date(fromDate);
+    const newToDate = new Date(toDate);
+    newFromDate.setFullYear(newFromDate.getFullYear() + (right ? 1 : -1));
+    newToDate.setFullYear(newToDate.getFullYear() + (right ? 1 : -1));
+
+    return [newFromDate, newToDate];
+  }
+
+  return [new Date(), new Date()];
+};
