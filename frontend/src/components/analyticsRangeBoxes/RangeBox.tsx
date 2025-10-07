@@ -4,19 +4,17 @@ import {
   getWeekDays,
   shiftWeekDays,
   getDayOfWeekName,
-  getDayRange,
   getMonthWeeks,
   getMonthName,
   getFiveMonths,
   shiftFiveMonths,
-  getMonthRange,
   getTwoYears,
   shiftTwoYears,
-  getYearRange,
   isCurrentDay,
   isCurrentWeek,
   isCurrentMonth,
   isCurrentYear,
+  shiftTwoDates,
 } from '../../helpers/dateHelpers';
 import { RangeType } from '../../helpers/dateHelpers';
 
@@ -29,27 +27,10 @@ interface RangeBoxProps {
   toDate: Date;
 }
 
-const isDateDay = (
-  rangeType: RangeType,
-  date: Date | [Date, Date]
-): date is Date => rangeType == 'days' && date instanceof Date;
-const isDateWeek = (
-  rangeType: RangeType,
-  date: Date | [Date, Date]
-): date is [Date, Date] => rangeType == 'weeks' && Array.isArray(date);
-const isDateMonth = (
-  rangeType: RangeType,
-  date: Date | [Date, Date]
-): date is Date => rangeType == 'months' && date instanceof Date;
-const isDateYear = (
-  rangeType: RangeType,
-  date: Date | [Date, Date]
-): date is Date => rangeType == 'years' && date instanceof Date;
-
 const getRangeItems = (
   rangeType: RangeType,
   fromDate: Date
-): Date[] | [Date, Date][] => {
+): [Date, Date][] => {
   switch (rangeType) {
     case 'days':
       return getWeekDays(fromDate);
@@ -67,29 +48,29 @@ const getRangeItems = (
 const isRangeItemSelected = (
   rangeType: RangeType,
   fromDate: Date,
-  rangeItemDate: Date | [Date, Date]
+  rangeItemDate: [Date, Date]
 ): boolean => {
-  if (isDateDay(rangeType, rangeItemDate)) {
+  if (rangeType == 'days') {
     return (
-      fromDate.getDate() == rangeItemDate.getDate() &&
-      fromDate.getMonth() == rangeItemDate.getMonth() &&
-      fromDate.getFullYear() == rangeItemDate.getFullYear()
+      fromDate.getDate() == rangeItemDate[0].getDate() &&
+      fromDate.getMonth() == rangeItemDate[0].getMonth() &&
+      fromDate.getFullYear() == rangeItemDate[0].getFullYear()
     );
   }
-  if (isDateMonth(rangeType, rangeItemDate)) {
-    return (
-      fromDate.getMonth() == rangeItemDate.getMonth() &&
-      fromDate.getFullYear() == rangeItemDate.getFullYear()
-    );
-  }
-  if (isDateYear(rangeType, rangeItemDate)) {
-    return fromDate.getFullYear() == rangeItemDate.getFullYear();
-  }
-  if (isDateWeek(rangeType, rangeItemDate)) {
+  if (rangeType == 'weeks') {
     return (
       fromDate.getTime() >= rangeItemDate[0].getTime() &&
       fromDate.getTime() < rangeItemDate[1].getTime()
     );
+  }
+  if (rangeType == 'months') {
+    return (
+      fromDate.getMonth() == rangeItemDate[0].getMonth() &&
+      fromDate.getFullYear() == rangeItemDate[0].getFullYear()
+    );
+  }
+  if (rangeType == 'years') {
+    return fromDate.getFullYear() == rangeItemDate[0].getFullYear();
   }
 
   return false;
@@ -97,19 +78,19 @@ const isRangeItemSelected = (
 
 const isCurrentRangeItem = (
   rangeType: RangeType,
-  rangeItemDate: Date | [Date, Date]
+  rangeItemDate: [Date, Date]
 ): boolean => {
-  if (isDateDay(rangeType, rangeItemDate)) {
-    return isCurrentDay(rangeItemDate);
+  if (rangeType == 'days') {
+    return isCurrentDay(rangeItemDate[0]);
   }
-  if (isDateWeek(rangeType, rangeItemDate)) {
+  if (rangeType == 'weeks') {
     return isCurrentWeek(rangeItemDate);
   }
-  if (isDateMonth(rangeType, rangeItemDate)) {
-    return isCurrentMonth(rangeItemDate);
+  if (rangeType == 'months') {
+    return isCurrentMonth(rangeItemDate[0]);
   }
-  if (isDateYear(rangeType, rangeItemDate)) {
-    return isCurrentYear(rangeItemDate);
+  if (rangeType == 'years') {
+    return isCurrentYear(rangeItemDate[0]);
   }
 
   return false;
@@ -172,16 +153,64 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
     rangeType === 'years' && 'gap-2'
   }`;
 
-  const [rangeItems, setRangeItems] = useState<Date[] | [Date, Date][]>(
+  const [rangeItems, setRangeItems] = useState<[Date, Date][]>(
     getRangeItems(rangeType, fromDate)
   );
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
-      if (event.code == 'ArrowLeft') {
-        leftArrowClickHandler();
-      } else if (event.code == 'ArrowRight') {
-        rightArrowClickHandler();
+      if (event.ctrlKey) {
+        if (event.code == 'ArrowLeft') {
+          leftArrowClickHandler();
+        } else if (event.code == 'ArrowRight') {
+          rightArrowClickHandler();
+        }
+      } else {
+        if (event.code == 'ArrowLeft') {
+          const [newFromDate, newToDate] = shiftTwoDates(
+            fromDate,
+            toDate,
+            false
+          );
+          navigate(
+            `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
+            { replace: true }
+          );
+
+          const index = rangeItems.findIndex(
+            (rangeItem) =>
+              rangeItem[0].getTime() == fromDate.getTime() &&
+              rangeItem[1].getTime() == toDate.getTime()
+          );
+          if (index == 0) {
+            leftArrowClickHandler();
+          }
+          if (index == -1) {
+            setRangeItems(getRangeItems(rangeType, newFromDate));
+          }
+        } else if (event.code == 'ArrowRight') {
+          const [newFromDate, newToDate] = shiftTwoDates(
+            fromDate,
+            toDate,
+            true
+          );
+          navigate(
+            `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
+            { replace: true }
+          );
+
+          const index = rangeItems.findIndex(
+            (rangeItem) =>
+              rangeItem[0].getTime() == fromDate.getTime() &&
+              rangeItem[1].getTime() == toDate.getTime()
+          );
+          if (index == rangeItems.length - 1) {
+            rightArrowClickHandler();
+          }
+          if (index == -1) {
+            setRangeItems(getRangeItems(rangeType, newFromDate));
+          }
+        }
       }
     };
 
@@ -190,16 +219,15 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
     return () => {
       window.removeEventListener('keyup', handleKeyClick);
     };
-  }, []);
+  }, [rangeItems, rangeType, fromDate, toDate]);
 
-  // TODO: избавиться от type assertion
-  const leftArrowClickHandler = () => {
+  function leftArrowClickHandler() {
     if (rangeType == 'days') {
-      setRangeItems((daysOfWeek) => shiftWeekDays(daysOfWeek as Date[], false));
+      setRangeItems((daysOfWeek) => shiftWeekDays(daysOfWeek, false));
     } else if (rangeType == 'weeks') {
       setRangeItems((weeks) => {
         // первое воскресенье всегда находится в текущем месяце
-        const firstSunday = (weeks as [Date, Date][])[0][1];
+        const firstSunday = weeks[0][1];
 
         // выбираем четвертый день в предыдущем месяце
         const dayFromPrevMonth = new Date(firstSunday);
@@ -209,20 +237,19 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
         return getMonthWeeks(dayFromPrevMonth);
       });
     } else if (rangeType == 'months') {
-      setRangeItems((months) => shiftFiveMonths(months as Date[], false));
+      setRangeItems((months) => shiftFiveMonths(months, false));
     } else if (rangeType == 'years') {
-      setRangeItems((years) => shiftTwoYears(years as Date[], false));
+      setRangeItems((years) => shiftTwoYears(years, false));
     }
-  };
+  }
 
-  // TODO: избавиться от type assertion
-  const rightArrowClickHandler = () => {
+  function rightArrowClickHandler() {
     if (rangeType == 'days') {
-      setRangeItems((daysOfWeek) => shiftWeekDays(daysOfWeek as Date[], true));
+      setRangeItems((daysOfWeek) => shiftWeekDays(daysOfWeek, true));
     } else if (rangeType == 'weeks') {
       setRangeItems((weeks) => {
         // последний понедельник всегда находится в текущем месяце
-        const lastMonday = (weeks as [Date, Date][])[weeks.length - 1][0];
+        const lastMonday = weeks[weeks.length - 1][0];
 
         // выбираем четвертый день в следующем месяце
         const dayFromNextMonth = new Date(lastMonday);
@@ -232,44 +259,18 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
         return getMonthWeeks(dayFromNextMonth);
       });
     } else if (rangeType == 'months') {
-      setRangeItems((months) => shiftFiveMonths(months as Date[], true));
+      setRangeItems((months) => shiftFiveMonths(months, true));
     } else if (rangeType == 'years') {
-      setRangeItems((years) => shiftTwoYears(years as Date[], true));
+      setRangeItems((years) => shiftTwoYears(years, true));
     }
-  };
+  }
 
-  const rangeItemClickHandler = (date: Date | [Date, Date]) => {
-    if (isDateDay(rangeType, date)) {
-      const [startOfDay, endOfDay] = getDayRange(date);
-      navigate(
-        `/analytics/range?from=${startOfDay.toISOString()}&to=${endOfDay.toISOString()}`,
-        { replace: true }
-      );
-    } else if (isDateWeek(rangeType, date)) {
-      navigate(
-        `/analytics/range?from=${date[0].toISOString()}&to=${date[1].toISOString()}`,
-        {
-          replace: true,
-        }
-      );
-    } else if (isDateMonth(rangeType, date)) {
-      const [startOfMonth, endOfMonth] = getMonthRange(date);
-      navigate(
-        `/analytics/range?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`,
-        {
-          replace: true,
-        }
-      );
-    } else if (isDateYear(rangeType, date)) {
-      const [startOfYear, endOfYear] = getYearRange(date);
-      navigate(
-        `/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`,
-        {
-          replace: true,
-        }
-      );
-    }
-  };
+  function rangeItemClickHandler(rangeItem: [Date, Date]) {
+    navigate(
+      `/analytics/range?from=${rangeItem[0].toISOString()}&to=${rangeItem[1].toISOString()}`,
+      { replace: true }
+    );
+  }
 
   return (
     <div
@@ -307,21 +308,21 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
               'bg-gray-300 dark:bg-surfaceDarkHover'
             } ${isCurrentRangeItem(rangeType, rangeItem) && 'red-dot'}`}
           >
-            {isDateDay(rangeType, rangeItem) && (
+            {rangeType == 'days' && (
               <>
                 <div className="text-[13px] font-medium text-gray-500 dark:text-textDarkSecondary">
-                  {getDayOfWeekName(rangeItem.getDay())}
+                  {getDayOfWeekName(rangeItem[0].getDay())}
                 </div>
 
                 <div className="text-lg font-semibold dark:text-textDark">
-                  {rangeItem.getDate().toString().length === 2
-                    ? rangeItem.getDate()
-                    : `0${rangeItem.getDate()}`}
+                  {rangeItem[0].getDate().toString().length === 2
+                    ? rangeItem[0].getDate()
+                    : `0${rangeItem[0].getDate()}`}
                 </div>
               </>
             )}
 
-            {isDateWeek(rangeType, rangeItem) && (
+            {rangeType == 'weeks' && (
               <>
                 <div className="text-base text-left text-slate-600 dark:text-textDarkSecondary">
                   {rangeItem[0].getFullYear() == rangeItem[1].getFullYear() ? (
@@ -337,22 +338,22 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
               </>
             )}
 
-            {isDateMonth(rangeType, rangeItem) && (
+            {rangeType == 'months' && (
               <>
                 <div className="text-base text-slate-600 dark:text-textDarkSecondary">
-                  {rangeItem.getFullYear()}
+                  {rangeItem[0].getFullYear()}
                 </div>
                 <div className="text-xl dark:text-textDark">
                   {new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
-                    rangeItem
+                    rangeItem[0]
                   )}
                 </div>
               </>
             )}
 
-            {isDateYear(rangeType, rangeItem) && (
+            {rangeType == 'years' && (
               <div className="text-xl text-center dark:text-textDark">
-                {rangeItem.getFullYear()}
+                {rangeItem[0].getFullYear()}
               </div>
             )}
           </div>
