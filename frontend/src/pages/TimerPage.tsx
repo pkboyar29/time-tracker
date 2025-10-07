@@ -269,7 +269,7 @@ const TimerPage: FC = () => {
                 {!isTimerStarted && (
                   <div>
                     <span className="block mb-2 text-lg font-semibold dark:text-textDark">
-                      Session duration (minutes)
+                      Session duration
                     </span>
                     <RangeSlider
                       minValue={1}

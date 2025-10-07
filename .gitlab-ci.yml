@@ -9,7 +9,7 @@ variables:
   FF_USE_FASTZIP: 'true'
   TRANSFER_METER_FREQUENCY: '2s'
 
-cache:
+cache: # TODO: проблема тут в том, что этот кеш загружается в каждой джобе сейчас
   key:
     files:
       - frontend/package-lock.json

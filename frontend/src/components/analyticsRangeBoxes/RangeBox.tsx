@@ -185,6 +185,9 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
           if (index == 0) {
             leftArrowClickHandler();
           }
+          if (index == -1) {
+            setRangeItems(getRangeItems(rangeType, newFromDate));
+          }
         } else if (event.code == 'ArrowRight') {
           const [newFromDate, newToDate] = shiftTwoDates(
             fromDate,
@@ -204,6 +207,9 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
           if (index == rangeItems.length - 1) {
             rightArrowClickHandler();
           }
+          if (index == -1) {
+            setRangeItems(getRangeItems(rangeType, newFromDate));
+          }
         }
       }
     };
@@ -213,7 +219,7 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
     return () => {
       window.removeEventListener('keyup', handleKeyClick);
     };
-  }, [rangeItems, fromDate, toDate]);
+  }, [rangeItems, rangeType, fromDate, toDate]);
 
   function leftArrowClickHandler() {
     if (rangeType == 'days') {

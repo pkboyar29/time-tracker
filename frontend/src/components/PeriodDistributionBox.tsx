@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useAppSelector } from '../redux/store';
 import { getTimeHoursMinutes } from '../helpers/timeHelpers';
 import { getRangeType } from '../helpers/dateHelpers';
@@ -18,11 +18,6 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import ToggleButton from './ToggleButton';
-
-interface PeriodDistributionBoxProps {
-  timeBars: ITimeBar[];
-  allActivityDistributionItems: IActivityDistribution[];
-}
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -106,6 +101,11 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
   );
 };
 
+interface PeriodDistributionBoxProps {
+  timeBars: ITimeBar[];
+  allActivityDistributionItems: IActivityDistribution[];
+}
+
 const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   timeBars,
   allActivityDistributionItems,
@@ -114,6 +114,14 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
 
   const userInfo = useAppSelector((state) => state.users.user);
   const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 0;
+
+  // const [isBarAnimationActive, setIsBarAnimationActive] = useState(true);
+  // useEffect(() => {
+  //   setIsBarAnimationActive(false);
+  //   // сразу после рендера выключаем, чтобы не было лишней анимации на обновлениях
+  //   // const timeout = requestAnimationFrame(() => setIsBarAnimationActive(false));
+  //   // return () => cancelAnimationFrame(timeout);
+  // }, [timeBars]);
 
   const toggleAdMode = (newAdMode: boolean) => {
     if (newAdMode) {
@@ -151,7 +159,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
           <YAxis dataKey="spentTimeSeconds" />
           <Tooltip content={<CustomTooltip adMode={adMode} />} />
           {!adMode ? (
-            <Bar dataKey="spentTimeSeconds">
+            <Bar isAnimationActive={true} dataKey="spentTimeSeconds">
               {timeBars.map((bar, index) => {
                 const color =
                   getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
