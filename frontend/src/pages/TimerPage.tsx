@@ -29,7 +29,7 @@ import SessionsList from '../components/SessionsList';
 import Button from '../components/Button';
 import RangeSlider from '../components/RangeSlider';
 import NotesSection from '../components/NotesSection';
-import ActivitySelect from '../components/ActivitySelect';
+import CustomSelect from '../components/CustomSelect';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -244,13 +244,28 @@ const TimerPage: FC = () => {
                         <PrimaryClipLoader size="25px" />
                       ) : (
                         activitiesToChoose && (
-                          <ActivitySelect
-                            topActivities={activitiesToChoose.topActivities}
-                            remainingActivities={
-                              activitiesToChoose.remainingActivities
-                            }
-                            value={selectedActivityId}
+                          <CustomSelect
+                            currentId={selectedActivityId}
                             onChange={onActivitiesSelectChange}
+                            optionGroups={[
+                              {
+                                optGroupName: '',
+                                color: 'grey',
+                                options: [{ id: '', name: 'Without activity' }],
+                              },
+                              {
+                                optGroupName: 'Last activities ⭐',
+                                color: 'red',
+                                options: activitiesToChoose.topActivities,
+                              },
+                              {
+                                optGroupName: 'All activities',
+                                color: 'standart',
+                                options: [
+                                  ...activitiesToChoose.remainingActivities,
+                                ],
+                              },
+                            ]}
                           />
                         )
                       )}
