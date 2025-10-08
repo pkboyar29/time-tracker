@@ -16,7 +16,10 @@ import {
 } from '../redux/slices/sessionSlice';
 import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
-import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
+import {
+  getRemainingTimeHoursMinutesSeconds,
+  getTimeHoursMinutes,
+} from '../helpers/timeHelpers';
 
 import { toast } from 'react-toastify';
 
@@ -148,6 +151,17 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         try {
           stopTimer();
           playAudio();
+
+          const notification = new Notification('Session completed!', {
+            body: `${
+              currentSession.activity
+                ? currentSession.activity.name
+                : 'Without activity'
+            } - ${getTimeHoursMinutes(currentSession.totalTimeSeconds)}`,
+          });
+          setTimeout(() => {
+            notification.close();
+          }, 5000);
 
           await dispatch(
             updateSession({

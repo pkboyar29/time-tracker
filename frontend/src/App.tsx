@@ -58,6 +58,12 @@ const App: FC = () => {
     fetchCurrentSession();
   }, []);
 
+  useEffect(() => {
+    if (Notification.permission == 'default') {
+      Notification.requestPermission();
+    }
+  }, []);
+
   return (
     <>
       <ToastContainer

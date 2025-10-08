@@ -62,6 +62,20 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
     dispatch(updateShowTimerInTitle(newState));
   };
 
+  const changeNotificationPermission = () => {
+    if (Notification.permission == 'default') {
+      Notification.requestPermission();
+    } else if (Notification.permission == 'denied') {
+      alert(
+        'You have blocked notifications. Please enable them manually in your browser settings.'
+      );
+    } else if (Notification.permission == 'granted') {
+      alert(
+        'If you want to block notifications, do it manually in your browser settings.'
+      );
+    }
+  };
+
   const downloadUserDataFile = async () => {
     const response = await axios.get(`/users/export`, {
       responseType: 'blob',
@@ -104,6 +118,14 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
               />
             </div>
           )}
+
+          <div className="flex justify-between gap-4 text-lg dark:text-textDark">
+            <div>Allow browser notifications</div>
+            <ToggleButton
+              isChecked={Notification.permission == 'granted'}
+              setIsChecked={changeNotificationPermission}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-3">
