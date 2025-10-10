@@ -1,10 +1,6 @@
 import { FC, useEffect, useState } from 'react';
-import {
-  fetchSessions,
-  updateSession,
-  resetCurrentSession,
-  createSession,
-} from '../redux/slices/sessionSlice';
+import { resetCurrentSession } from '../redux/slices/sessionSlice';
+import { fetchSessions, createSession, updateSession } from '../api/sessionApi';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivities } from '../api/activityApi';
@@ -91,10 +87,8 @@ const TimerPage: FC = () => {
 
   useEffect(() => {
     const fetchAllUncompletedSessions = async () => {
-      const resultAction = await dispatch(fetchSessions({ completed: false }));
-      if (fetchSessions.fulfilled.match(resultAction)) {
-        setUncompletedSessions(resultAction.payload);
-      }
+      const sessions = await fetchSessions({ completed: false });
+      setUncompletedSessions(sessions);
     };
 
     fetchAllUncompletedSessions();
@@ -102,13 +96,12 @@ const TimerPage: FC = () => {
 
   const handleStartSessionClick = async () => {
     try {
-      const newSession = await dispatch(
-        createSession({
-          totalTimeSeconds: selectedSeconds,
-          spentTimeSeconds: 0,
-          activity: selectedActivityId !== '' ? selectedActivityId : undefined,
-        })
-      ).unwrap();
+      const newSession = await createSession({
+        totalTimeSeconds: selectedSeconds,
+        spentTimeSeconds: 0,
+        activity: selectedActivityId !== '' ? selectedActivityId : undefined,
+      });
+
       startSession(newSession);
     } catch (e) {
       toast('A server error occurred while starting new session', {
@@ -127,8 +120,7 @@ const TimerPage: FC = () => {
 
       // TODO: почему это условие стоит после toggleTimer, вспомнить
       if (timerState == 'running') {
-        // TODO: если сессию не удалось обновить?
-        dispatch(updateSession(currentSession));
+        updateSession(currentSession);
       }
     }
   };
@@ -137,8 +129,7 @@ const TimerPage: FC = () => {
     if (currentSession) {
       stopTimer();
 
-      // TODO: если сессию не удалось обновить?
-      dispatch(updateSession(currentSession));
+      updateSession(currentSession);
 
       dispatch(resetCurrentSession());
       removeSessionFromLocalStorage();

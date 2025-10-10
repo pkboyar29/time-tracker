@@ -10,10 +10,10 @@ import {
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import {
   changeSpentSeconds,
-  updateSession,
   resetCurrentSession,
   setLastCompletedSessionId,
 } from '../redux/slices/sessionSlice';
+import { updateSession } from '../api/sessionApi';
 import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
 import {
@@ -180,12 +180,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           playAudio();
           showNotification(currentSession);
 
-          await dispatch(
-            updateSession({
-              ...currentSession,
-              spentTimeSeconds: currentSession.totalTimeSeconds,
-            })
-          ).unwrap();
+          updateSession({
+            ...currentSession,
+            spentTimeSeconds: currentSession.totalTimeSeconds,
+          });
 
           dispatch(setLastCompletedSessionId(currentSession.id));
           dispatch(resetCurrentSession());
@@ -206,7 +204,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
     event.preventDefault();
     if (currentSession) {
-      dispatch(updateSession(currentSession));
+      updateSession(currentSession);
     }
   };
 

@@ -1,6 +1,6 @@
 import { FC, useState, ReactNode } from 'react';
-import { useAppDispatch, useAppSelector } from '../../redux/store';
-import { createSession, updateSession } from '../../redux/slices/sessionSlice';
+import { useAppSelector } from '../../redux/store';
+import { createSession, updateSession } from '../../api/sessionApi';
 import { useQueryCustom } from '../../hooks/useQueryCustom';
 import { fetchActivities } from '../../api/activityApi';
 import { toast } from 'react-toastify';
@@ -24,7 +24,6 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   onCloseModal,
   modalTitle,
 }) => {
-  const dispatch = useAppDispatch();
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
   );
@@ -44,16 +43,14 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   const onSubmit = async () => {
     try {
       if (currentSession) {
-        dispatch(updateSession(currentSession));
+        updateSession(currentSession);
       }
 
-      const newSession = await dispatch(
-        createSession({
-          totalTimeSeconds: selectedMinutes * 60,
-          spentTimeSeconds: 0,
-          activity: selectedActivityId !== '' ? selectedActivityId : undefined,
-        })
-      ).unwrap();
+      const newSession = await createSession({
+        totalTimeSeconds: selectedMinutes * 60,
+        spentTimeSeconds: 0,
+        activity: selectedActivityId !== '' ? selectedActivityId : undefined,
+      });
       startSession(newSession);
 
       afterSubmitHandler();

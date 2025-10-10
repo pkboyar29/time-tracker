@@ -1,6 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/store';
-import { updateSession, changeNote } from '../redux/slices/sessionSlice';
+import { changeNote } from '../redux/slices/sessionSlice';
+import { updateSession } from '../api/sessionApi';
 
 const NotesSection: FC = () => {
   const currentSession = useAppSelector(
@@ -37,12 +38,10 @@ const NotesSection: FC = () => {
       if (currentSession.note !== note) {
         dispatch(changeNote(note));
 
-        dispatch(
-          updateSession({
-            ...currentSession,
-            note,
-          })
-        );
+        updateSession({
+          ...currentSession,
+          note,
+        });
       }
     }
   };

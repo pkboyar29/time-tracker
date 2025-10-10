@@ -2,7 +2,7 @@ import { FC, useState, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../redux/store';
 import { useTimer } from '../hooks/useTimer';
 import { useStartSession } from '../hooks/useStartSession';
-import { deleteSession, updateSession } from '../redux/slices/sessionSlice';
+import { updateSession, deleteSession } from '../api/sessionApi';
 import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -86,9 +86,7 @@ const SessionsList: FC<SessionsListProps> = ({
     // updating the previous current session if it's not paused
     if (currentSession && timerState == 'running') {
       try {
-        const updatedSession = await dispatch(
-          updateSession(currentSession)
-        ).unwrap();
+        const updatedSession = await updateSession(currentSession);
 
         updateSessionsListHandler(
           getSessionsListAfterSessionUpdate(sessions, updatedSession)
@@ -102,8 +100,9 @@ const SessionsList: FC<SessionsListProps> = ({
     startSession(session);
   };
 
-  const handleSessionDelete = (sessionId: string) => {
-    dispatch(deleteSession(sessionId));
+  const handleSessionDelete = async (sessionId: string) => {
+    // TODO: отображать тост при ошибке
+    await deleteSession(sessionId);
     updateSessionsListHandler(
       sessions.filter((session) => session.id !== sessionId)
     );

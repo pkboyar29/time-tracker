@@ -6,10 +6,8 @@ import {
   updateDailyGoal,
   updateShowTimerInTitle,
 } from '../../redux/slices/userSlice';
-import {
-  updateSession,
-  resetSessionState,
-} from '../../redux/slices/sessionSlice';
+import { resetSessionState } from '../../redux/slices/sessionSlice';
+import { updateSession } from '../../api/sessionApi';
 import axios from '../../api/axios';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
 
@@ -38,7 +36,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
 
   const logOutHandler = async () => {
     if (currentSession) {
-      await dispatch(updateSession(currentSession));
+      await updateSession(currentSession);
 
       dispatch(resetSessionState());
     }
