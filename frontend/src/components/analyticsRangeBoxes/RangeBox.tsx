@@ -265,6 +265,10 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
     }
   }
 
+  function currentRangeItemClickHandler() {
+    setRangeItems(getRangeItems(rangeType, fromDate));
+  }
+
   function rangeItemClickHandler(rangeItem: [Date, Date]) {
     navigate(
       `/analytics/range?from=${rangeItem[0].toISOString()}&to=${rangeItem[1].toISOString()}`,
@@ -286,7 +290,10 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
           <LeftChevronIcon />
         </button>
 
-        <div className="flex items-center justify-center text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md dark:border-gray-500 w-52 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover dark:text-textDark">
+        <div
+          onClick={currentRangeItemClickHandler}
+          className="flex items-center justify-center text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md dark:border-gray-500 w-52 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover dark:text-textDark"
+        >
           {renderDateLabel(rangeType, fromDate, toDate)}
         </div>
 
