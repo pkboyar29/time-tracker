@@ -18,18 +18,25 @@ import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
 import {
   getRemainingTimeHoursMinutesSeconds,
-  getTimeHoursMinutes,
+  getTimerEndDate,
 } from '../helpers/timeHelpers';
+import { showNotification } from '../helpers/notificationHelpers';
 
 import { toast } from 'react-toastify';
 
 type TimerState = 'idle' | 'running' | 'paused';
 
 interface TimerContextType {
-  startTimer: (startSpentSeconds: number, paused?: boolean) => void;
+  // TODO: totalTimeSeconds - временный костыль, удалить потом
+  startTimer: (
+    startSpentSeconds: number,
+    totalTimeSeconds: number,
+    paused?: boolean
+  ) => void;
   toggleTimer: (startSpentSeconds: number) => void;
   stopTimer: () => void;
   timerState: TimerState;
+  timerEndDate: Date;
 }
 
 const TimerContext = createContext<TimerContextType>({
@@ -37,6 +44,7 @@ const TimerContext = createContext<TimerContextType>({
   toggleTimer: () => {},
   stopTimer: () => {},
   timerState: 'idle',
+  timerEndDate: new Date(),
 });
 
 interface TimerProviderProps {
@@ -49,21 +57,33 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const startTimestamp = useRef<number>(0); // here we store timestamp
   const startSpentSeconds = useRef<number>(0); // here we store seconds
 
+  const timerEndDate = useRef<Date>(new Date()); // here we store date when timer is going to end
+
   const currentSession = useAppSelector(
     (state) => state.sessions.currentSession
   );
   const currentUser = useAppSelector((state) => state.users.user);
   const dispatch = useAppDispatch();
 
-  const startTimer = (newStartSpentSeconds: number, paused?: boolean) => {
-    // TODO: после вызова dispatch(setCurrentSession) currentSession не устанавливается сразу
-    // if (currentSession) {
-    // }
+  // TODO: totalTimeSeconds - временный костыль, который надо удалить, когда currentSession не будет null, когда вызываем эту функцию
+  // TODO: во время запуска этой функции после вызова dispatch(setCurrentSession) currentSession не устанавливается сразу и в этой функции будет null
+  const startTimer = (
+    newStartSpentSeconds: number,
+    totalTimeSeconds: number,
+    paused?: boolean
+  ) => {
     if (paused) {
       setTimerState('paused');
     } else {
-      startTimestamp.current = Date.now();
+      const newStartTimestamp = Date.now();
+      startTimestamp.current = newStartTimestamp;
       startSpentSeconds.current = newStartSpentSeconds;
+
+      timerEndDate.current = getTimerEndDate(
+        newStartTimestamp,
+        newStartSpentSeconds,
+        totalTimeSeconds
+      );
 
       setTimerState('running');
     }
@@ -76,8 +96,15 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
       setTimerState('paused');
     } else if (timerState == 'paused') {
-      startTimestamp.current = Date.now();
+      const newStartTimestamp = Date.now();
+      startTimestamp.current = newStartTimestamp;
       startSpentSeconds.current = newStartSpentSeconds;
+
+      timerEndDate.current = getTimerEndDate(
+        newStartTimestamp,
+        newStartSpentSeconds,
+        currentSession!.totalTimeSeconds
+      );
 
       setTimerState('running');
     }
@@ -151,17 +178,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         try {
           stopTimer();
           playAudio();
-
-          const notification = new Notification('Session completed!', {
-            body: `${
-              currentSession.activity
-                ? currentSession.activity.name
-                : 'Without activity'
-            } - ${getTimeHoursMinutes(currentSession.totalTimeSeconds)}`,
-          });
-          setTimeout(() => {
-            notification.close();
-          }, 5000);
+          showNotification(currentSession);
 
           await dispatch(
             updateSession({
@@ -207,7 +224,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   return (
     <TimerContext.Provider
-      value={{ startTimer, toggleTimer, stopTimer, timerState }}
+      value={{
+        startTimer,
+        toggleTimer,
+        stopTimer,
+        timerState,
+        timerEndDate: timerEndDate.current,
+      }}
     >
       {children}
     </TimerContext.Provider>

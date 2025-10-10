@@ -42,7 +42,11 @@ const App: FC = () => {
           }
 
           dispatch(setCurrentSession(currentSession));
-          startTimer(currentSession.spentTimeSeconds, true);
+          startTimer(
+            currentSession.spentTimeSeconds,
+            currentSession.totalTimeSeconds,
+            true
+          );
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
             removeSessionFromLocalStorage();

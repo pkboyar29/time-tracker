@@ -15,6 +15,7 @@ import {
 import {
   getRemainingTimeHoursMinutesSeconds,
   getTimeHoursMinutes,
+  getTimeHHmmFromDate,
 } from '../helpers/timeHelpers';
 import { useTimer } from '../hooks/useTimer';
 import { useStartSession } from '../hooks/useStartSession';
@@ -49,7 +50,7 @@ const TimerPage: FC = () => {
   const [selectedSeconds, setSelectedSeconds] = useState<number>(1500);
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');
 
-  const { toggleTimer, stopTimer, timerState } = useTimer();
+  const { toggleTimer, stopTimer, timerState, timerEndDate } = useTimer();
   const isTimerStarted = timerState != 'idle';
   const { startSession } = useStartSession();
 
@@ -225,13 +226,24 @@ const TimerPage: FC = () => {
             <div className="flex flex-col p-6 rounded-lg shadow-md w-96 bg-surfaceLightHover dark:bg-surfaceDark">
               <div className="flex flex-col flex-grow gap-5 overflow-auto">
                 {isTimerStarted && (
-                  <div className="text-lg font-semibold dark:text-textDark">
-                    Session{' '}
-                    {getTimeHoursMinutes(
-                      currentSession!.totalTimeSeconds,
-                      false
-                    )}
-                  </div>
+                  <>
+                    <div className="text-lg font-semibold dark:text-textDark">
+                      Session{' '}
+                      {getTimeHoursMinutes(
+                        currentSession!.totalTimeSeconds,
+                        false
+                      )}
+                    </div>
+
+                    <div className="flex items-center dark:text-textDark">
+                      <span>Ends in</span>
+                      <span className="inline-block min-w-[3.5rem] text-center">
+                        {timerState === 'paused'
+                          ? '...'
+                          : getTimeHHmmFromDate(timerEndDate)}
+                      </span>
+                    </div>
+                  </>
                 )}
 
                 <div>

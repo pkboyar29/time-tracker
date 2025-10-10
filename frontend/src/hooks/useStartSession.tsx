@@ -12,7 +12,7 @@ export const useStartSession = () => {
   const startSession = (session: ISession) => {
     dispatch(setCurrentSession(session));
     saveSessionToLocalStorage(session.id);
-    startTimer(session.spentTimeSeconds);
+    startTimer(session.spentTimeSeconds, session.totalTimeSeconds);
   };
 
   return { startSession };

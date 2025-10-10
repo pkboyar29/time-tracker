@@ -74,3 +74,13 @@ export const getTimeHHmmFromDate = (date: Date) => {
     minutes < 10 ? `0${minutes}` : `${minutes}`
   }`;
 };
+
+export const getTimerEndDate = (
+  startTimerTimestamp: number,
+  startTimerSpentSeconds: number,
+  sessionTotalSeconds: number
+): Date => {
+  return new Date(
+    startTimerTimestamp + (sessionTotalSeconds - startTimerSpentSeconds) * 1000
+  );
+};
