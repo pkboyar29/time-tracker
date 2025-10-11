@@ -1,10 +1,9 @@
 import { FC, useState, ReactNode } from 'react';
-import { useAppSelector } from '../../redux/store';
-import { createSession, updateSession } from '../../api/sessionApi';
+import { useTimer } from '../../hooks/useTimer';
+import { createSession } from '../../api/sessionApi';
 import { useQueryCustom } from '../../hooks/useQueryCustom';
 import { fetchActivities } from '../../api/activityApi';
 import { toast } from 'react-toastify';
-import { useStartSession } from '../../hooks/useStartSession';
 
 import Modal from './Modal';
 import Button from '../Button';
@@ -24,10 +23,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   onCloseModal,
   modalTitle,
 }) => {
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
-  const { startSession } = useStartSession();
+  const { startTimer } = useTimer();
 
   const { data: activitiesToChoose, isLoading: isLoadingActivities } =
     useQueryCustom({
@@ -42,16 +38,12 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
 
   const onSubmit = async () => {
     try {
-      if (currentSession) {
-        updateSession(currentSession);
-      }
-
       const newSession = await createSession({
         totalTimeSeconds: selectedMinutes * 60,
         spentTimeSeconds: 0,
         activity: selectedActivityId !== '' ? selectedActivityId : undefined,
       });
-      startSession(newSession);
+      startTimer(newSession);
 
       afterSubmitHandler();
     } catch (e) {

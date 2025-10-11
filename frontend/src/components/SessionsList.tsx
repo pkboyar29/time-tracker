@@ -1,9 +1,9 @@
 import { FC, useState, useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '../redux/store';
+import { useAppSelector } from '../redux/store';
 import { useTimer } from '../hooks/useTimer';
-import { useStartSession } from '../hooks/useStartSession';
-import { updateSession, deleteSession } from '../api/sessionApi';
+import { deleteSession } from '../api/sessionApi';
 import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
+import { toast } from 'react-toastify';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -34,14 +34,9 @@ const SessionsList: FC<SessionsListProps> = ({
   sessions,
   updateSessionsListHandler,
 }) => {
-  const dispatch = useAppDispatch();
-  const { timerState } = useTimer();
-  const { startSession } = useStartSession();
+  const { timerState, startTimer } = useTimer();
 
   const sessionIdFromLocalStorage = getSessionIdFromLocalStorage();
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
   const lastCompletedSessionId = useAppSelector(
     (state) => state.sessions.lastCompletedSessionId
   );
@@ -59,20 +54,20 @@ const SessionsList: FC<SessionsListProps> = ({
   const [less, setLess] = useState<boolean>(false); // less - true, more - false
 
   useEffect(() => {
-    if (currentSession) {
+    if (timerState.session) {
       const isCurrentSessionInList = sessions.find(
-        (s) => s.id === currentSession.id
+        (s) => s.id === timerState.session.id
       );
 
       if (isCurrentSessionInList) {
         updateSessionsListHandler(
-          getSessionsListAfterSessionUpdate(sessions, currentSession)
+          getSessionsListAfterSessionUpdate(sessions, timerState.session)
         );
       } else {
-        updateSessionsListHandler([...sessions, currentSession]);
+        updateSessionsListHandler([...sessions, timerState.session]);
       }
     }
-  }, [currentSession]);
+  }, [timerState.session]);
 
   useEffect(() => {
     if (lastCompletedSessionId) {
@@ -83,34 +78,25 @@ const SessionsList: FC<SessionsListProps> = ({
   }, [lastCompletedSessionId]);
 
   const handleSessionClick = async (session: ISession) => {
-    // updating the previous current session if it's not paused
-    if (currentSession && timerState == 'running') {
-      try {
-        const updatedSession = await updateSession(currentSession);
-
-        updateSessionsListHandler(
-          getSessionsListAfterSessionUpdate(sessions, updatedSession)
-        );
-      } catch (e) {
-        // TODO: сообщать в тосте, что не удалось обновить сессию
-        console.log(e);
-      }
-    }
-
-    startSession(session);
+    startTimer(session);
   };
 
   const handleSessionDelete = async (sessionId: string) => {
-    // TODO: отображать тост при ошибке
-    await deleteSession(sessionId);
-    updateSessionsListHandler(
-      sessions.filter((session) => session.id !== sessionId)
-    );
+    try {
+      await deleteSession(sessionId);
+      updateSessionsListHandler(
+        sessions.filter((session) => session.id !== sessionId)
+      );
 
-    setDeleteModal({
-      status: false,
-      selectedItemId: null,
-    });
+      setDeleteModal({
+        status: false,
+        selectedItemId: null,
+      });
+    } catch (e) {
+      toast('A server error occurred while deleting session', {
+        type: 'error',
+      });
+    }
   };
 
   const handleSessionDeleteClick = (sessionId: string) => {
@@ -166,8 +152,8 @@ const SessionsList: FC<SessionsListProps> = ({
             >
               {sessionsWithoutCurrent.map((session) => (
                 <SessionItem
-                  isActive={currentSession?.id === session.id}
-                  isEnabled={timerState == 'running'}
+                  isActive={timerState.session?.id === session.id}
+                  isEnabled={timerState.status == 'running'}
                   key={session.id}
                   session={session}
                   sessionClickHandler={handleSessionClick}

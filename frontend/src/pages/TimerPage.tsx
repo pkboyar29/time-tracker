@@ -1,20 +1,14 @@
 import { FC, useEffect, useState } from 'react';
-import { resetCurrentSession } from '../redux/slices/sessionSlice';
-import { fetchSessions, createSession, updateSession } from '../api/sessionApi';
-import { useAppDispatch, useAppSelector } from '../redux/store';
+import { fetchSessions, createSession } from '../api/sessionApi';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivities } from '../api/activityApi';
-import {
-  removeSessionFromLocalStorage,
-  getSessionIdFromLocalStorage,
-} from '../helpers/localstorageHelpers';
+import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
 import {
   getRemainingTimeHoursMinutesSeconds,
   getTimeHoursMinutes,
   getTimeHHmmFromDate,
 } from '../helpers/timeHelpers';
 import { useTimer } from '../hooks/useTimer';
-import { useStartSession } from '../hooks/useStartSession';
 import { toast } from 'react-toastify';
 
 import PrimaryClipLoader from '../components/PrimaryClipLoader';
@@ -46,15 +40,9 @@ const TimerPage: FC = () => {
   const [selectedSeconds, setSelectedSeconds] = useState<number>(1500);
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');
 
-  const { toggleTimer, stopTimer, timerState, timerEndDate } = useTimer();
-  const isTimerStarted = timerState != 'idle';
-  const { startSession } = useStartSession();
-
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
-
-  const dispatch = useAppDispatch();
+  const { startTimer, toggleTimer, stopTimer, timerState, timerEndDate } =
+    useTimer();
+  const isTimerStarted = timerState.status != 'idle';
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
@@ -69,7 +57,7 @@ const TimerPage: FC = () => {
       }
 
       if (event.code == 'Space') {
-        if (currentSession) {
+        if (isTimerStarted) {
           handleToggleButtonClick();
         } else {
           handleStartSessionClick();
@@ -83,7 +71,7 @@ const TimerPage: FC = () => {
     return () => {
       window.removeEventListener('keyup', handleKeyClick);
     };
-  }, [currentSession, timerState, selectedSeconds, selectedActivityId]);
+  }, [timerState, selectedSeconds, selectedActivityId]);
 
   useEffect(() => {
     const fetchAllUncompletedSessions = async () => {
@@ -102,7 +90,7 @@ const TimerPage: FC = () => {
         activity: selectedActivityId !== '' ? selectedActivityId : undefined,
       });
 
-      startSession(newSession);
+      startTimer(newSession);
     } catch (e) {
       toast('A server error occurred while starting new session', {
         type: 'error',
@@ -115,25 +103,11 @@ const TimerPage: FC = () => {
   };
 
   const handleToggleButtonClick = () => {
-    if (currentSession) {
-      toggleTimer(currentSession.spentTimeSeconds);
-
-      // TODO: почему это условие стоит после toggleTimer, вспомнить
-      if (timerState == 'running') {
-        updateSession(currentSession);
-      }
-    }
+    toggleTimer();
   };
 
   const handleStopButtonClick = () => {
-    if (currentSession) {
-      stopTimer();
-
-      updateSession(currentSession);
-
-      dispatch(resetCurrentSession());
-      removeSessionFromLocalStorage();
-    }
+    stopTimer(true);
   };
 
   return (
@@ -155,13 +129,13 @@ const TimerPage: FC = () => {
               ) : (
                 <CustomCircularProgress
                   valuePercent={
-                    (currentSession!.spentTimeSeconds /
-                      currentSession!.totalTimeSeconds) *
+                    (timerState.session.spentTimeSeconds /
+                      timerState.session.totalTimeSeconds) *
                     100
                   }
                   label={`${getRemainingTimeHoursMinutesSeconds(
-                    currentSession!.totalTimeSeconds,
-                    currentSession!.spentTimeSeconds
+                    timerState.session.totalTimeSeconds,
+                    timerState.session.spentTimeSeconds
                   )}`}
                   size="verybig"
                 />
@@ -191,7 +165,11 @@ const TimerPage: FC = () => {
                         handleToggleButtonClick();
                       }}
                     >
-                      {timerState == 'running' ? <PauseIcon /> : <PlayIcon />}
+                      {timerState.status == 'running' ? (
+                        <PauseIcon />
+                      ) : (
+                        <PlayIcon />
+                      )}
                     </button>
 
                     <button
@@ -206,7 +184,7 @@ const TimerPage: FC = () => {
                     </button>
                   </div>
 
-                  {timerState == 'paused' && (
+                  {timerState.status == 'paused' && (
                     <div className="dark:text-textDark">Paused</div>
                   )}
                 </>
@@ -221,7 +199,7 @@ const TimerPage: FC = () => {
                     <div className="text-lg font-semibold dark:text-textDark">
                       Session{' '}
                       {getTimeHoursMinutes(
-                        currentSession!.totalTimeSeconds,
+                        timerState.session.totalTimeSeconds,
                         false
                       )}
                     </div>
@@ -229,7 +207,7 @@ const TimerPage: FC = () => {
                     <div className="flex items-center dark:text-textDark">
                       <span>Ends in</span>
                       <span className="inline-block min-w-[3.5rem] text-center">
-                        {timerState === 'paused'
+                        {timerState.status === 'paused'
                           ? '...'
                           : getTimeHHmmFromDate(timerEndDate)}
                       </span>
@@ -273,9 +251,9 @@ const TimerPage: FC = () => {
                         )
                       )}
                     </div>
-                  ) : currentSession!.activity ? (
+                  ) : timerState.session.activity ? (
                     <div className="text-base dark:text-textDark">
-                      {currentSession!.activity.name}
+                      {timerState.session.activity.name}
                     </div>
                   ) : (
                     <div className="text-base italic text-gray-500 dark:text-textDarkSecondary">
@@ -305,7 +283,7 @@ const TimerPage: FC = () => {
                     <div className="mb-2 text-xl font-bold dark:text-textDark">
                       Notes
                     </div>
-                    <NotesSection />
+                    <NotesSection defaultNote={timerState.session.note} />
                   </div>
                 )}
               </div>

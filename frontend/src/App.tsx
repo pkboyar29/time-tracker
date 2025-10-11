@@ -4,7 +4,6 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './router/ProtectedRoute';
 import { useAppDispatch } from './redux/store';
 import { fetchSession } from './api/sessionApi';
-import { setCurrentSession } from './redux/slices/sessionSlice';
 import { useTimer } from './hooks/useTimer';
 import { fetchProfileInfo } from './redux/slices/userSlice';
 import {
@@ -41,12 +40,7 @@ const App: FC = () => {
             return;
           }
 
-          dispatch(setCurrentSession(currentSession));
-          startTimer(
-            currentSession.spentTimeSeconds,
-            currentSession.totalTimeSeconds,
-            true
-          );
+          startTimer(currentSession, true);
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
             removeSessionFromLocalStorage();

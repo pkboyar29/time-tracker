@@ -6,8 +6,7 @@ import {
   updateDailyGoal,
   updateShowTimerInTitle,
 } from '../../redux/slices/userSlice';
-import { resetSessionState } from '../../redux/slices/sessionSlice';
-import { updateSession } from '../../api/sessionApi';
+import { useTimer } from '../../hooks/useTimer';
 import axios from '../../api/axios';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
 
@@ -22,9 +21,8 @@ interface SettingsModalProps {
 const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((state) => state.users.user);
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
+
+  const { timerState, stopTimer } = useTimer();
 
   const [dailyGoalInput, setDailyGoalInput] = useState<number>(0);
 
@@ -35,10 +33,8 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
   }, [userInfo]);
 
   const logOutHandler = async () => {
-    if (currentSession) {
-      await updateSession(currentSession);
-
-      dispatch(resetSessionState());
+    if (timerState.status != 'idle') {
+      await stopTimer(true);
     }
     dispatch(logOutUser());
     clearSession();
