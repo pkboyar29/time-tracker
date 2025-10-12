@@ -58,7 +58,7 @@ const AnalyticsRangePage: FC = () => {
   }, [isError]);
 
   return (
-    <div className="flex flex-col h-screen overflow-y-hidden">
+    <div className="flex flex-col h-screen overflow-y-hidden dark:text-textDark">
       {fromDate && toDate && (
         <div className="flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
           {rangeType == 'custom' ? (

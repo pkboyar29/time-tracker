@@ -215,7 +215,7 @@ const TimerPage: FC = () => {
                   </>
                 )}
 
-                <div>
+                <div className="dark:text-textDark">
                   <span className="block mb-2 text-lg font-semibold dark:text-textDark">
                     Activity
                   </span>
