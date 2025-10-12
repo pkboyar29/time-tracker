@@ -7,8 +7,7 @@ import {
   FC,
   useContext,
 } from 'react';
-import { useAppDispatch, useAppSelector } from '../redux/store';
-import { setLastCompletedSessionId } from '../redux/slices/sessionSlice';
+import { useAppSelector } from '../redux/store';
 import { updateSession } from '../api/sessionApi';
 import {
   saveSessionToLocalStorage,
@@ -24,10 +23,7 @@ import { toast } from 'react-toastify';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
-// interface TimerState {
-//   status: 'idle' | 'running' | 'paused';
-//   session: ISession | null;
-// }
+const timerWorker = new Worker(new URL('./timerWorker.js', import.meta.url));
 
 type TimerState =
   | { status: 'idle'; session: null }
@@ -67,7 +63,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const timerEndDate = useRef<Date>(new Date()); // here we store date when timer is going to end
 
   const currentUser = useAppSelector((state) => state.users.user);
-  const dispatch = useAppDispatch();
 
   const startTimer = async (session: ISession, paused?: boolean) => {
     if (timerState.status == 'running') {
@@ -112,7 +107,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         });
       }
 
-      console.log(timerState.session);
       setTimerState({ session: timerState.session, status: 'paused' });
     } else if (timerState.status == 'paused') {
       const newStartTimestamp = Date.now();
@@ -150,6 +144,27 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     }
   };
 
+  const finishTimer = async () => {
+    if (timerState.status != 'idle') {
+      try {
+        playAudio();
+        showNotification(timerState.session);
+
+        await updateSession({
+          ...timerState.session,
+          spentTimeSeconds: timerState.session.totalTimeSeconds,
+        });
+
+        stopTimer();
+      } catch (e) {
+        toast('A server error occurred while updating session', {
+          type: 'error',
+        });
+        stopTimer();
+      }
+    }
+  };
+
   const setNote = (note: string) => {
     if (timerState.status != 'idle') {
       setTimerState({
@@ -160,36 +175,36 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval>;
-
     if (timerState.status == 'running') {
-      intervalId = setInterval(() => {
-        const startTimestampSeconds = Math.floor(startTimestamp.current / 1000);
-        const nowTimestampSeconds = Math.floor(Date.now() / 1000);
-
-        const newSpentSeconds =
-          startSpentSeconds.current +
-          (nowTimestampSeconds - startTimestampSeconds);
-
+      timerWorker.postMessage({
+        startTimestamp: startTimestamp.current,
+        startSpentSeconds: startSpentSeconds.current,
+        action: 'run',
+      });
+      timerWorker.onmessage = (ev) => {
         setTimerState((prev) => {
           if (prev.status == 'idle') return prev;
 
           return {
             status: 'running',
-            session: { ...prev.session, spentTimeSeconds: newSpentSeconds },
+            session: { ...prev.session, spentTimeSeconds: ev.data },
           };
         });
-      }, 1000);
-    }
 
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [timerState.status]);
+        if (ev.data >= timerState.session.totalTimeSeconds) {
+          finishTimer();
+          timerWorker.postMessage({ action: 'pause' });
+        }
+      };
+    } else {
+      // if status is paused or idle
+      timerWorker.postMessage({ action: 'pause' });
+    }
+  }, [timerState.status, timerState.session?.id]);
 
   useEffect(() => {
-    if (timerState.status != 'idle') {
-      const timerInTitle = currentUser?.showTimerInTitle
+    if (timerState.status != 'idle' && currentUser) {
+      const timerInTitle = currentUser.showTimerInTitle
         ? `${getRemainingTimeHoursMinutesSeconds(
             timerState.session.totalTimeSeconds,
             timerState.session.spentTimeSeconds,
@@ -213,39 +228,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     } else {
       document.title = 'Session Tracker';
     }
-  }, [timerState.session, currentUser]);
-
-  useEffect(() => {
-    const checkIfTimePassed = async () => {
-      console.log(timerState.session?.spentTimeSeconds);
-
-      if (
-        timerState.status != 'idle' &&
-        timerState.session.spentTimeSeconds >=
-          timerState.session.totalTimeSeconds
-      ) {
-        try {
-          playAudio();
-          showNotification(timerState.session);
-
-          await updateSession({
-            ...timerState.session,
-            spentTimeSeconds: timerState.session.totalTimeSeconds,
-          });
-          dispatch(setLastCompletedSessionId(timerState.session.id));
-
-          stopTimer();
-        } catch (e) {
-          toast('A server error occurred while updating session', {
-            type: 'error',
-          });
-          stopTimer();
-        }
-      }
-    };
-
-    checkIfTimePassed();
-  }, [timerState.session?.spentTimeSeconds]);
+  }, [timerState.status, currentUser]);
 
   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
     event.preventDefault();

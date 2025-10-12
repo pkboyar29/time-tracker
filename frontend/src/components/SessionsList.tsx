@@ -1,5 +1,4 @@
 import { FC, useState, useEffect } from 'react';
-import { useAppSelector } from '../redux/store';
 import { useTimer } from '../hooks/useTimer';
 import { deleteSession } from '../api/sessionApi';
 import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
@@ -37,9 +36,6 @@ const SessionsList: FC<SessionsListProps> = ({
   const { timerState, startTimer } = useTimer();
 
   const sessionIdFromLocalStorage = getSessionIdFromLocalStorage();
-  const lastCompletedSessionId = useAppSelector(
-    (state) => state.sessions.lastCompletedSessionId
-  );
 
   // removing current session from the list
   const sessionsWithoutCurrent = sessions.filter(
@@ -60,22 +56,23 @@ const SessionsList: FC<SessionsListProps> = ({
       );
 
       if (isCurrentSessionInList) {
-        updateSessionsListHandler(
-          getSessionsListAfterSessionUpdate(sessions, timerState.session)
-        );
+        if (
+          timerState.session.spentTimeSeconds ==
+          timerState.session.totalTimeSeconds
+        ) {
+          updateSessionsListHandler(
+            sessions.filter((s) => s.id !== timerState.session.id)
+          );
+        } else {
+          updateSessionsListHandler(
+            getSessionsListAfterSessionUpdate(sessions, timerState.session)
+          );
+        }
       } else {
         updateSessionsListHandler([...sessions, timerState.session]);
       }
     }
   }, [timerState.session]);
-
-  useEffect(() => {
-    if (lastCompletedSessionId) {
-      updateSessionsListHandler(
-        sessions.filter((s) => s.id !== lastCompletedSessionId)
-      );
-    }
-  }, [lastCompletedSessionId]);
 
   const handleSessionClick = async (session: ISession) => {
     startTimer(session);
