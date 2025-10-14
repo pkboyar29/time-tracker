@@ -60,7 +60,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
         onClick={() => {
           setDropdown((dropdown) => !dropdown);
         }}
-        className={`flex justify-between gap-2 px-3 py-2`}
+        className={`cursor-pointer flex justify-between gap-2 px-3 py-2`}
       >
         <div className="w-10/12 truncate">{currentOption?.name}</div>
 
@@ -73,7 +73,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
 
       {dropdown && (
         <div
-          className={`absolute top-full left-0 w-full px-3 py-2 rounded-lg bg-white dark:bg-surfaceDarkHover border-t border-solid border-gray-500 overflow-y-auto max-h-[500px] `}
+          className={`absolute z-[2000] top-full left-0 w-full px-3 py-2 rounded-lg bg-white dark:bg-surfaceDarkHover border border-solid border-gray-500 overflow-y-auto max-h-[500px] `}
         >
           {optionGroups.map((optGroup, i) => (
             <div key={i}>

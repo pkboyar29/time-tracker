@@ -1,9 +1,9 @@
 import { FC, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAppSelector } from '../redux/store';
 import { useTimer } from '../hooks/useTimer';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { toggleThemeInLocalStorage } from '../helpers/localstorageHelpers';
+import { getWeekRange } from '../helpers/dateHelpers';
 
 import TimerIcon from '../icons/TimerIcon';
 import BookIcon from '../icons/BookIcon';
@@ -14,9 +14,8 @@ import SettingsModal from './modals/SettingsModal';
 const Sidebar: FC = () => {
   const [settingsModal, setSettingsModal] = useState<boolean>(false);
 
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
+  const [startOfWeek, endOfWeek] = getWeekRange(new Date());
+
   const { timerState } = useTimer();
 
   const changeTheme = () => {
@@ -38,11 +37,11 @@ const Sidebar: FC = () => {
         <ul className="flex flex-col items-center justify-between h-full">
           <div className="flex flex-col items-center gap-5">
             <li className="flex flex-col items-center min-h-[32px]">
-              {timerState != 'idle' && (
+              {timerState.status != 'idle' && (
                 <div className="px-4 py-2 text-sm shadow-sm rounded-xl bg-primary/10 text-primary dark:bg-surfaceDark dark:text-textDark">
                   {getRemainingTimeHoursMinutesSeconds(
-                    currentSession!.totalTimeSeconds,
-                    currentSession!.spentTimeSeconds
+                    timerState.session.totalTimeSeconds,
+                    timerState.session.spentTimeSeconds
                   )}
                 </div>
               )}
@@ -71,7 +70,7 @@ const Sidebar: FC = () => {
 
             <li>
               <NavLink
-                to="/analytics"
+                to={`/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`}
                 className="flex items-center gap-4 group"
               >
                 <AnalyticsIcon className="transition duration-300 group-hover:stroke-primary" />

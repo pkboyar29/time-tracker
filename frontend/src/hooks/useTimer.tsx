@@ -7,33 +7,44 @@ import {
   FC,
   useContext,
 } from 'react';
-import { useAppDispatch, useAppSelector } from '../redux/store';
+import { useAppSelector } from '../redux/store';
+import { updateSession } from '../api/sessionApi';
 import {
-  changeSpentSeconds,
-  updateSession,
-  resetCurrentSession,
-  setLastCompletedSessionId,
-} from '../redux/slices/sessionSlice';
-import { removeSessionFromLocalStorage } from '../helpers/localstorageHelpers';
+  saveSessionToLocalStorage,
+  removeSessionFromLocalStorage,
+} from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
-import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
-
+import {
+  getRemainingTimeHoursMinutesSeconds,
+  getTimerEndDate,
+} from '../helpers/timeHelpers';
+import { showNotification } from '../helpers/notificationHelpers';
 import { toast } from 'react-toastify';
 
-type TimerState = 'idle' | 'running' | 'paused';
+import { ISession } from '../ts/interfaces/Session/ISession';
+
+const timerWorker = new Worker(new URL('./timerWorker.js', import.meta.url));
+
+type TimerState =
+  | { status: 'idle'; session: null }
+  | { status: 'running' | 'paused'; session: ISession };
 
 interface TimerContextType {
-  startTimer: (startSpentSeconds: number, paused?: boolean) => void;
-  toggleTimer: (startSpentSeconds: number) => void;
-  stopTimer: () => void;
+  startTimer: (session: ISession, paused?: boolean) => Promise<void>;
+  toggleTimer: () => Promise<void>;
+  stopTimer: (shouldUpdateSession?: boolean) => Promise<void>;
+  setNote: (note: string) => void;
   timerState: TimerState;
+  timerEndDate: Date;
 }
 
 const TimerContext = createContext<TimerContextType>({
-  startTimer: () => {},
-  toggleTimer: () => {},
-  stopTimer: () => {},
-  timerState: 'idle',
+  startTimer: async () => {},
+  toggleTimer: async () => {},
+  stopTimer: async () => {},
+  setNote: () => {},
+  timerState: { status: 'idle', session: null },
+  timerEndDate: new Date(),
 });
 
 interface TimerProviderProps {
@@ -41,159 +52,213 @@ interface TimerProviderProps {
 }
 
 const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
-  const [timerState, setTimerState] = useState<TimerState>('idle');
+  const [timerState, setTimerState] = useState<TimerState>({
+    status: 'idle',
+    session: null,
+  });
 
   const startTimestamp = useRef<number>(0); // here we store timestamp
   const startSpentSeconds = useRef<number>(0); // here we store seconds
 
-  const currentSession = useAppSelector(
-    (state) => state.sessions.currentSession
-  );
+  const timerEndDate = useRef<Date>(new Date()); // here we store date when timer is going to end
+
   const currentUser = useAppSelector((state) => state.users.user);
-  const dispatch = useAppDispatch();
 
-  const startTimer = (newStartSpentSeconds: number, paused?: boolean) => {
-    // TODO: после вызова dispatch(setCurrentSession) currentSession не устанавливается сразу
-    // if (currentSession) {
-    // }
+  const startTimer = async (session: ISession, paused?: boolean) => {
+    if (timerState.status == 'running') {
+      try {
+        await updateSession(timerState.session);
+      } catch (e) {
+        toast('A server error occurred while updating session', {
+          type: 'error',
+        });
+      }
+    }
+
+    saveSessionToLocalStorage(session.id);
+
     if (paused) {
-      setTimerState('paused');
+      setTimerState({ status: 'paused', session });
     } else {
-      startTimestamp.current = Date.now();
-      startSpentSeconds.current = newStartSpentSeconds;
+      const newStartTimestamp = Date.now();
+      startTimestamp.current = newStartTimestamp;
+      startSpentSeconds.current = session.spentTimeSeconds;
 
-      setTimerState('running');
+      timerEndDate.current = getTimerEndDate(
+        newStartTimestamp,
+        session.spentTimeSeconds,
+        session.totalTimeSeconds
+      );
+
+      setTimerState({ status: 'running', session });
     }
   };
 
-  const toggleTimer = (newStartSpentSeconds: number) => {
-    if (timerState == 'running') {
+  const toggleTimer = async () => {
+    if (timerState.status == 'running') {
       startTimestamp.current = 0;
       startSpentSeconds.current = 0;
 
-      setTimerState('paused');
-    } else if (timerState == 'paused') {
-      startTimestamp.current = Date.now();
-      startSpentSeconds.current = newStartSpentSeconds;
+      try {
+        await updateSession(timerState.session);
+      } catch (e) {
+        toast('A server error occurred while updating session', {
+          type: 'error',
+        });
+      }
 
-      setTimerState('running');
+      setTimerState({ session: timerState.session, status: 'paused' });
+    } else if (timerState.status == 'paused') {
+      const newStartTimestamp = Date.now();
+      startTimestamp.current = newStartTimestamp;
+      startSpentSeconds.current = timerState.session.spentTimeSeconds;
+
+      timerEndDate.current = getTimerEndDate(
+        newStartTimestamp,
+        timerState.session.spentTimeSeconds,
+        timerState.session.totalTimeSeconds
+      );
+
+      setTimerState({ session: timerState.session, status: 'running' });
     }
   };
 
-  const stopTimer = () => {
-    setTimerState('idle');
-    startTimestamp.current = 0;
-    startSpentSeconds.current = 0;
-  };
-
-  useEffect(() => {
-    let intervalId: ReturnType<typeof setInterval>;
-
-    if (timerState == 'running') {
-      intervalId = setInterval(() => {
-        if (currentSession) {
-          const startTimestampSeconds = Math.floor(
-            startTimestamp.current / 1000
-          );
-          const nowTimestampSeconds = Math.floor(Date.now() / 1000);
-
-          const newSpentSeconds =
-            startSpentSeconds.current +
-            (nowTimestampSeconds - startTimestampSeconds);
-
-          dispatch(changeSpentSeconds(newSpentSeconds));
+  // TODO: этот параметр мне кажется костылем
+  const stopTimer = async (shouldUpdateSession?: boolean) => {
+    if (timerState.status != 'idle') {
+      if (timerState.status == 'running' && shouldUpdateSession) {
+        try {
+          await updateSession(timerState.session);
+        } catch (e) {
+          toast('A server error occurred while updating session', {
+            type: 'error',
+          });
         }
-      }, 1000);
-    }
+      }
 
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [timerState, dispatch]);
+      setTimerState({ status: 'idle', session: null });
+      startTimestamp.current = 0;
+      startSpentSeconds.current = 0;
+
+      removeSessionFromLocalStorage();
+    }
+  };
+
+  const finishTimer = async () => {
+    if (timerState.status != 'idle') {
+      try {
+        playAudio();
+        showNotification(timerState.session);
+
+        await updateSession({
+          ...timerState.session,
+          spentTimeSeconds: timerState.session.totalTimeSeconds,
+        });
+
+        stopTimer();
+      } catch (e) {
+        toast('A server error occurred while updating session', {
+          type: 'error',
+        });
+        stopTimer();
+      }
+    }
+  };
+
+  const setNote = (note: string) => {
+    if (timerState.status != 'idle') {
+      setTimerState({
+        status: timerState.status,
+        session: { ...timerState.session, note },
+      });
+    }
+  };
 
   useEffect(() => {
-    if (timerState != 'idle' && currentSession) {
-      const timerInTitle = currentUser?.showTimerInTitle
+    if (timerState.status == 'running') {
+      timerWorker.postMessage({
+        startTimestamp: startTimestamp.current,
+        startSpentSeconds: startSpentSeconds.current,
+        action: 'run',
+      });
+      timerWorker.onmessage = (ev) => {
+        setTimerState((prev) => {
+          if (prev.status == 'idle') return prev;
+
+          return {
+            status: 'running',
+            session: { ...prev.session, spentTimeSeconds: ev.data },
+          };
+        });
+
+        if (ev.data >= timerState.session.totalTimeSeconds) {
+          finishTimer();
+          timerWorker.postMessage({ action: 'pause' });
+        }
+      };
+    } else {
+      // if status is paused or idle
+      timerWorker.postMessage({ action: 'pause' });
+    }
+  }, [timerState.status, timerState.session?.id]);
+
+  useEffect(() => {
+    if (timerState.status != 'idle' && currentUser) {
+      const timerInTitle = currentUser.showTimerInTitle
         ? `${getRemainingTimeHoursMinutesSeconds(
-            currentSession.totalTimeSeconds,
-            currentSession.spentTimeSeconds,
+            timerState.session.totalTimeSeconds,
+            timerState.session.spentTimeSeconds,
             true
           )}`
         : '';
 
-      if (timerState == 'running') {
+      if (timerState.status == 'running') {
         document.title = `${timerInTitle} Focus | ${
-          currentSession.activity
-            ? currentSession.activity.name
+          timerState.session.activity
+            ? timerState.session.activity.name
             : 'Without activity'
         }`;
-      } else if (timerState == 'paused') {
+      } else if (timerState.status == 'paused') {
         document.title = `${timerInTitle} Paused | ${
-          currentSession.activity
-            ? currentSession.activity.name
+          timerState.session.activity
+            ? timerState.session.activity.name
             : 'Without activity'
         }`;
       }
     } else {
       document.title = 'Session Tracker';
     }
-  }, [timerState, currentUser, currentSession]);
-
-  useEffect(() => {
-    const checkIfTimePassed = async () => {
-      if (
-        currentSession &&
-        currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
-      ) {
-        try {
-          stopTimer();
-          playAudio();
-
-          await dispatch(
-            updateSession({
-              ...currentSession,
-              spentTimeSeconds: currentSession.totalTimeSeconds,
-            })
-          ).unwrap();
-
-          dispatch(setLastCompletedSessionId(currentSession.id));
-          dispatch(resetCurrentSession());
-          removeSessionFromLocalStorage();
-        } catch (e) {
-          // TODO: тут можно писать: но время все равно сохранилось
-          toast('A server error occurred while updating session', {
-            type: 'error',
-          });
-          stopTimer();
-        }
-      }
-    };
-
-    checkIfTimePassed();
-  }, [currentSession?.spentTimeSeconds]);
+  }, [timerState.status, timerState.session, currentUser]);
 
   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
     event.preventDefault();
-    if (currentSession) {
-      dispatch(updateSession(currentSession));
+    if (timerState.session) {
+      updateSession(timerState.session);
     }
   };
 
   useEffect(() => {
-    if (timerState == 'running') {
+    if (timerState.status == 'running') {
       window.addEventListener('beforeunload', handleBeforeUnload);
-    } else if (timerState == 'paused') {
+    } else if (timerState.status == 'paused') {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     }
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [currentSession?.spentTimeSeconds, timerState, dispatch]);
+  }, [timerState.session?.spentTimeSeconds, timerState.status]);
 
   return (
     <TimerContext.Provider
-      value={{ startTimer, toggleTimer, stopTimer, timerState }}
+      value={{
+        startTimer,
+        toggleTimer,
+        stopTimer,
+        setNote,
+        timerState,
+        timerEndDate: timerEndDate.current,
+      }}
     >
       {children}
     </TimerContext.Provider>
