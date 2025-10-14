@@ -228,7 +228,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     } else {
       document.title = 'Session Tracker';
     }
-  }, [timerState.status, currentUser]);
+  }, [timerState.status, timerState.session, currentUser]);
 
   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
     event.preventDefault();

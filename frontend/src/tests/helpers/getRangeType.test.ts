@@ -56,4 +56,11 @@ describe('getRangeType', () => {
 
     expect(getRangeType(fromDate, toDate)).toBe('custom');
   });
+
+  it('should return "overall" for analytics starting from 2000 year', () => {
+    const fromDate = new Date(2000, 0, 1, 0, 0, 0, 0); // Jan 1, 2000
+    const toDate = new Date();
+
+    expect(getRangeType(fromDate, toDate)).toBe('overall');
+  });
 });

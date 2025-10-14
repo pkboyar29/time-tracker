@@ -331,7 +331,14 @@ export const isSameDay = (oneDay: Date, twoDay: Date) => {
   );
 };
 
-export type RangeType = 'days' | 'weeks' | 'months' | 'years' | 'custom';
+// TODO: добавить overall
+export type RangeType =
+  | 'days'
+  | 'weeks'
+  | 'months'
+  | 'years'
+  | 'custom'
+  | 'overall';
 
 export const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
   if (
@@ -374,6 +381,14 @@ export const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
     isStartOfDay(toDate)
   ) {
     return 'years';
+  } else if (
+    fromDate.getFullYear() == 2000 &&
+    fromDate.getMonth() == 0 &&
+    fromDate.getDate() == 1 &&
+    isStartOfDay(fromDate) &&
+    isSameDay(new Date(), toDate)
+  ) {
+    return 'overall';
   } else {
     return 'custom';
   }

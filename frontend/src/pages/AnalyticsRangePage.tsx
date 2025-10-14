@@ -1,20 +1,41 @@
 import { FC, useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchRangeAnalytics } from '../api/analyticsApi';
 import { toast } from 'react-toastify';
-import { getRangeType, RangeType } from '../helpers/dateHelpers';
+import {
+  getRangeType,
+  RangeType,
+  getDayRange,
+  getWeekRange,
+  getMonthRange,
+  getYearRange,
+} from '../helpers/dateHelpers';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
 import PrimaryClipLoader from '../components/PrimaryClipLoader';
+import CustomSelect from '../components/CustomSelect';
 // TODO: использовать lazy loading
 import DailyGoalBox from '../components/DailyGoalBox';
 import PeriodDistributionBox from '../components/PeriodDistributionBox';
 import RangeBox from '../components/analyticsRangeBoxes/RangeBox';
 import CustomRangeBox from '../components/analyticsRangeBoxes/CustomRangeBox';
 
+const viewOptions: Record<RangeType, string> = {
+  days: '0',
+  weeks: '1',
+  months: '2',
+  years: '3',
+  overall: '4',
+  custom: '5',
+};
+const viewOptionsArr = Object.entries(viewOptions).map((opt) => {
+  return { id: opt[1], name: opt[0] };
+});
+
 const AnalyticsRangePage: FC = () => {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
@@ -33,7 +54,11 @@ const AnalyticsRangePage: FC = () => {
 
   const [fromDate, setFromDate] = useState<Date>(new Date(fromParam));
   const [toDate, setToDate] = useState<Date>(new Date(toParam));
-  const [rangeType] = useState<RangeType>(getRangeType(fromDate, toDate));
+  const [rangeType, setRangeType] = useState<RangeType>(
+    getRangeType(fromDate, toDate)
+  );
+
+  const viewId = viewOptions[rangeType];
 
   const {
     data: rangeAnalytics,
@@ -44,10 +69,53 @@ const AnalyticsRangePage: FC = () => {
     queryFn: () => fetchRangeAnalytics(fromDate, toDate),
   });
 
+  const onViewSelectChange = (id: string) => {
+    if (id == viewId) {
+      return;
+    }
+
+    if (id == '0') {
+      const [startOfToday, endOfToday] = getDayRange(new Date());
+      navigate(
+        `/analytics/range?from=${startOfToday.toISOString()}&to=${endOfToday.toISOString()}`
+      );
+    } else if (id == '1') {
+      const [startOfWeek, endOfWeek] = getWeekRange(new Date());
+      navigate(
+        `/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`
+      );
+    } else if (id == '2') {
+      const [startOfMonth, endOfMonth] = getMonthRange(new Date());
+      navigate(
+        `/analytics/range?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`
+      );
+    } else if (id == '3') {
+      const [startOfYear, endOfYear] = getYearRange(new Date());
+      navigate(
+        `/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`
+      );
+    } else if (id == '4') {
+      navigate(
+        `/analytics/range?from=2000-01-01T00:00:00&to=${new Date().toISOString()}`
+      );
+    } else if (id == '5') {
+      const [startOfToday, endOfToday] = getDayRange(new Date());
+      const customFromDate = new Date(startOfToday);
+      customFromDate.setDate(customFromDate.getDate() - 1);
+      navigate(
+        `/analytics/range?from=${customFromDate.toISOString()}&to=${endOfToday.toISOString()}`
+      );
+    }
+  };
+
   useEffect(() => {
     setFromDate(new Date(fromParam));
     setToDate(new Date(toParam));
   }, [searchParams]);
+
+  useEffect(() => {
+    setRangeType(getRangeType(fromDate, toDate));
+  }, [fromDate, toDate]);
 
   useEffect(() => {
     if (isError) {
@@ -60,16 +128,33 @@ const AnalyticsRangePage: FC = () => {
   return (
     <div className="flex flex-col h-screen overflow-y-hidden dark:text-textDark">
       {fromDate && toDate && (
-        <div className="flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
+        <div className="h-[164px] relative flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
           {rangeType == 'custom' ? (
             <CustomRangeBox fromDate={fromDate} toDate={toDate} />
+          ) : rangeType == 'overall' ? (
+            <div className="flex items-center justify-center text-xl font-semibold tracking-wide select-none">
+              Overall session analytics
+            </div>
           ) : (
-            <RangeBox
-              rangeType={rangeType}
-              fromDate={fromDate}
-              toDate={toDate}
-            />
+            <RangeBox fromDate={fromDate} toDate={toDate} />
           )}
+
+          <div className="w-[140px] absolute top-10 right-48">
+            <div className="text-right mb-1.5 text-lg font-semibold">
+              View by
+            </div>
+            <CustomSelect
+              currentId={viewId}
+              onChange={onViewSelectChange}
+              optionGroups={[
+                {
+                  optGroupName: '',
+                  color: 'standart',
+                  options: [...viewOptionsArr],
+                },
+              ]}
+            />
+          </div>
         </div>
       )}
 
@@ -106,7 +191,7 @@ const AnalyticsRangePage: FC = () => {
                 }
               />
             )}
-            {rangeType != 'days' && (
+            {rangeType != 'days' && rangeType != 'overall' && (
               <PeriodDistributionBox
                 timeBars={rangeAnalytics.timeBars}
                 allActivityDistributionItems={

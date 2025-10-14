@@ -15,6 +15,7 @@ import {
   isCurrentMonth,
   isCurrentYear,
   shiftTwoDates,
+  getRangeType,
 } from '../../helpers/dateHelpers';
 import { RangeType } from '../../helpers/dateHelpers';
 
@@ -22,7 +23,6 @@ import LeftChevronIcon from '../../icons/LeftChevronIcon';
 import RightChevronIcon from '../../icons/RightChevronIcon';
 
 interface RangeBoxProps {
-  rangeType: RangeType;
   fromDate: Date;
   toDate: Date;
 }
@@ -142,8 +142,10 @@ const renderDateLabel = (
   }
 };
 
-const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
+const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
   const navigate = useNavigate();
+
+  const rangeType = getRangeType(fromDate, toDate);
 
   const rangeItemClassNames = `transition duration-300 cursor-pointer bg-gray-200 dark:bg-surfaceDark hover:bg-gray-300 dark:hover:bg-surfaceDarkHover px-2 ${
     rangeType === 'days'
@@ -153,9 +155,13 @@ const RangeBox: FC<RangeBoxProps> = ({ rangeType, fromDate, toDate }) => {
     rangeType === 'years' && 'gap-2'
   }`;
 
-  const [rangeItems, setRangeItems] = useState<[Date, Date][]>(
+  const [rangeItems, setRangeItems] = useState<[Date, Date][]>(() =>
     getRangeItems(rangeType, fromDate)
   );
+
+  useEffect(() => {
+    setRangeItems(getRangeItems(rangeType, fromDate));
+  }, [rangeType]);
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {

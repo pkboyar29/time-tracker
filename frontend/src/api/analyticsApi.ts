@@ -72,16 +72,6 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
   };
 };
 
-export const fetchOverallAnalytics = async (): Promise<IAnalytics> => {
-  const { data } = await axios.get(
-    `/analytics/?from=2000-01-01T00:00:00&to=${new Date(
-      Date.now()
-    ).toISOString()}&tz=${Intl.DateTimeFormat().resolvedOptions().timeZone}`
-  );
-
-  return mapResponseData(data);
-};
-
 export const fetchRangeAnalytics = async (fromDate: Date, toDate: Date) => {
   const { data } = await axios.get(
     `/analytics/?from=${fromDate.toISOString()}&to=${toDate.toISOString()}&tz=${
