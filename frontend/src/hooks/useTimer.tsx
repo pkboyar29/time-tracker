@@ -99,6 +99,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       startTimestamp.current = 0;
       startSpentSeconds.current = 0;
 
+      setTimerState({ session: timerState.session, status: 'paused' });
+
       try {
         await updateSession(timerState.session);
       } catch (e) {
@@ -106,8 +108,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           type: 'error',
         });
       }
-
-      setTimerState({ session: timerState.session, status: 'paused' });
     } else if (timerState.status == 'paused') {
       const newStartTimestamp = Date.now();
       startTimestamp.current = newStartTimestamp;
@@ -126,21 +126,22 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   // TODO: этот параметр мне кажется костылем
   const stopTimer = async (shouldUpdateSession?: boolean) => {
     if (timerState.status != 'idle') {
+      const sessionToUpdate = timerState.session;
+
+      setTimerState({ status: 'idle', session: null });
+      startTimestamp.current = 0;
+      startSpentSeconds.current = 0;
+      removeSessionFromLocalStorage();
+
       if (timerState.status == 'running' && shouldUpdateSession) {
         try {
-          await updateSession(timerState.session);
+          await updateSession(sessionToUpdate);
         } catch (e) {
           toast('A server error occurred while updating session', {
             type: 'error',
           });
         }
       }
-
-      setTimerState({ status: 'idle', session: null });
-      startTimestamp.current = 0;
-      startSpentSeconds.current = 0;
-
-      removeSessionFromLocalStorage();
     }
   };
 
