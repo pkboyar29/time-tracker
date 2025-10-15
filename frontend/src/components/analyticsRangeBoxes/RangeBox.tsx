@@ -284,7 +284,7 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
 
   return (
     <div
-      className={`flex flex-col items-center gap-3 select-none ${
+      className={`h-full flex flex-col items-center gap-3 select-none ${
         rangeType === 'days' && 'max-w-[340px]'
       }`}
     >

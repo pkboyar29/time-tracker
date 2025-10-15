@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useRef, useEffect } from 'react';
 import { clearSession } from '../../helpers/authHelpers';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import {
@@ -9,10 +9,12 @@ import {
 import { useTimer } from '../../hooks/useTimer';
 import axios from '../../api/axios';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
+import { getTimeHoursMinutes } from '../../helpers/timeHelpers';
 
 import Button from '../Button';
 import Modal from './Modal';
 import ToggleButton from '../ToggleButton';
+import RangeSlider from '../RangeSlider';
 
 interface SettingsModalProps {
   onCloseModal: () => void;
@@ -25,6 +27,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
   const { timerState, stopTimer } = useTimer();
 
   const [dailyGoalInput, setDailyGoalInput] = useState<number>(0);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (userInfo) {
@@ -40,16 +43,16 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
     clearSession();
   };
 
-  const inputChangeDailyGoalHandler = async (
-    e: React.FormEvent<HTMLInputElement>
-  ) => {
-    setDailyGoalInput(parseInt(e.currentTarget.value));
-  };
-
-  const inputBlurDailyGoalHandler = async () => {
-    if (!Number.isNaN(dailyGoalInput)) {
-      dispatch(updateDailyGoal(dailyGoalInput * 60));
+  const dailyGoalInputChange = async (min: number) => {
+    setDailyGoalInput(min);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
+
+    const timeoutId = setTimeout(() => {
+      dispatch(updateDailyGoal(min * 60));
+    }, 200);
+    timeoutRef.current = timeoutId;
   };
 
   const showTimerInTitleButtonClick = async (newState: boolean) => {
@@ -86,22 +89,22 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
     <Modal title="Settings" onCloseModal={onCloseModal}>
       <div className="h-[40vh] flex flex-col gap-4 justify-between">
         <div className="flex flex-col gap-4">
-          <div className="text-lg dark:text-textDark">
-            {userInfo?.firstName} {userInfo?.lastName}
-          </div>
-
-          <div className="flex gap-4 text-lg dark:text-textDark">
-            <div>Change your daily goal (minutes)</div>
-            <input
-              value={dailyGoalInput}
-              onChange={inputChangeDailyGoalHandler}
-              onBlur={inputBlurDailyGoalHandler}
-              min={1}
-              max={1440}
-              type="number"
-              className="w-16 bg-transparent border-b border-gray-400 border-solid"
-            />
-          </div>
+          {userInfo && (
+            <div className="p-5 text-center rounded-3xl bg-surfaceLightHover dark:bg-surfaceDarkDarker">
+              <h3 className="mb-2 text-lg font-semibold dark:text-gray-200">
+                Your daily goal
+              </h3>
+              <div className="mb-2 text-3xl font-bold text-primary">
+                {getTimeHoursMinutes(dailyGoalInput * 60)}
+              </div>
+              <RangeSlider
+                minValue={1}
+                maxValue={1440}
+                currentValue={dailyGoalInput}
+                changeCurrentValue={dailyGoalInputChange}
+              />
+            </div>
+          )}
 
           {userInfo && (
             <div className="flex justify-between gap-4 text-lg dark:text-textDark">

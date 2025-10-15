@@ -9,6 +9,7 @@ export const colors = {
   textDark: '#E0E0E0', // in dark mode
   textDarkSecondary: '#AAAAAA', // in dark mode, secondary text
   surfaceDark: '#2C2C2C', // in dark mode, for panels/cards
+  surfaceDarkDarker: '#272727', // 1 level darker than surfaceDark
   surfaceDarkHover: '#3A3A3A', // in dark mode, when hovering the panels/cards with surfaceDark background
   modalBackgroundLight: 'rgba(49, 49, 49, .8)', // in light mode, for overlay when modal is open
   modalBackgroundDark: 'rgba(0, 0, 0, 0.6)', // in dark mode, for overlay when modal is open

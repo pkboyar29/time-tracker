@@ -34,7 +34,7 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
   };
 
   return (
-    <div className="relative flex gap-4">
+    <div className="relative flex h-full gap-4">
       <label className="flex flex-col gap-1 text-lg text-gray-700 dark:text-textDarkSecondary">
         From:
         <input
