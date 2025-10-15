@@ -132,7 +132,7 @@ const AnalyticsRangePage: FC = () => {
           {rangeType == 'custom' ? (
             <CustomRangeBox fromDate={fromDate} toDate={toDate} />
           ) : rangeType == 'overall' ? (
-            <div className="flex items-center justify-center text-xl font-semibold tracking-wide select-none">
+            <div className="h-full py-10 text-xl font-semibold select-none">
               Overall session analytics
             </div>
           ) : (
