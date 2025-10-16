@@ -1,4 +1,4 @@
-import { FC, useState, useRef, useEffect } from 'react';
+import { FC, useState, useRef } from 'react';
 import { clearSession } from '../../helpers/authHelpers';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import {
@@ -26,14 +26,10 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
 
   const { timerState, stopTimer } = useTimer();
 
-  const [dailyGoalInput, setDailyGoalInput] = useState<number>(0);
+  const [dailyGoalInput, setDailyGoalInput] = useState<number>(
+    userInfo ? Math.trunc(userInfo.dailyGoal / 60) : 0
+  ); // minutes
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    if (userInfo) {
-      setDailyGoalInput(Math.trunc(userInfo.dailyGoal / 60));
-    }
-  }, [userInfo]);
 
   const logOutHandler = async () => {
     if (timerState.status != 'idle') {

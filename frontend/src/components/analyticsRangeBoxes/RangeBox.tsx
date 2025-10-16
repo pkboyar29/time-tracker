@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getWeekDays,
@@ -23,8 +23,7 @@ import LeftChevronIcon from '../../icons/LeftChevronIcon';
 import RightChevronIcon from '../../icons/RightChevronIcon';
 
 interface RangeBoxProps {
-  fromDate: Date;
-  toDate: Date;
+  range: { fromDate: Date; toDate: Date };
 }
 
 const getRangeItems = (
@@ -142,10 +141,10 @@ const renderDateLabel = (
   }
 };
 
-const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
+const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   const navigate = useNavigate();
 
-  const rangeType = getRangeType(fromDate, toDate);
+  const rangeType = getRangeType(range.fromDate, range.toDate);
 
   const rangeItemClassNames = `transition duration-300 cursor-pointer bg-gray-200 dark:bg-surfaceDark hover:bg-gray-300 dark:hover:bg-surfaceDarkHover px-2 ${
     rangeType === 'days'
@@ -156,11 +155,11 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
   }`;
 
   const [rangeItems, setRangeItems] = useState<[Date, Date][]>(() =>
-    getRangeItems(rangeType, fromDate)
+    getRangeItems(rangeType, range.fromDate)
   );
 
-  useEffect(() => {
-    setRangeItems(getRangeItems(rangeType, fromDate));
+  useLayoutEffect(() => {
+    setRangeItems(getRangeItems(rangeType, range.fromDate));
   }, [rangeType]);
 
   useEffect(() => {
@@ -174,8 +173,8 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
       } else {
         if (event.code == 'ArrowLeft') {
           const [newFromDate, newToDate] = shiftTwoDates(
-            fromDate,
-            toDate,
+            range.fromDate,
+            range.toDate,
             false
           );
           navigate(
@@ -185,8 +184,8 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
 
           const index = rangeItems.findIndex(
             (rangeItem) =>
-              rangeItem[0].getTime() == fromDate.getTime() &&
-              rangeItem[1].getTime() == toDate.getTime()
+              rangeItem[0].getTime() == range.fromDate.getTime() &&
+              rangeItem[1].getTime() == range.toDate.getTime()
           );
           if (index == 0) {
             leftArrowClickHandler();
@@ -196,8 +195,8 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
           }
         } else if (event.code == 'ArrowRight') {
           const [newFromDate, newToDate] = shiftTwoDates(
-            fromDate,
-            toDate,
+            range.fromDate,
+            range.toDate,
             true
           );
           navigate(
@@ -207,8 +206,8 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
 
           const index = rangeItems.findIndex(
             (rangeItem) =>
-              rangeItem[0].getTime() == fromDate.getTime() &&
-              rangeItem[1].getTime() == toDate.getTime()
+              rangeItem[0].getTime() == range.fromDate.getTime() &&
+              rangeItem[1].getTime() == range.toDate.getTime()
           );
           if (index == rangeItems.length - 1) {
             rightArrowClickHandler();
@@ -225,7 +224,7 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
     return () => {
       window.removeEventListener('keyup', handleKeyClick);
     };
-  }, [rangeItems, rangeType, fromDate, toDate]);
+  }, [rangeItems, rangeType, range.fromDate, range.toDate]);
 
   function leftArrowClickHandler() {
     if (rangeType == 'days') {
@@ -272,7 +271,7 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
   }
 
   function currentRangeItemClickHandler() {
-    setRangeItems(getRangeItems(rangeType, fromDate));
+    setRangeItems(getRangeItems(rangeType, range.fromDate));
   }
 
   function rangeItemClickHandler(rangeItem: [Date, Date]) {
@@ -300,7 +299,7 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
           onClick={currentRangeItemClickHandler}
           className="flex items-center justify-center text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md dark:border-gray-500 w-52 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover dark:text-textDark"
         >
-          {renderDateLabel(rangeType, fromDate, toDate)}
+          {renderDateLabel(rangeType, range.fromDate, range.toDate)}
         </div>
 
         <button
@@ -317,7 +316,7 @@ const RangeBox: FC<RangeBoxProps> = ({ fromDate, toDate }) => {
             key={index}
             onClick={() => rangeItemClickHandler(rangeItem)}
             className={`${rangeItemClassNames} ${
-              isRangeItemSelected(rangeType, fromDate, rangeItem) &&
+              isRangeItemSelected(rangeType, range.fromDate, rangeItem) &&
               'bg-gray-300 dark:bg-surfaceDarkHover'
             } ${isCurrentRangeItem(rangeType, rangeItem) && 'red-dot'}`}
           >
