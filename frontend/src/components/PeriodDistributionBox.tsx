@@ -5,7 +5,7 @@ import { getRangeType } from '../helpers/dateHelpers';
 import { colors } from '../../design-tokens';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
-import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
+import { IAnalytics } from '../ts/interfaces/Statistics/IAnaltytics';
 
 import {
   BarChart,
@@ -102,13 +102,13 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
 };
 
 interface PeriodDistributionBoxProps {
-  timeBars: ITimeBar[];
-  allActivityDistributionItems: IActivityDistribution[];
+  analytics: IAnalytics;
+  setAdBoxMode: (newAdMode: 'table' | 'chart') => void;
 }
 
 const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
-  timeBars,
-  allActivityDistributionItems,
+  analytics,
+  setAdBoxMode,
 }) => {
   const [adMode, setAdMode] = useState<boolean>(false);
 
@@ -125,7 +125,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
 
   const toggleAdMode = (newAdMode: boolean) => {
     if (newAdMode) {
-      // TODO: в ActivityDistributionBox включать chart режим
+      setAdBoxMode('chart');
     }
 
     setAdMode(newAdMode);
@@ -139,13 +139,35 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center gap-4 px-10 py-5 text-[16px] dark:text-textDark">
-        <ToggleButton isChecked={adMode} setIsChecked={toggleAdMode} />
-        <div>Show activity distribution</div>
+      <div className="flex items-center justify-between gap-2 px-10 py-5">
+        <div className="flex items-center gap-4 text-[16px] dark:text-textDark">
+          <ToggleButton isChecked={adMode} setIsChecked={toggleAdMode} />
+          <div>Activity distribution</div>
+        </div>
+
+        <div className="text-lg font-semibold dark:text-textDark">
+          Avg.{' '}
+          <span className="text-primary">
+            {getTimeHoursMinutes(
+              analytics.sessionStatistics.averageSpentTimeSeconds,
+              true
+            )}
+          </span>{' '}
+          per{' '}
+          {getRangeType(
+            analytics.timeBars[1].startOfRange,
+            analytics.timeBars[1].endOfRange
+          ) == 'days'
+            ? 'day'
+            : 'month'}
+        </div>
       </div>
 
       <ResponsiveContainer width="100%" className="px-10" height={300}>
-        <BarChart data={timeBars} className="dark:[&>svg>path]:fill-[#5c5c5c]">
+        <BarChart
+          data={analytics.timeBars}
+          className="dark:[&>svg>path]:fill-[#5c5c5c]"
+        >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis
             dataKey="barName"
@@ -160,7 +182,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
           <Tooltip content={<CustomTooltip adMode={adMode} />} />
           {!adMode ? (
             <Bar isAnimationActive={true} dataKey="spentTimeSeconds">
-              {timeBars.map((bar, index) => {
+              {analytics.timeBars.map((bar, index) => {
                 const color =
                   getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
                   bar.spentTimeSeconds > dailyGoalSeconds
@@ -173,7 +195,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
               })}
             </Bar>
           ) : (
-            allActivityDistributionItems.map((ad, index) => {
+            analytics.activityDistributionItems.map((ad, index) => {
               return (
                 <Bar
                   key={index}

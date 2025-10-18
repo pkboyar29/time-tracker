@@ -1,4 +1,4 @@
-import { FC, useState, useRef, useMemo } from 'react';
+import { FC, useRef, useMemo } from 'react';
 import { getTimeHoursMinutes } from '../helpers/timeHelpers';
 import { PieChart, Pie, ResponsiveContainer } from 'recharts';
 import { colors } from '../../design-tokens';
@@ -7,12 +7,15 @@ import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDist
 
 interface ActivityDistributionBoxProps {
   activityDistributionItems: IActivityDistribution[];
+  adBoxMode: 'table' | 'chart';
+  setAdBoxMode: (newAdMode: 'table' | 'chart') => void;
 }
 
 const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   activityDistributionItems,
+  adBoxMode,
+  setAdBoxMode,
 }) => {
-  const [activeBar, setActiveBar] = useState<'table' | 'chart'>('table');
   const rootRef = useRef<HTMLDivElement>(null);
 
   const sortedItems = useMemo(() => {
@@ -65,8 +68,8 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   }, [sortedItems]);
 
   const onTableBarClick = () => {
-    if (activeBar == 'chart') {
-      setActiveBar('table');
+    if (adBoxMode == 'chart') {
+      setAdBoxMode('table');
     }
 
     rootRef.current?.scrollTo({
@@ -77,8 +80,8 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   };
 
   const onChartBarClick = () => {
-    if (activeBar == 'table') {
-      setActiveBar('chart');
+    if (adBoxMode == 'table') {
+      setAdBoxMode('chart');
     }
 
     rootRef.current?.scrollTo({
@@ -98,7 +101,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           <button
             onClick={onTableBarClick}
             className={`transition duration-300 hover:text-primary dark:hover:text-primary ${
-              activeBar == 'table'
+              adBoxMode == 'table'
                 ? 'text-primary dark:text-primary'
                 : 'dark:text-textDark'
             }`}
@@ -108,7 +111,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           <button
             onClick={onChartBarClick}
             className={`transition duration-300 hover:text-primary dark:hover:text-primary ${
-              activeBar == 'chart'
+              adBoxMode == 'chart'
                 ? 'text-primary dark:text-primary'
                 : 'dark:text-textDark'
             }`}
@@ -123,7 +126,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         </div>
       </div>
 
-      {activeBar == 'table' && (
+      {adBoxMode == 'table' && (
         <div className="px-10">
           <div className="flex my-3.5 text-lg tracking-wide text-gray-800 dark:text-textDarkSecondary">
             <div className="w-1/2">Activity</div>
@@ -150,7 +153,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         </div>
       )}
 
-      {activeBar == 'chart' && (
+      {adBoxMode == 'chart' && (
         <div className="flex justify-between px-10 my-3.5">
           <div className="sticky flex items-start self-start justify-center w-1/2 top-10">
             <ResponsiveContainer width="100%" height={300}>

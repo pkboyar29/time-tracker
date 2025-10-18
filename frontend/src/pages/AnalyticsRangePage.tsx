@@ -52,6 +52,8 @@ const AnalyticsRangePage: FC = () => {
     );
   }
 
+  const [adBoxMode, setAdBoxMode] = useState<'table' | 'chart'>('table');
+
   const [range, setRange] = useState<{ fromDate: Date; toDate: Date }>({
     fromDate: new Date(fromParam),
     toDate: new Date(toParam),
@@ -175,6 +177,8 @@ const AnalyticsRangePage: FC = () => {
                   activityDistributionItems={
                     rangeAnalytics.activityDistributionItems
                   }
+                  adBoxMode={adBoxMode}
+                  setAdBoxMode={setAdBoxMode}
                 />
               </div>
             )}
@@ -190,10 +194,8 @@ const AnalyticsRangePage: FC = () => {
             )}
             {rangeType != 'days' && rangeType != 'overall' && (
               <PeriodDistributionBox
-                timeBars={rangeAnalytics.timeBars}
-                allActivityDistributionItems={
-                  rangeAnalytics.activityDistributionItems
-                }
+                analytics={rangeAnalytics}
+                setAdBoxMode={setAdBoxMode}
               />
             )}
           </div>

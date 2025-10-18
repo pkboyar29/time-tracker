@@ -2,14 +2,7 @@ import axios from './axios';
 import { getBarName, getBarDetailedName } from '../helpers/barNaming';
 
 import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
-import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
-import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
-
-interface IAnalytics {
-  sessionStatistics: ISessionStatistics;
-  activityDistributionItems: IActivityDistribution[];
-  timeBars: ITimeBar[];
-}
+import { IAnalytics } from '../ts/interfaces/Statistics/IAnaltytics';
 
 const mapResponseData = (unmappedData: any): IAnalytics => {
   // TODO: можно установить исключения для нескольких цветов, которые есть в самом интерфейсе
@@ -40,13 +33,8 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
     }
   );
 
-  return {
-    sessionStatistics: {
-      sessionsAmount: unmappedData.sessionsAmount,
-      spentTimeSeconds: unmappedData.spentTimeSeconds,
-    },
-    activityDistributionItems,
-    timeBars: unmappedData.timeBars.map((unmappedBar: any) => ({
+  const timeBars: ITimeBar[] = unmappedData.timeBars.map(
+    (unmappedBar: any) => ({
       startOfRange: new Date(unmappedBar.startOfRange),
       endOfRange: new Date(unmappedBar.endOfRange),
       sessionsAmount: unmappedBar.sessionsAmount,
@@ -68,7 +56,39 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
           };
         }
       ),
-    })),
+    })
+  );
+
+  let averageSpentTimeSeconds = 0;
+  if (timeBars.length > 0) {
+    const allSpentTimeSeconds = timeBars.reduce(
+      (spentTimeSeconds, bar) => spentTimeSeconds + bar.spentTimeSeconds,
+      0
+    );
+
+    let timerBarsLength = 0;
+    for (let i = 0; i < timeBars.length; i++) {
+      if (timeBars[i].startOfRange > new Date()) {
+        timerBarsLength = i;
+        break;
+      }
+
+      if (i == timeBars.length - 1) {
+        timerBarsLength = timeBars.length;
+      }
+    }
+
+    averageSpentTimeSeconds = allSpentTimeSeconds / timerBarsLength;
+  }
+
+  return {
+    sessionStatistics: {
+      sessionsAmount: unmappedData.sessionsAmount,
+      spentTimeSeconds: unmappedData.spentTimeSeconds,
+      averageSpentTimeSeconds,
+    },
+    activityDistributionItems,
+    timeBars,
   };
 };
 
