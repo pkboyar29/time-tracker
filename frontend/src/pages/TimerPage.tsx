@@ -205,7 +205,7 @@ const TimerPage: FC = () => {
                     </div>
 
                     <div className="flex items-center dark:text-textDark">
-                      <span className="">Ends in</span>
+                      <span className="">Ends at</span>
                       <span className="inline-block min-w-[3.5rem] text-center font-bold">
                         {timerState.status === 'paused'
                           ? '...'

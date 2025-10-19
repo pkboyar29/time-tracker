@@ -15,6 +15,7 @@ import Button from '../Button';
 import Modal from './Modal';
 import ToggleButton from '../ToggleButton';
 import RangeSlider from '../RangeSlider';
+import QuestionMarkTooltip from '../QuestionMarkTooltip';
 
 interface SettingsModalProps {
   onCloseModal: () => void;
@@ -112,8 +113,13 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
             </div>
           )}
 
-          <div className="flex justify-between gap-4 text-lg dark:text-textDark">
-            <div>Allow browser notifications</div>
+          <div className="flex items-center justify-between gap-4 text-lg dark:text-textDark">
+            <div className="flex items-center gap-2">
+              <div>Allow browser notifications</div>
+              <div className="pb-3.5">
+                <QuestionMarkTooltip tooltipText="Browser notifications are shown when the timer is about to end" />
+              </div>
+            </div>
             <ToggleButton
               isChecked={Notification.permission == 'granted'}
               setIsChecked={changeNotificationPermission}
