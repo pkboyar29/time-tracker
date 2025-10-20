@@ -1,13 +1,11 @@
 import analyticsService from '../../../service/analytics.service';
-import activityService from '../../../service/activity.service';
 import { IActivity } from '../../../model/activity.model';
-import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 import { ISessionPart } from '../../../model/sessionPart.model';
 import { ISession } from '../../../model/session.model';
 import {
   ActivityDistribution,
   AnalyticsForRangeDTO,
-  TimeBar,
 } from '../../../dto/analytics.dto';
 import * as dateUtils from '../../../helpers/getTodayRange';
 
@@ -15,49 +13,49 @@ describe('analyticsService.getSessionStatistics', () => {
   it('should sum correctly', () => {
     const sessionParts: ISessionPart[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         spentTimeSeconds: 120,
         session: { activity: { name: 'Reading' } },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T10:00:00Z'),
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         spentTimeSeconds: 90,
         session: { activity: { name: 'Coding' } },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T12:00:00Z'),
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         spentTimeSeconds: 60,
         session: { activity: { name: 'Exercise' } },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T14:00:00Z'),
       },
     ];
 
     const completedSessions: ISession[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         totalTimeSeconds: 300,
         spentTimeSeconds: 300,
         note: 'Morning session',
         completed: true,
         activity: { name: 'Reading' },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T08:00:00Z'),
         updatedDate: new Date('2025-09-20T08:30:00Z'),
         deleted: false,
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         totalTimeSeconds: 180,
         spentTimeSeconds: 180,
         note: 'Afternoon session',
         completed: true,
         activity: { name: 'Coding' },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T14:00:00Z'),
         updatedDate: new Date('2025-09-20T14:30:00Z'),
         deleted: false,
@@ -133,20 +131,26 @@ describe('analyticsService.getTimeBarType', () => {
 describe('analyticsService.getTimeBars', () => {
   const mockActivities: IActivity[] = [
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       name: 'Reading',
-      user: new mongoose.Types.ObjectId(),
-      activityGroup: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
+      activityGroup: {
+        _id: new Types.ObjectId(),
+        name: 'activity group name',
+      },
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
       archived: false,
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       name: 'Coding',
-      user: new mongoose.Types.ObjectId(),
-      activityGroup: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
+      activityGroup: {
+        _id: new Types.ObjectId(),
+        name: 'activity group name',
+      },
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
@@ -156,58 +160,58 @@ describe('analyticsService.getTimeBars', () => {
 
   const sessionParts: ISessionPart[] = [
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 1200,
       createdDate: new Date('2025-07-01T10:00:00Z'),
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 600,
       createdDate: new Date('2025-07-01T12:00:00Z'),
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 900,
       createdDate: new Date('2025-07-02T09:00:00Z'),
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
     },
   ];
 
   const completedSessions: ISession[] = [
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       activity: { name: 'Reading' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
       createdDate: new Date(),
       updatedDate: new Date('2025-07-01T13:00:00Z'),
       deleted: false,
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       activity: { name: 'Reading' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
       createdDate: new Date(),
       updatedDate: new Date('2025-07-02T14:00:00Z'),
       deleted: false,
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       activity: { name: 'Coding' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
       createdDate: new Date(),
       updatedDate: new Date('2025-07-02T15:00:00Z'),
       deleted: false,
@@ -480,20 +484,26 @@ describe('analyticsService.getTimeBars', () => {
 describe('analyticsService.getActivityDistributions', () => {
   const mockActivities: IActivity[] = [
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       name: 'Reading',
-      user: new mongoose.Types.ObjectId(),
-      activityGroup: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
+      activityGroup: {
+        _id: new Types.ObjectId(),
+        name: 'activity group name',
+      },
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
       archived: false,
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       name: 'Coding',
-      user: new mongoose.Types.ObjectId(),
-      activityGroup: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
+      activityGroup: {
+        _id: new Types.ObjectId(),
+        name: 'activity group name',
+      },
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
@@ -504,34 +514,34 @@ describe('analyticsService.getActivityDistributions', () => {
   it('should return correct distribution when sessions and sessionParts match activities', async () => {
     const completedSessions: ISession[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         activity: { name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date(),
         updatedDate: new Date(),
         deleted: false,
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         activity: { name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date(),
         updatedDate: new Date(),
         deleted: false,
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         activity: { name: 'Coding' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date(),
         updatedDate: new Date(),
         deleted: false,
@@ -540,18 +550,18 @@ describe('analyticsService.getActivityDistributions', () => {
 
     const sessionParts: ISessionPart[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         session: { activity: { name: 'Reading' } },
         spentTimeSeconds: 100,
         createdDate: new Date(),
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         session: { activity: { name: 'Coding' } },
         spentTimeSeconds: 200,
         createdDate: new Date(),
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
       },
     ];
 
@@ -585,12 +595,12 @@ describe('analyticsService.getActivityDistributions', () => {
   it('should not add "Without activity" if time and sessions match exactly', async () => {
     const completedSessions: ISession[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         activity: { name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date(),
         updatedDate: new Date(),
         deleted: false,
@@ -599,11 +609,11 @@ describe('analyticsService.getActivityDistributions', () => {
 
     const sessionParts: ISessionPart[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         session: { activity: { name: 'Reading' } },
         spentTimeSeconds: 300,
         createdDate: new Date(),
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
       },
     ];
 

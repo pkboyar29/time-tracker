@@ -23,11 +23,16 @@ interface GetDetailedActivityGroupOptions {
   onlyCompleted: boolean;
 }
 
+interface GetActivityGroupOptions {
+  activityGroupId: string;
+  userId: string;
+}
+
 const activityGroupService = {
   getActivityGroups,
   getDetailedActivityGroups,
   getDetailedActivityGroup,
-  existsActivityGroup,
+  getActivityGroup,
   createActivityGroup,
   updateActivityGroup,
   archiveGroupActivities,
@@ -75,12 +80,10 @@ async function getDetailedActivityGroup({
   onlyCompleted,
 }: GetDetailedActivityGroupOptions): Promise<IDetailedActivityGroup> {
   try {
-    if (
-      !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
-    ) {
-      throw new HttpError(404, 'Activity Group Not Found');
-    }
-    const activityGroup = await ActivityGroup.findById(activityGroupId);
+    const activityGroup = await activityGroupService.getActivityGroup({
+      activityGroupId,
+      userId,
+    });
 
     const activities = await activityService.getActivitiesForActivityGroup({
       activityGroupId: activityGroupId,
@@ -96,7 +99,7 @@ async function getDetailedActivityGroup({
     });
 
     return {
-      ...activityGroup!.toObject(),
+      ...activityGroup.toObject(),
       sessionsAmount,
       spentTimeSeconds,
     };
@@ -105,34 +108,39 @@ async function getDetailedActivityGroup({
   }
 }
 
-async function existsActivityGroup(
-  activityGroupId: string,
-  userId: string
-): Promise<boolean> {
-  if (!mongoose.Types.ObjectId.isValid(activityGroupId)) {
-    return false;
-  }
+async function getActivityGroup({
+  activityGroupId,
+  userId,
+}: GetActivityGroupOptions): Promise<
+  mongoose.HydratedDocument<IActivityGroup>
+> {
+  const notFoundError = new HttpError(404, 'Activity Group Not Found');
+  try {
+    if (!mongoose.Types.ObjectId.isValid(activityGroupId)) {
+      throw notFoundError;
+    }
 
-  const activityGroup = await ActivityGroup.findById(activityGroupId);
-  if (!activityGroup) {
-    return false;
-  }
+    const activityGroup = await ActivityGroup.findById(activityGroupId).exec();
+    if (!activityGroup) {
+      throw notFoundError;
+    }
+    if (activityGroup.deleted) {
+      throw notFoundError;
+    }
+    if (activityGroup.user.toString() !== userId) {
+      throw notFoundError;
+    }
 
-  if (activityGroup.deleted) {
-    return false;
+    return activityGroup;
+  } catch (e) {
+    throw e;
   }
-
-  if (activityGroup.user.toString() !== userId) {
-    return false;
-  }
-
-  return true;
 }
 
 async function createActivityGroup(
   activityGroupDTO: ActivityGroupDTO,
   userId: string
-): Promise<IDetailedActivityGroup> {
+): Promise<IActivityGroup> {
   try {
     const newActivityGroup = new ActivityGroup({
       name: activityGroupDTO.name,
@@ -152,11 +160,7 @@ async function createActivityGroup(
 
     const newActivityGroupWithId = await newActivityGroup.save();
 
-    return activityGroupService.getDetailedActivityGroup({
-      activityGroupId: newActivityGroupWithId._id.toString(),
-      userId,
-      onlyCompleted: false,
-    });
+    return newActivityGroupWithId;
   } catch (e) {
     throw e;
   }
@@ -168,18 +172,15 @@ async function updateActivityGroup(
   userId: string
 ): Promise<IDetailedActivityGroup> {
   try {
-    if (
-      !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
-    ) {
-      throw new HttpError(404, 'Activity Group Not Found');
-    }
+    const activityGroup = await activityGroupService.getActivityGroup({
+      activityGroupId,
+      userId,
+    });
+    activityGroup.name = activityGroupDTO.name;
+    activityGroup.descr = activityGroupDTO.descr;
+    activityGroup.updatedDate = new Date();
 
-    const activityGroup = await ActivityGroup.findById(activityGroupId);
-    activityGroup!.name = activityGroupDTO.name;
-    activityGroup!.descr = activityGroupDTO.descr;
-    activityGroup!.updatedDate = new Date();
-
-    const validationError = activityGroup!.validateSync();
+    const validationError = activityGroup.validateSync();
     if (validationError) {
       if (validationError.errors.name) {
         throw new HttpError(400, validationError.errors.name.toString());
@@ -189,7 +190,7 @@ async function updateActivityGroup(
       }
     }
 
-    await activityGroup!.save();
+    await activityGroup.save();
 
     return activityGroupService.getDetailedActivityGroup({
       activityGroupId,
@@ -205,11 +206,7 @@ async function archiveGroupActivities(
   activityGroupId: string,
   userId: string
 ): Promise<{ message: string }> {
-  if (
-    !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
-  ) {
-    throw new HttpError(404, 'Activity Group Not Found');
-  }
+  await activityGroupService.getActivityGroup({ activityGroupId, userId });
 
   await Activity.updateMany(
     { activityGroup: activityGroupId },
@@ -224,11 +221,7 @@ async function deleteActivityGroup(
   userId: string
 ): Promise<{ message: string }> {
   try {
-    if (
-      !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
-    ) {
-      throw new HttpError(404, 'Activity Group Not Found');
-    }
+    await activityGroupService.getActivityGroup({ activityGroupId, userId });
 
     // TODO: удалять через updateMany, только тут как-то еще сессии для каждой активности удалять через updateMany
     const activities = await activityService.getActivitiesForActivityGroup({
