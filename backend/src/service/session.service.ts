@@ -3,6 +3,8 @@ import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
+
+import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { HttpError } from '../helpers/HttpError';
 
 interface PopulatedActivity {
@@ -187,12 +189,17 @@ async function updateSession(
       );
     }
 
+    if (session.spentTimeSeconds === sessionDTO.spentTimeSeconds) {
+      return session;
+    }
+
     let partSpentTimeSeconds: number =
       sessionDTO.spentTimeSeconds - session!.spentTimeSeconds;
     const newSessionPart = new SessionPart({
       spentTimeSeconds: partSpentTimeSeconds,
       session: sessionId,
       user: userId,
+      paused: convertParamToBoolean(sessionDTO.isPaused.toString()),
       createdDate: Date.now(),
     });
     await newSessionPart.save();

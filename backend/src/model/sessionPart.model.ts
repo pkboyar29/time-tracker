@@ -20,6 +20,11 @@ const sessionPartSchema = new Schema({
     ref: 'Session',
     required: true,
   },
+  paused: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
   user: {
     type: Schema.Types.ObjectId,
     ref: 'User',

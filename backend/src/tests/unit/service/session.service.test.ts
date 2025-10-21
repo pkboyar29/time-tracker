@@ -140,7 +140,12 @@ describe('sessionService.updateSession', () => {
     try {
       await sessionService.updateSession(
         'sessionId',
-        { spentTimeSeconds: 10, totalTimeSeconds: 20, note: 'note' },
+        {
+          spentTimeSeconds: 10,
+          totalTimeSeconds: 20,
+          note: 'note',
+          isPaused: false,
+        },
         'userId'
       );
     } catch (e) {
@@ -156,7 +161,12 @@ describe('sessionService.updateSession', () => {
     try {
       await sessionService.updateSession(
         'sessionId',
-        { spentTimeSeconds: 30, totalTimeSeconds: 20, note: 'note' },
+        {
+          spentTimeSeconds: 30,
+          totalTimeSeconds: 20,
+          note: 'note',
+          isPaused: false,
+        },
         'userId'
       );
     } catch (e) {
@@ -178,7 +188,12 @@ describe('sessionService.updateSession', () => {
     try {
       await sessionService.updateSession(
         'sessionId',
-        { spentTimeSeconds: 10, totalTimeSeconds: 20, note: 'note' },
+        {
+          spentTimeSeconds: 10,
+          totalTimeSeconds: 20,
+          note: 'note',
+          isPaused: false,
+        },
         'userId'
       );
     } catch (e) {
@@ -201,7 +216,12 @@ describe('sessionService.updateSession', () => {
     try {
       await sessionService.updateSession(
         'sessionId',
-        { spentTimeSeconds: 10, totalTimeSeconds: 30, note: 'note' },
+        {
+          spentTimeSeconds: 10,
+          totalTimeSeconds: 30,
+          note: 'note',
+          isPaused: false,
+        },
         'userId'
       );
     } catch (e) {
@@ -234,7 +254,12 @@ describe('sessionService.updateSession', () => {
 
     await sessionService.updateSession(
       'sessionId',
-      { spentTimeSeconds: 15, totalTimeSeconds: 25, note: 'new note' },
+      {
+        spentTimeSeconds: 15,
+        totalTimeSeconds: 25,
+        note: 'new note',
+        isPaused: false,
+      },
       'userId'
     );
 
