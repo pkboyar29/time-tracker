@@ -5,6 +5,7 @@ export interface ISessionPart {
   spentTimeSeconds: number;
   session: { activity: { name: string } };
   user: Types.ObjectId;
+  paused: boolean;
   createdDate: Date;
 }
 

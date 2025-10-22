@@ -5,6 +5,7 @@ import {
   AnalyticsForRangeDTO,
   ActivityDistribution,
   TimeBar,
+  SessionStatistics,
 } from '../dto/analytics.dto';
 import { ISessionPart } from '../model/sessionPart.model';
 import { ISession } from '../model/session.model';
@@ -24,6 +25,7 @@ interface GetSessionsStatistics {
 interface GetActivityDistributionsOptions {
   allSessionsAmount: number;
   allSpentTimeSeconds: number;
+  allPausedAmount: number;
   sessionParts: ISessionPart[];
   completedSessions: ISession[];
   userActivities: IActivity[];
@@ -73,26 +75,29 @@ const analyticsService = {
 function getSessionsStatistics({
   sessionParts,
   completedSessions,
-}: GetSessionsStatistics): {
-  sessionsAmount: number;
-  spentTimeSeconds: number;
-} {
+}: GetSessionsStatistics): SessionStatistics {
   const sessionsAmount = completedSessions.length;
+
   const spentTimeSeconds = sessionParts.reduce(
     (spentTimeSeconds, sessionPart) =>
       spentTimeSeconds + sessionPart.spentTimeSeconds,
     0
   );
 
+  const pausedSessionParts = sessionParts.filter((part) => part.paused);
+  const pausedAmount = pausedSessionParts.length;
+
   return {
     sessionsAmount,
     spentTimeSeconds,
+    pausedAmount,
   };
 }
 
 function getActivityDistributions({
   allSessionsAmount,
   allSpentTimeSeconds,
+  allPausedAmount,
   sessionParts,
   completedSessions,
   userActivities,
@@ -102,58 +107,68 @@ function getActivityDistributions({
   activityDistributions = userActivities.map((activity) => {
     const activityDistribution: ActivityDistribution = {
       activityName: activity.name,
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
     };
     return activityDistribution;
   });
 
   let activitiesSeconds: number = 0;
   let activitiesSessions: number = 0;
+  let activitiesPaused: number = 0;
 
   // set sessionsAmount to activityDistributions
   completedSessions.forEach((session) => {
     if (session.activity) {
-      const activityDistributionIndex: number = activityDistributions.findIndex(
-        (activityDistribution) =>
-          activityDistribution.activityName === session.activity.name
+      const adIndex: number = activityDistributions.findIndex(
+        (ad) => ad.activityName === session.activity.name
       );
-      activityDistributions[activityDistributionIndex].sessionsAmount += 1;
-
+      activityDistributions[adIndex].sessionStatistics.sessionsAmount += 1;
       activitiesSessions += 1;
     }
   });
 
-  // set spentTimeSeconds to activityDistributions
-  sessionParts.forEach((sessionPart) => {
-    if (sessionPart.session.activity) {
-      const activityDistributionIndex: number = activityDistributions.findIndex(
-        (activityDistribution) =>
-          activityDistribution.activityName ===
-          sessionPart.session.activity.name
+  // set spentTimeSeconds and pausedAmount to activityDistributions
+  sessionParts.forEach((part) => {
+    if (part.session.activity) {
+      const adIndex: number = activityDistributions.findIndex(
+        (ad) => ad.activityName === part.session.activity.name
       );
-      activityDistributions[activityDistributionIndex].spentTimeSeconds +=
-        sessionPart.spentTimeSeconds;
 
-      activitiesSeconds += sessionPart.spentTimeSeconds;
+      activityDistributions[adIndex].sessionStatistics.spentTimeSeconds +=
+        part.spentTimeSeconds;
+      activitiesSeconds += part.spentTimeSeconds;
+
+      if (part.paused) {
+        activityDistributions[adIndex].sessionStatistics.pausedAmount += 1;
+        activitiesPaused += 1;
+      }
     }
   });
 
   // delete empty activity distributions
   activityDistributions = activityDistributions.filter(
-    (activityDistribution) =>
-      activityDistribution.sessionsAmount !== 0 ||
-      activityDistribution.spentTimeSeconds !== 0
+    (ad) =>
+      ad.sessionStatistics.sessionsAmount > 0 ||
+      ad.sessionStatistics.spentTimeSeconds > 0 ||
+      ad.sessionStatistics.pausedAmount > 0
   );
 
   // set without activity to activityDistributions
   const woActivitySessions = allSessionsAmount - activitiesSessions;
   const woActivitySeconds = allSpentTimeSeconds - activitiesSeconds;
+  const woActivityPaused = allPausedAmount - activitiesPaused;
   if (woActivitySeconds > 0) {
     activityDistributions.push({
       activityName: 'Without activity',
-      sessionsAmount: woActivitySessions,
-      spentTimeSeconds: woActivitySeconds,
+      sessionStatistics: {
+        sessionsAmount: woActivitySessions,
+        spentTimeSeconds: woActivitySeconds,
+        pausedAmount: woActivityPaused,
+      },
     });
   }
 
@@ -252,10 +267,10 @@ function getTimeBars({
       (total: number, sessionPart) => total + sessionPart.spentTimeSeconds,
       0
     );
-    const barSessionsAmount = filteredSessions.reduce(
-      (total: number) => total + 1,
-      0
-    );
+    const barSessionsAmount = filteredSessions.length;
+    const barPausedAmount = filteredSessionParts.filter(
+      (part) => part.paused
+    ).length;
 
     if (nextPeriod.getTime() > endOfRange.getTime()) {
       nextPeriod = new Date(endOfRange);
@@ -264,11 +279,15 @@ function getTimeBars({
     timeBars.push({
       startOfRange: new Date(prevPeriod),
       endOfRange: new Date(nextPeriod),
-      spentTimeSeconds: barSpentTimeSeconds,
-      sessionsAmount: barSessionsAmount,
+      sessionStatistics: {
+        spentTimeSeconds: barSpentTimeSeconds,
+        sessionsAmount: barSessionsAmount,
+        pausedAmount: barPausedAmount,
+      },
       activityDistribution: analyticsService.getActivityDistributions({
         allSessionsAmount: barSessionsAmount,
         allSpentTimeSeconds: barSpentTimeSeconds,
+        allPausedAmount: barPausedAmount,
         sessionParts: filteredSessionParts,
         completedSessions: filteredSessions,
         userActivities,
@@ -303,8 +322,11 @@ async function getAnalyticsForRange({
 }: GetAnalyticsForRangeOptions): Promise<AnalyticsForRangeDTO> {
   if (startOfRange > new Date()) {
     return {
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
       timeBars: [],
     };
@@ -324,17 +346,17 @@ async function getAnalyticsForRange({
     userId,
   });
 
-  const { sessionsAmount, spentTimeSeconds } =
-    analyticsService.getSessionsStatistics({
-      sessionParts: sessionPartsForRange,
-      completedSessions: completedSessionsForRange,
-    });
+  const sessionStatistics = analyticsService.getSessionsStatistics({
+    sessionParts: sessionPartsForRange,
+    completedSessions: completedSessionsForRange,
+  });
 
   const userActivities = await activityService.getActivities({ userId });
 
   const activityDistribution = await analyticsService.getActivityDistributions({
-    allSessionsAmount: sessionsAmount,
-    allSpentTimeSeconds: spentTimeSeconds,
+    allSessionsAmount: sessionStatistics.sessionsAmount,
+    allSpentTimeSeconds: sessionStatistics.spentTimeSeconds,
+    allPausedAmount: sessionStatistics.pausedAmount,
     sessionParts: sessionPartsForRange,
     completedSessions: completedSessionsForRange,
     userActivities,
@@ -351,8 +373,7 @@ async function getAnalyticsForRange({
   });
 
   const analyticsForRange: AnalyticsForRangeDTO = {
-    sessionsAmount,
-    spentTimeSeconds,
+    sessionStatistics,
     activityDistribution: activityDistribution,
     timeBars,
   };
@@ -476,16 +497,27 @@ function mergeActivityDistributions({
     finalAd = finalAd.map((ad) => {
       for (let j = 0; j < adsList[i].length; j++) {
         if (ad.activityName === adsList[i][j].activityName) {
-          const { activityName, sessionsAmount, spentTimeSeconds } =
-            adsList[i][j];
+          const {
+            activityName,
+            sessionStatistics: {
+              sessionsAmount,
+              spentTimeSeconds,
+              pausedAmount,
+            },
+          } = adsList[i][j];
           adsList[i] = adsList[i].filter(
             (ad) => ad.activityName !== activityName
           );
 
           return {
             activityName: ad.activityName,
-            sessionsAmount: ad.sessionsAmount + sessionsAmount,
-            spentTimeSeconds: ad.spentTimeSeconds + spentTimeSeconds,
+            sessionStatistics: {
+              sessionsAmount:
+                ad.sessionStatistics.sessionsAmount + sessionsAmount,
+              spentTimeSeconds:
+                ad.sessionStatistics.spentTimeSeconds + spentTimeSeconds,
+              pausedAmount: ad.sessionStatistics.pausedAmount + pausedAmount,
+            },
           };
         }
       }
@@ -507,9 +539,17 @@ function mergeAnalytics({
   timezone,
 }: MergeAnalyticsOptions): AnalyticsForRangeDTO {
   const finalObj: AnalyticsForRangeDTO = {
-    sessionsAmount: untilTodayObj.sessionsAmount + todayObj.sessionsAmount,
-    spentTimeSeconds:
-      untilTodayObj.spentTimeSeconds + todayObj.spentTimeSeconds,
+    sessionStatistics: {
+      sessionsAmount:
+        untilTodayObj.sessionStatistics.sessionsAmount +
+        todayObj.sessionStatistics.sessionsAmount,
+      spentTimeSeconds:
+        untilTodayObj.sessionStatistics.spentTimeSeconds +
+        todayObj.sessionStatistics.spentTimeSeconds,
+      pausedAmount:
+        untilTodayObj.sessionStatistics.pausedAmount +
+        todayObj.sessionStatistics.pausedAmount,
+    },
     activityDistribution: [],
     timeBars: [],
   };
@@ -538,8 +578,11 @@ function mergeAnalytics({
       untilTodayObjTimeBars.push({
         startOfRange: finalObjStartOfRange,
         endOfRange: startOfToday,
-        sessionsAmount: untilTodayObj.sessionsAmount,
-        spentTimeSeconds: untilTodayObj.spentTimeSeconds,
+        sessionStatistics: {
+          sessionsAmount: untilTodayObj.sessionStatistics.sessionsAmount,
+          spentTimeSeconds: untilTodayObj.sessionStatistics.spentTimeSeconds,
+          pausedAmount: untilTodayObj.sessionStatistics.pausedAmount,
+        },
         activityDistribution: untilTodayObj.activityDistribution,
       });
     }
@@ -550,8 +593,11 @@ function mergeAnalytics({
         finalObjEndOfRange < startOfTomorrow
           ? finalObjEndOfRange
           : startOfTomorrow,
-      sessionsAmount: todayObj.sessionsAmount,
-      spentTimeSeconds: todayObj.spentTimeSeconds,
+      sessionStatistics: {
+        sessionsAmount: todayObj.sessionStatistics.sessionsAmount,
+        spentTimeSeconds: todayObj.sessionStatistics.spentTimeSeconds,
+        pausedAmount: todayObj.sessionStatistics.pausedAmount,
+      },
       activityDistribution: todayObj.activityDistribution,
     };
 
@@ -600,9 +646,17 @@ function mergeAnalytics({
           finalObjEndOfRange < startOfNextMonth
             ? finalObjEndOfRange
             : startOfNextMonth,
-        sessionsAmount: untilTodayObj.sessionsAmount + todayObj.sessionsAmount,
-        spentTimeSeconds:
-          untilTodayObj.spentTimeSeconds + todayObj.spentTimeSeconds,
+        sessionStatistics: {
+          sessionsAmount:
+            untilTodayObj.sessionStatistics.sessionsAmount +
+            todayObj.sessionStatistics.sessionsAmount,
+          spentTimeSeconds:
+            untilTodayObj.sessionStatistics.spentTimeSeconds +
+            todayObj.sessionStatistics.spentTimeSeconds,
+          pausedAmount:
+            untilTodayObj.sessionStatistics.pausedAmount +
+            todayObj.sessionStatistics.pausedAmount,
+        },
         activityDistribution: analyticsService.mergeActivityDistributions({
           adsList: [
             untilTodayObj.activityDistribution,
@@ -621,12 +675,17 @@ function mergeAnalytics({
       // if until today obj is month or less than month (timeBarType is day)
       const untilTodayTimeBarsSessionsAmount = untilTodayTimeBars.reduce(
         (totalSessionsAmount, timeBar) =>
-          totalSessionsAmount + timeBar.sessionsAmount,
+          totalSessionsAmount + timeBar.sessionStatistics.sessionsAmount,
         0
       );
       const untilTodayTimeBarsSpentSeconds = untilTodayTimeBars.reduce(
         (totalSpentTimeSeconds, timeBar) =>
-          totalSpentTimeSeconds + timeBar.spentTimeSeconds,
+          totalSpentTimeSeconds + timeBar.sessionStatistics.spentTimeSeconds,
+        0
+      );
+      const untilTodayTimeBarsPausedAmount = untilTodayTimeBars.reduce(
+        (totalPausedAmount, timeBar) =>
+          totalPausedAmount + timeBar.sessionStatistics.pausedAmount,
         0
       );
       const untilTodayTimeBarsAd = analyticsService.mergeActivityDistributions({
@@ -642,16 +701,22 @@ function mergeAnalytics({
         const untilTodayTimeBar: TimeBar = {
           startOfRange: untilTodayTimeBars[0].startOfRange,
           endOfRange: startOfToday,
-          sessionsAmount: untilTodayTimeBarsSessionsAmount,
-          spentTimeSeconds: untilTodayTimeBarsSpentSeconds,
+          sessionStatistics: {
+            sessionsAmount: untilTodayTimeBarsSessionsAmount,
+            spentTimeSeconds: untilTodayTimeBarsSpentSeconds,
+            pausedAmount: untilTodayTimeBarsPausedAmount,
+          },
           activityDistribution: untilTodayTimeBarsAd,
         };
 
         const currentMonthTimeBar: TimeBar = {
           startOfRange: startOfToday,
           endOfRange: startOfNextMonth,
-          sessionsAmount: todayObj.sessionsAmount,
-          spentTimeSeconds: todayObj.spentTimeSeconds,
+          sessionStatistics: {
+            sessionsAmount: todayObj.sessionStatistics.sessionsAmount,
+            spentTimeSeconds: todayObj.sessionStatistics.spentTimeSeconds,
+            pausedAmount: todayObj.sessionStatistics.pausedAmount,
+          },
           activityDistribution: todayObj.activityDistribution,
         };
 
@@ -665,10 +730,17 @@ function mergeAnalytics({
         const currentMonthTimeBar: TimeBar = {
           startOfRange: untilTodayTimeBars[0].startOfRange,
           endOfRange: startOfNextMonth,
-          sessionsAmount:
-            untilTodayTimeBarsSessionsAmount + todayObj.sessionsAmount,
-          spentTimeSeconds:
-            untilTodayTimeBarsSpentSeconds + todayObj.spentTimeSeconds,
+          sessionStatistics: {
+            sessionsAmount:
+              untilTodayTimeBarsSessionsAmount +
+              todayObj.sessionStatistics.sessionsAmount,
+            spentTimeSeconds:
+              untilTodayTimeBarsSpentSeconds +
+              todayObj.sessionStatistics.spentTimeSeconds,
+            pausedAmount:
+              untilTodayTimeBarsPausedAmount +
+              todayObj.sessionStatistics.pausedAmount,
+          },
           activityDistribution: analyticsService.mergeActivityDistributions({
             adsList: [untilTodayTimeBarsAd, todayObj.activityDistribution],
           }),
@@ -688,8 +760,11 @@ function mergeAnalytics({
             finalObjEndOfRange < startOfNextMonth
               ? finalObjEndOfRange
               : startOfNextMonth,
-          sessionsAmount: todayObj.sessionsAmount,
-          spentTimeSeconds: todayObj.spentTimeSeconds,
+          sessionStatistics: {
+            sessionsAmount: todayObj.sessionStatistics.sessionsAmount,
+            spentTimeSeconds: todayObj.sessionStatistics.spentTimeSeconds,
+            pausedAmount: todayObj.sessionStatistics.pausedAmount,
+          },
           activityDistribution: todayObj.activityDistribution,
         };
 
@@ -706,12 +781,17 @@ function mergeAnalytics({
             finalObjEndOfRange < startOfNextMonth
               ? finalObjEndOfRange
               : startOfNextMonth,
-          sessionsAmount:
-            currentMonthUntilTodayTimeBar!.sessionsAmount +
-            todayObj.sessionsAmount,
-          spentTimeSeconds:
-            currentMonthUntilTodayTimeBar!.spentTimeSeconds +
-            todayObj.spentTimeSeconds,
+          sessionStatistics: {
+            sessionsAmount:
+              currentMonthUntilTodayTimeBar!.sessionStatistics.sessionsAmount +
+              todayObj.sessionStatistics.sessionsAmount,
+            spentTimeSeconds:
+              currentMonthUntilTodayTimeBar!.sessionStatistics
+                .spentTimeSeconds + todayObj.sessionStatistics.spentTimeSeconds,
+            pausedAmount:
+              currentMonthUntilTodayTimeBar!.sessionStatistics.pausedAmount +
+              todayObj.sessionStatistics.pausedAmount,
+          },
           activityDistribution: analyticsService.mergeActivityDistributions({
             adsList: [
               currentMonthUntilTodayTimeBar!.activityDistribution,
