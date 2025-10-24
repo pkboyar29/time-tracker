@@ -3,6 +3,7 @@ import { getBarName, getBarDetailedName } from '../helpers/barNaming';
 
 import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
 import { IAnalytics } from '../ts/interfaces/Statistics/IAnaltytics';
+import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
 const mapResponseData = (unmappedData: any): IAnalytics => {
   // TODO: можно установить исключения для нескольких цветов, которые есть в самом интерфейсе
@@ -17,47 +18,47 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
     );
   });
 
-  const activityDistributionItems = unmappedData.activityDistribution.map(
-    (unmappedAd: any) => {
+  const activityDistributionItems: IActivityDistribution[] =
+    unmappedData.activityDistribution.map((ad: any) => {
       return {
-        activityName: unmappedAd.activityName,
-        sessionsAmount: unmappedAd.sessionsAmount,
-        spentTimeSeconds: unmappedAd.spentTimeSeconds,
+        activityName: ad.activityName,
+        sessionsAmount: ad.sessionStatistics.sessionsAmount,
+        pausedAmount: ad.sessionStatistics.pausedAmount,
+        spentTimeSeconds: ad.sessionStatistics.spentTimeSeconds,
         spentTimePercentage: parseFloat(
-          (unmappedAd.spentTimeSeconds / unmappedData.spentTimeSeconds).toFixed(
-            2
-          )
+          (
+            ad.sessionStatistics.spentTimeSeconds /
+            unmappedData.sessionStatistics.spentTimeSeconds
+          ).toFixed(2)
         ),
-        fill: activityFillMap.get(unmappedAd.activityName),
+        fill: activityFillMap.get(ad.activityName),
       };
-    }
-  );
+    });
 
-  const timeBars: ITimeBar[] = unmappedData.timeBars.map(
-    (unmappedBar: any) => ({
-      startOfRange: new Date(unmappedBar.startOfRange),
-      endOfRange: new Date(unmappedBar.endOfRange),
-      sessionsAmount: unmappedBar.sessionsAmount,
-      spentTimeSeconds: unmappedBar.spentTimeSeconds,
-      barName: getBarName(unmappedBar),
-      barDetailedName: getBarDetailedName(unmappedBar),
-      activityDistributionItems: unmappedBar.activityDistribution.map(
-        (unmappedAd: any) => {
-          return {
-            activityName: unmappedAd.activityName,
-            sessionsAmount: unmappedAd.sessionsAmount,
-            spentTimeSeconds: unmappedAd.spentTimeSeconds,
-            spentTimePercentage: parseFloat(
-              (
-                unmappedAd.spentTimeSeconds / unmappedData.spentTimeSeconds
-              ).toFixed(2)
-            ),
-            fill: activityFillMap.get(unmappedAd.activityName),
-          };
-        }
-      ),
-    })
-  );
+  const timeBars: ITimeBar[] = unmappedData.timeBars.map((bar: any) => ({
+    startOfRange: new Date(bar.startOfRange),
+    endOfRange: new Date(bar.endOfRange),
+    sessionsAmount: bar.sessionStatistics.sessionsAmount,
+    pausedAmount: bar.sessionStatistics.pausedAmount,
+    spentTimeSeconds: bar.sessionStatistics.spentTimeSeconds,
+    barName: getBarName(bar),
+    barDetailedName: getBarDetailedName(bar),
+    activityDistributionItems: bar.activityDistribution.map((ad: any) => {
+      return {
+        activityName: ad.activityName,
+        sessionsAmount: ad.sessionStatistics.sessionsAmount,
+        pausedAmount: ad.sessionStatistics.pausedAmount,
+        spentTimeSeconds: ad.sessionStatistics.spentTimeSeconds,
+        spentTimePercentage: parseFloat(
+          (
+            ad.sessionStatistics.spentTimeSeconds /
+            unmappedData.sessionStatistics.spentTimeSeconds
+          ).toFixed(2)
+        ),
+        fill: activityFillMap.get(ad.activityName),
+      };
+    }),
+  }));
 
   let averageSpentTimeSeconds = 0;
   if (timeBars.length > 0) {
@@ -83,8 +84,9 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
 
   return {
     sessionStatistics: {
-      sessionsAmount: unmappedData.sessionsAmount,
-      spentTimeSeconds: unmappedData.spentTimeSeconds,
+      sessionsAmount: unmappedData.sessionStatistics.sessionsAmount,
+      spentTimeSeconds: unmappedData.sessionStatistics.spentTimeSeconds,
+      pausedAmount: unmappedData.sessionStatistics.pausedAmount,
       averageSpentTimeSeconds,
     },
     activityDistributionItems,

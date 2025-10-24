@@ -37,12 +37,16 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
     if (lessOnePercentageCount >= 4) {
       let othersSpentTimeSeconds = 0;
       let othersSessionsAmount = 0;
+      let othersPausedAmount = 0;
       let othersSpentTimePercentage = 0;
 
       for (let i = 1; i <= lessOnePercentageCount; i++) {
         const deletedLastItem = pieItems.pop();
         othersSessionsAmount += deletedLastItem
           ? deletedLastItem.sessionsAmount
+          : 0;
+        othersPausedAmount += deletedLastItem
+          ? deletedLastItem.pausedAmount
           : 0;
         othersSpentTimeSeconds += deletedLastItem
           ? deletedLastItem.spentTimeSeconds
@@ -57,6 +61,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         {
           activityName: 'Others',
           sessionsAmount: othersSessionsAmount,
+          pausedAmount: othersPausedAmount,
           spentTimeSeconds: othersSpentTimeSeconds,
           spentTimePercentage: othersSpentTimePercentage,
           fill: '#4287f5',
@@ -132,7 +137,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
             <div className="w-1/2">Activity</div>
             <div className="w-1/5">Sessions</div>
             <div className="w-1/5">Time</div>
-            <div className="w-1/5">Ratio</div>
+            <div className="w-1/5">Distracted</div>
           </div>
           <div className="flex flex-col gap-3 dark:text-textDark">
             {sortedItems.map((item, index) => (
@@ -145,7 +150,8 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   {getTimeHoursMinutes(item.spentTimeSeconds, true)}
                 </div>
                 <div className="w-1/5">
-                  {Math.trunc(item.spentTimePercentage * 100)}%
+                  {item.pausedAmount} times
+                  {/* {Math.trunc(item.spentTimePercentage * 100)}% */}
                 </div>
               </div>
             ))}
@@ -189,7 +195,8 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                     {item.activityName}
                   </div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
-                    ({getTimeHoursMinutes(item.spentTimeSeconds, true)},{' '}
+                    ({getTimeHoursMinutes(item.spentTimeSeconds, true)} (
+                    {Math.trunc(item.spentTimePercentage * 100)}%),{' '}
                     {item.sessionsAmount} sessions)
                   </div>
                 </div>

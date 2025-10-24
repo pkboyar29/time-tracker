@@ -5,6 +5,7 @@ import { getRangeType } from '../helpers/dateHelpers';
 import { colors } from '../../design-tokens';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
+import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
 import { IAnalytics } from '../ts/interfaces/Statistics/IAnaltytics';
 
 import {
@@ -28,7 +29,7 @@ interface CustomTooltipProps {
 const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
   const isVisible = active && payload && payload.length;
 
-  const timeBar = payload[0]?.payload;
+  const timeBar: ITimeBar = payload[0]?.payload;
 
   const userInfo = useAppSelector((state) => state.users.user);
   const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 0;
@@ -60,6 +61,9 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                   </p>
                   <p className="text-gray-800 dark:text-textDark">
                     {timeBar.sessionsAmount} sessions
+                  </p>
+                  <p className="text-gray-800 dark:text-textDark">
+                    {timeBar.pausedAmount} pauses
                   </p>
                 </>
               ) : (

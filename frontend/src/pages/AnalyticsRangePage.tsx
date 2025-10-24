@@ -185,19 +185,18 @@ const AnalyticsRangePage: FC = () => {
           </div>
 
           <div className="w-1/2 px-4 pt-5">
-            {rangeType == 'days' && rangeAnalytics.sessionStatistics && (
+            {rangeType == 'days' ? (
               <DailyGoalBox
                 spentTimeSeconds={
                   rangeAnalytics.sessionStatistics.spentTimeSeconds
                 }
               />
-            )}
-            {rangeType != 'days' && rangeType != 'overall' && (
+            ) : rangeType != 'overall' && rangeAnalytics.timeBars.length > 0 ? (
               <PeriodDistributionBox
                 analytics={rangeAnalytics}
                 setAdBoxMode={setAdBoxMode}
               />
-            )}
+            ) : null}
           </div>
         </div>
       ) : (
