@@ -5,6 +5,7 @@ export interface ISessionPart {
   spentTimeSeconds: number;
   session: { activity: { name: string } };
   user: Types.ObjectId;
+  paused: boolean;
   createdDate: Date;
 }
 
@@ -18,6 +19,11 @@ const sessionPartSchema = new Schema({
   session: {
     type: Schema.Types.ObjectId,
     ref: 'Session',
+    required: true,
+  },
+  paused: {
+    type: Boolean,
+    default: false,
     required: true,
   },
   user: {

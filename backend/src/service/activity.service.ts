@@ -12,7 +12,7 @@ import { HttpError } from '../helpers/HttpError';
 import mongoose from 'mongoose';
 
 interface PopulatedActivityGroup {
-  _id: string;
+  _id: mongoose.Types.ObjectId;
   name: string;
 }
 
@@ -28,6 +28,11 @@ interface GetDetailedActivitiesOptions {
   activityGroupId?: string;
   onlyCompleted: boolean; // true - only completed sessions in detailed info, false - all sessions in detailed info
   archived?: boolean;
+}
+
+interface GetActivityOptions {
+  activityId: string;
+  userId: string;
 }
 
 interface GetDetailedActivityOptions {
@@ -53,8 +58,8 @@ const activityService = {
   getDetailedActivities,
   getActivitiesForActivityGroup,
   getSplitActivities,
+  getActivity,
   getDetailedActivity,
-  existsActivity,
   createActivity,
   updateActivity,
   archiveActivity,
@@ -138,11 +143,7 @@ async function getActivitiesForActivityGroup({
   onlyCompleted,
 }: GetActivitiesForGroupOptions): Promise<IActivity[] | IDetailedActivity[]> {
   try {
-    if (
-      !(await activityGroupService.existsActivityGroup(activityGroupId, userId))
-    ) {
-      throw new HttpError(404, 'Activity Group Not Found');
-    }
+    await activityGroupService.getActivityGroup({ activityGroupId, userId });
 
     if (detailed) {
       let onlyCompletedParam = onlyCompleted ? onlyCompleted : false;
@@ -219,14 +220,14 @@ async function getSplitActivities({
   };
 }
 
-async function getDetailedActivity({
+async function getActivity({
   activityId,
   userId,
-  onlyCompleted,
-}: GetDetailedActivityOptions): Promise<IDetailedActivity> {
+}: GetActivityOptions): Promise<mongoose.HydratedDocument<IActivity>> {
+  const notFoundError = new HttpError(404, 'Activity Not Found');
   try {
-    if (!(await activityService.existsActivity(activityId, userId))) {
-      throw new HttpError(404, 'Activity Not Found');
+    if (!mongoose.Types.ObjectId.isValid(activityId)) {
+      throw notFoundError;
     }
 
     const activity = await Activity.findById(activityId)
@@ -235,6 +236,29 @@ async function getDetailedActivity({
         'id name'
       )
       .exec();
+    if (!activity) {
+      throw notFoundError;
+    }
+    if (activity.deleted) {
+      throw notFoundError;
+    }
+
+    if (activity.user.toString() !== userId) {
+      throw notFoundError;
+    }
+    return activity;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function getDetailedActivity({
+  activityId,
+  userId,
+  onlyCompleted,
+}: GetDetailedActivityOptions): Promise<IDetailedActivity> {
+  try {
+    const activity = await activityService.getActivity({ activityId, userId });
 
     const sessions = onlyCompleted
       ? await sessionService.getSessionsForActivity({
@@ -249,7 +273,7 @@ async function getDetailedActivity({
       0
     );
     return {
-      ...activity!.toObject(),
+      ...activity.toObject(),
       sessionsAmount: sessionsAmount ?? 0,
       spentTimeSeconds: spentTimeSeconds ?? 0,
     };
@@ -258,44 +282,15 @@ async function getDetailedActivity({
   }
 }
 
-async function existsActivity(
-  activityId: string,
-  userId: string
-): Promise<boolean> {
-  if (!mongoose.Types.ObjectId.isValid(activityId)) {
-    return false;
-  }
-
-  const activity = await Activity.findById(activityId);
-  if (!activity) {
-    return false;
-  }
-
-  if (activity.deleted) {
-    return false;
-  }
-
-  if (activity.user.toString() !== userId) {
-    return false;
-  }
-
-  return true;
-}
-
-// TODO: не надо возвращать detailed activity
 async function createActivity(
   activityDTO: ActivityCreateDTO,
   userId: string
-): Promise<IDetailedActivity> {
+): Promise<IActivity> {
   try {
-    if (
-      !(await activityGroupService.existsActivityGroup(
-        activityDTO.activityGroupId,
-        userId
-      ))
-    ) {
-      throw new HttpError(404, 'Activity Group Not Found');
-    }
+    await activityGroupService.getActivityGroup({
+      activityGroupId: activityDTO.activityGroupId,
+      userId,
+    });
 
     const newActivity = new Activity({
       name: activityDTO.name,
@@ -315,34 +310,26 @@ async function createActivity(
     }
 
     const newActivityWithId = await newActivity.save();
-
-    return activityService.getDetailedActivity({
-      activityId: newActivityWithId._id.toString(),
-      userId,
-      onlyCompleted: false,
-    });
+    return newActivityWithId;
   } catch (e) {
     throw e;
   }
 }
 
-// TODO: не надо возвращать detailed activity
+// TODO: не надо возвращать detailed activity. просто возвращать activity?
 async function updateActivity(
   activityId: string,
   activityDTO: ActivityUpdateDTO,
   userId: string
 ): Promise<IDetailedActivity> {
   try {
-    if (!(await activityService.existsActivity(activityId, userId))) {
-      throw new HttpError(404, 'Activity Not Found');
-    }
+    const activity = await activityService.getActivity({ activityId, userId });
 
-    const activity = await Activity.findById(activityId);
-    activity!.name = activityDTO.name;
-    activity!.descr = activityDTO.descr;
-    activity!.updatedDate = new Date();
+    activity.name = activityDTO.name;
+    activity.descr = activityDTO.descr;
+    activity.updatedDate = new Date();
 
-    const validationError = activity!.validateSync();
+    const validationError = activity.validateSync();
     if (validationError) {
       if (validationError.errors.name) {
         throw new HttpError(400, validationError.errors.name.toString());
@@ -352,7 +339,7 @@ async function updateActivity(
       }
     }
 
-    await activity!.save();
+    await activity.save();
 
     await analyticsService.invalidateCache(userId);
 
@@ -371,25 +358,20 @@ async function archiveActivity(
   archived: boolean,
   userId: string
 ): Promise<IActivity> {
-  if (!(await activityService.existsActivity(activityId, userId))) {
-    throw new HttpError(404, 'Activity Not Found');
-  }
+  const activity = await activityService.getActivity({ activityId, userId });
+  activity.archived = archived;
+  activity.save();
 
-  const activity = await Activity.findById(activityId);
-  activity!.archived = archived;
-  activity!.save();
-
-  return activity!;
+  return activity;
 }
 
+// TODO: делать это атомарно
 async function deleteActivity(
   activityId: string,
   userId: string
 ): Promise<{ message: string }> {
   try {
-    if (!(await activityService.existsActivity(activityId, userId))) {
-      throw new HttpError(404, 'Activity Not Found');
-    }
+    const activity = await activityService.getActivity({ activityId, userId });
 
     // TODO: удалять через updateMany
     const sessions = await sessionService.getSessionsForActivity({
@@ -402,7 +384,7 @@ async function deleteActivity(
       })
     );
 
-    await Activity.findById(activityId).updateOne({
+    await activity.updateOne({
       deleted: true,
     });
 
@@ -418,10 +400,13 @@ async function deleteActivity(
 
 // TODO: надо поддерживать максимум 5 элементов атомарно (использовать атомарный вариант с upsert)
 async function addActivityToLastActivities(activityId: string, userId: string) {
-  // TODO: добавить проверку на существование активности
-  const activity = await Activity.findById(activityId);
-  if (activity?.archived) {
-    return;
+  try {
+    const activity = await activityService.getActivity({ activityId, userId });
+    if (activity.archived) {
+      return;
+    }
+  } catch (e) {
+    throw e;
   }
 
   const userLastActivities = await UserTopActivity.find({ userId }).sort({

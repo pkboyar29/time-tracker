@@ -1,13 +1,11 @@
 import analyticsService from '../../../service/analytics.service';
-import activityService from '../../../service/activity.service';
 import { IActivity } from '../../../model/activity.model';
-import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 import { ISessionPart } from '../../../model/sessionPart.model';
 import { ISession } from '../../../model/session.model';
 import {
   ActivityDistribution,
   AnalyticsForRangeDTO,
-  TimeBar,
 } from '../../../dto/analytics.dto';
 import * as dateUtils from '../../../helpers/getTodayRange';
 
@@ -15,62 +13,66 @@ describe('analyticsService.getSessionStatistics', () => {
   it('should sum correctly', () => {
     const sessionParts: ISessionPart[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         spentTimeSeconds: 120,
         session: { activity: { name: 'Reading' } },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
+        paused: true,
         createdDate: new Date('2025-09-20T10:00:00Z'),
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         spentTimeSeconds: 90,
         session: { activity: { name: 'Coding' } },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
+        paused: true,
         createdDate: new Date('2025-09-20T12:00:00Z'),
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         spentTimeSeconds: 60,
         session: { activity: { name: 'Exercise' } },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
+        paused: false,
         createdDate: new Date('2025-09-20T14:00:00Z'),
       },
     ];
 
     const completedSessions: ISession[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         totalTimeSeconds: 300,
         spentTimeSeconds: 300,
         note: 'Morning session',
         completed: true,
         activity: { name: 'Reading' },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T08:00:00Z'),
         updatedDate: new Date('2025-09-20T08:30:00Z'),
         deleted: false,
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         totalTimeSeconds: 180,
         spentTimeSeconds: 180,
         note: 'Afternoon session',
         completed: true,
         activity: { name: 'Coding' },
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T14:00:00Z'),
         updatedDate: new Date('2025-09-20T14:30:00Z'),
         deleted: false,
       },
     ];
 
-    const { spentTimeSeconds, sessionsAmount } =
+    const { spentTimeSeconds, sessionsAmount, pausedAmount } =
       analyticsService.getSessionsStatistics({
         sessionParts,
         completedSessions,
       });
     expect(spentTimeSeconds).toBe(270);
     expect(sessionsAmount).toBe(2);
+    expect(pausedAmount).toBe(2);
   });
 });
 
@@ -133,20 +135,26 @@ describe('analyticsService.getTimeBarType', () => {
 describe('analyticsService.getTimeBars', () => {
   const mockActivities: IActivity[] = [
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       name: 'Reading',
-      user: new mongoose.Types.ObjectId(),
-      activityGroup: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
+      activityGroup: {
+        _id: new Types.ObjectId(),
+        name: 'activity group name',
+      },
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
       archived: false,
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       name: 'Coding',
-      user: new mongoose.Types.ObjectId(),
-      activityGroup: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
+      activityGroup: {
+        _id: new Types.ObjectId(),
+        name: 'activity group name',
+      },
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
@@ -156,58 +164,61 @@ describe('analyticsService.getTimeBars', () => {
 
   const sessionParts: ISessionPart[] = [
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 1200,
       createdDate: new Date('2025-07-01T10:00:00Z'),
-      user: new mongoose.Types.ObjectId(),
+      paused: false,
+      user: new Types.ObjectId(),
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 600,
       createdDate: new Date('2025-07-01T12:00:00Z'),
-      user: new mongoose.Types.ObjectId(),
+      paused: true,
+      user: new Types.ObjectId(),
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       session: { activity: { name: 'Reading' } },
       spentTimeSeconds: 900,
       createdDate: new Date('2025-07-02T09:00:00Z'),
-      user: new mongoose.Types.ObjectId(),
+      paused: false,
+      user: new Types.ObjectId(),
     },
   ];
 
   const completedSessions: ISession[] = [
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       activity: { name: 'Reading' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
       createdDate: new Date(),
       updatedDate: new Date('2025-07-01T13:00:00Z'),
       deleted: false,
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       activity: { name: 'Reading' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
       createdDate: new Date(),
       updatedDate: new Date('2025-07-02T14:00:00Z'),
       deleted: false,
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       activity: { name: 'Coding' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
-      user: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
       createdDate: new Date(),
       updatedDate: new Date('2025-07-02T15:00:00Z'),
       deleted: false,
@@ -232,13 +243,15 @@ describe('analyticsService.getTimeBars', () => {
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
-    expect(result[0].spentTimeSeconds).toBe(1800);
-    expect(result[0].sessionsAmount).toBe(1);
+    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(1800);
+    expect(result[0].sessionStatistics.sessionsAmount).toBe(1);
+    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-07-03T00:00:00Z'));
-    expect(result[1].spentTimeSeconds).toBe(900);
-    expect(result[1].sessionsAmount).toBe(2);
+    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(900);
+    expect(result[1].sessionStatistics.sessionsAmount).toBe(2);
+    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should return correct day-based time bars and cut last period to end of range', () => {
@@ -259,13 +272,15 @@ describe('analyticsService.getTimeBars', () => {
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
-    expect(result[0].spentTimeSeconds).toBe(1800);
-    expect(result[0].sessionsAmount).toBe(1);
+    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(1800);
+    expect(result[0].sessionStatistics.sessionsAmount).toBe(1);
+    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-07-02T18:00:00Z'));
-    expect(result[1].spentTimeSeconds).toBe(900);
-    expect(result[1].sessionsAmount).toBe(2);
+    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(900);
+    expect(result[1].sessionStatistics.sessionsAmount).toBe(2);
+    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should split time bars correctly when range starts mid-day', () => {
@@ -286,13 +301,15 @@ describe('analyticsService.getTimeBars', () => {
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T12:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
-    expect(result[0].spentTimeSeconds).toBe(600);
-    expect(result[0].sessionsAmount).toBe(1);
+    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(600);
+    expect(result[0].sessionStatistics.sessionsAmount).toBe(1);
+    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-07-03T00:00:00Z'));
-    expect(result[1].spentTimeSeconds).toBe(900);
-    expect(result[1].sessionsAmount).toBe(2);
+    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(900);
+    expect(result[1].sessionStatistics.sessionsAmount).toBe(2);
+    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should return correct month-based time bars', () => {
@@ -313,13 +330,15 @@ describe('analyticsService.getTimeBars', () => {
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
-    expect(result[0].spentTimeSeconds).toBe(2700);
-    expect(result[0].sessionsAmount).toBe(3);
+    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(2700);
+    expect(result[0].sessionStatistics.sessionsAmount).toBe(3);
+    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-09-01T00:00:00Z'));
-    expect(result[1].spentTimeSeconds).toBe(0);
-    expect(result[1].sessionsAmount).toBe(0);
+    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(0);
+    expect(result[1].sessionStatistics.sessionsAmount).toBe(0);
+    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should return correct month-based time bars and cut last period to end of range', () => {
@@ -340,13 +359,15 @@ describe('analyticsService.getTimeBars', () => {
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
-    expect(result[0].spentTimeSeconds).toBe(2700);
-    expect(result[0].sessionsAmount).toBe(3);
+    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(2700);
+    expect(result[0].sessionStatistics.sessionsAmount).toBe(3);
+    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-08-10T00:00:00Z'));
-    expect(result[1].spentTimeSeconds).toBe(0);
-    expect(result[1].sessionsAmount).toBe(0);
+    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(0);
+    expect(result[1].sessionStatistics.sessionsAmount).toBe(0);
+    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should split month time bars correctly when range starts mid-month', () => {
@@ -368,16 +389,22 @@ describe('analyticsService.getTimeBars', () => {
     expect(result[0]).toEqual({
       startOfRange: new Date('2025-05-10T12:00:00Z'),
       endOfRange: new Date('2025-06-01T00:00:00Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
 
     expect(result[1]).toEqual({
       startOfRange: new Date('2025-06-01T00:00:00Z'),
       endOfRange: new Date('2025-07-01T00:00:00Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
   });
@@ -400,43 +427,61 @@ describe('analyticsService.getTimeBars', () => {
     expect(result[0]).toEqual({
       startOfRange: new Date('2024-06-30T21:00:00.000Z'),
       endOfRange: new Date('2024-07-31T21:00:00.000Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
     expect(result[1]).toEqual({
       startOfRange: new Date('2024-07-31T21:00:00.000Z'),
       endOfRange: new Date('2024-08-31T21:00:00.000Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
     expect(result[2]).toEqual({
       startOfRange: new Date('2024-08-31T21:00:00.000Z'),
       endOfRange: new Date('2024-09-30T21:00:00.000Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
     expect(result[3]).toEqual({
       startOfRange: new Date('2024-09-30T21:00:00.000Z'),
       endOfRange: new Date('2024-10-31T21:00:00.000Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
     expect(result[4]).toEqual({
       startOfRange: new Date('2024-10-31T21:00:00.000Z'),
       endOfRange: new Date('2024-11-30T21:00:00.000Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
     expect(result[5]).toEqual({
       startOfRange: new Date('2024-11-30T21:00:00.000Z'),
       endOfRange: new Date('2024-12-31T21:00:00.000Z'),
-      spentTimeSeconds: 0,
-      sessionsAmount: 0,
+      sessionStatistics: {
+        spentTimeSeconds: 0,
+        sessionsAmount: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
   });
@@ -458,20 +503,29 @@ describe('analyticsService.getTimeBars', () => {
     expect(result[0].activityDistribution).toEqual([
       {
         activityName: 'Reading',
-        sessionsAmount: 1,
-        spentTimeSeconds: 1800,
+        sessionStatistics: {
+          spentTimeSeconds: 1800,
+          sessionsAmount: 1,
+          pausedAmount: 1,
+        },
       },
     ]);
     expect(result[1].activityDistribution).toEqual([
       {
         activityName: 'Reading',
-        sessionsAmount: 1,
-        spentTimeSeconds: 900,
+        sessionStatistics: {
+          spentTimeSeconds: 900,
+          sessionsAmount: 1,
+          pausedAmount: 0,
+        },
       },
       {
         activityName: 'Coding',
-        sessionsAmount: 1,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          spentTimeSeconds: 0,
+          sessionsAmount: 1,
+          pausedAmount: 0,
+        },
       },
     ]);
   });
@@ -480,20 +534,26 @@ describe('analyticsService.getTimeBars', () => {
 describe('analyticsService.getActivityDistributions', () => {
   const mockActivities: IActivity[] = [
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       name: 'Reading',
-      user: new mongoose.Types.ObjectId(),
-      activityGroup: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
+      activityGroup: {
+        _id: new Types.ObjectId(),
+        name: 'activity group name',
+      },
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
       archived: false,
     },
     {
-      _id: new mongoose.Types.ObjectId(),
+      _id: new Types.ObjectId(),
       name: 'Coding',
-      user: new mongoose.Types.ObjectId(),
-      activityGroup: new mongoose.Types.ObjectId(),
+      user: new Types.ObjectId(),
+      activityGroup: {
+        _id: new Types.ObjectId(),
+        name: 'activity group name',
+      },
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
@@ -504,34 +564,34 @@ describe('analyticsService.getActivityDistributions', () => {
   it('should return correct distribution when sessions and sessionParts match activities', async () => {
     const completedSessions: ISession[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         activity: { name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date(),
         updatedDate: new Date(),
         deleted: false,
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         activity: { name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date(),
         updatedDate: new Date(),
         deleted: false,
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         activity: { name: 'Coding' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date(),
         updatedDate: new Date(),
         deleted: false,
@@ -540,24 +600,35 @@ describe('analyticsService.getActivityDistributions', () => {
 
     const sessionParts: ISessionPart[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         session: { activity: { name: 'Reading' } },
         spentTimeSeconds: 100,
         createdDate: new Date(),
-        user: new mongoose.Types.ObjectId(),
+        paused: true,
+        user: new Types.ObjectId(),
       },
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         session: { activity: { name: 'Coding' } },
         spentTimeSeconds: 200,
         createdDate: new Date(),
-        user: new mongoose.Types.ObjectId(),
+        paused: false,
+        user: new Types.ObjectId(),
+      },
+      {
+        _id: new Types.ObjectId(),
+        session: { activity: { name: 'Coding' } },
+        spentTimeSeconds: 200,
+        createdDate: new Date(),
+        paused: true,
+        user: new Types.ObjectId(),
       },
     ];
 
     const result = analyticsService.getActivityDistributions({
       allSessionsAmount: 4,
-      allSpentTimeSeconds: 400,
+      allSpentTimeSeconds: 600,
+      allPausedAmount: 2,
       sessionParts,
       completedSessions,
       userActivities: mockActivities,
@@ -566,18 +637,27 @@ describe('analyticsService.getActivityDistributions', () => {
     expect(result).toEqual([
       {
         activityName: 'Reading',
-        sessionsAmount: 2,
-        spentTimeSeconds: 100,
+        sessionStatistics: {
+          spentTimeSeconds: 100,
+          sessionsAmount: 2,
+          pausedAmount: 1,
+        },
       },
       {
         activityName: 'Coding',
-        sessionsAmount: 1,
-        spentTimeSeconds: 200,
+        sessionStatistics: {
+          spentTimeSeconds: 400,
+          sessionsAmount: 1,
+          pausedAmount: 1,
+        },
       },
       {
         activityName: 'Without activity',
-        sessionsAmount: 1, // 4 - 3
-        spentTimeSeconds: 100, // 400 - (100+200)
+        sessionStatistics: {
+          spentTimeSeconds: 100, // 400 - (100 + 200)
+          sessionsAmount: 1, // 4 - 3
+          pausedAmount: 0,
+        },
       },
     ]);
   });
@@ -585,12 +665,12 @@ describe('analyticsService.getActivityDistributions', () => {
   it('should not add "Without activity" if time and sessions match exactly', async () => {
     const completedSessions: ISession[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
         activity: { name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
         createdDate: new Date(),
         updatedDate: new Date(),
         deleted: false,
@@ -599,17 +679,19 @@ describe('analyticsService.getActivityDistributions', () => {
 
     const sessionParts: ISessionPart[] = [
       {
-        _id: new mongoose.Types.ObjectId(),
+        _id: new Types.ObjectId(),
+        paused: false,
         session: { activity: { name: 'Reading' } },
         spentTimeSeconds: 300,
         createdDate: new Date(),
-        user: new mongoose.Types.ObjectId(),
+        user: new Types.ObjectId(),
       },
     ];
 
     const result = analyticsService.getActivityDistributions({
       allSessionsAmount: 1,
       allSpentTimeSeconds: 300,
+      allPausedAmount: 0,
       sessionParts,
       completedSessions,
       userActivities: mockActivities,
@@ -627,22 +709,92 @@ describe('analyticsService.getActivityDistributions', () => {
 
 describe('analyticsService.mergeActivityDistributions', () => {
   const firstAd: ActivityDistribution[] = [
-    { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 100 },
-    { activityName: 'B', sessionsAmount: 1, spentTimeSeconds: 200 },
+    {
+      activityName: 'A',
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 100,
+        pausedAmount: 1,
+      },
+    },
+    {
+      activityName: 'B',
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 200,
+        pausedAmount: 0,
+      },
+    },
   ];
   const secondAd: ActivityDistribution[] = [
-    { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
-    { activityName: 'C', sessionsAmount: 1, spentTimeSeconds: 100 },
+    {
+      activityName: 'A',
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 50,
+        pausedAmount: 1,
+      },
+    },
+    {
+      activityName: 'C',
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 100,
+        pausedAmount: 2,
+      },
+    },
   ];
   const thirdAd: ActivityDistribution[] = [
-    { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
-    { activityName: 'B', sessionsAmount: 2, spentTimeSeconds: 200 },
-    { activityName: 'D', sessionsAmount: 1, spentTimeSeconds: 100 },
+    {
+      activityName: 'A',
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 50,
+        pausedAmount: 0,
+      },
+    },
+    {
+      activityName: 'B',
+      sessionStatistics: {
+        sessionsAmount: 2,
+        spentTimeSeconds: 200,
+        pausedAmount: 0,
+      },
+    },
+    {
+      activityName: 'D',
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 100,
+        pausedAmount: 0,
+      },
+    },
   ];
   const fourthAd: ActivityDistribution[] = [
-    { activityName: 'B', sessionsAmount: 2, spentTimeSeconds: 100 },
-    { activityName: 'D', sessionsAmount: 0, spentTimeSeconds: 300 },
-    { activityName: 'E', sessionsAmount: 2, spentTimeSeconds: 200 },
+    {
+      activityName: 'B',
+      sessionStatistics: {
+        sessionsAmount: 2,
+        spentTimeSeconds: 100,
+        pausedAmount: 0,
+      },
+    },
+    {
+      activityName: 'D',
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 300,
+        pausedAmount: 1,
+      },
+    },
+    {
+      activityName: 'E',
+      sessionStatistics: {
+        sessionsAmount: 2,
+        spentTimeSeconds: 200,
+        pausedAmount: 0,
+      },
+    },
   ];
 
   it('should correctly handle an empty array input', () => {
@@ -669,22 +821,31 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityA = result.find((a) => a.activityName === 'A');
     expect(activityA).toEqual({
       activityName: 'A',
-      sessionsAmount: 2,
-      spentTimeSeconds: 150,
+      sessionStatistics: {
+        sessionsAmount: 2,
+        spentTimeSeconds: 150,
+        pausedAmount: 2,
+      },
     });
 
     const activityB = result.find((a) => a.activityName === 'B');
     expect(activityB).toEqual({
       activityName: 'B',
-      sessionsAmount: 1,
-      spentTimeSeconds: 200,
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 200,
+        pausedAmount: 0,
+      },
     });
 
     const activityC = result.find((a) => a.activityName === 'C');
     expect(activityC).toEqual({
       activityName: 'C',
-      sessionsAmount: 1,
-      spentTimeSeconds: 100,
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 100,
+        pausedAmount: 2,
+      },
     });
   });
 
@@ -697,36 +858,51 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityA = result.find((a) => a.activityName === 'A');
     expect(activityA).toEqual({
       activityName: 'A',
-      sessionsAmount: 3,
-      spentTimeSeconds: 200,
+      sessionStatistics: {
+        sessionsAmount: 3,
+        spentTimeSeconds: 200,
+        pausedAmount: 2,
+      },
     });
 
     const activityB = result.find((a) => a.activityName === 'B');
     expect(activityB).toEqual({
       activityName: 'B',
-      sessionsAmount: 5,
-      spentTimeSeconds: 500,
+      sessionStatistics: {
+        sessionsAmount: 5,
+        spentTimeSeconds: 500,
+        pausedAmount: 0,
+      },
     });
 
     const activityC = result.find((a) => a.activityName === 'C');
     expect(activityC).toEqual({
       activityName: 'C',
-      sessionsAmount: 1,
-      spentTimeSeconds: 100,
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 100,
+        pausedAmount: 2,
+      },
     });
 
     const activityD = result.find((a) => a.activityName === 'D');
     expect(activityD).toEqual({
       activityName: 'D',
-      sessionsAmount: 1,
-      spentTimeSeconds: 400,
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 400,
+        pausedAmount: 1,
+      },
     });
 
     const activityE = result.find((a) => a.activityName === 'E');
     expect(activityE).toEqual({
       activityName: 'E',
-      sessionsAmount: 2,
-      spentTimeSeconds: 200,
+      sessionStatistics: {
+        sessionsAmount: 2,
+        spentTimeSeconds: 200,
+        pausedAmount: 0,
+      },
     });
   });
 });
@@ -737,36 +913,76 @@ describe('analyticsService.mergeAnalytics', () => {
   const startOfTomorrow = new Date('2025-09-21T00:00:00Z');
 
   const untilTodayObj: AnalyticsForRangeDTO = {
-    sessionsAmount: 2,
-    spentTimeSeconds: 300,
+    sessionStatistics: {
+      sessionsAmount: 2,
+      spentTimeSeconds: 300,
+      pausedAmount: 2,
+    },
     activityDistribution: [
-      { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 100 },
-      { activityName: 'B', sessionsAmount: 1, spentTimeSeconds: 200 },
+      {
+        activityName: 'A',
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 100,
+          pausedAmount: 1,
+        },
+      },
+      {
+        activityName: 'B',
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 200,
+          pausedAmount: 1,
+        },
+      },
     ],
     timeBars: [
       {
         startOfRange: new Date('2025-09-18T00:00:00Z'),
         endOfRange: new Date('2025-09-19T00:00:00Z'),
-        sessionsAmount: 1,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 25,
+          pausedAmount: 2,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-19T00:00:00Z'),
         endOfRange: new Date('2025-09-20T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 25,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
     ],
   };
 
   const todayObj: AnalyticsForRangeDTO = {
-    sessionsAmount: 1,
-    spentTimeSeconds: 150,
+    sessionStatistics: {
+      sessionsAmount: 1,
+      spentTimeSeconds: 150,
+      pausedAmount: 1,
+    },
     activityDistribution: [
-      { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
-      { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+      {
+        activityName: 'A',
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 50,
+          pausedAmount: 1,
+        },
+      },
+      {
+        activityName: 'C',
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 100,
+          pausedAmount: 0,
+        },
+      },
     ],
     timeBars: [],
   };
@@ -780,8 +996,9 @@ describe('analyticsService.mergeAnalytics', () => {
       timezone,
     });
 
-    expect(result.sessionsAmount).toBe(3);
-    expect(result.spentTimeSeconds).toBe(450);
+    expect(result.sessionStatistics.sessionsAmount).toBe(3);
+    expect(result.sessionStatistics.spentTimeSeconds).toBe(450);
+    expect(result.sessionStatistics.pausedAmount).toBe(3);
   });
 
   it('should create correct day timeBars', () => {
@@ -804,54 +1021,78 @@ describe('analyticsService.mergeAnalytics', () => {
     expect(timeBars[0]).toEqual({
       startOfRange: new Date('2025-09-18T00:00:00Z'),
       endOfRange: new Date('2025-09-19T00:00:00Z'),
-      sessionsAmount: 1,
-      spentTimeSeconds: 25,
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 25,
+        pausedAmount: 2,
+      },
       activityDistribution: [],
     });
     expect(timeBars[1]).toEqual({
       startOfRange: new Date('2025-09-19T00:00:00Z'),
       endOfRange: new Date('2025-09-20T00:00:00Z'),
-      sessionsAmount: 0,
-      spentTimeSeconds: 25,
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 25,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
     expect(timeBars[2]).toEqual({
       startOfRange: startOfToday,
       endOfRange: startOfTomorrow,
-      sessionsAmount: 1,
-      spentTimeSeconds: 150,
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 150,
+        pausedAmount: 1,
+      },
       activityDistribution: [
         {
           activityName: 'A',
-          sessionsAmount: 1,
-          spentTimeSeconds: 50,
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 50,
+            pausedAmount: 1,
+          },
         },
         {
           activityName: 'C',
-          sessionsAmount: 0,
-          spentTimeSeconds: 100,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 100,
+            pausedAmount: 0,
+          },
         },
       ],
     });
     expect(timeBars[3]).toEqual({
       startOfRange: new Date('2025-09-21T00:00:00Z'),
       endOfRange: new Date('2025-09-22T00:00:00Z'),
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
     expect(timeBars[4]).toEqual({
       startOfRange: new Date('2025-09-22T00:00:00Z'),
       endOfRange: new Date('2025-09-23T00:00:00Z'),
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
     expect(timeBars[5]).toEqual({
       startOfRange: new Date('2025-09-23T00:00:00Z'),
       endOfRange: new Date('2025-09-24T00:00:00Z'),
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
     });
   });
@@ -863,74 +1104,118 @@ describe('analyticsService.mergeAnalytics', () => {
     });
 
     const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionsAmount: 2,
-      spentTimeSeconds: 300,
+      sessionStatistics: {
+        sessionsAmount: 2,
+        spentTimeSeconds: 300,
+        pausedAmount: 3,
+      },
       activityDistribution: [
-        { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 100 },
-        { activityName: 'B', sessionsAmount: 1, spentTimeSeconds: 200 },
+        {
+          activityName: 'A',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 100,
+            pausedAmount: 2,
+          },
+        },
+        {
+          activityName: 'B',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 200,
+            pausedAmount: 1,
+          },
+        },
       ],
       timeBars: [
         {
           startOfRange: new Date('2025-01-01T00:00:00Z'),
           endOfRange: new Date('2025-02-01T00:00:00Z'),
-          sessionsAmount: 10,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 10,
+            spentTimeSeconds: 25,
+            pausedAmount: 2,
+          },
           activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-02-01T00:00:00Z'),
           endOfRange: new Date('2025-03-01T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 25,
+            pausedAmount: 0,
+          },
           activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-03-01T00:00:00Z'),
           endOfRange: new Date('2025-04-01T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 25,
+            pausedAmount: 0,
+          },
           activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-04-01T00:00:00Z'),
           endOfRange: new Date('2025-05-01T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 25,
+            pausedAmount: 0,
+          },
           activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-05-01T00:00:00Z'),
           endOfRange: new Date('2025-06-01T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 25,
+            pausedAmount: 0,
+          },
           activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-06-01T00:00:00Z'),
           endOfRange: new Date('2025-07-01T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 25,
+            pausedAmount: 0,
+          },
           activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-07-01T00:00:00Z'),
           endOfRange: new Date('2025-08-01T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 25,
+            pausedAmount: 0,
+          },
           activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-08-01T00:00:00Z'),
           endOfRange: new Date('2025-09-01T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 25,
+            pausedAmount: 0,
+          },
           activityDistribution: [],
         },
         {
           startOfRange: new Date('2025-09-01T00:00:00Z'),
           endOfRange: new Date('2025-09-20T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 25,
+            pausedAmount: 4,
+          },
           activityDistribution: [],
         },
       ],
@@ -951,96 +1236,138 @@ describe('analyticsService.mergeAnalytics', () => {
       {
         startOfRange: new Date('2025-01-01T00:00:00Z'),
         endOfRange: new Date('2025-02-01T00:00:00Z'),
-        sessionsAmount: 10,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 10,
+          spentTimeSeconds: 25,
+          pausedAmount: 2,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-02-01T00:00:00Z'),
         endOfRange: new Date('2025-03-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 25,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-03-01T00:00:00Z'),
         endOfRange: new Date('2025-04-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 25,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-04-01T00:00:00Z'),
         endOfRange: new Date('2025-05-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 25,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-05-01T00:00:00Z'),
         endOfRange: new Date('2025-06-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 25,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-06-01T00:00:00Z'),
         endOfRange: new Date('2025-07-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 25,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-07-01T00:00:00Z'),
         endOfRange: new Date('2025-08-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 25,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-08-01T00:00:00Z'),
         endOfRange: new Date('2025-09-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 25,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-01T00:00:00Z'),
         endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionsAmount: 1,
-        spentTimeSeconds: 175,
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 175,
+          pausedAmount: 5,
+        },
         activityDistribution: [
           {
             activityName: 'A',
-            sessionsAmount: 1,
-            spentTimeSeconds: 50,
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
           },
           {
             activityName: 'C',
-            sessionsAmount: 0,
-            spentTimeSeconds: 100,
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
           },
         ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-12-01T00:00:00Z'),
         endOfRange: new Date('2026-01-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
     ]);
@@ -1053,8 +1380,11 @@ describe('analyticsService.mergeAnalytics', () => {
     });
 
     const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
       timeBars: [],
     };
@@ -1073,33 +1403,48 @@ describe('analyticsService.mergeAnalytics', () => {
       {
         startOfRange: new Date('2025-09-20T00:00:00Z'),
         endOfRange: new Date('2025-09-21T00:00:00Z'),
-        sessionsAmount: 1,
-        spentTimeSeconds: 150,
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 150,
+          pausedAmount: 1,
+        },
         activityDistribution: [
           {
             activityName: 'A',
-            sessionsAmount: 1,
-            spentTimeSeconds: 50,
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
           },
           {
             activityName: 'C',
-            sessionsAmount: 0,
-            spentTimeSeconds: 100,
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
           },
         ],
       },
       {
         startOfRange: new Date('2025-09-21T00:00:00Z'),
         endOfRange: new Date('2025-09-22T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-22T00:00:00Z'),
         endOfRange: new Date('2025-09-23T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
     ]);
@@ -1112,8 +1457,11 @@ describe('analyticsService.mergeAnalytics', () => {
     });
 
     const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionsAmount: 1,
-      spentTimeSeconds: 200,
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 200,
+        pausedAmount: 2,
+      },
       activityDistribution: [],
       timeBars: [],
     };
@@ -1132,40 +1480,58 @@ describe('analyticsService.mergeAnalytics', () => {
       {
         startOfRange: new Date('2025-09-19T00:00:00Z'),
         endOfRange: new Date('2025-09-20T00:00:00Z'),
-        sessionsAmount: 1,
-        spentTimeSeconds: 200,
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 200,
+          pausedAmount: 2,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-20T00:00:00Z'),
         endOfRange: new Date('2025-09-21T00:00:00Z'),
-        sessionsAmount: 1,
-        spentTimeSeconds: 150,
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 150,
+          pausedAmount: 1,
+        },
         activityDistribution: [
           {
             activityName: 'A',
-            sessionsAmount: 1,
-            spentTimeSeconds: 50,
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
           },
           {
             activityName: 'C',
-            sessionsAmount: 0,
-            spentTimeSeconds: 100,
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
           },
         ],
       },
       {
         startOfRange: new Date('2025-09-21T00:00:00Z'),
         endOfRange: new Date('2025-09-22T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-09-22T00:00:00Z'),
         endOfRange: new Date('2025-09-23T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
     ]);
@@ -1178,46 +1544,67 @@ describe('analyticsService.mergeAnalytics', () => {
     });
 
     const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionsAmount: 3,
-      spentTimeSeconds: 600,
+      sessionStatistics: {
+        sessionsAmount: 3,
+        spentTimeSeconds: 600,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
       timeBars: [
         {
           startOfRange: new Date('2025-09-17T00:00:00Z'),
           endOfRange: new Date('2025-09-18T00:00:00Z'),
-          sessionsAmount: 1,
-          spentTimeSeconds: 200,
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 200,
+            pausedAmount: 2,
+          },
           activityDistribution: [
             {
               activityName: 'A',
-              sessionsAmount: 1,
-              spentTimeSeconds: 200,
+              sessionStatistics: {
+                sessionsAmount: 1,
+                spentTimeSeconds: 200,
+                pausedAmount: 2,
+              },
             },
           ],
         },
         {
           startOfRange: new Date('2025-09-18T00:00:00Z'),
           endOfRange: new Date('2025-09-19T00:00:00Z'),
-          sessionsAmount: 1,
-          spentTimeSeconds: 200,
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 200,
+            pausedAmount: 3,
+          },
           activityDistribution: [
             {
               activityName: 'A',
-              sessionsAmount: 1,
-              spentTimeSeconds: 200,
+              sessionStatistics: {
+                sessionsAmount: 1,
+                spentTimeSeconds: 200,
+                pausedAmount: 3,
+              },
             },
           ],
         },
         {
           startOfRange: new Date('2025-09-19T00:00:00Z'),
           endOfRange: new Date('2025-09-20T00:00:00Z'),
-          sessionsAmount: 1,
-          spentTimeSeconds: 200,
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 200,
+            pausedAmount: 0,
+          },
           activityDistribution: [
             {
               activityName: 'A',
-              sessionsAmount: 1,
-              spentTimeSeconds: 200,
+              sessionStatistics: {
+                sessionsAmount: 1,
+                spentTimeSeconds: 200,
+                pausedAmount: 0,
+              },
             },
           ],
         },
@@ -1238,40 +1625,58 @@ describe('analyticsService.mergeAnalytics', () => {
       {
         startOfRange: new Date('2025-09-17T00:00:00Z'),
         endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionsAmount: 4,
-        spentTimeSeconds: 750,
+        sessionStatistics: {
+          sessionsAmount: 4,
+          spentTimeSeconds: 750,
+          pausedAmount: 6,
+        },
         activityDistribution: [
           {
             activityName: 'A',
-            sessionsAmount: 4,
-            spentTimeSeconds: 650,
+            sessionStatistics: {
+              sessionsAmount: 4,
+              spentTimeSeconds: 650,
+              pausedAmount: 6,
+            },
           },
           {
             activityName: 'C',
-            sessionsAmount: 0,
-            spentTimeSeconds: 100,
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
           },
         ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-12-01T00:00:00Z'),
         endOfRange: new Date('2026-01-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
     ]);
@@ -1284,8 +1689,11 @@ describe('analyticsService.mergeAnalytics', () => {
     });
 
     const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionsAmount: 1,
-      spentTimeSeconds: 100,
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 100,
+        pausedAmount: 3,
+      },
       activityDistribution: [],
       timeBars: [],
     };
@@ -1304,32 +1712,58 @@ describe('analyticsService.mergeAnalytics', () => {
       {
         startOfRange: new Date('2025-09-19T00:00:00Z'),
         endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionsAmount: 2,
-        spentTimeSeconds: 250,
+        sessionStatistics: {
+          sessionsAmount: 2,
+          spentTimeSeconds: 250,
+          pausedAmount: 4,
+        },
         activityDistribution: [
-          { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
-          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
+          },
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
+          },
         ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-12-01T00:00:00Z'),
         endOfRange: new Date('2026-01-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
     ]);
@@ -1342,8 +1776,11 @@ describe('analyticsService.mergeAnalytics', () => {
     });
 
     const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
       activityDistribution: [],
       timeBars: [],
     };
@@ -1362,32 +1799,58 @@ describe('analyticsService.mergeAnalytics', () => {
       {
         startOfRange: new Date('2025-09-20T00:00:00Z'),
         endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionsAmount: 1,
-        spentTimeSeconds: 150,
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 150,
+          pausedAmount: 1,
+        },
         activityDistribution: [
-          { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
-          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
+          },
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
+          },
         ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
       {
         startOfRange: new Date('2025-12-01T00:00:00Z'),
         endOfRange: new Date('2026-01-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
     ]);
@@ -1400,38 +1863,92 @@ describe('analyticsService.mergeAnalytics', () => {
     });
 
     const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionsAmount: 5,
-      spentTimeSeconds: 500,
+      sessionStatistics: {
+        sessionsAmount: 5,
+        spentTimeSeconds: 500,
+        pausedAmount: 2,
+      },
       activityDistribution: [
-        { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
-        { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+        {
+          activityName: 'A',
+          sessionStatistics: {
+            sessionsAmount: 3,
+            spentTimeSeconds: 300,
+            pausedAmount: 2,
+          },
+        },
+        {
+          activityName: 'C',
+          sessionStatistics: {
+            sessionsAmount: 2,
+            spentTimeSeconds: 200,
+            pausedAmount: 0,
+          },
+        },
       ],
       timeBars: [
         {
           startOfRange: new Date('2025-09-28T00:00:00Z'),
           endOfRange: new Date('2025-09-29T00:00:00Z'),
-          sessionsAmount: 2,
-          spentTimeSeconds: 200,
+          sessionStatistics: {
+            sessionsAmount: 2,
+            spentTimeSeconds: 200,
+            pausedAmount: 0,
+          },
           activityDistribution: [
-            { activityName: 'A', sessionsAmount: 0, spentTimeSeconds: 0 },
-            { activityName: 'C', sessionsAmount: 1, spentTimeSeconds: 100 },
+            {
+              activityName: 'A',
+              sessionStatistics: {
+                sessionsAmount: 0,
+                spentTimeSeconds: 0,
+                pausedAmount: 0,
+              },
+            },
+            {
+              activityName: 'C',
+              sessionStatistics: {
+                sessionsAmount: 1,
+                spentTimeSeconds: 100,
+                pausedAmount: 0,
+              },
+            },
           ],
         },
         {
           startOfRange: new Date('2025-09-29T00:00:00Z'),
           endOfRange: new Date('2025-09-30T00:00:00Z'),
-          sessionsAmount: 3,
-          spentTimeSeconds: 300,
+          sessionStatistics: {
+            sessionsAmount: 3,
+            spentTimeSeconds: 300,
+            pausedAmount: 2,
+          },
           activityDistribution: [
-            { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
-            { activityName: 'C', sessionsAmount: 1, spentTimeSeconds: 100 },
+            {
+              activityName: 'A',
+              sessionStatistics: {
+                sessionsAmount: 3,
+                spentTimeSeconds: 300,
+                pausedAmount: 2,
+              },
+            },
+            {
+              activityName: 'C',
+              sessionStatistics: {
+                sessionsAmount: 1,
+                spentTimeSeconds: 100,
+                pausedAmount: 0,
+              },
+            },
           ],
         },
         {
           startOfRange: new Date('2025-09-30T00:00:00Z'),
           endOfRange: new Date('2025-10-01T00:00:00Z'),
-          sessionsAmount: 0,
-          spentTimeSeconds: 0,
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 0,
+            pausedAmount: 0,
+          },
           activityDistribution: [],
         },
       ],
@@ -1451,28 +1968,65 @@ describe('analyticsService.mergeAnalytics', () => {
       {
         startOfRange: new Date('2025-09-28T00:00:00Z'),
         endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionsAmount: 5,
-        spentTimeSeconds: 500,
+        sessionStatistics: {
+          sessionsAmount: 5,
+          spentTimeSeconds: 500,
+          pausedAmount: 2,
+        },
         activityDistribution: [
-          { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
-          { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 3,
+              spentTimeSeconds: 300,
+              pausedAmount: 2,
+            },
+          },
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 2,
+              spentTimeSeconds: 200,
+              pausedAmount: 0,
+            },
+          },
         ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionsAmount: 1,
-        spentTimeSeconds: 150,
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 150,
+          pausedAmount: 1,
+        },
         activityDistribution: [
-          { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
-          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
+          },
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
+          },
         ],
       },
       {
         startOfRange: new Date('2025-11-01T00:00:00Z'),
         endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
         activityDistribution: [],
       },
     ]);
@@ -1485,31 +2039,82 @@ describe('analyticsService.mergeAnalytics', () => {
     });
 
     const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionsAmount: 5,
-      spentTimeSeconds: 500,
+      sessionStatistics: {
+        sessionsAmount: 5,
+        spentTimeSeconds: 500,
+        pausedAmount: 3,
+      },
       activityDistribution: [
-        { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
-        { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+        {
+          activityName: 'A',
+          sessionStatistics: {
+            sessionsAmount: 3,
+            spentTimeSeconds: 300,
+            pausedAmount: 3,
+          },
+        },
+        {
+          activityName: 'C',
+          sessionStatistics: {
+            sessionsAmount: 2,
+            spentTimeSeconds: 200,
+            pausedAmount: 0,
+          },
+        },
       ],
       timeBars: [
         {
           startOfRange: new Date('2025-08-01T00:00:00Z'),
           endOfRange: new Date('2025-09-01T00:00:00Z'),
-          sessionsAmount: 3,
-          spentTimeSeconds: 300,
+          sessionStatistics: {
+            sessionsAmount: 3,
+            spentTimeSeconds: 300,
+            pausedAmount: 2,
+          },
           activityDistribution: [
-            { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
-            { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 0 },
+            {
+              activityName: 'A',
+              sessionStatistics: {
+                sessionsAmount: 3,
+                spentTimeSeconds: 300,
+                pausedAmount: 2,
+              },
+            },
+            {
+              activityName: 'C',
+              sessionStatistics: {
+                sessionsAmount: 0,
+                spentTimeSeconds: 0,
+                pausedAmount: 0,
+              },
+            },
           ],
         },
         {
           startOfRange: new Date('2025-09-01T00:00:00Z'),
           endOfRange: new Date('2025-10-01T00:00:00Z'),
-          sessionsAmount: 2,
-          spentTimeSeconds: 200,
+          sessionStatistics: {
+            sessionsAmount: 2,
+            spentTimeSeconds: 200,
+            pausedAmount: 1,
+          },
           activityDistribution: [
-            { activityName: 'A', sessionsAmount: 0, spentTimeSeconds: 0 },
-            { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+            {
+              activityName: 'A',
+              sessionStatistics: {
+                sessionsAmount: 0,
+                spentTimeSeconds: 0,
+                pausedAmount: 0,
+              },
+            },
+            {
+              activityName: 'C',
+              sessionStatistics: {
+                sessionsAmount: 2,
+                spentTimeSeconds: 200,
+                pausedAmount: 1,
+              },
+            },
           ],
         },
       ],
@@ -1529,31 +2134,82 @@ describe('analyticsService.mergeAnalytics', () => {
       {
         startOfRange: new Date('2025-08-01T00:00:00Z'),
         endOfRange: new Date('2025-09-01T00:00:00Z'),
-        sessionsAmount: 3,
-        spentTimeSeconds: 300,
+        sessionStatistics: {
+          sessionsAmount: 3,
+          spentTimeSeconds: 300,
+          pausedAmount: 2,
+        },
         activityDistribution: [
-          { activityName: 'A', sessionsAmount: 3, spentTimeSeconds: 300 },
-          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 0 },
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 3,
+              spentTimeSeconds: 300,
+              pausedAmount: 2,
+            },
+          },
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 0,
+              pausedAmount: 0,
+            },
+          },
         ],
       },
       {
         startOfRange: new Date('2025-09-01T00:00:00Z'),
         endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionsAmount: 2,
-        spentTimeSeconds: 200,
+        sessionStatistics: {
+          sessionsAmount: 2,
+          spentTimeSeconds: 200,
+          pausedAmount: 1,
+        },
         activityDistribution: [
-          { activityName: 'A', sessionsAmount: 0, spentTimeSeconds: 0 },
-          { activityName: 'C', sessionsAmount: 2, spentTimeSeconds: 200 },
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 0,
+              pausedAmount: 0,
+            },
+          },
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 2,
+              spentTimeSeconds: 200,
+              pausedAmount: 1,
+            },
+          },
         ],
       },
       {
         startOfRange: new Date('2025-10-01T00:00:00Z'),
         endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionsAmount: 1,
-        spentTimeSeconds: 150,
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 150,
+          pausedAmount: 1,
+        },
         activityDistribution: [
-          { activityName: 'A', sessionsAmount: 1, spentTimeSeconds: 50 },
-          { activityName: 'C', sessionsAmount: 0, spentTimeSeconds: 100 },
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
+          },
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
+          },
         ],
       },
     ]);

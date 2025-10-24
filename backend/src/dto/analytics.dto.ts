@@ -1,22 +1,23 @@
-interface ActivityDistribution {
-  activityName: string;
+export interface SessionStatistics {
   sessionsAmount: number;
+  pausedAmount: number;
   spentTimeSeconds: number;
 }
 
-interface TimeBar {
+export interface ActivityDistribution {
+  activityName: string;
+  sessionStatistics: SessionStatistics;
+}
+
+export interface TimeBar {
   startOfRange: Date;
   endOfRange: Date;
-  sessionsAmount: number;
-  spentTimeSeconds: number;
+  sessionStatistics: SessionStatistics;
   activityDistribution: ActivityDistribution[];
 }
 
-interface AnalyticsForRangeDTO {
-  sessionsAmount: number;
-  spentTimeSeconds: number;
+export interface AnalyticsForRangeDTO {
+  sessionStatistics: SessionStatistics;
   activityDistribution: ActivityDistribution[];
   timeBars: TimeBar[];
 }
-
-export { AnalyticsForRangeDTO, ActivityDistribution, TimeBar };

@@ -1,8 +1,9 @@
 import activityGroupService from '../../../service/activityGroup.service';
 import mongoose from 'mongoose';
 import ActivityGroup from '../../../model/activityGroup.model';
+import { HttpError } from '../../../helpers/HttpError';
 
-describe('activityGroupService.existsActvityGroup', () => {
+describe('activityGroupService.getActivityGroup', () => {
   const mockActivityGroup = {
     _id: 'someObjectId',
     name: 'name',
@@ -11,62 +12,78 @@ describe('activityGroupService.existsActvityGroup', () => {
     toObject: () => this,
   };
 
-  it('returns false if activityGroupId is not a valid ObjectId', async () => {
+  it('throws error if activityGroupId is not a valid ObjectId', async () => {
     const spy = jest.spyOn(mongoose.Types.ObjectId, 'isValid');
 
-    const exists = await activityGroupService.existsActivityGroup(
-      'notValidActivityGroupId',
-      'user123'
-    );
-
-    expect(exists).toBe(false);
-    expect(spy).toHaveBeenCalled();
+    try {
+      await activityGroupService.getActivityGroup({
+        activityGroupId: 'notValidActivityGroupId',
+        userId: 'user123',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+      expect(spy).toHaveBeenCalled();
+    }
   });
 
-  it('returns false if activity group is not found in database', async () => {
-    jest.spyOn(ActivityGroup, 'findById').mockResolvedValue(null);
+  it('throws error if activity group is not found in database', async () => {
+    jest.spyOn(ActivityGroup, 'findById').mockReturnValue({
+      exec: jest.fn().mockResolvedValue(null),
+    } as any);
 
-    const exists = await activityGroupService.existsActivityGroup(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
+    try {
+      await activityGroupService.getActivityGroup({
+        activityGroupId: new mongoose.Types.ObjectId().toString(),
+        userId: 'user123',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
   });
 
-  it('returns false if activity group is marked as deleted', async () => {
-    jest.spyOn(ActivityGroup, 'findById').mockResolvedValue({
-      ...mockActivityGroup,
-      deleted: true,
+  it('throws error if activity group is marked as deleted', async () => {
+    jest.spyOn(ActivityGroup, 'findById').mockReturnValue({
+      exec: jest.fn().mockResolvedValue({
+        ...mockActivityGroup,
+        deleted: true,
+      }),
+    } as any);
+
+    try {
+      await activityGroupService.getActivityGroup({
+        activityGroupId: new mongoose.Types.ObjectId().toString(),
+        userId: 'user123',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
+  });
+
+  it('throws error if activity group belongs to another user', async () => {
+    jest.spyOn(ActivityGroup, 'findById').mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockActivityGroup),
+    } as any);
+
+    try {
+      await activityGroupService.getActivityGroup({
+        activityGroupId: new mongoose.Types.ObjectId().toString(),
+        userId: 'user123',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
+  });
+
+  it('returns mock activity group if activity group is valid, not deleted, and owned by user', async () => {
+    jest.spyOn(ActivityGroup, 'findById').mockReturnValue({
+      exec: jest.fn().mockResolvedValue(mockActivityGroup),
+    } as any);
+
+    const result = await activityGroupService.getActivityGroup({
+      activityGroupId: new mongoose.Types.ObjectId().toString(),
+      userId: mockActivityGroup.user,
     });
 
-    const exists = await activityGroupService.existsActivityGroup(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
-  });
-
-  it('returns false if activity group belongs to another user', async () => {
-    jest.spyOn(ActivityGroup, 'findById').mockResolvedValue(mockActivityGroup);
-
-    const exists = await activityGroupService.existsActivityGroup(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
-  });
-
-  it('returns true if activity group is valid, not deleted, and owned by user', async () => {
-    jest.spyOn(ActivityGroup, 'findById').mockResolvedValue(mockActivityGroup);
-
-    const exists = await activityGroupService.existsActivityGroup(
-      new mongoose.Types.ObjectId().toString(),
-      mockActivityGroup.user
-    );
-
-    expect(exists).toBe(true);
+    expect(result).toBe(mockActivityGroup);
   });
 });

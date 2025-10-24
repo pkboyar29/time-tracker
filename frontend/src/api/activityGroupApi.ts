@@ -9,6 +9,13 @@ import {
 const mapResponseData = (unmappedActivityGroup: any): IActivityGroup => {
   return {
     ...unmappedActivityGroup,
+    sessionsAmount: unmappedActivityGroup.sessionsAmount
+      ? unmappedActivityGroup.sessionsAmount
+      : 0,
+    spentTimeSeconds: unmappedActivityGroup.spentTimeSeconds
+      ? unmappedActivityGroup.spentTimeSeconds
+      : 0,
+
     id: unmappedActivityGroup._id,
   };
 };

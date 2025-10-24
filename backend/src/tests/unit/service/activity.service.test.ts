@@ -1,8 +1,9 @@
 import activityService from '../../../service/activity.service';
-import mongoose from 'mongoose';
+import { Types } from 'mongoose';
 import Activity from '../../../model/activity.model';
+import { HttpError } from '../../../helpers/HttpError';
 
-describe('activityService.existsActivity', () => {
+describe('activityService.getActivity', () => {
   const mockActivity = {
     _id: 'someObjectId',
     name: 'name',
@@ -12,62 +13,82 @@ describe('activityService.existsActivity', () => {
     toObject: () => this,
   };
 
-  it('returns false if activityId is not a valid ObjectId', async () => {
-    const spy = jest.spyOn(mongoose.Types.ObjectId, 'isValid');
+  it('throws error if activityId is not a valid ObjectId', async () => {
+    const spy = jest.spyOn(Types.ObjectId, 'isValid');
 
-    const exists = await activityService.existsActivity(
-      'notValidActivityId',
-      'user123'
-    );
-
-    expect(exists).toBe(false);
-    expect(spy).toHaveBeenCalled();
+    try {
+      await activityService.getActivity({
+        activityId: 'notValidActivityId',
+        userId: 'user123',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+      expect(spy).toHaveBeenCalled();
+    }
   });
 
-  it('returns false if activity is not found in database', async () => {
-    jest.spyOn(Activity, 'findById').mockResolvedValue(null);
+  it('throws error if activity is not found in database', async () => {
+    jest.spyOn(Activity, 'findById').mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(null),
+    } as any);
 
-    const exists = await activityService.existsActivity(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
+    try {
+      await activityService.getActivity({
+        activityId: new Types.ObjectId().toString(),
+        userId: 'user123',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
   });
 
-  it('returns false if activity is marked as deleted', async () => {
-    jest.spyOn(Activity, 'findById').mockResolvedValue({
-      ...mockActivity,
-      deleted: true,
+  it('throws error if activity is marked as deleted', async () => {
+    jest.spyOn(Activity, 'findById').mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue({
+        ...mockActivity,
+        deleted: true,
+      }),
+    } as any);
+
+    try {
+      await activityService.getActivity({
+        activityId: new Types.ObjectId().toString(),
+        userId: 'user123',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
+  });
+
+  it('throws error if activity belongs to another user', async () => {
+    jest.spyOn(Activity, 'findById').mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(mockActivity),
+    } as any);
+
+    try {
+      await activityService.getActivity({
+        activityId: new Types.ObjectId().toString(),
+        userId: 'user123',
+      });
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
+  });
+
+  it('returns mock activity if activity is valid, not deleted, and owned by user', async () => {
+    jest.spyOn(Activity, 'findById').mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(mockActivity),
+    } as any);
+
+    const result = await activityService.getActivity({
+      activityId: new Types.ObjectId().toString(),
+      userId: mockActivity.user,
     });
 
-    const exists = await activityService.existsActivity(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
-  });
-
-  it('returns false if activity belongs to another user', async () => {
-    jest.spyOn(Activity, 'findById').mockResolvedValue(mockActivity);
-
-    const exists = await activityService.existsActivity(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
-  });
-
-  it('returns true if activity is valid, not deleted, and owned by user', async () => {
-    jest.spyOn(Activity, 'findById').mockResolvedValue(mockActivity);
-
-    const exists = await activityService.existsActivity(
-      new mongoose.Types.ObjectId().toString(),
-      mockActivity.user
-    );
-
-    expect(exists).toBe(true);
+    expect(result).toBe(mockActivity);
   });
 });

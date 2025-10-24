@@ -1,11 +1,11 @@
 import sessionService from '../../../service/session.service';
 import activityService from '../../../service/activity.service';
-import mongoose from 'mongoose';
-import Session from '../../../model/session.model';
+import { Types, HydratedDocument } from 'mongoose';
+import Session, { ISession } from '../../../model/session.model';
 import SessionPart from '../../../model/sessionPart.model';
 import { HttpError } from '../../../helpers/HttpError';
 
-describe('sessionService.existsSession', () => {
+describe('sessionService.getSession', () => {
   const mockSession = {
     _id: 'someObjectId',
     totalTimeSeconds: 3600,
@@ -15,78 +15,82 @@ describe('sessionService.existsSession', () => {
     toObject: () => this,
   };
 
-  it('returns false if sessionId is not a valid ObjectId', async () => {
-    const spy = jest.spyOn(mongoose.Types.ObjectId, 'isValid');
+  it('throws error if sessionId is not a valid ObjectId', async () => {
+    const spy = jest.spyOn(Types.ObjectId, 'isValid');
 
-    const exists = await sessionService.existsSession(
-      'notValidSessionId',
-      'user123'
-    );
+    try {
+      await sessionService.getSession('notValidSessionId', 'user123');
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
 
-    expect(exists).toBe(false);
     expect(spy).toHaveBeenCalled();
   });
 
-  it('returns false if session is not found in database', async () => {
-    jest.spyOn(Session, 'findById').mockResolvedValue(null);
+  it('throws error if session is not found in database', async () => {
+    jest.spyOn(Session, 'findById').mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(null),
+    } as any);
 
-    const exists = await sessionService.existsSession(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
+    try {
+      await sessionService.getSession(
+        new Types.ObjectId().toString(),
+        'user123'
+      );
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
   });
 
-  it('returns false if session is marked as deleted', async () => {
-    jest.spyOn(Session, 'findById').mockResolvedValue({
-      ...mockSession,
-      deleted: true,
-    });
+  it('throws error if session is marked as deleted', async () => {
+    jest.spyOn(Session, 'findById').mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue({
+        ...mockSession,
+        user: 'user123',
+        deleted: true,
+      }),
+    } as any);
 
-    const exists = await sessionService.existsSession(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
+    try {
+      await sessionService.getSession(
+        new Types.ObjectId().toString(),
+        'user123'
+      );
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
   });
 
-  it('returns false if session belongs to another user', async () => {
-    jest.spyOn(Session, 'findById').mockResolvedValue(mockSession);
+  it('throws error if session belongs to another user', async () => {
+    jest.spyOn(Session, 'findById').mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(mockSession),
+    } as any);
 
-    const exists = await sessionService.existsSession(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
+    try {
+      await sessionService.getSession(
+        new Types.ObjectId().toString(),
+        'user123'
+      );
+    } catch (e) {
+      expect(e).toBeInstanceOf(HttpError);
+    }
   });
 
-  it('returns false if related activity is not found for user', async () => {
-    jest.spyOn(Session, 'findById').mockResolvedValue({
-      ...mockSession,
-      activity: new mongoose.Types.ObjectId(),
-    });
-    jest.spyOn(activityService, 'existsActivity').mockResolvedValue(false);
+  it('returns mock session if session is valid, not deleted, and owned by user', async () => {
+    jest.spyOn(Session, 'findById').mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      exec: jest.fn().mockResolvedValue(mockSession),
+    } as any);
 
-    const exists = await sessionService.existsSession(
-      new mongoose.Types.ObjectId().toString(),
-      'user123'
-    );
-
-    expect(exists).toBe(false);
-  });
-
-  it('returns true if session is valid, not deleted, and owned by user', async () => {
-    jest.spyOn(Session, 'findById').mockResolvedValue(mockSession);
-
-    const exists = await sessionService.existsSession(
-      new mongoose.Types.ObjectId().toString(),
+    const session = await sessionService.getSession(
+      new Types.ObjectId().toString(),
       mockSession.user
     );
 
-    expect(exists).toBe(true);
+    expect(session).toBe(mockSession);
   });
 });
 
@@ -98,7 +102,9 @@ describe('sessionService.createSession', () => {
   };
 
   it('should throw error if activity not found', async () => {
-    jest.spyOn(activityService, 'existsActivity').mockResolvedValue(false);
+    jest
+      .spyOn(activityService, 'getActivity')
+      .mockRejectedValue(new HttpError(404, 'Activity Not Found'));
 
     await expect(
       sessionService.createSession(mockSessionDTO, userId)
@@ -107,13 +113,39 @@ describe('sessionService.createSession', () => {
 });
 
 describe('sessionService.updateSession', () => {
+  const mockSession: HydratedDocument<ISession> = {
+    _id: new Types.ObjectId('652fcb3f0000000000000001'),
+    totalTimeSeconds: 3600,
+    spentTimeSeconds: 600,
+    note: 'Focus session on project A',
+    completed: false,
+    activity: { name: 'Coding' },
+    user: new Types.ObjectId('652fcb3f0000000000000002'),
+    createdDate: new Date('2025-10-19T10:00:00Z'),
+    updatedDate: new Date('2025-10-19T10:30:00Z'),
+    deleted: false,
+    // toObject: jest.fn().mockImplementation(function () {
+    //   return { ...this };
+    // }),
+    save: jest.fn(),
+    populate: jest.fn().mockResolvedValue(this),
+    deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }),
+  } as unknown as HydratedDocument<ISession>;
+
   it('should throw 404 if session does not exist', async () => {
-    jest.spyOn(sessionService, 'existsSession').mockResolvedValue(false);
+    jest
+      .spyOn(sessionService, 'getSession')
+      .mockRejectedValue(new HttpError(404, 'Session Not Found'));
 
     try {
       await sessionService.updateSession(
         'sessionId',
-        { spentTimeSeconds: 10, totalTimeSeconds: 20, note: 'note' },
+        {
+          spentTimeSeconds: 10,
+          totalTimeSeconds: 20,
+          note: 'note',
+          isPaused: false,
+        },
         'userId'
       );
     } catch (e) {
@@ -124,12 +156,17 @@ describe('sessionService.updateSession', () => {
   });
 
   it('should throw 400 if spentTimeSeconds > totalTimeSeconds', async () => {
-    jest.spyOn(sessionService, 'existsSession').mockResolvedValue(true);
+    jest.spyOn(sessionService, 'getSession').mockResolvedValue(mockSession);
 
     try {
       await sessionService.updateSession(
         'sessionId',
-        { spentTimeSeconds: 30, totalTimeSeconds: 20, note: 'note' },
+        {
+          spentTimeSeconds: 30,
+          totalTimeSeconds: 20,
+          note: 'note',
+          isPaused: false,
+        },
         'userId'
       );
     } catch (e) {
@@ -143,15 +180,20 @@ describe('sessionService.updateSession', () => {
   });
 
   it('should throw 400 if session is already completed', async () => {
-    jest.spyOn(sessionService, 'existsSession').mockResolvedValue(true);
-    jest.spyOn(Session, 'findById').mockResolvedValue({
+    jest.spyOn(sessionService, 'getSession').mockResolvedValue({
+      ...mockSession,
       completed: true,
     } as any);
 
     try {
       await sessionService.updateSession(
         'sessionId',
-        { spentTimeSeconds: 10, totalTimeSeconds: 20, note: 'note' },
+        {
+          spentTimeSeconds: 10,
+          totalTimeSeconds: 20,
+          note: 'note',
+          isPaused: false,
+        },
         'userId'
       );
     } catch (e) {
@@ -165,8 +207,8 @@ describe('sessionService.updateSession', () => {
   });
 
   it('should throw 400 if trying to reduce spentTimeSeconds', async () => {
-    jest.spyOn(sessionService, 'existsSession').mockResolvedValue(true);
-    jest.spyOn(Session, 'findById').mockResolvedValue({
+    jest.spyOn(sessionService, 'getSession').mockResolvedValue({
+      ...mockSession,
       completed: false,
       spentTimeSeconds: 20,
     } as any);
@@ -174,7 +216,12 @@ describe('sessionService.updateSession', () => {
     try {
       await sessionService.updateSession(
         'sessionId',
-        { spentTimeSeconds: 10, totalTimeSeconds: 30, note: 'note' },
+        {
+          spentTimeSeconds: 10,
+          totalTimeSeconds: 30,
+          note: 'note',
+          isPaused: false,
+        },
         'userId'
       );
     } catch (e) {
@@ -188,8 +235,7 @@ describe('sessionService.updateSession', () => {
   });
 
   it('should create a new SessionPart and update session', async () => {
-    jest.spyOn(sessionService, 'existsSession').mockResolvedValue(true);
-    const sessionMock: any = {
+    const sessionMock = {
       completed: false,
       spentTimeSeconds: 10,
       totalTimeSeconds: 20,
@@ -197,17 +243,23 @@ describe('sessionService.updateSession', () => {
       validateSync: jest.fn().mockReturnValue(undefined),
       save: jest.fn().mockResolvedValue(true),
     };
-    jest.spyOn(Session, 'findById').mockResolvedValue(sessionMock);
+
+    jest
+      .spyOn(sessionService, 'getSession')
+      .mockResolvedValue(sessionMock as any);
+
     const saveSpy = jest
       .spyOn(SessionPart.prototype, 'save')
       .mockResolvedValue(true);
-    jest
-      .spyOn(sessionService, 'getSession')
-      .mockResolvedValue('finalResult' as any);
 
-    const result = await sessionService.updateSession(
+    await sessionService.updateSession(
       'sessionId',
-      { spentTimeSeconds: 15, totalTimeSeconds: 25, note: 'new note' },
+      {
+        spentTimeSeconds: 15,
+        totalTimeSeconds: 25,
+        note: 'new note',
+        isPaused: false,
+      },
       'userId'
     );
 
@@ -215,6 +267,5 @@ describe('sessionService.updateSession', () => {
     expect(sessionMock.spentTimeSeconds).toBe(15);
     expect(sessionMock.totalTimeSeconds).toBe(25);
     expect(sessionMock.note).toBe('new note');
-    expect(result).toBe('finalResult');
   });
 });

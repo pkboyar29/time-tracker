@@ -5,7 +5,7 @@ export interface IActivity {
   name: string;
   descr?: string;
   user: Types.ObjectId;
-  activityGroup: Types.ObjectId;
+  activityGroup: { _id: Types.ObjectId; name: string };
   createdDate: Date;
   updatedDate: Date;
   archived: boolean;

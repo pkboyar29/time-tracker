@@ -44,8 +44,16 @@ export const createSession = async (
   return mapResponseData(data);
 };
 
-export const updateSession = async (payload: ISession): Promise<ISession> => {
-  const { data } = await axios.put(`/sessions/${payload.id}`, payload);
+export const updateSession = async (
+  payload: ISession,
+  isPaused?: boolean
+): Promise<ISession> => {
+  const body = {
+    ...payload,
+    isPaused: isPaused !== undefined ? isPaused : false,
+  };
+
+  const { data } = await axios.put(`/sessions/${payload.id}`, body);
 
   return mapResponseData(data);
 };

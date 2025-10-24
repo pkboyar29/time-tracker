@@ -67,7 +67,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const startTimer = async (session: ISession, paused?: boolean) => {
     if (timerState.status == 'running') {
       try {
-        await updateSession(timerState.session);
+        await updateSession(timerState.session, true);
       } catch (e) {
         toast('A server error occurred while updating session', {
           type: 'error',
@@ -102,7 +102,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       setTimerState({ session: timerState.session, status: 'paused' });
 
       try {
-        await updateSession(timerState.session);
+        await updateSession(timerState.session, true);
       } catch (e) {
         toast('A server error occurred while updating session', {
           type: 'error',
@@ -135,7 +135,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
       if (timerState.status == 'running' && shouldUpdateSession) {
         try {
-          await updateSession(sessionToUpdate);
+          await updateSession(sessionToUpdate, true);
         } catch (e) {
           toast('A server error occurred while updating session', {
             type: 'error',
@@ -234,7 +234,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
     event.preventDefault();
     if (timerState.session) {
-      updateSession(timerState.session);
+      updateSession(timerState.session, true);
     }
   };
 

@@ -6,6 +6,7 @@ export interface ITimeBar {
   barName: string;
   barDetailedName: string;
   sessionsAmount: number;
+  pausedAmount: number;
   spentTimeSeconds: number;
   activityDistributionItems: IActivityDistribution[];
 }

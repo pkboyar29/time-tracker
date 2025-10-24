@@ -52,10 +52,14 @@ const AnalyticsRangePage: FC = () => {
     );
   }
 
-  const [fromDate, setFromDate] = useState<Date>(new Date(fromParam));
-  const [toDate, setToDate] = useState<Date>(new Date(toParam));
+  const [adBoxMode, setAdBoxMode] = useState<'table' | 'chart'>('table');
+
+  const [range, setRange] = useState<{ fromDate: Date; toDate: Date }>({
+    fromDate: new Date(fromParam),
+    toDate: new Date(toParam),
+  });
   const [rangeType, setRangeType] = useState<RangeType>(
-    getRangeType(fromDate, toDate)
+    getRangeType(range.fromDate, range.toDate)
   );
 
   const viewId = viewOptions[rangeType];
@@ -65,8 +69,8 @@ const AnalyticsRangePage: FC = () => {
     isLoading,
     isError,
   } = useQueryCustom({
-    queryKey: ['rangeAnalytics', fromDate, toDate],
-    queryFn: () => fetchRangeAnalytics(fromDate, toDate),
+    queryKey: ['rangeAnalytics', range.fromDate, range.toDate],
+    queryFn: () => fetchRangeAnalytics(range.fromDate, range.toDate),
   });
 
   const onViewSelectChange = (id: string) => {
@@ -109,13 +113,12 @@ const AnalyticsRangePage: FC = () => {
   };
 
   useEffect(() => {
-    setFromDate(new Date(fromParam));
-    setToDate(new Date(toParam));
+    setRange({ fromDate: new Date(fromParam), toDate: new Date(toParam) });
   }, [searchParams]);
 
   useEffect(() => {
-    setRangeType(getRangeType(fromDate, toDate));
-  }, [fromDate, toDate]);
+    setRangeType(getRangeType(range.fromDate, range.toDate));
+  }, [range]);
 
   useEffect(() => {
     if (isError) {
@@ -127,36 +130,32 @@ const AnalyticsRangePage: FC = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-y-hidden dark:text-textDark">
-      {fromDate && toDate && (
-        <div className="h-[164px] relative flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
-          {rangeType == 'custom' ? (
-            <CustomRangeBox fromDate={fromDate} toDate={toDate} />
-          ) : rangeType == 'overall' ? (
-            <div className="h-full py-10 text-xl font-semibold select-none">
-              Overall session analytics
-            </div>
-          ) : (
-            <RangeBox fromDate={fromDate} toDate={toDate} />
-          )}
-
-          <div className="w-[140px] absolute top-10 right-48">
-            <div className="text-right mb-1.5 text-lg font-semibold">
-              View by
-            </div>
-            <CustomSelect
-              currentId={viewId}
-              onChange={onViewSelectChange}
-              optionGroups={[
-                {
-                  optGroupName: '',
-                  color: 'standart',
-                  options: [...viewOptionsArr],
-                },
-              ]}
-            />
+      <div className="h-[164px] relative flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
+        {rangeType == 'custom' ? (
+          <CustomRangeBox fromDate={range.fromDate} toDate={range.toDate} />
+        ) : rangeType == 'overall' ? (
+          <div className="h-full py-10 text-xl font-semibold select-none">
+            Overall session analytics
           </div>
+        ) : (
+          <RangeBox range={range} />
+        )}
+
+        <div className="w-[140px] absolute top-10 right-48">
+          <div className="text-right mb-1.5 text-lg font-semibold">View by</div>
+          <CustomSelect
+            currentId={viewId}
+            onChange={onViewSelectChange}
+            optionGroups={[
+              {
+                optGroupName: '',
+                color: 'standart',
+                options: [...viewOptionsArr],
+              },
+            ]}
+          />
         </div>
-      )}
+      </div>
 
       {isLoading ? (
         <div className="mt-5 text-center">
@@ -178,27 +177,26 @@ const AnalyticsRangePage: FC = () => {
                   activityDistributionItems={
                     rangeAnalytics.activityDistributionItems
                   }
+                  adBoxMode={adBoxMode}
+                  setAdBoxMode={setAdBoxMode}
                 />
               </div>
             )}
           </div>
 
           <div className="w-1/2 px-4 pt-5">
-            {rangeType == 'days' && rangeAnalytics.sessionStatistics && (
+            {rangeType == 'days' ? (
               <DailyGoalBox
                 spentTimeSeconds={
                   rangeAnalytics.sessionStatistics.spentTimeSeconds
                 }
               />
-            )}
-            {rangeType != 'days' && rangeType != 'overall' && (
+            ) : rangeType != 'overall' && rangeAnalytics.timeBars.length > 0 ? (
               <PeriodDistributionBox
-                timeBars={rangeAnalytics.timeBars}
-                allActivityDistributionItems={
-                  rangeAnalytics.activityDistributionItems
-                }
+                analytics={rangeAnalytics}
+                setAdBoxMode={setAdBoxMode}
               />
-            )}
+            ) : null}
           </div>
         </div>
       ) : (

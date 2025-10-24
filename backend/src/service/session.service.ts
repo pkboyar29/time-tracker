@@ -1,9 +1,10 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
-import Activity from '../model/activity.model';
 import activityService from './activity.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
+
+import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { HttpError } from '../helpers/HttpError';
 
 interface PopulatedActivity {
@@ -34,7 +35,6 @@ const sessionService = {
   getSessions,
   getSessionsForActivity,
   getSession,
-  existsSession,
   createSession,
   updateSession,
   deleteSession,
@@ -63,9 +63,7 @@ async function getSessionsForActivity({
   completed,
 }: GetSessionsForActivityOptions): Promise<ISession[]> {
   try {
-    if (!(await activityService.existsActivity(activityId, userId))) {
-      throw new HttpError(404, 'Activity For Session Not Found');
-    }
+    await activityService.getActivity({ activityId, userId });
 
     const filter: Record<string, unknown> = {
       activity: activityId,
@@ -80,57 +78,36 @@ async function getSessionsForActivity({
   }
 }
 
+// TODO: добавить параметр, при котором не будет искать информацию об активности
 async function getSession(
   sessionId: string,
   userId: string
-): Promise<ISession> {
+): Promise<mongoose.HydratedDocument<ISession>> {
+  const notFoundError = new HttpError(404, 'Session Not Found');
   try {
-    if (!(await sessionService.existsSession(sessionId, userId))) {
-      throw new HttpError(404, 'Session Not Found');
+    if (!mongoose.Types.ObjectId.isValid(sessionId)) {
+      throw notFoundError;
     }
 
-    const session = await Session.findById(sessionId).populate<{
-      activity: PopulatedActivity;
-    }>(activityPopulateConfig);
-    return session!;
+    const session = await Session.findById(sessionId)
+      .populate<{
+        activity: PopulatedActivity;
+      }>(activityPopulateConfig)
+      .exec();
+    if (!session) {
+      throw notFoundError;
+    }
+    if (session.user.toString() !== userId) {
+      throw notFoundError;
+    }
+    if (session.deleted) {
+      throw notFoundError;
+    }
+
+    return session;
   } catch (e) {
     throw e;
   }
-}
-
-async function existsSession(
-  sessionId: string,
-  userId: string
-): Promise<boolean> {
-  if (!mongoose.Types.ObjectId.isValid(sessionId)) {
-    return false;
-  }
-
-  const session = await Session.findById(sessionId);
-  if (!session) {
-    return false;
-  }
-
-  if (session.deleted) {
-    return false;
-  }
-
-  if (session.activity) {
-    if (
-      !(await activityService.existsActivity(
-        session.activity.toString(),
-        userId
-      ))
-    ) {
-      return false;
-    }
-  }
-
-  if (session.user.toString() !== userId) {
-    return false;
-  }
-
-  return true;
 }
 
 async function createSession(
@@ -139,14 +116,11 @@ async function createSession(
 ): Promise<ISession> {
   try {
     if (sessionDTO.activity) {
-      if (
-        !(await activityService.existsActivity(sessionDTO.activity, userId))
-      ) {
-        throw new HttpError(404, 'Activity Not Found');
-      }
-
-      const activity = await Activity.findById(sessionDTO.activity);
-      if (activity!.archived) {
+      const activity = await activityService.getActivity({
+        activityId: sessionDTO.activity,
+        userId,
+      });
+      if (activity.archived) {
         throw new HttpError(
           400,
           'Cannot create session with archived activity'
@@ -190,10 +164,6 @@ async function updateSession(
   userId: string
 ): Promise<ISession> {
   try {
-    if (!(await sessionService.existsSession(sessionId, userId))) {
-      throw new HttpError(404, 'Session Not Found');
-    }
-
     if (
       Number(sessionDTO.spentTimeSeconds) > Number(sessionDTO.totalTimeSeconds)
     ) {
@@ -203,20 +173,24 @@ async function updateSession(
       );
     }
 
-    const session = await Session.findById(sessionId);
+    const session = await sessionService.getSession(sessionId, userId);
 
-    if (session!.completed) {
+    if (session.completed) {
       throw new HttpError(
         400,
         'You cannot update an already completed session'
       );
     }
 
-    if (session!.spentTimeSeconds > sessionDTO.spentTimeSeconds) {
+    if (session.spentTimeSeconds > sessionDTO.spentTimeSeconds) {
       throw new HttpError(
         400,
         "You cannot reduce a session's spentTimeSeconds"
       );
+    }
+
+    if (session.spentTimeSeconds === sessionDTO.spentTimeSeconds) {
+      return session;
     }
 
     let partSpentTimeSeconds: number =
@@ -225,18 +199,19 @@ async function updateSession(
       spentTimeSeconds: partSpentTimeSeconds,
       session: sessionId,
       user: userId,
+      paused: convertParamToBoolean(sessionDTO.isPaused.toString()),
       createdDate: Date.now(),
     });
     await newSessionPart.save();
 
-    session!.totalTimeSeconds = sessionDTO.totalTimeSeconds;
-    session!.spentTimeSeconds = sessionDTO.spentTimeSeconds;
-    session!.note = sessionDTO.note;
-    session!.completed =
+    session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
+    session.spentTimeSeconds = sessionDTO.spentTimeSeconds;
+    session.note = sessionDTO.note;
+    session.completed =
       sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds;
-    session!.updatedDate = new Date();
+    session.updatedDate = new Date();
 
-    const validationError = session!.validateSync();
+    const validationError = session.validateSync();
     if (validationError) {
       const fields = ['totalTimeSeconds', 'spentTimeSeconds', 'note'] as const;
 
@@ -248,24 +223,23 @@ async function updateSession(
       }
     }
 
-    await session!.save();
+    await session.save();
 
-    return await sessionService.getSession(sessionId, userId);
+    return session;
   } catch (e) {
     throw e;
   }
 }
 
+// TODO: делать это атомарно
 async function deleteSession(
   sessionId: string,
   userId: string
 ): Promise<{ message: string }> {
   try {
-    if (!(await sessionService.existsSession(sessionId, userId))) {
-      throw new HttpError(404, 'Session Not Found');
-    }
+    const session = await sessionService.getSession(sessionId, userId);
 
-    await Session.findById(sessionId).updateOne({
+    await session.updateOne({
       deleted: true,
     });
 

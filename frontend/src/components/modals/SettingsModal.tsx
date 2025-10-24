@@ -1,4 +1,4 @@
-import { FC, useState, useRef, useEffect } from 'react';
+import { FC, useState, useRef } from 'react';
 import { clearSession } from '../../helpers/authHelpers';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import {
@@ -15,6 +15,7 @@ import Button from '../Button';
 import Modal from './Modal';
 import ToggleButton from '../ToggleButton';
 import RangeSlider from '../RangeSlider';
+import QuestionMarkTooltip from '../QuestionMarkTooltip';
 
 interface SettingsModalProps {
   onCloseModal: () => void;
@@ -26,14 +27,10 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
 
   const { timerState, stopTimer } = useTimer();
 
-  const [dailyGoalInput, setDailyGoalInput] = useState<number>(0);
+  const [dailyGoalInput, setDailyGoalInput] = useState<number>(
+    userInfo ? Math.trunc(userInfo.dailyGoal / 60) : 0
+  ); // minutes
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
-
-  useEffect(() => {
-    if (userInfo) {
-      setDailyGoalInput(Math.trunc(userInfo.dailyGoal / 60));
-    }
-  }, [userInfo]);
 
   const logOutHandler = async () => {
     if (timerState.status != 'idle') {
@@ -116,8 +113,13 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
             </div>
           )}
 
-          <div className="flex justify-between gap-4 text-lg dark:text-textDark">
-            <div>Allow browser notifications</div>
+          <div className="flex items-center justify-between gap-4 text-lg dark:text-textDark">
+            <div className="flex items-center gap-2">
+              <div>Allow browser notifications</div>
+              <div className="pb-3.5">
+                <QuestionMarkTooltip tooltipText="Browser notifications are shown when the timer is about to end" />
+              </div>
+            </div>
             <ToggleButton
               isChecked={Notification.permission == 'granted'}
               setIsChecked={changeNotificationPermission}
