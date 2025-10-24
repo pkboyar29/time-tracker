@@ -31,6 +31,7 @@ describe('Session controller endpoints', () => {
       .send({
         totalTimeSeconds: 1000,
         spentTimeSeconds: 200,
+        isPaused: false,
         note: 'some notes',
       })
       .expect(200);

@@ -199,7 +199,11 @@ async function updateSession(
       spentTimeSeconds: partSpentTimeSeconds,
       session: sessionId,
       user: userId,
-      paused: convertParamToBoolean(sessionDTO.isPaused.toString()),
+      paused: convertParamToBoolean(
+        sessionDTO.isPaused !== undefined
+          ? sessionDTO.isPaused.toString()
+          : undefined
+      ),
       createdDate: Date.now(),
     });
     await newSessionPart.save();
