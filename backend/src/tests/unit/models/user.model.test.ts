@@ -15,19 +15,6 @@ describe('User model validation', () => {
     expect(error).toBeUndefined();
   });
 
-  it('should require firstName and lastName', () => {
-    const user = new User({
-      email: 'john.doe@example.com',
-      username: 'john123',
-      password: 'secret',
-      dailyGoal: 3600,
-    });
-
-    const error = user.validateSync();
-    expect(error?.errors.firstName).toBeDefined();
-    expect(error?.errors.lastName).toBeDefined();
-  });
-
   it('should enforce minLength and maxLength for firstName', () => {
     const shortName = new User({
       firstName: 'A',

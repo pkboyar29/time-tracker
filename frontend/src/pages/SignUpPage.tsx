@@ -12,8 +12,6 @@ import Input from '../components/Input';
 import Button from '../components/Button';
 
 interface SignUpFields {
-  firstName: string;
-  lastName: string;
   email: string;
   username: string;
   password: string;
@@ -36,7 +34,6 @@ const SignUpPage: FC = () => {
     return <Navigate to="/timer" />;
   }
 
-  const onlyLettersRegex = /^[A-Za-zА-Яа-яЁё]+$/;
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{4,}$/;
   const usernameRegex = /^[a-zA-Z][a-zA-Z0-9]+$/;
   const emailRegex =
@@ -86,64 +83,6 @@ const SignUpPage: FC = () => {
         className="flex flex-col items-center gap-5 mt-3 w-[225px]"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <Input
-          fieldName="firstName"
-          placeHolder="First Name"
-          register={register}
-          validationRules={{
-            required: 'Field is required',
-            minLength: {
-              value: 2,
-              message: 'Minimum symbols: 2',
-            },
-            maxLength: {
-              value: 20,
-              message: 'Maximum symbols: 20',
-            },
-            pattern: {
-              value: onlyLettersRegex,
-              message: 'Only letters allowed',
-            },
-          }}
-          inputProps={{
-            maxLength: 20,
-          }}
-          errorMessage={
-            typeof errors.firstName?.message === 'string'
-              ? errors.firstName.message
-              : ''
-          }
-        />
-
-        <Input
-          fieldName="lastName"
-          placeHolder="Last Name"
-          register={register}
-          validationRules={{
-            required: 'Field is required',
-            minLength: {
-              value: 2,
-              message: 'Minimum symbols: 2',
-            },
-            maxLength: {
-              value: 20,
-              message: 'Maximum symbols: 20',
-            },
-            pattern: {
-              value: onlyLettersRegex,
-              message: 'Only letters allowed',
-            },
-          }}
-          inputProps={{
-            maxLength: 20,
-          }}
-          errorMessage={
-            typeof errors.lastName?.message === 'string'
-              ? errors.lastName.message
-              : ''
-          }
-        />
-
         <Input
           fieldName="email"
           placeHolder="Email"

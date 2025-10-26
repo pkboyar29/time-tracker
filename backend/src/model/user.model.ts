@@ -3,13 +3,13 @@ import mongoose from 'mongoose';
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: true,
+    required: false,
     minLength: [2, 'firstName minimum length is 2 characters'],
     maxLength: [20, 'firstName maximum length is 20 characters'],
   },
   lastName: {
     type: String,
-    required: true,
+    required: false,
     minLength: [2, 'lastName minimum length is 2 characters'],
     maxLength: [20, 'lastName maximum length is 20 characters'],
   },

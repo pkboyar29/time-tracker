@@ -75,7 +75,7 @@ async function signUp(
 
   const validationError = newUser.validateSync();
   if (validationError) {
-    const fields = ['firstName', 'lastName', 'email', 'username'] as const;
+    const fields = ['email', 'username'] as const;
 
     for (const field of fields) {
       const err = validationError.errors[field];
@@ -207,8 +207,8 @@ function refreshAccessToken(refreshToken: string): string | undefined {
 
 async function getProfileInfo(userId: string): Promise<UserResponseDTO> {
   const profileInfo = await User.findById(userId).select(
-    'username firstName lastName email dailyGoal showTimerInTitle'
-  );
+    'username email dailyGoal showTimerInTitle'
+  ); // firstName lastName
   return profileInfo as UserResponseDTO;
 }
 
