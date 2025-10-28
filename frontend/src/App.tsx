@@ -14,6 +14,7 @@ import { AxiosError } from 'axios';
 
 import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
+import BurgerButton from './components/BurgerButton';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -73,13 +74,19 @@ const App: FC = () => {
 
       <div
         id="app"
-        className={`App h-screen bg-backgroundLight dark:bg-backgroundDark ${
-          requiredAuth ? 'grid grid-cols-[auto,1fr]' : ''
+        className={`relative App h-screen bg-backgroundLight dark:bg-backgroundDark ${
+          requiredAuth ? 'md:grid md:grid-cols-[auto,1fr]' : ''
         }`}
       >
-        {requiredAuth && <Sidebar />}
+        {requiredAuth && (
+          <>
+            <BurgerButton />
 
-        <div className="w-full overflow-y-auto">
+            <Sidebar />
+          </>
+        )}
+
+        <div className="w-full h-full overflow-y-auto">
           <Routes>
             {routeConfig.map((route, index) => (
               <Route
