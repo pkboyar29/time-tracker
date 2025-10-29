@@ -158,7 +158,7 @@ const AnalyticsRangePage: FC = () => {
       </div>
 
       {isLoading ? (
-        <div className="mt-5 text-center">
+        <div className="h-full pt-5 text-center">
           <PrimaryClipLoader />
         </div>
       ) : rangeAnalytics &&
@@ -200,7 +200,7 @@ const AnalyticsRangePage: FC = () => {
           </div>
         </div>
       ) : (
-        <div className="mt-10 text-2xl font-bold text-center dark:text-textDark">
+        <div className="h-full pt-5 text-2xl font-bold text-center dark:text-textDark">
           No session activity for the specified dates
         </div>
       )}
