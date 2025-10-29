@@ -29,14 +29,12 @@ import DropdownMenu from './DropdownMenu';
 
 interface ActivityBoxProps {
   activityCommon: IActivity | IActivityGroup;
-  editHandler: (activityId: string) => void;
-  afterUpdateHandler?: (updatedActivity: IActivity | IActivityGroup) => void;
+  afterUpdateHandler: (updatedActivity: IActivity | IActivityGroup) => void;
   afterDeleteHandler: (deletedActivityCommonId: string) => void;
 }
 
 const ActivityItem: FC<ActivityBoxProps> = ({
   activityCommon,
-  editHandler,
   afterUpdateHandler,
   afterDeleteHandler,
 }) => {
@@ -74,15 +72,11 @@ const ActivityItem: FC<ActivityBoxProps> = ({
   };
 
   const editButtonClickHandler = () => {
-    if (afterUpdateHandler) {
-      if (isEditing && name != activityCommon.name) {
-        onUpdateActivityCommon();
-      }
-
-      setIsEditing((isEditing) => !isEditing);
-    } else {
-      editHandler(activityCommon.id);
+    if (isEditing && name != activityCommon.name) {
+      onUpdateActivityCommon();
     }
+
+    setIsEditing((prev) => !prev);
   };
 
   const archiveButtonClickHandler = async (archived: boolean) => {
@@ -90,8 +84,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
       try {
         await archiveActivity({ id: activityCommon.id, archived });
 
-        afterUpdateHandler &&
-          afterUpdateHandler({ ...activityCommon, archived });
+        afterUpdateHandler({ ...activityCommon, archived });
 
         toast(`Activity ${archived ? 'archived' : 'unarchived'} successfully`, {
           type: 'success',
@@ -137,7 +130,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           name,
         });
 
-        afterUpdateHandler && afterUpdateHandler(updatedData);
+        afterUpdateHandler(updatedData);
       } catch (e) {
         if (e instanceof AxiosError) {
           toast(
@@ -162,7 +155,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           name,
         });
 
-        afterUpdateHandler && afterUpdateHandler(updatedData);
+        afterUpdateHandler(updatedData);
       } catch (e) {
         if (e instanceof AxiosError) {
           toast(
@@ -243,6 +236,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
             <button
               className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
               onClick={editButtonClickHandler}
+              title="Edit"
             >
               {isEditing ? <SaveIcon /> : <EditIcon />}
             </button>
@@ -291,6 +285,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
                           setDropdown(false);
                           deleteButtonClickHandler();
                         }}
+                        title="Delete"
                       >
                         <div className="w-24 dark:text-textDark">Delete</div>
                         <DeleteIcon />
@@ -303,6 +298,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
               <button
                 className="p-1 transition duration-300 rounded-lg hover:bg-primaryHover/35 dark:hover:bg-primaryHover/35"
                 onClick={deleteButtonClickHandler}
+                title="Delete"
               >
                 <DeleteIcon />
               </button>
@@ -310,18 +306,22 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           </div>
         </div>
 
-        {isActivity && (
-          <div className="flex justify-end mt-4">
-            <div className="w-fit">
+        <div className="flex justify-end mt-4">
+          <div className="w-fit">
+            {isActivity ? (
               <Button
                 disabled={activityCommon.archived}
                 onClick={() => setStartSessionModal(true)}
               >
                 <span>Start session</span>
               </Button>
-            </div>
+            ) : (
+              <Button onClick={() => navigate(`${activityCommon.id}`)}>
+                <span>Show activities</span>
+              </Button>
+            )}
           </div>
-        )}
+        </div>
 
         <div className="flex justify-center gap-6 mt-6">
           <div className="text-center">

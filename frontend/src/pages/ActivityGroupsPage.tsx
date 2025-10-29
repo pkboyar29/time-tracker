@@ -1,5 +1,4 @@
 import { FC, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueryCustom } from '../hooks/useQueryCustom';
@@ -17,7 +16,6 @@ import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
 const ActivityGroupsPage: FC = () => {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const {
     data: activityGroups,
@@ -39,10 +37,6 @@ const ActivityGroupsPage: FC = () => {
       });
     }
   }, [isError]);
-
-  const handleEditActivityGroupClick = (activityGroupId: string) => {
-    navigate(`${activityGroupId}`);
-  };
 
   return (
     <>
@@ -114,7 +108,15 @@ const ActivityGroupsPage: FC = () => {
                     <ActivityItem
                       key={activityGroup.id}
                       activityCommon={activityGroup}
-                      editHandler={handleEditActivityGroupClick}
+                      afterUpdateHandler={(updatedGroup) => {
+                        queryClient.setQueryData(
+                          ['activityGroups'],
+                          (oldData: IActivityGroup[]) =>
+                            oldData.map((group) =>
+                              group.id == updatedGroup.id ? updatedGroup : group
+                            )
+                        );
+                      }}
                       afterDeleteHandler={(deletedItemId) => {
                         queryClient.setQueryData(
                           ['activityGroups'],
