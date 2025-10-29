@@ -1,11 +1,8 @@
 import { FC, useState, useRef } from 'react';
 import { clearSession } from '../../helpers/authHelpers';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
-import {
-  logOutUser,
-  updateDailyGoal,
-  updateShowTimerInTitle,
-} from '../../redux/slices/userSlice';
+import { logOutUser, setUser } from '../../redux/slices/userSlice';
+import { updateDailyGoal, updateShowTimerInTitle } from '../../api/userApi';
 import { useTimer } from '../../hooks/useTimer';
 import axios from '../../api/axios';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
@@ -46,14 +43,19 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
       clearTimeout(timeoutRef.current);
     }
 
-    const timeoutId = setTimeout(() => {
-      dispatch(updateDailyGoal(min * 60));
+    const timeoutId = setTimeout(async () => {
+      const newDailyGoal = min * 60;
+      await updateDailyGoal(newDailyGoal);
+
+      dispatch(setUser({ ...userInfo!, dailyGoal: newDailyGoal }));
     }, 200);
     timeoutRef.current = timeoutId;
   };
 
   const showTimerInTitleButtonClick = async (newState: boolean) => {
-    dispatch(updateShowTimerInTitle(newState));
+    await updateShowTimerInTitle(newState);
+
+    dispatch(setUser({ ...userInfo!, showTimerInTitle: newState }));
   };
 
   const changeNotificationPermission = () => {
