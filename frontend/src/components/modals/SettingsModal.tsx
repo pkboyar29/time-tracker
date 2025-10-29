@@ -127,7 +127,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
           </div>
         </div>
 
-        <div className="flex justify-end gap-3">
+        <div className="flex flex-col justify-end gap-3 md:flex-row">
           <div>
             <Button onClick={downloadUserDataFile}>
               Export user data to file
