@@ -195,6 +195,14 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         if (ev.data >= timerState.session.totalTimeSeconds) {
           finishTimer();
           timerWorker.postMessage({ action: 'pause' });
+          return;
+        }
+
+        // automatic timer update on server every 5 minutes
+        if ((ev.data - startSpentSeconds.current) % 300 == 0) {
+          updateSession({
+            ...timerState.session,
+          });
         }
       };
     } else {
