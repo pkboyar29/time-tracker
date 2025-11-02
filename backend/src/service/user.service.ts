@@ -71,6 +71,7 @@ async function signUp(
     ...userSignUpDTO,
     dailyGoal: 10800, // 3 hours
     password: hashedPassword,
+    createdDate: Date.now(),
   });
 
   const validationError = newUser.validateSync();
