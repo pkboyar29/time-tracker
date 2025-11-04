@@ -5,6 +5,7 @@ export interface IUser {
   email: string;
   dailyGoal: number;
   showTimerInTitle: boolean;
+  createdDate: Date;
 }
 
 export interface ISignIn {

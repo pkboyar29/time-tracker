@@ -60,7 +60,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
         onClick={() => {
           setDropdown((dropdown) => !dropdown);
         }}
-        className={`cursor-pointer flex justify-between gap-2 px-3 py-2`}
+        className="flex justify-between gap-2 px-3 py-2 cursor-pointer"
       >
         <div className="w-10/12 truncate">{currentOption?.name}</div>
 
@@ -75,42 +75,44 @@ const CustomSelect: FC<CustomSelectProps> = ({
         <div
           className={`absolute z-[2000] top-full left-0 w-full px-3 py-2 rounded-lg bg-white dark:bg-surfaceDarkHover border border-solid border-gray-500 overflow-y-auto max-h-[500px] `}
         >
-          {optionGroups.map((optGroup, i) => (
-            <div key={i}>
-              <div
-                className={`text-sm font-semibold ${
-                  optGroup.color == 'red'
-                    ? 'text-primary'
-                    : optGroup.color == 'grey'
-                    ? 'text-gray-500'
-                    : 'dark:text-textDark'
-                }`}
-              >
-                {optGroup.optGroupName}
-              </div>
+          {optionGroups
+            .filter((optGroup) => optGroup.options.length > 0)
+            .map((optGroup, i) => (
+              <div key={i}>
+                <div
+                  className={`text-sm font-semibold ${
+                    optGroup.color == 'red'
+                      ? 'text-primary'
+                      : optGroup.color == 'grey'
+                      ? 'text-gray-500'
+                      : 'dark:text-textDark'
+                  }`}
+                >
+                  {optGroup.optGroupName}
+                </div>
 
-              <div className="flex flex-col">
-                {optGroup.options.map((option) => (
-                  <div
-                    key={option.id}
-                    onClick={() => {
-                      onChange(option.id);
-                      setDropdown(false);
-                    }}
-                    className={`py-1.5 pl-4 text-base transition duration-300 rounded-md hover:bg-surfaceLightHover dark:hover:bg-surfaceDark truncate ${
-                      optGroup.color == 'red'
-                        ? 'text-primary'
-                        : optGroup.color == 'grey'
-                        ? 'text-gray-500'
-                        : 'dark:text-textDark'
-                    }`}
-                  >
-                    {option.name}
-                  </div>
-                ))}
+                <div className="flex flex-col">
+                  {optGroup.options.map((option) => (
+                    <div
+                      key={option.id}
+                      onClick={() => {
+                        onChange(option.id);
+                        setDropdown(false);
+                      }}
+                      className={`py-1.5 pl-4 text-base transition duration-300 rounded-md hover:bg-surfaceLightHover dark:hover:bg-surfaceDark truncate ${
+                        optGroup.color == 'red'
+                          ? 'text-primary'
+                          : optGroup.color == 'grey'
+                          ? 'text-gray-500'
+                          : 'dark:text-textDark'
+                      }`}
+                    >
+                      {option.name}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
     </div>

@@ -208,7 +208,7 @@ function refreshAccessToken(refreshToken: string): string | undefined {
 
 async function getProfileInfo(userId: string): Promise<UserResponseDTO> {
   const profileInfo = await User.findById(userId).select(
-    'username email dailyGoal showTimerInTitle'
+    'username email dailyGoal showTimerInTitle createdDate'
   ); // firstName lastName
   return profileInfo as UserResponseDTO;
 }

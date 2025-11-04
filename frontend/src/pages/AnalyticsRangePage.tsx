@@ -21,6 +21,7 @@ import DailyGoalBox from '../components/DailyGoalBox';
 import PeriodDistributionBox from '../components/PeriodDistributionBox';
 import RangeBox from '../components/analyticsRangeBoxes/RangeBox';
 import CustomRangeBox from '../components/analyticsRangeBoxes/CustomRangeBox';
+import OverallAnalyticsLabel from '../components/analyticsRangeBoxes/OverallAnalyticsLabel';
 
 const viewOptions: Record<RangeType, string> = {
   days: '0',
@@ -130,13 +131,11 @@ const AnalyticsRangePage: FC = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-y-hidden dark:text-textDark">
-      <div className="h-[164px] relative flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
+      <div className="max-h-[156px] h-full relative flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
         {rangeType == 'custom' ? (
           <CustomRangeBox fromDate={range.fromDate} toDate={range.toDate} />
         ) : rangeType == 'overall' ? (
-          <div className="h-full py-10 text-xl font-semibold select-none">
-            Overall session analytics
-          </div>
+          <OverallAnalyticsLabel />
         ) : (
           <RangeBox range={range} />
         )}

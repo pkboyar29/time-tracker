@@ -21,7 +21,7 @@ export const signUp = async (
 export const fetchProfileInfo = async (): Promise<IUser> => {
   const { data } = await axios.get('/users/profile');
 
-  return data as IUser;
+  return { ...data, createdDate: new Date(data.createdDate) };
 };
 
 export const updateDailyGoal = async (
