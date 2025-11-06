@@ -67,11 +67,11 @@ const Sidebar: FC = () => {
 
       <div
         ref={sidebarRef}
-        className={`absolute flex flex-col bg-backgroundLight dark:bg-backgroundDark h-full transition duration-300 ease-in-out z-50 top-0 left-0 md:relative md:translate-x-0 w-[150px] pt-2 p-5 md:p-5 border-r border-solid border-r-gray-500 ${
+        className={`absolute flex flex-col bg-backgroundLight dark:bg-backgroundDark h-full transition duration-300 ease-in-out z-50 top-0 left-0 xl:relative xl:translate-x-0 w-[150px] pt-2 p-5 xl:p-5 border-r border-solid border-r-gray-500 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className={`flex justify-end mb-3 md:hidden`}>
+        <div className={`flex justify-end mb-3 xl:hidden`}>
           <button
             className="p-1.5 transition duration-300 hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover rounded-full"
             onClick={() => dispatch(setIsSidebarOpen(false))}

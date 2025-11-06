@@ -4,11 +4,17 @@ import CrossIcon from '../../icons/CrossIcon';
 
 interface ModalProps {
   children: ReactNode;
+  modalClassnames?: string;
   title: ReactNode;
   onCloseModal: () => void;
 }
 
-const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
+const Modal: FC<ModalProps> = ({
+  children,
+  title,
+  modalClassnames,
+  onCloseModal,
+}) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const isMouseDownInside = useRef<boolean>(false);
 
@@ -49,7 +55,7 @@ const Modal: FC<ModalProps> = ({ children, title, onCloseModal }) => {
     >
       <div
         ref={modalRef}
-        className="px-3 py-5 overflow-hidden border border-solid rounded-md bg-surfaceLight dark:bg-surfaceDark basis-1/3 border-gray-300/80 dark:border-gray-500"
+        className={`${modalClassnames} px-3 py-5 overflow-hidden border border-solid rounded-md bg-surfaceLight dark:bg-surfaceDark basis-5/6 md:basis-2/3 xl:basis-1/3 border-gray-300/80 dark:border-gray-500`}
       >
         <div className="flex items-center justify-between mb-5">
           <div className="text-lg dark:text-textDark">{title}</div>

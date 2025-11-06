@@ -3,7 +3,8 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import Cookies from 'js-cookie';
 import { useAppDispatch } from '../redux/store';
-import { fetchProfileInfo } from '../redux/slices/userSlice';
+import { fetchProfileInfo } from '../api/userApi';
+import { setUser } from '../redux/slices/userSlice';
 import { isAuth } from '../helpers/authHelpers';
 import { signIn } from '../api/userApi';
 import { toast } from 'react-toastify';
@@ -39,7 +40,8 @@ const SignInPage: FC = () => {
       Cookies.set('access', access);
       Cookies.set('refresh', refresh, { expires: 5 });
 
-      dispatch(fetchProfileInfo());
+      const userInfo = await fetchProfileInfo();
+      dispatch(setUser(userInfo));
     } catch (e) {
       handleErrorResponse(e);
     }

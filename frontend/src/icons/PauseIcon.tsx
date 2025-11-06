@@ -6,15 +6,14 @@ const PauseIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
-      strokeWidth="1.5"
-      stroke="currentColor"
       className="size-6 stroke-black dark:stroke-textDark"
       {...props}
     >
       <path
+        d="M8 5 L8 19 M16 5 L16 19"
+        strokeWidth={1.5}
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M15.75 5.25v13.5m-7.5-13.5v13.5"
       />
     </svg>
   );

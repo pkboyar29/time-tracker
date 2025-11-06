@@ -5,7 +5,8 @@ import ProtectedRoute from './router/ProtectedRoute';
 import { useAppDispatch } from './redux/store';
 import { fetchSession } from './api/sessionApi';
 import { useTimer } from './hooks/useTimer';
-import { fetchProfileInfo } from './redux/slices/userSlice';
+import { fetchProfileInfo } from './api/userApi';
+import { setUser } from './redux/slices/userSlice';
 import {
   getSessionIdFromLocalStorage,
   removeSessionFromLocalStorage,
@@ -25,8 +26,14 @@ const App: FC = () => {
   const requiredAuth = !nonRequiredAuthRoutes.includes(location.pathname);
 
   useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const userInfo = await fetchProfileInfo();
+
+      dispatch(setUser(userInfo));
+    };
+
     if (requiredAuth) {
-      dispatch(fetchProfileInfo());
+      fetchCurrentUser();
     }
   }, []);
 
@@ -75,7 +82,7 @@ const App: FC = () => {
       <div
         id="app"
         className={`relative App h-screen bg-backgroundLight dark:bg-backgroundDark ${
-          requiredAuth ? 'md:grid md:grid-cols-[auto,1fr]' : ''
+          requiredAuth ? 'xl:grid xl:grid-cols-[auto,1fr]' : ''
         }`}
       >
         {requiredAuth && (

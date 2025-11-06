@@ -15,6 +15,9 @@ import { ModalState } from '../ts/interfaces/ModalState';
 
 interface SessionsListProps {
   title: string;
+  classname?: string;
+  setIsSessionsBlockOpen?: (state: boolean) => void;
+  isExpandable: boolean;
   sessions: ISession[];
   updateSessionsListHandler: (updatedSessions: ISession[]) => void;
 }
@@ -30,11 +33,13 @@ const getSessionsListAfterSessionUpdate = (
 
 const SessionsList: FC<SessionsListProps> = ({
   title,
+  classname,
+  setIsSessionsBlockOpen,
+  isExpandable,
   sessions,
   updateSessionsListHandler,
 }) => {
   const { timerState, startTimer } = useTimer();
-
   const sessionIdFromLocalStorage = getSessionIdFromLocalStorage();
 
   // removing current session from the list
@@ -76,6 +81,10 @@ const SessionsList: FC<SessionsListProps> = ({
 
   const handleSessionClick = async (session: ISession) => {
     startTimer(session);
+
+    if (setIsSessionsBlockOpen) {
+      setIsSessionsBlockOpen(false);
+    }
   };
 
   const handleSessionDelete = async (sessionId: string) => {
@@ -108,6 +117,7 @@ const SessionsList: FC<SessionsListProps> = ({
       {deleteModal.status && (
         <Modal
           title="Deleting session"
+          modalClassnames="basis-5/6 md:basis-5/6"
           onCloseModal={() =>
             setDeleteModal({
               status: false,
@@ -134,29 +144,31 @@ const SessionsList: FC<SessionsListProps> = ({
       )}
 
       {sessionsWithoutCurrent.length !== 0 && (
-        <div className="flex flex-col items-end ml-auto">
-          <button
-            onClick={() => setLess(!less)}
-            className="flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"
-          >
-            {title}
-            {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}
-          </button>
+        <div className={`flex flex-col items-end ml-auto ${classname}`}>
+          {isExpandable && (
+            <button
+              onClick={() => setLess(!less)}
+              className="flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"
+            >
+              {title}
+              {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+            </button>
+          )}
 
           {!less && (
-            <div
-              className={`flex flex-col gap-5 w-96 overflow-y-auto overflow-x-hidden`}
-            >
-              {sessionsWithoutCurrent.map((session) => (
-                <SessionItem
-                  isActive={timerState.session?.id === session.id}
-                  isEnabled={timerState.status == 'running'}
-                  key={session.id}
-                  session={session}
-                  sessionClickHandler={handleSessionClick}
-                  sessionDeleteHandler={handleSessionDeleteClick}
-                />
-              ))}
+            <div className="w-full overflow-x-hidden overflow-y-auto">
+              <div
+                className={`flex flex-col gap-5 w-full min-[400px]:w-96 ml-auto mr-1.5`}
+              >
+                {sessionsWithoutCurrent.map((session) => (
+                  <SessionItem
+                    key={session.id}
+                    session={session}
+                    sessionClickHandler={handleSessionClick}
+                    sessionDeleteHandler={handleSessionDeleteClick}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>

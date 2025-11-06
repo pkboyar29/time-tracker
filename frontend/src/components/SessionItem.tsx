@@ -3,6 +3,7 @@ import {
   getTimeHoursMinutes,
   getRemainingTimeHoursMinutesSeconds,
 } from '../helpers/timeHelpers';
+import { useTimer } from '../hooks/useTimer';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -12,29 +13,28 @@ import PauseIcon from '../icons/PauseIcon';
 import ResumeIcon from '../icons/ResumeIcon';
 import CustomCircularProgress from './CustomCircularProgress';
 
-// TODO: что за состояние isEnabled
 interface SessionItemProps {
-  isActive: boolean;
-  isEnabled?: boolean;
   session: ISession;
-  sessionClickHandler?: (session: ISession) => void;
+  sessionClickHandler: (session: ISession) => void;
   sessionDeleteHandler: (sessionId: string) => void;
 }
 
 const SessionItem: FC<SessionItemProps> = ({
-  isActive,
-  isEnabled,
   session,
   sessionClickHandler,
   sessionDeleteHandler,
 }) => {
+  const { timerState } = useTimer();
+  const isActive = timerState.session?.id === session.id;
+  const isEnabled = timerState.status == 'running';
+
   return (
     <div
-      className={`p-5 w-96 border border-solid rounded-xl ${
+      className={`p-5 w-full min-[400px]:w-96 border border-solid rounded-xl ${
         isActive ? 'border-primary' : 'border-black dark:border-gray-500'
       }`}
     >
-      <div className="flex items-start gap-20">
+      <div className="flex items-start justify-between gap-10 min-[400px]:gap-20">
         <div className="flex gap-5">
           <div className="flex flex-col gap-3 ml-auto">
             <div className="flex flex-col gap-2">
@@ -58,11 +58,11 @@ const SessionItem: FC<SessionItemProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-5 ml-auto">
+        <div className="flex flex-col gap-5">
           <div className="flex gap-3">
             <button
-              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
-              onClick={() => sessionClickHandler?.(session)}
+              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover translate-y-[1px]"
+              onClick={() => sessionClickHandler(session)}
             >
               {isActive ? (
                 isEnabled ? (

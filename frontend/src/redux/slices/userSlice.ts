@@ -1,82 +1,27 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from '../../api/axios';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { IUser } from '../../ts/interfaces/User/IUser';
-import UserStateStatuses from '../../ts/enums/UserStateStatuses';
 
 interface UserState {
   user: IUser | null;
-  status: UserStateStatuses;
 }
 
 const initialState: UserState = {
   user: null,
-  status: UserStateStatuses.idle,
 };
-
-export const fetchProfileInfo = createAsyncThunk(
-  'users/fetchProfileInfo',
-  async () => {
-    const { data } = await axios.get('/users/profile');
-    return data as IUser;
-  }
-);
-
-export const updateDailyGoal = createAsyncThunk(
-  'users/updateDailyGoal',
-  async (newDailyGoal: number) => {
-    const { data } = await axios.put('/users/updateDailyGoal', {
-      newDailyGoal,
-    });
-    return data;
-  }
-);
-
-export const updateShowTimerInTitle = createAsyncThunk(
-  'users/updateShowTimerInTitle',
-  async (showTimerInTitle: boolean) => {
-    const { data } = await axios.put('/users/updateShowTimerInTitle', {
-      showTimerInTitle,
-    });
-    return data;
-  }
-);
 
 const userSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {
+    setUser(state, action: PayloadAction<IUser>) {
+      state.user = action.payload;
+    },
     logOutUser(state) {
       state.user = null;
-      state.status = UserStateStatuses.logout;
     },
   },
-  extraReducers: (builder) => {
-    builder
-      .addCase(fetchProfileInfo.pending, (state) => {
-        state.status = UserStateStatuses.loading;
-      })
-      .addCase(fetchProfileInfo.fulfilled, (state, action) => {
-        state.status = UserStateStatuses.succeeded;
-        state.user = action.payload;
-      })
-      .addCase(fetchProfileInfo.rejected, (state) => {
-        state.status = UserStateStatuses.failed;
-      })
-      .addCase(updateDailyGoal.fulfilled, (state, action) => {
-        if (state.user) {
-          state.user = {
-            ...state.user,
-            dailyGoal: action.meta.arg,
-          };
-        }
-      })
-      .addCase(updateShowTimerInTitle.fulfilled, (state, action) => {
-        if (state.user) {
-          state.user = { ...state.user, showTimerInTitle: action.meta.arg };
-        }
-      });
-  },
+  extraReducers: (builder) => {},
 });
 
-export const { logOutUser } = userSlice.actions;
+export const { logOutUser, setUser } = userSlice.actions;
 export default userSlice.reducer;

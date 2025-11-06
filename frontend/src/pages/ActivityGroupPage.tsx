@@ -9,9 +9,9 @@ import {
 import { fetchGroupActivities } from '../api/activityApi';
 import { toast } from 'react-toastify';
 
+import Title from '../components/Title';
 import CrossIcon from '../icons/CrossIcon';
 import ActivityCreateForm from '../components/forms/ActivityCreateForm';
-import ActivityCommonUpdateForm from '../components/forms/ActivityCommonUpdateForm';
 import ActivityItem from '../components/ActivityItem';
 import Button from '../components/Button';
 import Modal from '../components/modals/Modal';
@@ -129,19 +129,9 @@ const ActivityGroupPage: FC = () => {
               / {currentActivityGroup.name}
             </div>
 
-            <div className="flex justify-between mt-5">
+            <div className="flex items-center justify-between mt-5">
               {currentActivityGroup && (
-                <ActivityCommonUpdateForm
-                  activityCommon={currentActivityGroup}
-                  afterUpdateHandler={(updatedGroup) => {
-                    if (!('activityGroup' in updatedGroup)) {
-                      queryClient.setQueryData(
-                        ['activityGroup', activityGroupId],
-                        () => updatedGroup
-                      );
-                    }
-                  }}
-                />
+                <Title>{currentActivityGroup.name}</Title>
               )}
               <div className="flex h-full gap-5">
                 <div className="relative flex">
@@ -193,7 +183,6 @@ const ActivityGroupPage: FC = () => {
                     <ActivityItem
                       key={activity.id}
                       activityCommon={activity}
-                      editHandler={() => console.log('edit handler')}
                       afterUpdateHandler={(updatedActivity) => {
                         queryClient.setQueryData(
                           ['activities', activityGroupId],

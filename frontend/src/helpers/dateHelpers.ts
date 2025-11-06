@@ -331,7 +331,6 @@ export const isSameDay = (oneDay: Date, twoDay: Date) => {
   );
 };
 
-// TODO: добавить overall
 export type RangeType =
   | 'days'
   | 'weeks'
@@ -483,3 +482,10 @@ export const shiftTwoDates = (
 
   return [new Date(), new Date()];
 };
+
+export const formatDate = (date: Date) =>
+  date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });

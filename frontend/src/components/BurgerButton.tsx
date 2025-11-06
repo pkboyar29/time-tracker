@@ -10,7 +10,7 @@ const BurgerButton: FC = () => {
 
   return (
     <div
-      className={`absolute z-30 block md:hidden top-4 left-4 transition duration-200 ease-in-out ${
+      className={`absolute z-30 block xl:hidden top-4 left-4 transition duration-200 ease-in-out ${
         isSidebarOpen ? 'opacity-0' : 'opacity-100'
       }`}
     >
