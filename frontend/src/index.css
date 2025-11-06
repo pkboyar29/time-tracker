@@ -203,3 +203,31 @@ h6 {
 .modal-open {
   overflow: hidden;
 }
+
+@keyframes backdrop-blur-fade-in {
+  from {
+    backdrop-filter: blur(0px);
+    background-color: rgba(0, 0, 0, 0);
+  }
+  to {
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.animate-backdrop-fade-in {
+  animation: backdrop-blur-fade-in 0.3s ease-out forwards;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
+}

@@ -15,6 +15,7 @@ import PrimaryClipLoader from '../components/PrimaryClipLoader';
 import PlayIcon from '../icons/PlayIcon';
 import PauseIcon from '../icons/PauseIcon';
 import StopIcon from '../icons/StopIcon';
+import TimerIcon from '../icons/TimerIcon';
 import CustomCircularProgress from '../components/CustomCircularProgress';
 import SessionsList from '../components/SessionsList';
 import Button from '../components/Button';
@@ -30,6 +31,8 @@ const TimerPage: FC = () => {
   const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
     []
   );
+  const [isSessionsBlockOpen, setIsSessionsBlockOpen] =
+    useState<boolean>(false);
 
   const { data: activitiesToChoose, isLoading: isLoadingActivities } =
     useQueryCustom({
@@ -112,11 +115,11 @@ const TimerPage: FC = () => {
 
   return (
     <div className="h-full bg-surfaceLight dark:bg-backgroundDark">
-      <div className="container flex items-stretch justify-between h-full gap-10 py-5">
+      <div className="container flex items-stretch justify-between w-full h-full gap-10 py-5">
         {sessionIdFromLocalStorage && !isTimerStarted ? null : (
-          <div className="sticky top-0 flex text-lg gap-28">
+          <div className="sticky top-0 flex flex-col w-full gap-8 text-lg sm:flex-row md:gap-16 lg:w-auto xl:gap-28">
             {/* Left part of timer */}
-            <div className="flex flex-col items-center flex-1 gap-2">
+            <div className="flex flex-col items-center gap-2 mt-10 sm:mt-0 sm:flex-1 basis-1/3 sm:basis-auto">
               {!isTimerStarted ? (
                 <CustomCircularProgress
                   valuePercent={0}
@@ -184,15 +187,15 @@ const TimerPage: FC = () => {
                     </button>
                   </div>
 
-                  {timerState.status == 'paused' && (
-                    <div className="dark:text-textDark">Paused</div>
-                  )}
+                  <div className="h-6 dark:text-textDark">
+                    {timerState.status == 'paused' && 'Paused'}
+                  </div>
                 </>
               )}
             </div>
 
             {/* Right part of timer */}
-            <div className="flex flex-col p-6 rounded-lg shadow-md w-96 bg-surfaceLightHover dark:bg-surfaceDark">
+            <div className="flex flex-col flex-1 w-full p-6 rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
               <div className="flex flex-col flex-grow gap-5 overflow-auto">
                 {isTimerStarted && (
                   <>
@@ -291,8 +294,50 @@ const TimerPage: FC = () => {
           </div>
         )}
 
+        {/* Uncompleted sessions block */}
+        <button
+          className="fixed z-50 p-4 transition-colors duration-300 rounded-full shadow-lg xl:hidden bottom-6 right-6 bg-primary hover:bg-primaryHover"
+          onClick={() => setIsSessionsBlockOpen(true)}
+        >
+          <TimerIcon className="stroke-textDark" />
+        </button>
+        {isSessionsBlockOpen && (
+          <>
+            <div
+              className="fixed xl:hidden inset-0 z-[60] bg-black/50 backdrop-blur-sm backdrop-blur-fade-in"
+              onClick={() => setIsSessionsBlockOpen(false)}
+            />
+
+            <div className="p-4 fixed xl:hidden top-0 right-0 h-full w-full min-[400px]:w-[400px] bg-[#fafafa] dark:bg-[#111] z-[70] shadow-lg transform animate-slide-in">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold dark:text-textDark">
+                  Uncompleted sessions
+                </h2>
+                <button
+                  onClick={() => setIsSessionsBlockOpen(false)}
+                  className="dark:text-gray-400"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="w-full overflow-y-auto h-[calc(100%-3rem)]">
+                <SessionsList
+                  title=""
+                  isExpandable={false}
+                  setIsSessionsBlockOpen={setIsSessionsBlockOpen}
+                  sessions={uncompletedSessions}
+                  updateSessionsListHandler={setUncompletedSessions}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
         <SessionsList
+          classname="hidden xl:flex"
           title="Uncompleted sessions"
+          isExpandable={true}
           sessions={uncompletedSessions}
           updateSessionsListHandler={setUncompletedSessions}
         />
