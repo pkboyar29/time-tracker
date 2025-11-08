@@ -8,7 +8,7 @@ import {
   archiveActivity,
   deleteActivity,
 } from '../api/activityApi';
-import { getTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
+import { getTimeHMS } from '../helpers/timeHelpers';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { AxiosError } from 'axios';
@@ -334,7 +334,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           </div>
           <div className="text-center">
             <div className="font-bold dark:text-textDark">
-              {getTimeHoursMinutesSeconds(activityCommon.spentTimeSeconds)}
+              {getTimeHMS(activityCommon.spentTimeSeconds)}
             </div>
             <div className="text-[13px] dark:text-textDarkSecondary">
               spent time

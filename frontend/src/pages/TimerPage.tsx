@@ -5,7 +5,7 @@ import { fetchActivities } from '../api/activityApi';
 import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
 import {
   getRemainingTimeHoursMinutesSeconds,
-  getTimeHoursMinutes,
+  getReadableTimeHMS,
   getTimeHHmmFromDate,
 } from '../helpers/timeHelpers';
 import { useTimer } from '../hooks/useTimer';
@@ -201,7 +201,7 @@ const TimerPage: FC = () => {
                   <>
                     <div className="text-lg font-semibold dark:text-textDark">
                       Session{' '}
-                      {getTimeHoursMinutes(
+                      {getReadableTimeHMS(
                         timerState.session.totalTimeSeconds,
                         false
                       )}

@@ -1,7 +1,7 @@
 import {
   getRemainingTimeHoursMinutesSeconds,
-  getTimeHoursMinutesSeconds,
-  getTimeHoursMinutes,
+  getTimeHMS,
+  getReadableTimeHMS,
   getTimeHHmmFromDate,
 } from '../../helpers/timeHelpers';
 
@@ -47,86 +47,86 @@ describe('getRemainingTimeHoursMinutesSeconds', () => {
   });
 });
 
-describe('getTimeHoursMinutesSeconds', () => {
+describe('getTimeHMS', () => {
   it('formats full time correctly with hours, minutes, and seconds', () => {
-    const result = getTimeHoursMinutesSeconds(3665); // 1h 1m 5s
+    const result = getTimeHMS(3665); // 1h 1m 5s
     expect(result).toBe('01:01:05');
   });
 
   it('formats time with leading zeros in hours, minutes, and seconds', () => {
-    const result = getTimeHoursMinutesSeconds(5); // 0h 0m 5s
+    const result = getTimeHMS(5); // 0h 0m 5s
     expect(result).toBe('00:00:05');
   });
 
   it('formats time with minutes and seconds only', () => {
-    const result = getTimeHoursMinutesSeconds(125); // 0h 2m 5s
+    const result = getTimeHMS(125); // 0h 2m 5s
     expect(result).toBe('00:02:05');
   });
 
   it('formats exactly one hour', () => {
-    const result = getTimeHoursMinutesSeconds(3600); // 1h 0m 0s
+    const result = getTimeHMS(3600); // 1h 0m 0s
     expect(result).toBe('01:00:00');
   });
 
   it('formats exactly one minute', () => {
-    const result = getTimeHoursMinutesSeconds(60); // 0h 1m 0s
+    const result = getTimeHMS(60); // 0h 1m 0s
     expect(result).toBe('00:01:00');
   });
 
   it('formats zero seconds', () => {
-    const result = getTimeHoursMinutesSeconds(0); // 0h 0m 0s
+    const result = getTimeHMS(0); // 0h 0m 0s
     expect(result).toBe('00:00:00');
   });
 
   it('formats large time values correctly', () => {
-    const result = getTimeHoursMinutesSeconds(37230); // 10h 20m 30s
+    const result = getTimeHMS(37230); // 10h 20m 30s
     expect(result).toBe('10:20:30');
   });
 });
 
-describe('getTimeHoursMinutes', () => {
-  it('returns "0 minutes" when input is 0 and short is false', () => {
-    const result = getTimeHoursMinutes(0);
-    expect(result).toBe('0 minutes');
+describe('getReadableTimeHMS', () => {
+  it('returns only seconds when input is less than 1 minute and short is false', () => {
+    const result = getReadableTimeHMS(3);
+    expect(result).toBe('3 seconds');
   });
 
-  it('returns "0m" when input is 0 and short is true', () => {
-    const result = getTimeHoursMinutes(0, true);
-    expect(result).toBe('0m');
+  it('returns only seconds when input is less than 1 minute and short is true', () => {
+    const result = getReadableTimeHMS(14, true);
+    expect(result).toBe('14s');
   });
 
   it('returns only minutes when hours are 0 and short is false', () => {
-    const result = getTimeHoursMinutes(150); // 2m 30s
+    const result = getReadableTimeHMS(150); // 2m 30s
     expect(result).toBe('2 minutes');
   });
 
   it('returns only minutes when hours are 0 and short is true', () => {
-    const result = getTimeHoursMinutes(120, true); // 2m
+    const result = getReadableTimeHMS(120, true); // 2m
     expect(result).toBe('2m');
   });
 
   it('returns only hours when minutes are 0 and short is false', () => {
-    const result = getTimeHoursMinutes(3600); // 1h
+    const result = getReadableTimeHMS(3600); // 1h
     expect(result).toBe('1 hours');
   });
 
   it('returns only hours when minutes are 0 and short is true', () => {
-    const result = getTimeHoursMinutes(7200, true); // 2h
+    const result = getReadableTimeHMS(7200, true); // 2h
     expect(result).toBe('2h');
   });
 
   it('returns hours and minutes when both are present, short = false', () => {
-    const result = getTimeHoursMinutes(3660); // 1h 1m
+    const result = getReadableTimeHMS(3660); // 1h 1m
     expect(result).toBe('1 hours 1 minutes');
   });
 
   it('returns hours and minutes when both are present, short = true', () => {
-    const result = getTimeHoursMinutes(7260, true); // 2h 1m
+    const result = getReadableTimeHMS(7260, true); // 2h 1m
     expect(result).toBe('2h 1m');
   });
 
   it('trims extra whitespace when only one part is present', () => {
-    const result = getTimeHoursMinutes(3600); // only hours
+    const result = getReadableTimeHMS(3600); // only hours
     expect(result).toBe('1 hours');
   });
 });

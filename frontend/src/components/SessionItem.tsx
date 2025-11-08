@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import {
-  getTimeHoursMinutes,
+  getReadableTimeHMS,
   getRemainingTimeHoursMinutesSeconds,
 } from '../helpers/timeHelpers';
 import { useTimer } from '../hooks/useTimer';
@@ -43,8 +43,8 @@ const SessionItem: FC<SessionItemProps> = ({
               </div>
               <div className="dark:text-textDarkSecondary">
                 {session.totalTimeSeconds >= 3600
-                  ? getTimeHoursMinutes(session.totalTimeSeconds, true)
-                  : getTimeHoursMinutes(session.totalTimeSeconds, false)}
+                  ? getReadableTimeHMS(session.totalTimeSeconds, true)
+                  : getReadableTimeHMS(session.totalTimeSeconds, false)}
               </div>
             </div>
             <div className="flex flex-col gap-2">

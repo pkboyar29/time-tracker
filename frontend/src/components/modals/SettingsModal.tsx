@@ -6,7 +6,7 @@ import { updateDailyGoal, updateShowTimerInTitle } from '../../api/userApi';
 import { useTimer } from '../../hooks/useTimer';
 import axios from '../../api/axios';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
-import { getTimeHoursMinutes } from '../../helpers/timeHelpers';
+import { getReadableTimeHMS } from '../../helpers/timeHelpers';
 
 import Button from '../common/Button';
 import Modal from './Modal';
@@ -94,7 +94,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
                 Your daily goal
               </h3>
               <div className="mb-2 text-3xl font-bold text-primary">
-                {getTimeHoursMinutes(dailyGoalInput * 60)}
+                {getReadableTimeHMS(dailyGoalInput * 60)}
               </div>
               <RangeSlider
                 minValue={1}

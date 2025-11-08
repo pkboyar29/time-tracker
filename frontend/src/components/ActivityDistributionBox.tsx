@@ -1,5 +1,5 @@
 import { FC, useRef, useMemo } from 'react';
-import { getTimeHoursMinutes } from '../helpers/timeHelpers';
+import { getReadableTimeHMS } from '../helpers/timeHelpers';
 import { PieChart, Pie, ResponsiveContainer } from 'recharts';
 import { colors } from '../../design-tokens';
 
@@ -147,7 +147,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 </div>
                 <div className="w-1/5">{item.sessionsAmount}</div>
                 <div className="w-1/5">
-                  {getTimeHoursMinutes(item.spentTimeSeconds, true)}
+                  {getReadableTimeHMS(item.spentTimeSeconds, true)}
                 </div>
                 <div className="w-1/5">
                   {item.pausedAmount} times
@@ -195,7 +195,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                     {item.activityName}
                   </div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
-                    ({getTimeHoursMinutes(item.spentTimeSeconds, true)} (
+                    ({getReadableTimeHMS(item.spentTimeSeconds, true)} (
                     {Math.trunc(item.spentTimePercentage * 100)}%),{' '}
                     {item.sessionsAmount} sessions)
                   </div>
