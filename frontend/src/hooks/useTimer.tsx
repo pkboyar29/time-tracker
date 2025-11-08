@@ -202,6 +202,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         if ((ev.data - startSpentSeconds.current) % 300 == 0) {
           updateSession({
             ...timerState.session,
+            spentTimeSeconds: ev.data,
           });
         }
       };
