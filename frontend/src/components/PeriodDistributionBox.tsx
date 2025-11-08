@@ -18,7 +18,7 @@ import {
   Cell,
   ResponsiveContainer,
 } from 'recharts';
-import ToggleButton from './ToggleButton';
+import ToggleButton from './common/ToggleButton';
 
 interface CustomTooltipProps {
   active?: boolean;

@@ -16,7 +16,7 @@ import { AxiosError } from 'axios';
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
-import Button from './Button';
+import Button from './common/Button';
 import DeleteIcon from '../icons/DeleteIcon';
 import EditIcon from '../icons/EditIcon';
 import SaveIcon from '../icons/SaveIcon';
@@ -25,7 +25,7 @@ import UnarchiveIcon from '../icons/UnarchiveIcon';
 import KebabHorizontalIcon from '../icons/KebabHorizontalIcon';
 import SessionCreateModal from './modals/SessionCreateModal';
 import Modal from './modals/Modal';
-import DropdownMenu from './DropdownMenu';
+import DropdownMenu from './common/DropdownMenu';
 
 interface ActivityBoxProps {
   activityCommon: IActivity | IActivityGroup;

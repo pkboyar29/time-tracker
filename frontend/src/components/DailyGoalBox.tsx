@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { useAppSelector } from '../redux/store';
 import { getTimeHoursMinutes } from '../helpers/timeHelpers';
 
-import CustomCircularProgress from './CustomCircularProgress';
+import CustomCircularProgress from './common/CustomCircularProgress';
 
 interface DailyGoalBoxProps {
   spentTimeSeconds: number;

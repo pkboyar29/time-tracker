@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { createActivityGroup } from '../../api/activityGroupApi';
 import { toast } from 'react-toastify';
 
-import Button from '../Button';
-import Input from '../Input';
+import Button from '../common/Button';
+import Input from '../common/Input';
 
 import { IActivityGroup } from '../../ts/interfaces/ActivityGroup/IActivityGroup';
 

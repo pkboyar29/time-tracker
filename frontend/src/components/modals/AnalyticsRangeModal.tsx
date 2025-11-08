@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getDayRange } from '../../helpers/dateHelpers';
 
 import Modal from './Modal';
-import Button from '../Button';
+import Button from '../common/Button';
 
 interface AnalyticsRangeModalProps {
   onCloseModal: () => void;

@@ -9,13 +9,13 @@ import {
 import { fetchGroupActivities } from '../api/activityApi';
 import { toast } from 'react-toastify';
 
-import Title from '../components/Title';
+import Title from '../components/common/Title';
 import CrossIcon from '../icons/CrossIcon';
 import ActivityCreateForm from '../components/forms/ActivityCreateForm';
 import ActivityItem from '../components/ActivityItem';
-import Button from '../components/Button';
+import Button from '../components/common/Button';
 import Modal from '../components/modals/Modal';
-import PrimaryClipLoader from '../components/PrimaryClipLoader';
+import PrimaryClipLoader from '../components/common/PrimaryClipLoader';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 

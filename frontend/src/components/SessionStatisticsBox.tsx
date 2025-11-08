@@ -2,7 +2,7 @@ import { FC } from 'react';
 import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
 import { getTimeHoursMinutes } from '../helpers/timeHelpers';
 
-import QuestionMarkTooltip from './QuestionMarkTooltip';
+import QuestionMarkTooltip from './common/QuestionMarkTooltip';
 
 interface SessionStatisticsBoxProps {
   statistics: ISessionStatistics;

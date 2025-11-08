@@ -8,11 +8,11 @@ import axios from '../../api/axios';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
 import { getTimeHoursMinutes } from '../../helpers/timeHelpers';
 
-import Button from '../Button';
+import Button from '../common/Button';
 import Modal from './Modal';
-import ToggleButton from '../ToggleButton';
-import RangeSlider from '../RangeSlider';
-import QuestionMarkTooltip from '../QuestionMarkTooltip';
+import ToggleButton from '../common/ToggleButton';
+import RangeSlider from '../common/RangeSlider';
+import QuestionMarkTooltip from '../common/QuestionMarkTooltip';
 
 interface SettingsModalProps {
   onCloseModal: () => void;

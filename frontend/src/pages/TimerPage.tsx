@@ -11,17 +11,17 @@ import {
 import { useTimer } from '../hooks/useTimer';
 import { toast } from 'react-toastify';
 
-import PrimaryClipLoader from '../components/PrimaryClipLoader';
+import PrimaryClipLoader from '../components/common/PrimaryClipLoader';
 import PlayIcon from '../icons/PlayIcon';
 import PauseIcon from '../icons/PauseIcon';
 import StopIcon from '../icons/StopIcon';
 import TimerIcon from '../icons/TimerIcon';
-import CustomCircularProgress from '../components/CustomCircularProgress';
+import CustomCircularProgress from '../components/common/CustomCircularProgress';
 import SessionsList from '../components/SessionsList';
-import Button from '../components/Button';
-import RangeSlider from '../components/RangeSlider';
+import Button from '../components/common/Button';
+import RangeSlider from '../components/common/RangeSlider';
 import NotesSection from '../components/NotesSection';
-import CustomSelect from '../components/CustomSelect';
+import CustomSelect from '../components/common/CustomSelect';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 

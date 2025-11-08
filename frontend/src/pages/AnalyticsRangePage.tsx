@@ -14,8 +14,8 @@ import {
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
-import PrimaryClipLoader from '../components/PrimaryClipLoader';
-import CustomSelect from '../components/CustomSelect';
+import PrimaryClipLoader from '../components/common/PrimaryClipLoader';
+import CustomSelect from '../components/common/CustomSelect';
 // TODO: использовать lazy loading
 import DailyGoalBox from '../components/DailyGoalBox';
 import PeriodDistributionBox from '../components/PeriodDistributionBox';

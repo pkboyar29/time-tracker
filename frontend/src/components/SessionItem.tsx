@@ -11,7 +11,7 @@ import DeleteIcon from '../icons/DeleteIcon';
 import PlayIcon from '../icons/PlayIcon';
 import PauseIcon from '../icons/PauseIcon';
 import ResumeIcon from '../icons/ResumeIcon';
-import CustomCircularProgress from './CustomCircularProgress';
+import CustomCircularProgress from './common/CustomCircularProgress';
 
 interface SessionItemProps {
   session: ISession;

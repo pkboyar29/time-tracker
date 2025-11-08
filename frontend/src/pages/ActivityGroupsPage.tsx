@@ -5,10 +5,10 @@ import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivityGroups } from '../api/activityGroupApi';
 
 import CrossIcon from '../icons/CrossIcon';
-import PrimaryClipLoader from '../components/PrimaryClipLoader';
-import Button from '../components/Button';
+import PrimaryClipLoader from '../components/common/PrimaryClipLoader';
+import Button from '../components/common/Button';
 import Modal from '../components/modals/Modal';
-import Title from '../components/Title';
+import Title from '../components/common/Title';
 import ActivityItem from '../components/ActivityItem';
 import ActivityGroupCreateForm from '../components/forms/ActivityGroupCreateForm';
 
