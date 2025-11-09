@@ -10,7 +10,7 @@ import { fetchGroupActivities } from '../api/activityApi';
 import { toast } from 'react-toastify';
 
 import Title from '../components/common/Title';
-import CrossIcon from '../icons/CrossIcon';
+import SearchBar from '../components/common/SearchBar';
 import ActivityCreateForm from '../components/forms/ActivityCreateForm';
 import ActivityItem from '../components/ActivityItem';
 import Button from '../components/common/Button';
@@ -64,8 +64,6 @@ const ActivityGroupPage: FC = () => {
   }, [isErrorActivities]);
 
   const onArchiveAllActivities = async () => {
-    // TODO: отображать серверную ошибку
-
     try {
       await archiveAllActivities(currentActivityGroup!.id);
 
@@ -112,13 +110,13 @@ const ActivityGroupPage: FC = () => {
       )}
 
       {isLoading ? (
-        <div className="mt-5 text-center">
+        <div className="my-[65px] xl:my-5 text-center">
           <PrimaryClipLoader />
         </div>
       ) : (
         currentActivityGroup &&
         activities && (
-          <div className="container my-5">
+          <div className="container my-[65px] xl:my-5">
             <div className="dark:text-textDark">
               <span
                 onClick={() => navigate('/activity-groups')}
@@ -133,27 +131,27 @@ const ActivityGroupPage: FC = () => {
               {currentActivityGroup && (
                 <Title>{currentActivityGroup.name}</Title>
               )}
+
               <div className="flex h-full gap-5">
-                <div className="relative flex">
-                  <input
-                    value={searchString}
-                    onChange={(e) => setSearchString(e.target.value)}
-                    className="transition duration-300 bg-transparent border-b border-solid border-b-gray-500 focus:border-b-primary dark:text-textDark"
-                    type="text"
-                    placeholder="Search..."
-                  />
-                  {searchString && (
-                    <button
-                      className="absolute right-0 z-10 top-[6px]"
-                      onClick={() => setSearchString('')}
-                    >
-                      <CrossIcon />
-                    </button>
-                  )}
+                <SearchBar
+                  searchString={searchString}
+                  setSearchString={setSearchString}
+                  compact={true}
+                  className="hidden md:flex"
+                />
+
+                <div className="hidden md:block w-fit">
+                  <Button onClick={() => setCreateModal(true)}>
+                    Create new activity group
+                  </Button>
                 </div>
-                <Button onClick={() => setCreateModal(true)}>
-                  Create new activity
-                </Button>
+
+                <button
+                  className="fixed z-50 flex items-center justify-center text-3xl font-semibold leading-none text-white transition-colors duration-300 rounded-full shadow-lg w-14 h-14 md:hidden bottom-6 right-6 bg-primary hover:bg-primaryHover dark:text-textDark"
+                  onClick={() => setCreateModal(true)}
+                >
+                  +
+                </button>
               </div>
             </div>
 
@@ -169,7 +167,7 @@ const ActivityGroupPage: FC = () => {
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 mt-7">
+            <div className="flex flex-wrap justify-center gap-4 md:justify-start mt-7">
               {activities.filter((activity) =>
                 activity.name.toLowerCase().includes(searchString.toLowerCase())
               ).length !== 0 ? (

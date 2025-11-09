@@ -86,7 +86,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
 
   return (
     <Modal title="Settings" onCloseModal={onCloseModal}>
-      <div className="h-[40vh] flex flex-col gap-4 justify-between">
+      <div className="h-[40vh] overflow-y-auto flex flex-col gap-4 justify-between">
         <div className="flex flex-col gap-4">
           {userInfo && (
             <div className="p-5 text-center rounded-3xl bg-surfaceLightHover dark:bg-surfaceDarkDarker">
