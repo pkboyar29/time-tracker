@@ -167,6 +167,15 @@ const ActivityGroupPage: FC = () => {
               </div>
             </div>
 
+            <div className="flex justify-end mt-4 md:hidden">
+              <SearchBar
+                searchString={searchString}
+                setSearchString={setSearchString}
+                compact={false}
+                className="flex md:hidden"
+              />
+            </div>
+
             <div className="flex flex-wrap justify-center gap-4 md:justify-start mt-7">
               {activities.filter((activity) =>
                 activity.name.toLowerCase().includes(searchString.toLowerCase())

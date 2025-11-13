@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, useRef } from 'react';
+import { FC, useState } from 'react';
 import {
   updateActivityGroup,
   deleteActivityGroup,
@@ -49,23 +49,6 @@ const ActivityItem: FC<ActivityBoxProps> = ({
   const [name, setName] = useState<string>(activityCommon.name);
 
   const [dropdown, setDropdown] = useState<boolean>(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
-        setDropdown(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   const inputChangeHandler = async (e: React.FormEvent<HTMLInputElement>) => {
     setName(e.currentTarget.value);
@@ -251,48 +234,44 @@ const ActivityItem: FC<ActivityBoxProps> = ({
                   <KebabHorizontalIcon />
                 </button>
 
-                {dropdown && (
-                  <DropdownMenu ref={dropdownRef}>
-                    <div className="flex flex-col gap-1.5">
-                      <button
-                        className="flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
-                        title="An archived activity will remain in analytics, but you cannot start session with this activity"
-                        onClick={() => {
-                          setDropdown(false);
-                          archiveButtonClickHandler(!activityCommon.archived);
-                        }}
-                      >
-                        {activityCommon.archived ? (
-                          <>
-                            <div className="w-24 dark:text-textDark">
-                              Unarchive
-                            </div>
-                            <UnarchiveIcon />
-                          </>
-                        ) : (
-                          <>
-                            <div className="w-24 dark:text-textDark">
-                              Archive
-                            </div>
-                            <ArchiveIcon />
-                          </>
-                        )}
-                      </button>
+                <DropdownMenu dropdown={dropdown} setDropdown={setDropdown}>
+                  <div className="flex flex-col gap-1.5">
+                    <button
+                      className="flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
+                      title="An archived activity will remain in analytics, but you cannot start session with this activity"
+                      onClick={() => {
+                        setDropdown(false);
+                        archiveButtonClickHandler(!activityCommon.archived);
+                      }}
+                    >
+                      {activityCommon.archived ? (
+                        <>
+                          <div className="w-24 dark:text-textDark">
+                            Unarchive
+                          </div>
+                          <UnarchiveIcon />
+                        </>
+                      ) : (
+                        <>
+                          <div className="w-24 dark:text-textDark">Archive</div>
+                          <ArchiveIcon />
+                        </>
+                      )}
+                    </button>
 
-                      <button
-                        className="flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-primaryHover/35 dark:hover:bg-primaryHover/35"
-                        onClick={() => {
-                          setDropdown(false);
-                          deleteButtonClickHandler();
-                        }}
-                        title="Delete"
-                      >
-                        <div className="w-24 dark:text-textDark">Delete</div>
-                        <DeleteIcon />
-                      </button>
-                    </div>
-                  </DropdownMenu>
-                )}
+                    <button
+                      className="flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-primaryHover/35 dark:hover:bg-primaryHover/35"
+                      onClick={() => {
+                        setDropdown(false);
+                        deleteButtonClickHandler();
+                      }}
+                      title="Delete"
+                    >
+                      <div className="w-24 dark:text-textDark">Delete</div>
+                      <DeleteIcon />
+                    </button>
+                  </div>
+                </DropdownMenu>
               </div>
             ) : (
               <button
