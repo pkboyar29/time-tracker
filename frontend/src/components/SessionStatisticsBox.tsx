@@ -1,8 +1,8 @@
 import { FC } from 'react';
 import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
-import { getTimeHoursMinutes } from '../helpers/timeHelpers';
+import { getReadableTimeHMS } from '../helpers/timeHelpers';
 
-import QuestionMarkTooltip from './QuestionMarkTooltip';
+import QuestionMarkTooltip from './common/QuestionMarkTooltip';
 
 interface SessionStatisticsBoxProps {
   statistics: ISessionStatistics;
@@ -16,7 +16,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
     <div className="flex justify-center gap-20 px-10 py-5 border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
       <div className="text-center">
         <div className="text-xl font-bold dark:text-textDark">
-          {getTimeHoursMinutes(statistics.spentTimeSeconds)}
+          {getReadableTimeHMS(statistics.spentTimeSeconds)}
         </div>
         <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
           total time

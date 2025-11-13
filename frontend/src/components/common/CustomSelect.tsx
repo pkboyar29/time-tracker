@@ -1,5 +1,5 @@
 import { FC, useState, useRef, useEffect, useMemo } from 'react';
-import CaretIcon from '../icons/CaretIcon';
+import CaretIcon from '../../icons/CaretIcon';
 
 interface Option {
   id: string;

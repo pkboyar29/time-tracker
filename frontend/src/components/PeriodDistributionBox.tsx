@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { useAppSelector } from '../redux/store';
-import { getTimeHoursMinutes } from '../helpers/timeHelpers';
+import { getReadableTimeHMS } from '../helpers/timeHelpers';
 import { getRangeType } from '../helpers/dateHelpers';
 import { colors } from '../../design-tokens';
 
@@ -18,7 +18,7 @@ import {
   Cell,
   ResponsiveContainer,
 } from 'recharts';
-import ToggleButton from './ToggleButton';
+import ToggleButton from './common/ToggleButton';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -51,7 +51,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
               {!adMode ? (
                 <>
                   <p className="text-gray-800 dark:text-textDark">
-                    {getTimeHoursMinutes(timeBar.spentTimeSeconds)}
+                    {getReadableTimeHMS(timeBar.spentTimeSeconds)}
 
                     {getRangeType(timeBar.startOfRange, timeBar.endOfRange) ==
                       'days' &&
@@ -68,7 +68,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                 </>
               ) : (
                 <p className="text-gray-800 dark:text-textDark">
-                  {getTimeHoursMinutes(timeBar.spentTimeSeconds)},{' '}
+                  {getReadableTimeHMS(timeBar.spentTimeSeconds)},{' '}
                   {timeBar.sessionsAmount} sessions
                 </p>
               )}
@@ -88,7 +88,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                             {item.activityName}
                           </div>
                           <div className="text-[13px] mt-1 text-gray-600 dark:text-textDarkSecondary">
-                            ({getTimeHoursMinutes(item.spentTimeSeconds, true)},{' '}
+                            ({getReadableTimeHMS(item.spentTimeSeconds, true)},{' '}
                             {item.sessionsAmount} sessions)
                           </div>
                         </div>
@@ -152,7 +152,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
         <div className="text-lg font-semibold dark:text-textDark">
           Avg.{' '}
           <span className="text-primary">
-            {getTimeHoursMinutes(
+            {getReadableTimeHMS(
               analytics.sessionStatistics.averageSpentTimeSeconds,
               true
             )}

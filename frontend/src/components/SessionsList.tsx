@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import SessionItem from './SessionItem';
-import Button from '../components/Button';
+import Button from './common/Button';
 import Modal from './modals/Modal';
 
 import { ISession } from '../ts/interfaces/Session/ISession';

@@ -4,8 +4,8 @@ import { createSession } from '../../api/sessionApi';
 import { toast } from 'react-toastify';
 
 import Modal from './Modal';
-import Button from '../Button';
-import RangeSlider from '../RangeSlider';
+import Button from '../common/Button';
+import RangeSlider from '../common/RangeSlider';
 
 interface SessionCreateModalProps {
   onCloseModal: () => void;

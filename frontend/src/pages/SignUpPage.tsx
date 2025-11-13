@@ -9,8 +9,8 @@ import { isAuth } from '../helpers/authHelpers';
 import { signUp } from '../api/userApi';
 import { toast } from 'react-toastify';
 
-import Input from '../components/Input';
-import Button from '../components/Button';
+import Input from '../components/common/Input';
+import Button from '../components/common/Button';
 
 interface SignUpFields {
   email: string;

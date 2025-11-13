@@ -5,23 +5,23 @@ import { fetchActivities } from '../api/activityApi';
 import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
 import {
   getRemainingTimeHoursMinutesSeconds,
-  getTimeHoursMinutes,
+  getReadableTimeHMS,
   getTimeHHmmFromDate,
 } from '../helpers/timeHelpers';
 import { useTimer } from '../hooks/useTimer';
 import { toast } from 'react-toastify';
 
-import PrimaryClipLoader from '../components/PrimaryClipLoader';
+import PrimaryClipLoader from '../components/common/PrimaryClipLoader';
 import PlayIcon from '../icons/PlayIcon';
 import PauseIcon from '../icons/PauseIcon';
 import StopIcon from '../icons/StopIcon';
 import TimerIcon from '../icons/TimerIcon';
-import CustomCircularProgress from '../components/CustomCircularProgress';
+import CustomCircularProgress from '../components/common/CustomCircularProgress';
 import SessionsList from '../components/SessionsList';
-import Button from '../components/Button';
-import RangeSlider from '../components/RangeSlider';
+import Button from '../components/common/Button';
+import RangeSlider from '../components/common/RangeSlider';
 import NotesSection from '../components/NotesSection';
-import CustomSelect from '../components/CustomSelect';
+import CustomSelect from '../components/common/CustomSelect';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -119,7 +119,7 @@ const TimerPage: FC = () => {
         {sessionIdFromLocalStorage && !isTimerStarted ? null : (
           <div className="sticky top-0 flex flex-col w-full gap-8 text-lg sm:flex-row md:gap-16 lg:w-auto xl:gap-28">
             {/* Left part of timer */}
-            <div className="flex flex-col items-center gap-2 mt-10 sm:mt-0 sm:flex-1 basis-1/3 sm:basis-auto">
+            <div className="flex flex-col items-center gap-2 sm:flex-1 basis-1/3 sm:basis-auto">
               {!isTimerStarted ? (
                 <CustomCircularProgress
                   valuePercent={0}
@@ -195,13 +195,13 @@ const TimerPage: FC = () => {
             </div>
 
             {/* Right part of timer */}
-            <div className="flex flex-col flex-1 w-full p-6 rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
-              <div className="flex flex-col flex-grow gap-5 overflow-auto">
+            <div className="min-h-[450px] flex flex-col flex-1 w-full p-6 overflow-y-hidden rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
+              <div className="flex flex-col flex-grow gap-5">
                 {isTimerStarted && (
                   <>
                     <div className="text-lg font-semibold dark:text-textDark">
                       Session{' '}
-                      {getTimeHoursMinutes(
+                      {getReadableTimeHMS(
                         timerState.session.totalTimeSeconds,
                         false
                       )}
@@ -219,8 +219,16 @@ const TimerPage: FC = () => {
                 )}
 
                 <div className="dark:text-textDark">
-                  <span className="block mb-2 text-lg font-semibold dark:text-textDark">
+                  <span className="block mb-0 text-lg font-semibold sm:mb-2 dark:text-textDark">
                     Activity
+                    {isTimerStarted && (
+                      <span className="text-base dark:text-textDark sm:hidden">
+                        :{' '}
+                        {timerState.session?.activity
+                          ? timerState.session?.activity.name
+                          : 'Without activity'}
+                      </span>
+                    )}
                   </span>
                   {!isTimerStarted ? (
                     <div className="h-[42px] flex items-center">
@@ -255,11 +263,11 @@ const TimerPage: FC = () => {
                       )}
                     </div>
                   ) : timerState.session.activity ? (
-                    <div className="text-base dark:text-textDark">
+                    <div className="hidden text-base sm:block dark:text-textDark">
                       {timerState.session.activity.name}
                     </div>
                   ) : (
-                    <div className="text-base italic text-gray-500 dark:text-textDarkSecondary">
+                    <div className="hidden text-base italic text-gray-500 sm:block dark:text-textDarkSecondary">
                       Without activity
                     </div>
                   )}

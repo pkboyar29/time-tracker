@@ -364,9 +364,11 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
             )}
 
             {rangeType == 'years' && (
-              <div className="text-xl text-center dark:text-textDark">
-                {rangeItem[0].getFullYear()}
-              </div>
+              <>
+                <div className="text-xl text-center dark:text-textDark">
+                  {rangeItem[0].getFullYear()}
+                </div>
+              </>
             )}
           </div>
         ))}

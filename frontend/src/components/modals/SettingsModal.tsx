@@ -6,13 +6,13 @@ import { updateDailyGoal, updateShowTimerInTitle } from '../../api/userApi';
 import { useTimer } from '../../hooks/useTimer';
 import axios from '../../api/axios';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
-import { getTimeHoursMinutes } from '../../helpers/timeHelpers';
+import { getReadableTimeHMS } from '../../helpers/timeHelpers';
 
-import Button from '../Button';
+import Button from '../common/Button';
 import Modal from './Modal';
-import ToggleButton from '../ToggleButton';
-import RangeSlider from '../RangeSlider';
-import QuestionMarkTooltip from '../QuestionMarkTooltip';
+import ToggleButton from '../common/ToggleButton';
+import RangeSlider from '../common/RangeSlider';
+import QuestionMarkTooltip from '../common/QuestionMarkTooltip';
 
 interface SettingsModalProps {
   onCloseModal: () => void;
@@ -86,7 +86,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
 
   return (
     <Modal title="Settings" onCloseModal={onCloseModal}>
-      <div className="h-[40vh] flex flex-col gap-4 justify-between">
+      <div className="h-[40vh] overflow-y-auto flex flex-col gap-4 justify-between">
         <div className="flex flex-col gap-4">
           {userInfo && (
             <div className="p-5 text-center rounded-3xl bg-surfaceLightHover dark:bg-surfaceDarkDarker">
@@ -94,7 +94,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
                 Your daily goal
               </h3>
               <div className="mb-2 text-3xl font-bold text-primary">
-                {getTimeHoursMinutes(dailyGoalInput * 60)}
+                {getReadableTimeHMS(dailyGoalInput * 60)}
               </div>
               <RangeSlider
                 minValue={1}

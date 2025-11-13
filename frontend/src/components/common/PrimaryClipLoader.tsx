@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { ClipLoader } from 'react-spinners';
-import { colors } from '../../design-tokens';
+import { colors } from '../../../design-tokens';
 
 interface PrimaryClipLoaderProps {
   size?: string;

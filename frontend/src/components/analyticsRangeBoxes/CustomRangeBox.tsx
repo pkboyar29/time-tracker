@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toLocalISOString } from '../../helpers/dateHelpers';
 import { toast } from 'react-toastify';
 
-import Button from '../Button';
+import Button from '../common/Button';
 
 interface CustomRangeBoxProps {
   fromDate: Date;

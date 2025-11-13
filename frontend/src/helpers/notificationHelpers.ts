@@ -1,4 +1,4 @@
-import { getTimeHoursMinutes } from './timeHelpers';
+import { getReadableTimeHMS } from './timeHelpers';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 export const showNotification = (currentSession: ISession) => {
@@ -7,7 +7,7 @@ export const showNotification = (currentSession: ISession) => {
       currentSession.activity
         ? currentSession.activity.name
         : 'Without activity'
-    } - ${getTimeHoursMinutes(currentSession.totalTimeSeconds)}`,
+    } - ${getReadableTimeHMS(currentSession.totalTimeSeconds)}`,
   });
   setTimeout(() => {
     notification.close();

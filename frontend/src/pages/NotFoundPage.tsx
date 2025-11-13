@@ -1,10 +1,28 @@
 import { FC } from 'react';
+import { Link } from 'react-router-dom';
 
 const NotFoundPage: FC = () => {
   return (
-    <>
-      <div className="mt-5 text-2xl font-semibold text-textDark">Not Found</div>
-    </>
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center bg-background">
+      <h1 className="font-bold tracking-tight select-none text-primary text-9xl">
+        404
+      </h1>
+
+      <h2 className="mt-2 text-3xl font-semibold dark:text-textDark">
+        Page Not Found
+      </h2>
+
+      <p className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
+        Sorry, the page you’re looking for doesn’t exist
+      </p>
+
+      <Link
+        to="/"
+        className="inline-block px-6 py-3 mt-8 font-medium text-white transition-all duration-200 bg-primary rounded-xl hover:bg-primaryHover active:scale-95"
+      >
+        Go Home
+      </Link>
+    </div>
   );
 };
 

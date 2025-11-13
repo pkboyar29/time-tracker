@@ -28,7 +28,7 @@ export const getRemainingTimeHoursMinutesSeconds = (
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
-export const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
+export const getTimeHMS = (allSeconds: number): string => {
   const hours: number = Math.trunc(allSeconds / 3600);
   const formattedHours: string = hours < 10 ? '0' + hours : hours.toString();
   const minutes: number = Math.trunc(allSeconds / 60) - hours * 60;
@@ -41,7 +41,7 @@ export const getTimeHoursMinutesSeconds = (allSeconds: number): string => {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
-export const getTimeHoursMinutes = (
+export const getReadableTimeHMS = (
   seconds: number,
   short: boolean = false
 ): string => {
@@ -60,7 +60,7 @@ export const getTimeHoursMinutes = (
 
   const resultString =
     hoursString === '' && minutesString === ''
-      ? `${short == true ? '0m' : '0 minutes'}`
+      ? `${short == true ? `${seconds}s` : `${seconds} seconds`}`
       : `${hoursString} ${minutesString}`;
 
   return resultString.trim();
