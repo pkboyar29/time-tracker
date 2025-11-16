@@ -34,39 +34,37 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
   };
 
   return (
-    <div className="relative flex h-full gap-4">
-      <label className="flex flex-col gap-1 text-lg text-gray-700 dark:text-textDarkSecondary">
-        From:
-        <input
-          value={from}
-          onChange={(e) => {
-            setIsEditing(true);
-            setFrom(e.target.value);
-          }}
-          className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-gray-500"
-          type="datetime-local"
-        />
-      </label>
+    <div className="md:ml-[90px] flex flex-col md:flex-row items-center justify-center h-full gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
+        <label className="flex flex-col gap-1 text-lg text-gray-700 dark:text-textDarkSecondary">
+          From:
+          <input
+            value={from}
+            onChange={(e) => {
+              setIsEditing(true);
+              setFrom(e.target.value);
+            }}
+            className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-gray-500"
+            type="datetime-local"
+          />
+        </label>
 
-      <label className="flex flex-col gap-1 text-lg text-gray-700 dark:text-textDarkSecondary">
-        To:
-        <input
-          value={to}
-          onChange={(e) => {
-            setIsEditing(true);
-            setTo(e.target.value);
-          }}
-          className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-gray-500"
-          type="datetime-local"
-        />
-      </label>
+        <label className="flex flex-col gap-1 text-lg text-gray-700 dark:text-textDarkSecondary">
+          To:
+          <input
+            value={to}
+            onChange={(e) => {
+              setIsEditing(true);
+              setTo(e.target.value);
+            }}
+            className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-gray-500"
+            type="datetime-local"
+          />
+        </label>
+      </div>
 
-      <div
-        className={`w-[90px] absolute -right-[106px] top-1/2 -translate-y-1/2 ${
-          !isEditing && 'hidden'
-        }`}
-      >
-        <Button onClick={handleApply}>Apply</Button>
+      <div className="w-[90px] h-[32px]">
+        {isEditing && <Button onClick={handleApply}>Apply</Button>}
       </div>
     </div>
   );

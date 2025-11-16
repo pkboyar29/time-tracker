@@ -136,91 +136,101 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   };
 
   return (
-    <div className="relative py-5 border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
-      <div className="sticky top-0 z-50 flex justify-end px-10 pb-5 border-b border-solid border-gray-300/80 dark:border-gray-500">
-        <div className="inline-block px-4 py-1 ml-auto text-lg font-medium tracking-wide rounded-lg text-gray-800 bg-gray-200 dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
+    <div className="relative pt-5 border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
+      <div className="sticky top-0 z-[39] flex justify-center px-5 pb-5 border-b border-solid min-[360px]:justify-end sm:px-10 border-gray-300/80 dark:border-gray-500">
+        <div className="inline-block px-4 py-1 text-lg font-medium tracking-wide rounded-lg text-gray-800 bg-gray-200 dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
           Period distribution
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-2 px-10 py-5">
+      <div className="flex flex-col justify-between gap-4 px-5 py-5 sm:gap-2 sm:items-center sm:flex-row sm:px-10">
         <div className="flex items-center gap-4 text-[16px] dark:text-textDark">
           <ToggleButton isChecked={adMode} setIsChecked={toggleAdMode} />
           <div>Activity distribution</div>
         </div>
 
-        <div className="text-lg font-semibold dark:text-textDark">
-          Avg.{' '}
-          <span className="text-primary">
-            {getReadableTimeHMS(
-              analytics.sessionStatistics.averageSpentTimeSeconds,
-              true
-            )}
-          </span>{' '}
-          per{' '}
-          {getRangeType(
-            analytics.timeBars[1].startOfRange,
-            analytics.timeBars[1].endOfRange
-          ) == 'days'
-            ? 'day'
-            : 'month'}
-        </div>
+        {analytics.timeBars.length > 1 && (
+          <div className="text-lg font-semibold dark:text-textDark">
+            Avg.{' '}
+            <span className="text-primary">
+              {getReadableTimeHMS(
+                analytics.sessionStatistics.averageSpentTimeSeconds,
+                true
+              )}
+            </span>{' '}
+            per{' '}
+            {getRangeType(
+              analytics.timeBars[1].startOfRange,
+              analytics.timeBars[1].endOfRange
+            ) == 'days'
+              ? 'day'
+              : 'month'}
+          </div>
+        )}
       </div>
 
-      <ResponsiveContainer width="100%" className="px-10" height={300}>
-        <BarChart
-          data={analytics.timeBars}
-          className="dark:[&>svg>path]:fill-[#5c5c5c]"
+      <div className="pb-5 overflow-x-auto scroll-overlay">
+        <ResponsiveContainer
+          minWidth={575}
+          width="100%"
+          className="px-5 sm:px-10"
+          height={300}
         >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            dataKey="barName"
-            // tick={{
-            //   fill:
-            //     localStorage.getItem('theme') === 'dark'
-            //       ? colors.textDarkSecondary
-            //       : '#000',
-            // }}
-          />
-          <YAxis dataKey="spentTimeSeconds" />
-          <Tooltip content={<CustomTooltip adMode={adMode} />} />
-          {!adMode ? (
-            <Bar isAnimationActive={true} dataKey="spentTimeSeconds">
-              {analytics.timeBars.map((bar, index) => {
-                const color =
-                  getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
-                  bar.spentTimeSeconds > dailyGoalSeconds
-                    ? colors.primary
-                    : localStorage.getItem('theme') === 'dark'
-                    ? '#424242'
-                    : '#E5E7EB';
+          <BarChart
+            data={analytics.timeBars}
+            className="dark:[&>svg>path]:fill-[#5c5c5c]"
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="barName"
+              // tick={{
+              //   fill:
+              //     localStorage.getItem('theme') === 'dark'
+              //       ? colors.textDarkSecondary
+              //       : '#000',
+              // }}
+            />
+            <YAxis dataKey="spentTimeSeconds" />
+            <Tooltip content={<CustomTooltip adMode={adMode} />} />
+            {!adMode ? (
+              <Bar isAnimationActive={true} dataKey="spentTimeSeconds">
+                {analytics.timeBars.map((bar, index) => {
+                  const color =
+                    getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
+                    bar.spentTimeSeconds > dailyGoalSeconds
+                      ? colors.primary
+                      : localStorage.getItem('theme') === 'dark'
+                      ? '#424242'
+                      : '#E5E7EB';
 
-                return <Cell key={index} fill={color} />;
-              })}
-            </Bar>
-          ) : (
-            analytics.activityDistributionItems.map((ad, index) => {
-              return (
-                <Bar
-                  key={index}
-                  dataKey={(bar) => {
-                    const barActivityItem = bar.activityDistributionItems.find(
-                      (item: IActivityDistribution) =>
-                        item.activityName === ad.activityName
-                    );
-                    return barActivityItem
-                      ? barActivityItem.spentTimeSeconds
-                      : '';
-                  }}
-                  fill={ad.fill}
-                  stackId="a"
-                  isAnimationActive={false}
-                />
-              );
-            })
-          )}
-        </BarChart>
-      </ResponsiveContainer>
+                  return <Cell key={index} fill={color} />;
+                })}
+              </Bar>
+            ) : (
+              analytics.activityDistributionItems.map((ad, index) => {
+                return (
+                  <Bar
+                    key={index}
+                    dataKey={(bar) => {
+                      const barActivityItem =
+                        bar.activityDistributionItems.find(
+                          (item: IActivityDistribution) =>
+                            item.activityName === ad.activityName
+                        );
+                      return barActivityItem
+                        ? barActivityItem.spentTimeSeconds
+                        : '';
+                    }}
+                    fill={ad.fill}
+                    stackId="a"
+                    isAnimationActive={false}
+                  />
+                );
+              })
+            )}
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

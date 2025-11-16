@@ -60,7 +60,11 @@ export const getReadableTimeHMS = (
 
   const resultString =
     hoursString === '' && minutesString === ''
-      ? `${short == true ? `${seconds}s` : `${seconds} seconds`}`
+      ? `${
+          short == true
+            ? `${Math.trunc(seconds)}s`
+            : `${Math.trunc(seconds)} seconds`
+        }`
       : `${hoursString} ${minutesString}`;
 
   return resultString.trim();
