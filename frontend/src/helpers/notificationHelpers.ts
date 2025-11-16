@@ -2,6 +2,8 @@ import { getReadableTimeHMS } from './timeHelpers';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 export const showNotification = (currentSession: ISession) => {
+  if (typeof window.Notification === 'undefined') return;
+
   const notification = new Notification('Session completed!', {
     body: `${
       currentSession.activity
