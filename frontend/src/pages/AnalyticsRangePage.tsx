@@ -49,11 +49,13 @@ const AnalyticsRangePage: FC = () => {
     isNaN(new Date(toParam).getTime())
   ) {
     return (
-      <div className="mt-4 text-lg text-center">Invalid date format in URL</div>
+      <div className="mt-4 text-lg text-center dark:text-textDark">
+        Invalid date format in URL
+      </div>
     );
   }
 
-  const [adBoxMode, setAdBoxMode] = useState<'table' | 'chart'>('table');
+  const [adBoxMode, setAdBoxMode] = useState<'table' | 'chart'>('chart');
 
   const [range, setRange] = useState<{ fromDate: Date; toDate: Date }>({
     fromDate: new Date(fromParam),
@@ -130,8 +132,8 @@ const AnalyticsRangePage: FC = () => {
   }, [isError]);
 
   return (
-    <div className="flex flex-col h-screen overflow-y-hidden dark:text-textDark">
-      <div className="max-h-[156px] h-full relative flex justify-center py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
+    <div className="flex flex-col overflow-y-hidden lg:h-screen dark:text-textDark">
+      <div className="lg:max-h-[156px] lg:h-full relative flex flex-col justify-center pb-5 py-[65px] sm:py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
         {rangeType == 'custom' ? (
           <CustomRangeBox fromDate={range.fromDate} toDate={range.toDate} />
         ) : rangeType == 'overall' ? (
@@ -140,7 +142,7 @@ const AnalyticsRangePage: FC = () => {
           <RangeBox range={range} />
         )}
 
-        <div className="w-[140px] absolute top-10 right-48">
+        <div className="w-[140px] ml-auto mr-4 mt-4 lg:ml-0 lg:mt-0 lg:mr-4 lg:absolute lg:top-10 lg:right-[8%]">
           <div className="text-right mb-1.5 text-lg font-semibold">View by</div>
           <CustomSelect
             currentId={viewId}
@@ -162,8 +164,8 @@ const AnalyticsRangePage: FC = () => {
         </div>
       ) : rangeAnalytics &&
         rangeAnalytics.sessionStatistics.spentTimeSeconds !== 0 ? (
-        <div className="flex h-full">
-          <div className="flex flex-col w-1/2 h-full gap-5 px-4 pt-5 border-r border-gray-400 border-solid dark:border-gray-500">
+        <div className="flex flex-col h-full pb-5 lg:pb-0 lg:flex-row">
+          <div className="flex flex-col h-full gap-5 px-4 pt-5 lg:w-1/2 lg:border-r lg:border-gray-400 lg:border-solid lg:dark:border-gray-500">
             {rangeAnalytics.sessionStatistics && (
               <SessionStatisticsBox
                 statistics={rangeAnalytics.sessionStatistics}
@@ -171,7 +173,7 @@ const AnalyticsRangePage: FC = () => {
             )}
 
             {rangeAnalytics.activityDistributionItems && (
-              <div className="overflow-y-auto basis-3/5">
+              <div className="overflow-y-auto h-[550px] lg:h-auto lg:basis-3/5">
                 <ActivityDistributionBox
                   activityDistributionItems={
                     rangeAnalytics.activityDistributionItems
@@ -183,7 +185,7 @@ const AnalyticsRangePage: FC = () => {
             )}
           </div>
 
-          <div className="w-1/2 px-4 pt-5">
+          <div className="px-4 pt-5 lg:w-1/2">
             {rangeType == 'days' ? (
               <DailyGoalBox
                 spentTimeSeconds={
@@ -199,7 +201,7 @@ const AnalyticsRangePage: FC = () => {
           </div>
         </div>
       ) : (
-        <div className="h-full pt-5 text-2xl font-bold text-center dark:text-textDark">
+        <div className="h-full px-2 pt-5 text-xl font-bold text-center md:text-2xl dark:text-textDark">
           No session activity for the specified dates
         </div>
       )}

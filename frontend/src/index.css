@@ -231,3 +231,18 @@ h6 {
 .animate-slide-in {
   animation: slide-in 0.3s ease-out forwards;
 }
+
+/* scrollbar overlay */
+
+.scroll-overlay {
+  scrollbar-gutter: stable both-edges;
+}
+.scroll-overlay::-webkit-scrollbar {
+  height: 10px;
+  background: transparent;
+  position: absolute;
+}
+.scroll-overlay::-webkit-scrollbar-thumb {
+  background: rgba(130, 130, 130, 0.4);
+  border-radius: 5px;
+}

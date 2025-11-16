@@ -30,7 +30,7 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
             size="big"
           />
 
-          <div className="text-xl text-center dark:text-textDark">
+          <div className="text-center tex-lg md:text-xl dark:text-textDark">
             You acheived{' '}
             <span className="font-bold">
               {getReadableTimeHMS(spentTimeSeconds, false)} (

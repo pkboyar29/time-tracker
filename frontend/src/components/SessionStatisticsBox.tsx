@@ -11,9 +11,8 @@ interface SessionStatisticsBoxProps {
 const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
   statistics,
 }) => {
-  // TODO: установить flex-wrap и в адаптивной верстке при определенных брейкпоинтах устанавливать gap поменьше
   return (
-    <div className="flex justify-center gap-20 px-10 py-5 border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
+    <div className="flex flex-wrap justify-center gap-5 px-10 py-5 border border-solid rounded-lg md:gap-10 2xl:gap-20 bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
       <div className="text-center">
         <div className="text-xl font-bold dark:text-textDark">
           {getReadableTimeHMS(statistics.spentTimeSeconds)}

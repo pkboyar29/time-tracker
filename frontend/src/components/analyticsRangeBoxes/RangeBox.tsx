@@ -95,18 +95,6 @@ const isCurrentRangeItem = (
   return false;
 };
 
-const renderWeekLabel = (week: Date[]) => (
-  <div className="flex gap-1.5 text-lg dark:text-textDark">
-    <time>
-      {getMonthName(week[0].getMonth())} {week[0].getDate()}
-    </time>
-    <span>-</span>
-    <time>
-      {getMonthName(week[1].getMonth())} {week[1].getDate()}
-    </time>
-  </div>
-);
-
 const renderDateLabel = (
   rangeType: RangeType,
   fromDate: Date,
@@ -120,7 +108,15 @@ const renderDateLabel = (
         {isCurrentWeek([fromDate, toDate]) ? (
           <>This week</>
         ) : (
-          renderWeekLabel([fromDate, toDate])
+          <div className="flex gap-1.5 text-lg dark:text-textDark">
+            <time>
+              {getMonthName(fromDate.getMonth())} {fromDate.getDate()}
+            </time>
+            <span>-</span>
+            <time>
+              {getMonthName(toDate.getMonth())} {toDate.getDate()}
+            </time>
+          </div>
         )}
       </>
     );
@@ -149,7 +145,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   const rangeItemClassNames = `transition duration-300 cursor-pointer bg-gray-200 dark:bg-surfaceDark hover:bg-gray-300 dark:hover:bg-surfaceDarkHover px-2 ${
     rangeType === 'days'
       ? 'w-12 rounded-[4px] items-center gap-1 py-1'
-      : 'w-40 rounded-[5px] py-2.5'
+      : 'w-36 lg:w-40 rounded-[5px] py-2.5'
   } ${rangeType !== 'weeks' && 'flex flex-col'} ${
     rangeType === 'years' && 'gap-2'
   }`;
@@ -282,11 +278,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   }
 
   return (
-    <div
-      className={`h-full flex flex-col items-center gap-3 select-none ${
-        rangeType === 'days' && 'max-w-[340px]'
-      }`}
-    >
+    <div className={`h-full flex flex-col items-center gap-3 select-none`}>
       <div className="flex gap-1 px-2 pb-1">
         <button
           className="rounded-md p-[6px] border border-solid border-gray-400 dark:border-gray-500 transition duration-300 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover"
@@ -310,7 +302,11 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
         </button>
       </div>
 
-      <div className={`flex ${rangeType === 'days' ? 'gap-1' : 'gap-3'}`}>
+      <div
+        className={`flex flex-wrap justify-center ${
+          rangeType === 'days' ? 'gap-1' : 'gap-3'
+        }`}
+      >
         {rangeItems.map((rangeItem, index) => (
           <div
             key={index}
@@ -346,7 +342,17 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
                   )}
                 </div>
 
-                {renderWeekLabel(rangeItem)}
+                <div className="flex gap-1.5 text-base lg:text-lg dark:text-textDark">
+                  <time>
+                    {getMonthName(rangeItem[0].getMonth())}{' '}
+                    {rangeItem[0].getDate()}
+                  </time>
+                  <span>-</span>
+                  <time>
+                    {getMonthName(rangeItem[1].getMonth())}{' '}
+                    {rangeItem[1].getDate()}
+                  </time>
+                </div>
               </>
             )}
 
@@ -355,7 +361,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
                 <div className="text-base text-slate-600 dark:text-textDarkSecondary">
                   {rangeItem[0].getFullYear()}
                 </div>
-                <div className="text-xl dark:text-textDark">
+                <div className="text-lg lg:text-xl dark:text-textDark">
                   {new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
                     rangeItem[0]
                   )}

@@ -99,9 +99,9 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   return (
     <div
       ref={rootRef}
-      className="h-full pb-5 overflow-y-auto border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500"
+      className="h-full overflow-y-auto border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500"
     >
-      <div className="sticky top-0 z-50 flex items-start justify-between px-10 pt-5 border-b border-solid bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
+      <div className="sticky top-0 z-[39] flex flex-wrap-reverse gap-4 items-center justify-center min-[360px]:justify-between px-5 sm:px-10 pt-5 pb-4 border-b border-solid bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
         <div className="flex gap-2.5 text-[15px]">
           <button
             onClick={onTableBarClick}
@@ -125,44 +125,46 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           </button>
         </div>
 
-        {/* TODO: странно указывать mb-4 тут */}
-        <div className="inline-block px-4 py-1 mb-4 ml-auto mr-0 text-lg font-medium tracking-wide text-right text-gray-800 bg-gray-200 rounded-lg dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
+        <div className="inline-block px-4 py-1 mr-0 text-lg font-medium tracking-wide text-right text-gray-800 bg-gray-200 rounded-lg dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
           Activity distribution
         </div>
       </div>
 
       {adBoxMode == 'table' && (
-        <div className="px-10">
-          <div className="flex my-3.5 text-lg tracking-wide text-gray-800 dark:text-textDarkSecondary">
-            <div className="w-1/2">Activity</div>
-            <div className="w-1/5">Sessions</div>
-            <div className="w-1/5">Time</div>
-            <div className="w-1/5">Distracted</div>
-          </div>
-          <div className="flex flex-col gap-3 dark:text-textDark">
-            {sortedItems.map((item, index) => (
-              <div className="flex items-center text-base" key={index}>
-                <div className="w-1/2 text-lg font-bold truncate">
-                  {item.activityName}
+        <div className="overflow-x-auto scroll-overlay">
+          <div className="min-w-[500px] px-5 sm:px-10 pb-5">
+            <div className="flex my-3.5 text-lg tracking-wide text-gray-800 dark:text-textDarkSecondary">
+              <div className="w-1/2">Activity</div>
+              <div className="w-1/5">Sessions</div>
+              <div className="w-1/5">Time</div>
+              <div className="w-1/5">Distracted</div>
+            </div>
+
+            <div className="flex flex-col gap-3 dark:text-textDark">
+              {sortedItems.map((item, index) => (
+                <div className="flex items-center text-base" key={index}>
+                  <div className="w-1/2 text-lg font-bold truncate">
+                    {item.activityName}
+                  </div>
+                  <div className="w-1/5">{item.sessionsAmount}</div>
+                  <div className="w-1/5">
+                    {getReadableTimeHMS(item.spentTimeSeconds, true)}
+                  </div>
+                  <div className="w-1/5">
+                    {item.pausedAmount} times
+                    {/* {Math.trunc(item.spentTimePercentage * 100)}% */}
+                  </div>
                 </div>
-                <div className="w-1/5">{item.sessionsAmount}</div>
-                <div className="w-1/5">
-                  {getReadableTimeHMS(item.spentTimeSeconds, true)}
-                </div>
-                <div className="w-1/5">
-                  {item.pausedAmount} times
-                  {/* {Math.trunc(item.spentTimePercentage * 100)}% */}
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
 
       {adBoxMode == 'chart' && (
-        <div className="flex justify-between px-10 my-3.5">
-          <div className="sticky flex items-start self-start justify-center w-1/2 top-10">
-            <ResponsiveContainer width="100%" height={300}>
+        <div className="flex flex-col sm:flex-row justify-between px-5 sm:px-10 sm:my-3.5 pb-5">
+          <div className="flex items-start self-center justify-center sm:sticky sm:self-start sm:w-1/2 top-10">
+            <ResponsiveContainer minWidth={250} width="100%" height={300}>
               <PieChart>
                 <Pie
                   animationDuration={750}
@@ -182,7 +184,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
             </ResponsiveContainer>
           </div>
 
-          <div className="w-1/2 flex flex-col gap-2.5">
+          <div className="w-full sm:w-1/2 flex flex-col gap-2.5">
             {pieItems.map((item, index) => (
               <div className="flex items-center gap-2.5" key={index}>
                 <div
