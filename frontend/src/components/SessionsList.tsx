@@ -1,7 +1,7 @@
 import { FC, useState, useEffect } from 'react';
 import { useTimer } from '../hooks/useTimer';
 import { deleteSession } from '../api/sessionApi';
-import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
+import { getSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { toast } from 'react-toastify';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -40,11 +40,11 @@ const SessionsList: FC<SessionsListProps> = ({
   updateSessionsListHandler,
 }) => {
   const { timerState, startTimer } = useTimer();
-  const sessionIdFromLocalStorage = getSessionIdFromLocalStorage();
+  const sessionFromLS = getSessionFromLocalStorage();
 
   // removing current session from the list
   const sessionsWithoutCurrent = sessions.filter(
-    (session) => session.id !== sessionIdFromLocalStorage
+    (session) => session.id !== sessionFromLS?.id
   );
 
   const [deleteModal, setDeleteModal] = useState<ModalState>({

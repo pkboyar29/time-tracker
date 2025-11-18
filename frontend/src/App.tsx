@@ -3,12 +3,12 @@ import routeConfig from './router/routeConfig';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './router/ProtectedRoute';
 import { useAppDispatch } from './redux/store';
-import { fetchSession } from './api/sessionApi';
+import { fetchSession, updateSession } from './api/sessionApi';
 import { useTimer } from './hooks/useTimer';
 import { fetchProfileInfo } from './api/userApi';
 import { setUser } from './redux/slices/userSlice';
 import {
-  getSessionIdFromLocalStorage,
+  getSessionFromLocalStorage,
   removeSessionFromLocalStorage,
 } from './helpers/localstorageHelpers';
 import { AxiosError } from 'axios';
@@ -39,16 +39,26 @@ const App: FC = () => {
 
   useEffect(() => {
     const fetchCurrentSession = async () => {
-      const currentSessionId = getSessionIdFromLocalStorage();
-      if (requiredAuth && currentSessionId) {
+      const sessionFromLS = getSessionFromLocalStorage();
+
+      if (requiredAuth && sessionFromLS) {
         try {
-          const currentSession = await fetchSession(currentSessionId);
-          if (currentSession.completed) {
+          const sessionFromServer = await fetchSession(sessionFromLS.id);
+          if (sessionFromServer.completed) {
             removeSessionFromLocalStorage();
             return;
           }
 
-          startTimer(currentSession, true);
+          if (
+            sessionFromLS.spentTimeSeconds > sessionFromServer.spentTimeSeconds
+          ) {
+            startTimer(sessionFromLS, true);
+
+            // TODO: отображать серверные ошибки?
+            updateSession(sessionFromLS, true);
+          } else {
+            startTimer(sessionFromServer, true);
+          }
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
             removeSessionFromLocalStorage();

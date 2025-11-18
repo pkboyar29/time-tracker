@@ -75,7 +75,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       }
     }
 
-    saveSessionToLocalStorage(session.id);
+    saveSessionToLocalStorage(session);
 
     if (paused) {
       setTimerState({ status: 'paused', session });
@@ -123,7 +123,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     }
   };
 
-  // TODO: этот параметр мне кажется костылем
   const stopTimer = async (shouldUpdateSession?: boolean) => {
     if (timerState.status != 'idle') {
       const sessionToUpdate = timerState.session;
@@ -197,6 +196,14 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           return;
         }
 
+        // automatic timer update in local storage every 2 seconds
+        if ((ev.data - startSpentSeconds.current) % 2 == 0) {
+          saveSessionToLocalStorage({
+            ...timerState.session,
+            spentTimeSeconds: ev.data,
+          });
+        }
+
         // automatic timer update on server every 5 minutes
         if ((ev.data - startSpentSeconds.current) % 300 == 0) {
           updateSession({
@@ -238,25 +245,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       document.title = 'Session Tracker';
     }
   }, [timerState.status, timerState.session, currentUser]);
-
-  const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-    event.preventDefault();
-    if (timerState.session) {
-      updateSession(timerState.session, true);
-    }
-  };
-
-  useEffect(() => {
-    if (timerState.status == 'running') {
-      window.addEventListener('beforeunload', handleBeforeUnload);
-    } else if (timerState.status == 'paused') {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    }
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [timerState.session?.spentTimeSeconds, timerState.status]);
 
   return (
     <TimerContext.Provider
