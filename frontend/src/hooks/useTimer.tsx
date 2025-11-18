@@ -147,22 +147,21 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const finishTimer = async () => {
     if (timerState.status != 'idle') {
-      try {
-        playAudio();
-        showNotification(timerState.session);
+      playAudio();
+      showNotification(timerState.session);
 
+      try {
         await updateSession({
           ...timerState.session,
           spentTimeSeconds: timerState.session.totalTimeSeconds,
         });
-
-        stopTimer();
       } catch (e) {
         toast('A server error occurred while updating session', {
           type: 'error',
         });
-        stopTimer();
       }
+
+      stopTimer();
     }
   };
 

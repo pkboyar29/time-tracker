@@ -190,6 +190,13 @@ async function updateSession(
     }
 
     if (session.spentTimeSeconds === sessionDTO.spentTimeSeconds) {
+      session.note = sessionDTO.note;
+      const validationError = session.validateSync();
+      if (validationError && validationError.errors['note']) {
+        throw new HttpError(400, validationError.errors['note'].toString());
+      }
+      await session.save();
+
       return session;
     }
 
