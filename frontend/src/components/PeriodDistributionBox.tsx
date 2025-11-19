@@ -55,7 +55,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
 
                     {getRangeType(timeBar.startOfRange, timeBar.endOfRange) ==
                       'days' &&
-                      (timeBar.spentTimeSeconds > dailyGoalSeconds
+                      (timeBar.spentTimeSeconds >= dailyGoalSeconds
                         ? ' (daily goal ✅)'
                         : ' (daily goal ❌)')}
                   </p>
@@ -197,7 +197,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                 {analytics.timeBars.map((bar, index) => {
                   const color =
                     getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
-                    bar.spentTimeSeconds > dailyGoalSeconds
+                    bar.spentTimeSeconds >= dailyGoalSeconds
                       ? colors.primary
                       : localStorage.getItem('theme') === 'dark'
                       ? '#424242'

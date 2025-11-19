@@ -67,7 +67,7 @@ const Sidebar: FC = () => {
 
       <div
         ref={sidebarRef}
-        className={`absolute flex flex-col bg-backgroundLight dark:bg-backgroundDark h-full transition duration-300 ease-in-out z-50 top-0 left-0 xl:relative xl:translate-x-0 w-[150px] pt-2 p-5 xl:p-5 border-r border-solid border-r-gray-500 ${
+        className={`absolute flex flex-col bg-backgroundLight dark:bg-backgroundDark h-full transition duration-300 ease-in-out z-50 top-0 left-0 xl:relative xl:translate-x-0 w-[200px] sm:w-[170px] pt-2 p-5 xl:p-5 border-r border-solid border-r-gray-500 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -93,47 +93,53 @@ const Sidebar: FC = () => {
               )}
             </li>
 
-            <li>
+            <li className="w-full">
               <NavLink
                 onClick={closeSidebar}
                 to="/timer"
-                className="flex items-center gap-4 group"
+                className={({ isActive }) =>
+                  `flex items-center gap-5 w-full px-4 py-2 rounded-xl transition duration-200
+       ${isActive ? 'bg-primary/10 dark:bg-surfaceDarkHover shadow-inner' : ''}
+    hover:bg-primary/10 dark:hover:bg-surfaceDarkHover`
+                }
               >
-                <TimerIcon className="transition duration-300 group-hover:stroke-primary" />
-                <div className="transition duration-300 group-hover:text-primary dark:text-textDark">
-                  Timer
-                </div>
+                <TimerIcon />
+                <div className="dark:text-textDark">Timer</div>
               </NavLink>
             </li>
 
-            <li>
+            <li className="w-full">
               <NavLink
                 onClick={closeSidebar}
                 to="/activity-groups"
-                className="flex items-center gap-4 group"
+                className={({ isActive }) =>
+                  `flex items-center gap-5 w-full px-4 py-2 rounded-xl transition duration-200
+       ${isActive ? 'bg-primary/10 dark:bg-surfaceDarkHover shadow-inner' : ''}
+       hover:bg-primary/10 dark:hover:bg-surfaceDarkHover`
+                }
               >
-                <BookIcon className="transition duration-300 group-hover:stroke-primary" />
-                <div className="transition duration-300 group-hover:text-primary dark:text-textDark">
-                  Activities
-                </div>
+                <BookIcon />
+                <div className="dark:text-textDark">Activities</div>
               </NavLink>
             </li>
 
-            <li>
+            <li className="w-full">
               <NavLink
                 onClick={closeSidebar}
                 to={`/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`}
-                className="flex items-center gap-4 group"
+                className={({ isActive }) =>
+                  `flex items-center gap-5 w-full px-4 py-2 rounded-xl transition duration-200
+       ${isActive ? 'bg-primary/10 dark:bg-surfaceDarkHover shadow-inner' : ''}
+       hover:bg-primary/10 dark:hover:bg-surfaceDarkHover`
+                }
               >
-                <AnalyticsIcon className="transition duration-300 group-hover:stroke-primary" />
-                <div className="transition duration-300 group-hover:text-primary dark:text-textDark">
-                  Analytics
-                </div>
+                <AnalyticsIcon />
+                <div className="dark:text-textDark">Analytics</div>
               </NavLink>
             </li>
           </div>
 
-          <li className="flex flex-col items-center mt-5">
+          <li className="flex flex-col items-center w-full mt-5">
             <button
               onClick={changeTheme}
               className="p-2 mb-8 transition duration-300 border border-transparent border-solid rounded-md hover:border-primary text-surfaceDark bg-textDark dark:bg-surfaceDark dark:text-textDark"
@@ -142,16 +148,14 @@ const Sidebar: FC = () => {
             </button>
 
             <button
-              className="flex items-center gap-4 group"
+              className="flex items-center gap-5 px-4 py-2 transition duration-200 sm:w-full rounded-xl hover:bg-primary/10 dark:hover:bg-surfaceDarkHover"
               onClick={() => {
                 closeSidebar();
                 setSettingsModal(true);
               }}
             >
-              <SettingsIcon className="transition duration-300 group-hover:stroke-primary" />
-              <div className="transition duration-300 group-hover:text-primary dark:text-textDark">
-                Settings
-              </div>
+              <SettingsIcon />
+              <div className="dark:text-textDark">Settings</div>
             </button>
           </li>
         </ul>

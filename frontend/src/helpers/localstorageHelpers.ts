@@ -1,5 +1,7 @@
-export const saveSessionToLocalStorage = (sessionId: string) => {
-  window.localStorage.setItem('session', sessionId);
+import { ISession } from '../ts/interfaces/Session/ISession';
+
+export const saveSessionToLocalStorage = (session: ISession) => {
+  window.localStorage.setItem('session', JSON.stringify(session));
 };
 
 export const removeSessionFromLocalStorage = () => {
@@ -8,12 +10,19 @@ export const removeSessionFromLocalStorage = () => {
   }
 };
 
-export const getSessionIdFromLocalStorage = (): string | null => {
-  const sessionId = window.localStorage.getItem('session');
-  if (sessionId) {
-    return sessionId;
+export const getSessionFromLocalStorage = (): ISession | null => {
+  const unparsedSession = window.localStorage.getItem('session');
+  if (!unparsedSession) {
+    return null;
   }
-  return null;
+
+  try {
+    const session: ISession = JSON.parse(unparsedSession);
+    return session;
+  } catch (e) {
+    removeSessionFromLocalStorage();
+    return null;
+  }
 };
 
 export const getThemeFromLocalStorage = (): 'light' | 'dark' => {

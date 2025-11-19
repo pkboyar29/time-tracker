@@ -36,7 +36,7 @@ const NotesSection: FC<NotesSectionProps> = ({ defaultNote }) => {
       onChange={handleChangeNoteInput}
       onBlur={handleBlurNoteInput}
       maxLength={1600}
-      className="flex-grow p-3 text-base font-medium bg-white border border-gray-300 rounded-lg resize-none dark:text-textDark dark:bg-surfaceDarkHover dark:border-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+      className="flex-grow p-3 text-base font-medium bg-white border border-gray-300 rounded-lg resize-none dark:text-textDark dark:bg-surfaceDarkHover dark:border-gray-500 focus:outline-none focus:ring-1 focus:ring-primary"
     />
   );
 };

@@ -2,7 +2,7 @@ import { FC, useEffect, useState } from 'react';
 import { fetchSessions, createSession } from '../api/sessionApi';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivities } from '../api/activityApi';
-import { getSessionIdFromLocalStorage } from '../helpers/localstorageHelpers';
+import { getSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import {
   getRemainingTimeHoursMinutesSeconds,
   getReadableTimeHMS,
@@ -26,7 +26,7 @@ import CustomSelect from '../components/common/CustomSelect';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
-  const sessionIdFromLocalStorage = getSessionIdFromLocalStorage();
+  const sessionFromLS = getSessionFromLocalStorage();
 
   const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
     []
@@ -116,7 +116,7 @@ const TimerPage: FC = () => {
   return (
     <div className="h-full bg-surfaceLight dark:bg-backgroundDark">
       <div className="container flex items-stretch justify-between w-full h-full gap-10 py-5">
-        {sessionIdFromLocalStorage && !isTimerStarted ? null : (
+        {sessionFromLS && !isTimerStarted ? null : (
           <div className="sticky top-0 flex flex-col w-full gap-8 text-lg sm:flex-row md:gap-16 lg:w-auto xl:gap-28">
             {/* Left part of timer */}
             <div className="flex flex-col items-center gap-2 sm:flex-1 basis-1/3 sm:basis-auto">
