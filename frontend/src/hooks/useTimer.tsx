@@ -204,8 +204,12 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           });
         }
 
-        // automatic timer update on server every 5 minutes
-        if ((ev.data - startSpentSeconds.current) % 300 == 0) {
+        // automatic timer update on server
+        let syncIntervalSeconds = 300;
+        if (timerState.session.totalTimeSeconds <= 300) {
+          syncIntervalSeconds = 0.2 * timerState.session.totalTimeSeconds;
+        }
+        if ((ev.data - startSpentSeconds.current) % syncIntervalSeconds == 0) {
           updateSession({
             ...timerState.session,
             spentTimeSeconds: ev.data,
