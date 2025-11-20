@@ -1,5 +1,4 @@
 export interface IUser {
-  username: string;
   // firstName: string;
   // lastName: string;
   email: string;
@@ -9,12 +8,11 @@ export interface IUser {
 }
 
 export interface ISignIn {
-  username: string;
+  email: string;
   password: string;
 }
 
 export interface ISignUp {
   email: string;
-  username: string;
   password: string;
 }

@@ -14,7 +14,6 @@ import Button from '../components/common/Button';
 
 interface SignUpFields {
   email: string;
-  username: string;
   password: string;
 }
 
@@ -36,7 +35,6 @@ const SignUpPage: FC = () => {
   }
 
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{4,}$/;
-  const usernameRegex = /^[a-zA-Z][a-zA-Z0-9]+$/;
   const emailRegex =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
@@ -57,12 +55,6 @@ const SignUpPage: FC = () => {
     const errorMessage = error.response?.data;
 
     switch (errorMessage) {
-      case 'Username must be unique':
-        setError('username', {
-          type: 'custom',
-          message: errorMessage,
-        });
-        break;
       case 'Email must be unique':
         setError('email', {
           type: 'custom',
@@ -110,36 +102,6 @@ const SignUpPage: FC = () => {
           errorMessage={
             typeof errors.email?.message === 'string'
               ? errors.email.message
-              : ''
-          }
-        />
-
-        <Input
-          fieldName="username"
-          placeHolder="Username"
-          register={register}
-          validationRules={{
-            required: 'Field is required',
-            minLength: {
-              value: 4,
-              message: 'Minimum symbols: 4',
-            },
-            maxLength: {
-              value: 20,
-              message: 'Maximum symbols: 20',
-            },
-            pattern: {
-              value: usernameRegex,
-              message:
-                'Only latin letters and numbers. Should start from latin letter.',
-            },
-          }}
-          inputProps={{
-            maxLength: 20,
-          }}
-          errorMessage={
-            typeof errors.username?.message === 'string'
-              ? errors.username.message
               : ''
           }
         />

@@ -26,7 +26,6 @@ export const setupIntegrationHooks = () => {
   beforeEach(async () => {
     const { access } = await userService.signUp({
       email: 'email@email.com',
-      username: 'username',
       password: 'passwordA1!',
     });
 

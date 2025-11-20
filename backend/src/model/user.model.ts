@@ -23,16 +23,6 @@ const userSchema = new mongoose.Schema({
       'Invalid email format',
     ],
   },
-  username: {
-    type: String,
-    required: true,
-    minLength: [4, 'username minimum length is 4 characters'],
-    maxLength: [20, 'username maximum length is 20 characters'],
-    match: [
-      /^[a-zA-Z][a-zA-Z0-9]+$/,
-      'username - only latin letters and numbers. Should start from latin letter',
-    ],
-  },
   password: {
     type: String,
     required: true,

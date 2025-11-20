@@ -13,7 +13,7 @@ import Input from '../components/common/Input';
 import Button from '../components/common/Button';
 
 interface SignInFields {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -50,8 +50,8 @@ const SignInPage: FC = () => {
   const handleErrorResponse = (error: any) => {
     const errorMessage = error.response?.data;
     switch (errorMessage) {
-      case 'User with this username doesnt exists':
-        setError('username', {
+      case 'User with this email doesnt exists':
+        setError('email', {
           type: 'custom',
           message: errorMessage,
         });
@@ -79,18 +79,18 @@ const SignInPage: FC = () => {
         onSubmit={handleSubmit(onSubmit)}
       >
         <Input
-          fieldName="username"
-          placeHolder="Username"
+          fieldName="email"
+          placeHolder="Email"
           register={register}
           validationRules={{
             required: 'Field is required',
           }}
           inputProps={{
-            maxLength: 20,
+            maxLength: 40,
           }}
           errorMessage={
-            typeof errors.username?.message === 'string'
-              ? errors.username.message
+            typeof errors.email?.message === 'string'
+              ? errors.email.message
               : ''
           }
         />
