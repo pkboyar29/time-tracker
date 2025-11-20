@@ -163,7 +163,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
 
       {adBoxMode == 'chart' && (
         <div className="flex flex-col sm:flex-row justify-between px-5 sm:px-10 sm:my-3.5 pb-5">
-          <div className="flex items-start self-center justify-center sm:sticky sm:self-start sm:w-1/2 top-10">
+          <div className="flex items-start self-center justify-center sm:pt-3 sm:sticky sm:self-start sm:w-1/2 top-10">
             <ResponsiveContainer minWidth={250} width="100%" height={300}>
               <PieChart>
                 <Pie
