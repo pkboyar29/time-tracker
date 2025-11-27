@@ -71,59 +71,64 @@ const SignInPage: FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center w-full mt-32">
-      <div className="text-2xl text-primary dark:text-textDark">Sign in</div>
+    <div className="flex items-center justify-center w-full min-h-screen bg-backgroundLight dark:bg-backgroundDark">
+      <div className="w-full max-w-md px-5 py-10 mx-3 border shadow-xl md:px-10 rounded-2xl bg-white/5 dark:bg-black/40 backdrop-blur-md border-white/10">
+        <h1 className="mb-8 text-2xl font-semibold text-center md:text-3xl text-primary dark:text-textDark">
+          Session Tracker. Sign in
+        </h1>
 
-      <form
-        className="flex flex-col items-center gap-5 mt-3 w-[225px]"
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <Input
-          fieldName="email"
-          placeHolder="Email"
-          register={register}
-          validationRules={{
-            required: 'Field is required',
-          }}
-          inputProps={{
-            maxLength: 40,
-          }}
-          errorMessage={
-            typeof errors.email?.message === 'string'
-              ? errors.email.message
-              : ''
-          }
-        />
+        <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
+          <Input
+            fieldName="email"
+            placeHolder="Email"
+            register={register}
+            validationRules={{
+              required: 'Field is required',
+            }}
+            inputProps={{
+              maxLength: 40,
+            }}
+            errorMessage={
+              typeof errors.email?.message === 'string'
+                ? errors.email.message
+                : ''
+            }
+            enlarged={true}
+          />
 
-        <Input
-          fieldName="password"
-          placeHolder="Password"
-          register={register}
-          validationRules={{
-            required: 'Field is required',
-          }}
-          inputProps={{
-            maxLength: 20,
-          }}
-          errorMessage={
-            typeof errors.password?.message === 'string'
-              ? errors.password.message
-              : ''
-          }
-          inputType="password"
-        />
+          <Input
+            fieldName="password"
+            placeHolder="Password"
+            register={register}
+            validationRules={{
+              required: 'Field is required',
+            }}
+            inputProps={{
+              maxLength: 20,
+            }}
+            errorMessage={
+              typeof errors.password?.message === 'string'
+                ? errors.password.message
+                : ''
+            }
+            inputType="password"
+            enlarged={true}
+          />
 
-        <Button className="text-[16px]" type="submit">
-          Sign in
-        </Button>
+          <Button className="text-[18px] py-3" type="submit">
+            Sign in
+          </Button>
 
-        <a
-          className="text-base text-center transition duration-300 cursor-pointer dark:text-textDark hover:text-primary dark:hover:text-primary"
-          onClick={() => navigate('/sign-up')}
-        >
-          Don't have account?
-        </a>
-      </form>
+          <div className="mt-2 text-center">
+            <a
+              className="text-base transition cursor-pointer dark:text-textDark hover:text-primary dark:hover:text-primary"
+              onClick={() => navigate('/sign-up')}
+            >
+              Don't have account?
+            </a>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
