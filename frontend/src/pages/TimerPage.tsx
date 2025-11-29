@@ -26,7 +26,8 @@ import CustomSelect from '../components/common/CustomSelect';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
-  const sessionFromLS = getSessionFromLocalStorage();
+  const sessionFromLS = getSessionFromLocalStorage('session');
+  const unsyncedSessionFromLS = getSessionFromLocalStorage('unsyncedSession');
 
   const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
     []
@@ -78,7 +79,27 @@ const TimerPage: FC = () => {
 
   useEffect(() => {
     const fetchAllUncompletedSessions = async () => {
-      const sessions = await fetchSessions({ completed: false });
+      let sessions = await fetchSessions({ completed: false });
+
+      if (unsyncedSessionFromLS) {
+        if (
+          unsyncedSessionFromLS.spentTimeSeconds ==
+          unsyncedSessionFromLS.totalTimeSeconds
+        ) {
+          sessions = sessions.filter(
+            (session) => session.id != unsyncedSessionFromLS.id
+          );
+        } else {
+          sessions = sessions.map((session) => {
+            if (session.id == unsyncedSessionFromLS.id) {
+              return unsyncedSessionFromLS;
+            } else {
+              return session;
+            }
+          });
+        }
+      }
+
       setUncompletedSessions(sessions);
     };
 

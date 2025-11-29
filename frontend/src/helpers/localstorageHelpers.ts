@@ -1,17 +1,24 @@
 import { ISession } from '../ts/interfaces/Session/ISession';
 
-export const saveSessionToLocalStorage = (session: ISession) => {
-  window.localStorage.setItem('session', JSON.stringify(session));
+export const saveSessionToLocalStorage = (
+  session: ISession,
+  lsKey: 'session' | 'unsyncedSession'
+) => {
+  window.localStorage.setItem(lsKey, JSON.stringify(session));
 };
 
-export const removeSessionFromLocalStorage = () => {
-  if (window.localStorage.getItem('session')) {
-    window.localStorage.removeItem('session');
+export const removeSessionFromLocalStorage = (
+  lsKey: 'session' | 'unsyncedSession'
+) => {
+  if (window.localStorage.getItem(lsKey)) {
+    window.localStorage.removeItem(lsKey);
   }
 };
 
-export const getSessionFromLocalStorage = (): ISession | null => {
-  const unparsedSession = window.localStorage.getItem('session');
+export const getSessionFromLocalStorage = (
+  lsKey: 'session' | 'unsyncedSession'
+): ISession | null => {
+  const unparsedSession = window.localStorage.getItem(lsKey);
   if (!unparsedSession) {
     return null;
   }
@@ -20,7 +27,7 @@ export const getSessionFromLocalStorage = (): ISession | null => {
     const session: ISession = JSON.parse(unparsedSession);
     return session;
   } catch (e) {
-    removeSessionFromLocalStorage();
+    removeSessionFromLocalStorage(lsKey);
     return null;
   }
 };
