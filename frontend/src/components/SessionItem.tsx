@@ -1,8 +1,5 @@
 import { FC } from 'react';
-import {
-  getReadableTimeHMS,
-  getRemainingTimeHoursMinutesSeconds,
-} from '../helpers/timeHelpers';
+import { getReadableTimeHMS } from '../helpers/timeHelpers';
 import { useTimer } from '../hooks/useTimer';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
@@ -11,7 +8,7 @@ import DeleteIcon from '../icons/DeleteIcon';
 import PlayIcon from '../icons/PlayIcon';
 import PauseIcon from '../icons/PauseIcon';
 import ResumeIcon from '../icons/ResumeIcon';
-import CustomCircularProgress from './common/CustomCircularProgress';
+import SessionProgress from './SessionProgress';
 
 interface SessionItemProps {
   session: ISession;
@@ -39,7 +36,7 @@ const SessionItem: FC<SessionItemProps> = ({
           <div className="flex flex-col gap-3 ml-auto">
             <div className="flex flex-col gap-2">
               <div className="text-lg font-bold dark:text-textDark">
-                Durability
+                Duration
               </div>
               <div className="dark:text-textDarkSecondary">
                 {session.totalTimeSeconds >= 3600
@@ -83,15 +80,7 @@ const SessionItem: FC<SessionItemProps> = ({
             </button>
           </div>
 
-          <CustomCircularProgress
-            valuePercent={
-              (session.spentTimeSeconds / session.totalTimeSeconds) * 100
-            }
-            label={getRemainingTimeHoursMinutesSeconds(
-              session.totalTimeSeconds,
-              session.spentTimeSeconds
-            )}
-          />
+          <SessionProgress session={session} />
         </div>
       </div>
     </div>

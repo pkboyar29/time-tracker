@@ -13,6 +13,7 @@ import Modal from './Modal';
 import ToggleButton from '../common/ToggleButton';
 import RangeSlider from '../common/RangeSlider';
 import QuestionMarkTooltip from '../common/QuestionMarkTooltip';
+import HotkeysInfo from '../HotkeysInfo';
 
 interface SettingsModalProps {
   onCloseModal: () => void;
@@ -86,7 +87,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
 
   return (
     <Modal title="Settings" onCloseModal={onCloseModal}>
-      <div className="h-[40vh] overflow-y-auto flex flex-col gap-4 justify-between">
+      <div className="h-[40vh] overflow-y-auto flex flex-col gap-4 justify-between pr-2">
         <div className="flex flex-col gap-4">
           {userInfo && (
             <div className="p-5 text-center rounded-3xl bg-surfaceLightHover dark:bg-surfaceDarkDarker">
@@ -128,6 +129,8 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
             />
           </div>
         </div>
+
+        <HotkeysInfo />
 
         <div className="flex flex-col justify-end gap-3 md:flex-row">
           <div>

@@ -75,7 +75,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       }
     }
 
-    saveSessionToLocalStorage(session);
+    saveSessionToLocalStorage(session, 'session');
 
     if (paused) {
       setTimerState({ status: 'paused', session });
@@ -104,9 +104,12 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       try {
         await updateSession(timerState.session, true);
       } catch (e) {
-        toast('A server error occurred while updating session', {
-          type: 'error',
-        });
+        toast(
+          'A server error occurred while updating session, but it was saved locally',
+          {
+            type: 'error',
+          }
+        );
       }
     } else if (timerState.status == 'paused') {
       const newStartTimestamp = Date.now();
@@ -130,15 +133,19 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       setTimerState({ status: 'idle', session: null });
       startTimestamp.current = 0;
       startSpentSeconds.current = 0;
-      removeSessionFromLocalStorage();
+      removeSessionFromLocalStorage('session');
 
       if (timerState.status == 'running' && shouldUpdateSession) {
         try {
           await updateSession(sessionToUpdate, true);
         } catch (e) {
-          toast('A server error occurred while updating session', {
-            type: 'error',
-          });
+          toast(
+            'A server error occurred while updating session, but it was saved locally',
+            {
+              type: 'error',
+            }
+          );
+          saveSessionToLocalStorage(timerState.session, 'unsyncedSession');
         }
       }
     }
@@ -149,15 +156,20 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       playAudio();
       showNotification(timerState.session);
 
+      const completedSession: ISession = {
+        ...timerState.session,
+        spentTimeSeconds: timerState.session.totalTimeSeconds,
+      };
       try {
-        await updateSession({
-          ...timerState.session,
-          spentTimeSeconds: timerState.session.totalTimeSeconds,
-        });
+        await updateSession(completedSession);
       } catch (e) {
-        toast('A server error occurred while updating session', {
-          type: 'error',
-        });
+        toast(
+          'A server error occurred while updating session, but it was saved locally',
+          {
+            type: 'error',
+          }
+        );
+        saveSessionToLocalStorage(completedSession, 'unsyncedSession');
       }
 
       stopTimer();
@@ -198,10 +210,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
         // automatic timer update in local storage every 2 seconds
         if ((ev.data - startSpentSeconds.current) % 2 == 0) {
-          saveSessionToLocalStorage({
-            ...timerState.session,
-            spentTimeSeconds: ev.data,
-          });
+          saveSessionToLocalStorage(
+            {
+              ...timerState.session,
+              spentTimeSeconds: ev.data,
+            },
+            'session'
+          );
         }
 
         // automatic timer update on server

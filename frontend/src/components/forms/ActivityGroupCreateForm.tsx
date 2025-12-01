@@ -48,7 +48,6 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
       <Input
         fieldName="name"
         register={register}
-        bg={true}
         placeHolder="Enter name"
         validationRules={{
           required: 'Field is required',
@@ -66,7 +65,6 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
         isTextArea={true}
         fieldName="descr"
         register={register}
-        bg={true}
         placeHolder="Enter description (optional)"
         validationRules={{
           maxLength: {

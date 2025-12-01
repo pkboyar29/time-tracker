@@ -20,13 +20,15 @@ import CustomCircularProgress from '../components/common/CustomCircularProgress'
 import SessionsList from '../components/SessionsList';
 import Button from '../components/common/Button';
 import RangeSlider from '../components/common/RangeSlider';
+import SessionDurationInputs from '../components/SessionDurationInputs';
 import NotesSection from '../components/NotesSection';
 import CustomSelect from '../components/common/CustomSelect';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
-  const sessionFromLS = getSessionFromLocalStorage();
+  const sessionFromLS = getSessionFromLocalStorage('session');
+  const unsyncedSessionFromLS = getSessionFromLocalStorage('unsyncedSession');
 
   const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
     []
@@ -78,7 +80,27 @@ const TimerPage: FC = () => {
 
   useEffect(() => {
     const fetchAllUncompletedSessions = async () => {
-      const sessions = await fetchSessions({ completed: false });
+      let sessions = await fetchSessions({ completed: false });
+
+      if (unsyncedSessionFromLS) {
+        if (
+          unsyncedSessionFromLS.spentTimeSeconds ==
+          unsyncedSessionFromLS.totalTimeSeconds
+        ) {
+          sessions = sessions.filter(
+            (session) => session.id != unsyncedSessionFromLS.id
+          );
+        } else {
+          sessions = sessions.map((session) => {
+            if (session.id == unsyncedSessionFromLS.id) {
+              return unsyncedSessionFromLS;
+            } else {
+              return session;
+            }
+          });
+        }
+      }
+
       setUncompletedSessions(sessions);
     };
 
@@ -278,14 +300,22 @@ const TimerPage: FC = () => {
                     <span className="block mb-2 text-lg font-semibold dark:text-textDark">
                       Session duration
                     </span>
-                    <RangeSlider
-                      minValue={1}
-                      maxValue={600}
-                      currentValue={selectedSeconds / 60}
-                      changeCurrentValue={(newCurrentValue) =>
-                        setSelectedSeconds(newCurrentValue * 60)
-                      }
-                    />
+                    <div className="hidden md:block">
+                      <RangeSlider
+                        minValue={1}
+                        maxValue={600}
+                        currentValue={selectedSeconds / 60}
+                        changeCurrentValue={(newCurrentValue) =>
+                          setSelectedSeconds(newCurrentValue * 60)
+                        }
+                      />
+                    </div>
+                    <div className="block md:hidden">
+                      <SessionDurationInputs
+                        seconds={selectedSeconds}
+                        setSeconds={setSelectedSeconds}
+                      />
+                    </div>
                   </div>
                 )}
 

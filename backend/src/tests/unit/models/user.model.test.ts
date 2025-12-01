@@ -6,7 +6,6 @@ describe('User model validation', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      username: 'john123',
       password: 'secret',
       dailyGoal: 3600,
     });
@@ -20,7 +19,6 @@ describe('User model validation', () => {
       firstName: 'A',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      username: 'john123',
       password: 'secret',
       dailyGoal: 3600,
     });
@@ -31,7 +29,6 @@ describe('User model validation', () => {
       firstName: 'A'.repeat(25),
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      username: 'john123',
       password: 'secret',
       dailyGoal: 3600,
     });
@@ -44,7 +41,6 @@ describe('User model validation', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'invalid-email',
-      username: 'john123',
       password: 'secret',
       dailyGoal: 3600,
     });
@@ -52,27 +48,11 @@ describe('User model validation', () => {
     const error = user.validateSync();
     expect(error?.errors.email).toBeDefined();
   });
-
-  it('should validate username pattern', () => {
-    const user = new User({
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      username: '123john',
-      password: 'secret',
-      dailyGoal: 3600,
-    });
-
-    const error = user.validateSync();
-    expect(error?.errors.username).toBeDefined();
-  });
-
   it('should validate dailyGoal range', () => {
     const tooSmall = new User({
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      username: 'john123',
       password: 'secret',
       dailyGoal: 30,
     });
@@ -83,7 +63,6 @@ describe('User model validation', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      username: 'john123',
       password: 'secret',
       dailyGoal: 90000,
     });
@@ -96,7 +75,6 @@ describe('User model validation', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
-      username: 'john123',
       password: 'secret',
       dailyGoal: 3600,
     });

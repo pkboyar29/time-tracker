@@ -40,7 +40,7 @@ const SessionsList: FC<SessionsListProps> = ({
   updateSessionsListHandler,
 }) => {
   const { timerState, startTimer } = useTimer();
-  const sessionFromLS = getSessionFromLocalStorage();
+  const sessionFromLS = getSessionFromLocalStorage('session');
 
   // removing current session from the list
   const sessionsWithoutCurrent = sessions.filter(

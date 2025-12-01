@@ -11,8 +11,8 @@ interface InputProps {
   inputProps?: React.InputHTMLAttributes<HTMLInputElement>;
   errorMessage: string;
   inputType?: 'text' | 'password';
-  bg?: boolean;
   isTextArea?: boolean;
+  enlarged?: boolean;
 }
 
 const Input: FC<InputProps> = ({
@@ -23,33 +23,27 @@ const Input: FC<InputProps> = ({
   inputProps,
   errorMessage,
   inputType = 'text',
-  bg = false,
   isTextArea = false,
+  enlarged = false,
 }) => {
   const [toggledType, setToggledType] = useState<'text' | 'password'>(
     inputType
   );
 
-  const handleToggleTypeClick = () => {
-    if (toggledType === 'text') {
-      setToggledType('password');
-    } else {
-      setToggledType('text');
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center w-full gap-2">
-      <div className="relative flex w-full">
+    <div className="flex flex-col w-full">
+      <div className="relative">
         {!isTextArea ? (
           <input
-            className={`w-full px-4 py-2 border border-solid rounded-lg focus:shadow-lg ${
-              errorMessage && 'border-primary'
-            } ${
-              bg
-                ? 'bg-backgroundLight dark:bg-surfaceDarkHover border-transparent dark:placeholder-textDark dark:text-textDark'
-                : 'dark:text-textDark bg-transparent border-black dark:border-gray-500'
-            }`}
+            className={`
+            w-full px-4 
+            ${enlarged ? 'py-3 text-[17px]' : 'py-2'} 
+            rounded-xl border border-gray-500 
+            dark:text-textDark bg-[#FAFAFA] dark:bg-white/10 
+            focus:ring-2 focus:ring-primary focus:border-primary
+            transition
+            ${errorMessage && 'border-primary'}
+          `}
             placeholder={placeHolder}
             {...register(fieldName, validationRules)}
             {...inputProps}
@@ -57,13 +51,13 @@ const Input: FC<InputProps> = ({
           />
         ) : (
           <textarea
-            className={`w-full h-20 px-4 py-2 border border-solid rounded-lg focus:shadow-lg ${
-              errorMessage && 'border-primary'
-            } ${
-              bg
-                ? 'bg-backgroundLight dark:bg-surfaceDarkHover border-transparent dark:placeholder-textDark dark:text-textDark'
-                : 'dark:text-textDark bg-transparent border-black dark:border-gray-500'
-            }`}
+            className={`w-full h-24 px-4 ${
+              enlarged ? 'py-3 text-[17px]' : 'py-2'
+            } rounded-xl border border-gray-500 
+            dark:text-textDark bg-[#FAFAFA] dark:bg-white/10 
+            focus:ring-2 focus:ring-primary focus:border-primary
+            transition
+            ${errorMessage && 'border-primary'}`}
             placeholder={placeHolder}
             {...register(fieldName, validationRules)}
           />
@@ -72,27 +66,23 @@ const Input: FC<InputProps> = ({
         {inputType === 'password' && (
           <button
             type="button"
-            className="absolute z-50 -translate-y-1/2 top-1/2 right-2"
-            onClick={handleToggleTypeClick}
+            className="absolute -translate-y-1/2 right-3 top-1/2"
+            onClick={() =>
+              setToggledType(toggledType === 'text' ? 'password' : 'text')
+            }
           >
             {toggledType === 'password' ? (
-              <Visibility
-                className="dark:fill-textDark"
-                style={{ fontSize: '19px' }}
-              />
+              <Visibility className="dark:fill-textDark" fontSize="small" />
             ) : (
-              <VisibilityOff
-                className="dark:fill-textDark"
-                style={{ fontSize: '19px' }}
-              />
+              <VisibilityOff className="dark:fill-textDark" fontSize="small" />
             )}
           </button>
         )}
       </div>
 
-      {errorMessage && (
-        <div className="text-base text-primary">{errorMessage}</div>
-      )}
+      <div className="min-h-[20px] mt-1 text-sm text-primary">
+        {errorMessage}
+      </div>
     </div>
   );
 };

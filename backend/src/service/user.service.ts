@@ -40,10 +40,6 @@ async function signUp(
 ): Promise<AuthorizeResponse> {
   const users = await User.find({});
   users.forEach((user) => {
-    if (user.username === userSignUpDTO.username) {
-      throw new HttpError(400, 'Username must be unique');
-    }
-
     if (user.email === userSignUpDTO.email) {
       throw new HttpError(400, 'Email must be unique');
     }
@@ -76,7 +72,7 @@ async function signUp(
 
   const validationError = newUser.validateSync();
   if (validationError) {
-    const fields = ['email', 'username'] as const;
+    const fields = ['email'] as const;
 
     for (const field of fields) {
       const err = validationError.errors[field];
@@ -94,9 +90,9 @@ async function signUp(
 async function signIn(
   userSignInDTO: UserSignInDTO
 ): Promise<AuthorizeResponse> {
-  const user = await User.find({ username: userSignInDTO.username });
+  const user = await User.find({ email: userSignInDTO.email });
   if (!user[0]) {
-    throw new HttpError(400, 'User with this username doesnt exists');
+    throw new HttpError(400, 'User with this email doesnt exists');
   }
 
   if (!compareSync(userSignInDTO.password, user[0].password)) {
@@ -208,7 +204,7 @@ function refreshAccessToken(refreshToken: string): string | undefined {
 
 async function getProfileInfo(userId: string): Promise<UserResponseDTO> {
   const profileInfo = await User.findById(userId).select(
-    'username email dailyGoal showTimerInTitle createdDate'
+    'email dailyGoal showTimerInTitle createdDate'
   ); // firstName lastName
   return profileInfo as UserResponseDTO;
 }

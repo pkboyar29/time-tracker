@@ -38,14 +38,30 @@ const App: FC = () => {
   }, []);
 
   useEffect(() => {
+    const updateSessionInCaseOfError = async () => {
+      const unsyncedSessionFromLS =
+        getSessionFromLocalStorage('unsyncedSession');
+
+      if (requiredAuth && unsyncedSessionFromLS) {
+        try {
+          await updateSession(unsyncedSessionFromLS);
+          removeSessionFromLocalStorage('unsyncedSession');
+        } catch (e) {}
+      }
+    };
+
+    updateSessionInCaseOfError();
+  }, []);
+
+  useEffect(() => {
     const fetchCurrentSession = async () => {
-      const sessionFromLS = getSessionFromLocalStorage();
+      const sessionFromLS = getSessionFromLocalStorage('session');
 
       if (requiredAuth && sessionFromLS) {
         try {
           const sessionFromServer = await fetchSession(sessionFromLS.id);
           if (sessionFromServer.completed) {
-            removeSessionFromLocalStorage();
+            removeSessionFromLocalStorage('session');
             return;
           }
 
@@ -61,7 +77,7 @@ const App: FC = () => {
           }
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
-            removeSessionFromLocalStorage();
+            removeSessionFromLocalStorage('session');
           } else {
             toast('A server error occurred while getting current session', {
               type: 'error',

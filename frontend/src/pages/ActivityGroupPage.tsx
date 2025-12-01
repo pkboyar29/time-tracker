@@ -160,11 +160,13 @@ const ActivityGroupPage: FC = () => {
                 Activities
               </div>
 
-              <div className="w-fit">
-                <Button onClick={onArchiveAllActivities}>
-                  Archive all activities
-                </Button>
-              </div>
+              {activities.length > 0 && (
+                <div className="w-fit">
+                  <Button onClick={onArchiveAllActivities}>
+                    Archive all activities
+                  </Button>
+                </div>
+              )}
             </div>
 
             <div className="flex justify-end mt-4 md:hidden">
