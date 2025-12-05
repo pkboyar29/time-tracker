@@ -36,6 +36,8 @@ interface TimerContextType {
   setNote: (note: string) => void;
   timerState: TimerState;
   timerEndDate: Date;
+  startTimestamp: number;
+  startSpentSeconds: number;
 }
 
 const TimerContext = createContext<TimerContextType>({
@@ -45,6 +47,8 @@ const TimerContext = createContext<TimerContextType>({
   setNote: () => {},
   timerState: { status: 'idle', session: null },
   timerEndDate: new Date(),
+  startTimestamp: 0,
+  startSpentSeconds: 0,
 });
 
 interface TimerProviderProps {
@@ -198,7 +202,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
           return {
             status: 'running',
-            session: { ...prev.session, spentTimeSeconds: ev.data },
+            session: {
+              ...prev.session,
+              spentTimeSeconds: ev.data,
+            },
           };
         });
 
@@ -274,6 +281,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         setNote,
         timerState,
         timerEndDate: timerEndDate.current,
+        startTimestamp: startTimestamp.current,
+        startSpentSeconds: startSpentSeconds.current,
       }}
     >
       {children}

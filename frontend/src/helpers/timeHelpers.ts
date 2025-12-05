@@ -43,7 +43,8 @@ export const getTimeHMS = (allSeconds: number): string => {
 
 export const getReadableTimeHMS = (
   seconds: number,
-  short: boolean = false
+  short: boolean = false,
+  showZeroMinutes: boolean = false
 ): string => {
   const hours: number = Math.trunc(seconds / 3600);
   const hoursString: string =
@@ -51,12 +52,17 @@ export const getReadableTimeHMS = (
 
   const remainingSeconds: number = seconds - hours * 3600;
   const remainingMinutes: number = Math.trunc(remainingSeconds / 60);
-  const minutesString: string =
-    remainingMinutes === 0
-      ? ''
-      : short == true
+
+  let minutesString = '';
+  if (remainingMinutes === 0) {
+    if (showZeroMinutes) {
+      minutesString = short ? '0m' : '0 minutes';
+    }
+  } else {
+    minutesString = short
       ? `${remainingMinutes}m`
       : `${remainingMinutes} minutes`;
+  }
 
   const resultString =
     hoursString === '' && minutesString === ''

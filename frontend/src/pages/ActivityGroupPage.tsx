@@ -142,7 +142,7 @@ const ActivityGroupPage: FC = () => {
 
                 <div className="hidden md:block w-fit">
                   <Button onClick={() => setCreateModal(true)}>
-                    Create new activity group
+                    Create new activity
                   </Button>
                 </div>
 

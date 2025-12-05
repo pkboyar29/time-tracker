@@ -10,22 +10,43 @@ interface QuestionMarkTooltipProps {
 
 const QuestionMarkTooltip: FC<QuestionMarkTooltipProps> = ({ tooltipText }) => {
   const [isVisible, setIsVisible] = useState<boolean>(false);
+
+  const questionMarkRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
+
   const [isOnCenter, setIsOnCenter] = useState<boolean>(true); // TODO: название должно быть связано с границей (либо выезжает за левую границу, либо за правую, либо никуда не выезжает)
+  const [top, setTop] = useState<number | null>(null);
 
   useEffect(() => {
     if (!isVisible) return;
 
-    const hide = () => setIsVisible(false);
+    const hideAndUpdateTop = () => {
+      setIsVisible(false);
+      if (questionMarkRef.current) {
+        const questionMarkRect =
+          questionMarkRef.current.getBoundingClientRect();
+        setTop(questionMarkRect.y - 30);
+      }
+    };
 
-    window.addEventListener('scroll', hide, { passive: true });
-    return () => window.removeEventListener('scroll', hide);
+    window.addEventListener('scroll', hideAndUpdateTop, true);
+    window.addEventListener('resize', hideAndUpdateTop);
+    return () => {
+      window.removeEventListener('scroll', hideAndUpdateTop);
+      window.removeEventListener('resize', hideAndUpdateTop);
+    };
   }, [isVisible]);
 
   useLayoutEffect(() => {
     if (tooltipRef.current) {
       if (isOutOfRightBoundary(tooltipRef.current)) {
         setIsOnCenter(false);
+
+        if (questionMarkRef.current) {
+          const questionMarkRect =
+            questionMarkRef.current.getBoundingClientRect();
+          setTop(questionMarkRect.y - 30);
+        }
       } else {
         setIsOnCenter(true);
       }
@@ -38,7 +59,10 @@ const QuestionMarkTooltip: FC<QuestionMarkTooltipProps> = ({ tooltipText }) => {
       onMouseEnter={() => setIsVisible(true)}
       onMouseLeave={() => setIsVisible(false)}
     >
-      <div className="flex items-center justify-center w-5 h-5 text-sm text-white rounded-full select-none bg-surfaceDarkHover">
+      <div
+        ref={questionMarkRef}
+        className="flex items-center justify-center w-5 h-5 text-sm text-white rounded-full select-none bg-surfaceDarkHover"
+      >
         ?
       </div>
 
@@ -55,7 +79,7 @@ const QuestionMarkTooltip: FC<QuestionMarkTooltipProps> = ({ tooltipText }) => {
         }
       `}
             style={{
-              top: tooltipRef.current?.getBoundingClientRect().y,
+              top: top!,
               right: 0,
               maxWidth: 'calc(100vw - 20px)',
             }}
