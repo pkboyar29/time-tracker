@@ -168,7 +168,10 @@ export const getMonthDetailedName = (date: Date) => {
   return `${months[date.getMonth()]} ${date.getFullYear()}`;
 };
 
-export const getMonthWeeks = (date: Date): [Date, Date][] => {
+export const getWeeks = (
+  date: Date,
+  full: boolean = true // true - all month weeks, false - 2 weeks
+): [Date, Date][] => {
   date = new Date(date);
 
   // находим дату понедельника
@@ -181,6 +184,22 @@ export const getMonthWeeks = (date: Date): [Date, Date][] => {
       date.setDate(date.getDate() - 1);
     }
     mondayDate = new Date(date);
+  }
+
+  if (!full) {
+    const sunday = new Date(mondayDate);
+    sunday.setDate(sunday.getDate() + 7);
+    sunday.setMilliseconds(sunday.getMilliseconds() - 1);
+
+    const prevWeekMonday = new Date(mondayDate);
+    const prevWeekSunday = new Date(sunday);
+    prevWeekMonday.setDate(prevWeekMonday.getDate() - 7);
+    prevWeekSunday.setDate(prevWeekSunday.getDate() - 7);
+
+    return [
+      [prevWeekMonday, prevWeekSunday],
+      [mondayDate, sunday],
+    ];
   }
 
   // определяем первый понедельник месяца, с которого начнем отсчет по четырем/пяти неделям
@@ -237,46 +256,49 @@ export const getMonthWeeks = (date: Date): [Date, Date][] => {
   return weeks;
 };
 
-export const getFiveMonths = (middleDate: Date): [Date, Date][] => {
-  const fiveMonths: [Date, Date][] = [];
+export const getMonths = (
+  middleDate: Date,
+  full: boolean = true // true - 5 months, false - 2 months
+): [Date, Date][] => {
+  const months: [Date, Date][] = [];
 
-  for (let i = 2; i > 0; i--) {
+  for (let i = full ? 2 : 1; i > 0; i--) {
     const date: Date = new Date(middleDate);
     date.setMonth(date.getMonth() - i);
-    fiveMonths.push(getMonthRange(date));
+    months.push(getMonthRange(date));
   }
-  fiveMonths.push(getMonthRange(new Date(middleDate)));
-  for (let i = 1; i < 3; i++) {
-    const date: Date = new Date(middleDate);
-    date.setMonth(date.getMonth() + i);
-    fiveMonths.push(getMonthRange(date));
+  months.push(getMonthRange(new Date(middleDate)));
+  if (full) {
+    for (let i = 1; i < 3; i++) {
+      const date: Date = new Date(middleDate);
+      date.setMonth(date.getMonth() + i);
+      months.push(getMonthRange(date));
+    }
   }
 
-  return fiveMonths;
+  return months;
 };
 
-export const shiftFiveMonths = (
-  fiveMonths: [Date, Date][],
+export const shiftMonths = (
+  months: [Date, Date][],
   right: boolean
 ): [Date, Date][] => {
-  let newFiveMonths: [Date, Date][] = [];
-  for (let i = 0; i < 5; i++) {
-    newFiveMonths.push([
-      new Date(fiveMonths[i][0]),
-      new Date(fiveMonths[i][1]),
-    ]);
+  const monthsCount = months.length;
+  let newMonths: [Date, Date][] = [];
+  for (let i = 0; i < monthsCount; i++) {
+    newMonths.push([new Date(months[i][0]), new Date(months[i][1])]);
   }
 
-  const step: number = right ? 5 : -5;
-  for (let i = 0; i < 5; i++) {
-    newFiveMonths[i][0].setMonth(newFiveMonths[i][0].getMonth() + step);
-    newFiveMonths[i][1].setMonth(newFiveMonths[i][1].getMonth() + step);
+  const step: number = right ? monthsCount : -monthsCount;
+  for (let i = 0; i < monthsCount; i++) {
+    newMonths[i][0].setMonth(newMonths[i][0].getMonth() + step);
+    newMonths[i][1].setMonth(newMonths[i][1].getMonth() + step);
   }
 
-  return newFiveMonths;
+  return newMonths;
 };
 
-export const getTwoYears = (yearDate: Date): [Date, Date][] => {
+export const getYears = (yearDate: Date): [Date, Date][] => {
   const previousYearDate: Date = new Date(yearDate);
   previousYearDate.setFullYear(yearDate.getFullYear() - 1);
 
@@ -287,7 +309,7 @@ export const getTwoYears = (yearDate: Date): [Date, Date][] => {
   return twoYears;
 };
 
-export const shiftTwoYears = (
+export const shiftYears = (
   twoYears: [Date, Date][],
   right: boolean
 ): [Date, Date][] => {

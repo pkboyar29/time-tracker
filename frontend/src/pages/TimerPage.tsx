@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState, useRef } from 'react';
 import { fetchSessions, createSession } from '../api/sessionApi';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivities } from '../api/activityApi';
@@ -45,9 +45,38 @@ const TimerPage: FC = () => {
   const [selectedSeconds, setSelectedSeconds] = useState<number>(1500);
   const [selectedActivityId, setSelectedActivityId] = useState<string>('');
 
-  const { startTimer, toggleTimer, stopTimer, timerState, timerEndDate } =
-    useTimer();
+  const {
+    startTimer,
+    toggleTimer,
+    stopTimer,
+    timerState,
+    timerEndDate,
+    startTimestamp,
+    startSpentSeconds,
+  } = useTimer();
   const isTimerStarted = timerState.status != 'idle';
+  const [spentMs, setSpentMs] = useState<number>(0);
+  const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // TODO bug: переключаясь между сессиями, может происходить туда сюда метание прогресса
+  useEffect(() => {
+    intervalId.current && clearInterval(intervalId.current);
+
+    if (timerState.status == 'running') {
+      intervalId.current = setInterval(() => {
+        const newSpentMs =
+          startSpentSeconds * 1000 + (Date.now() - startTimestamp);
+        setSpentMs(newSpentMs);
+      }, 100);
+    } else if (timerState.status == 'paused') {
+      setSpentMs(timerState.session.spentTimeSeconds * 1000); // set milliseconds rounded to full seconds
+    } else {
+      setSpentMs(0);
+    }
+    return () => {
+      intervalId.current && clearInterval(intervalId.current);
+    };
+  }, [timerState.status, timerState.session?.id]);
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
@@ -154,8 +183,7 @@ const TimerPage: FC = () => {
               ) : (
                 <CustomCircularProgress
                   valuePercent={
-                    (timerState.session.spentTimeSeconds /
-                      timerState.session.totalTimeSeconds) *
+                    (spentMs / (timerState.session.totalTimeSeconds * 1000)) *
                     100
                   }
                   label={`${getRemainingTimeHoursMinutesSeconds(

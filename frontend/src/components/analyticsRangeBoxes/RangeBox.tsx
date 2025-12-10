@@ -1,15 +1,17 @@
 import { FC, useState, useEffect, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useWindowSize } from '../../hooks/useWindowSize';
+import { useDebounce } from '../../hooks/useDebounce';
 import {
   getWeekDays,
   shiftWeekDays,
   getDayOfWeekName,
-  getMonthWeeks,
+  getWeeks,
   getMonthName,
-  getFiveMonths,
-  shiftFiveMonths,
-  getTwoYears,
-  shiftTwoYears,
+  getMonths,
+  shiftMonths,
+  getYears,
+  shiftYears,
   isCurrentDay,
   isCurrentWeek,
   isCurrentMonth,
@@ -28,17 +30,18 @@ interface RangeBoxProps {
 
 const getRangeItems = (
   rangeType: RangeType,
-  fromDate: Date
+  fromDate: Date,
+  windowWidth: number
 ): [Date, Date][] => {
   switch (rangeType) {
     case 'days':
       return getWeekDays(fromDate);
     case 'weeks':
-      return getMonthWeeks(fromDate);
+      return getWeeks(fromDate, windowWidth >= 768);
     case 'months':
-      return getFiveMonths(fromDate);
+      return getMonths(fromDate, windowWidth >= 768);
     case 'years':
-      return getTwoYears(fromDate);
+      return getYears(fromDate);
     default:
       return [];
   }
@@ -138,6 +141,8 @@ const renderDateLabel = (
 };
 
 const RangeBox: FC<RangeBoxProps> = ({ range }) => {
+  const { width: windowWidth } = useWindowSize();
+  const debouncedWidth = useDebounce(windowWidth, 150);
   const navigate = useNavigate();
 
   const rangeType = getRangeType(range.fromDate, range.toDate);
@@ -151,12 +156,16 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   }`;
 
   const [rangeItems, setRangeItems] = useState<[Date, Date][]>(() =>
-    getRangeItems(rangeType, range.fromDate)
+    getRangeItems(rangeType, range.fromDate, windowWidth)
   );
 
   useLayoutEffect(() => {
-    setRangeItems(getRangeItems(rangeType, range.fromDate));
+    setRangeItems(getRangeItems(rangeType, range.fromDate, windowWidth));
   }, [rangeType]);
+
+  useEffect(() => {
+    setRangeItems(getRangeItems(rangeType, range.fromDate, debouncedWidth));
+  }, [debouncedWidth]);
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
@@ -187,7 +196,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
             leftArrowClickHandler();
           }
           if (index == -1) {
-            setRangeItems(getRangeItems(rangeType, newFromDate));
+            setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
           }
         } else if (event.code == 'ArrowRight') {
           const [newFromDate, newToDate] = shiftTwoDates(
@@ -209,7 +218,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
             rightArrowClickHandler();
           }
           if (index == -1) {
-            setRangeItems(getRangeItems(rangeType, newFromDate));
+            setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
           }
         }
       }
@@ -227,20 +236,29 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
       setRangeItems((daysOfWeek) => shiftWeekDays(daysOfWeek, false));
     } else if (rangeType == 'weeks') {
       setRangeItems((weeks) => {
-        // первое воскресенье всегда находится в текущем месяце
-        const firstSunday = weeks[0][1];
+        const full = windowWidth >= 768;
 
-        // выбираем четвертый день в предыдущем месяце
-        const dayFromPrevMonth = new Date(firstSunday);
-        dayFromPrevMonth.setMonth(dayFromPrevMonth.getMonth() - 1);
-        dayFromPrevMonth.setDate(4);
+        if (full) {
+          // первое воскресенье всегда находится в текущем месяце
+          const firstSunday = weeks[0][1];
 
-        return getMonthWeeks(dayFromPrevMonth);
+          // выбираем четвертый день в предыдущем месяце
+          const dayFromPrevMonth = new Date(firstSunday);
+          dayFromPrevMonth.setMonth(dayFromPrevMonth.getMonth() - 1);
+          dayFromPrevMonth.setDate(4);
+
+          return getWeeks(dayFromPrevMonth, full);
+        } else {
+          const prevMonday = new Date(weeks[0][0]);
+          prevMonday.setDate(prevMonday.getDate() - 7);
+
+          return getWeeks(prevMonday, full);
+        }
       });
     } else if (rangeType == 'months') {
-      setRangeItems((months) => shiftFiveMonths(months, false));
+      setRangeItems((months) => shiftMonths(months, false));
     } else if (rangeType == 'years') {
-      setRangeItems((years) => shiftTwoYears(years, false));
+      setRangeItems((years) => shiftYears(years, false));
     }
   }
 
@@ -249,25 +267,34 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
       setRangeItems((daysOfWeek) => shiftWeekDays(daysOfWeek, true));
     } else if (rangeType == 'weeks') {
       setRangeItems((weeks) => {
-        // последний понедельник всегда находится в текущем месяце
-        const lastMonday = weeks[weeks.length - 1][0];
+        const full = windowWidth >= 768;
 
-        // выбираем четвертый день в следующем месяце
-        const dayFromNextMonth = new Date(lastMonday);
-        dayFromNextMonth.setMonth(dayFromNextMonth.getMonth() + 1);
-        dayFromNextMonth.setDate(4);
+        if (full) {
+          // последний понедельник всегда находится в текущем месяце
+          const lastMonday = weeks[weeks.length - 1][0];
 
-        return getMonthWeeks(dayFromNextMonth);
+          // выбираем четвертый день в следующем месяце
+          const dayFromNextMonth = new Date(lastMonday);
+          dayFromNextMonth.setMonth(dayFromNextMonth.getMonth() + 1);
+          dayFromNextMonth.setDate(4);
+
+          return getWeeks(dayFromNextMonth, windowWidth >= 768);
+        } else {
+          const nextMonday = new Date(weeks[1][0]);
+          nextMonday.setDate(nextMonday.getDate() + 14);
+
+          return getWeeks(nextMonday, full);
+        }
       });
     } else if (rangeType == 'months') {
-      setRangeItems((months) => shiftFiveMonths(months, true));
+      setRangeItems((months) => shiftMonths(months, true));
     } else if (rangeType == 'years') {
-      setRangeItems((years) => shiftTwoYears(years, true));
+      setRangeItems((years) => shiftYears(years, true));
     }
   }
 
   function currentRangeItemClickHandler() {
-    setRangeItems(getRangeItems(rangeType, range.fromDate));
+    setRangeItems(getRangeItems(rangeType, range.fromDate, windowWidth));
   }
 
   function rangeItemClickHandler(rangeItem: [Date, Date]) {

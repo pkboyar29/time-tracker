@@ -129,6 +129,26 @@ describe('getReadableTimeHMS', () => {
     const result = getReadableTimeHMS(3600); // only hours
     expect(result).toBe('1 hours');
   });
+
+  it('returns 0 minutes, zeroUnits = true, short = false', () => {
+    const result = getReadableTimeHMS(3600, false, true);
+    expect(result).toBe('1 hours 0 minutes');
+  });
+
+  it('returns 0m, zeroUnits = true, short = true', () => {
+    const result = getReadableTimeHMS(3600, true, true);
+    expect(result).toBe('1h 0m');
+  });
+
+  it('returns 0 hours, zeroUnits = true, short = false', () => {
+    const result = getReadableTimeHMS(300, false, true);
+    expect(result).toBe('0 hours 5 minutes');
+  });
+
+  it('returns 0h, zeroUnits = true, short = true', () => {
+    const result = getReadableTimeHMS(300, true, true);
+    expect(result).toBe('0h 5m');
+  });
 });
 
 describe('getTimeHHmmFromDate', () => {
