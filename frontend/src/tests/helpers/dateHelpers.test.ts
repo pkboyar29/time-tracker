@@ -1,10 +1,10 @@
 import {
   getWeekDays,
   shiftWeekDays,
-  getFiveMonths,
-  shiftFiveMonths,
-  getTwoYears,
-  shiftTwoYears,
+  getMonths,
+  shiftMonths,
+  getYears,
+  shiftYears,
   getDayRange,
   getWeekRange,
   getMonthRange,
@@ -252,10 +252,10 @@ describe('shiftWeekDays', () => {
   });
 });
 
-describe('getFiveMonths', () => {
+describe('getMonths', () => {
   it('should return 5 months with the middle one equal to the input', () => {
     const middle = new Date('2023-08-15');
-    const result = getFiveMonths(middle);
+    const result = getMonths(middle);
 
     expect(result).toHaveLength(5);
     expect(result[2][0].getMonth()).toBe(7); // August (0-indexed)
@@ -264,7 +264,7 @@ describe('getFiveMonths', () => {
 
   it('should return months in correct order (2 before, current, 2 after)', () => {
     const date = new Date('2023-06-01');
-    const result = getFiveMonths(date);
+    const result = getMonths(date);
 
     const months = result.map((d) => d[0].getMonth());
     expect(months).toEqual([3, 4, 5, 6, 7]); // Apr, May, Jun, Jul, Aug
@@ -272,7 +272,7 @@ describe('getFiveMonths', () => {
 
   it('should handle year change going backward (e.g., January)', () => {
     const date = new Date('2024-01-10');
-    const result = getFiveMonths(date);
+    const result = getMonths(date);
 
     const months = result.map((d) => d[0].getMonth());
     const years = result.map((d) => d[0].getFullYear());
@@ -283,7 +283,7 @@ describe('getFiveMonths', () => {
 
   it('should handle year change going forward (e.g., December)', () => {
     const date = new Date('2022-12-20');
-    const result = getFiveMonths(date);
+    const result = getMonths(date);
 
     const months = result.map((d) => d[0].getMonth());
     const years = result.map((d) => d[0].getFullYear());
@@ -291,9 +291,17 @@ describe('getFiveMonths', () => {
     expect(months).toEqual([9, 10, 11, 0, 1]); // Oct, Nov, Dec, Jan, Feb
     expect(years).toEqual([2022, 2022, 2022, 2023, 2023]);
   });
+
+  it('should return 2 months if full is false', () => {
+    const date = new Date('2025-10-20');
+    const result = getMonths(date, false);
+
+    expect(result[0][0].getMonth()).toBe(8); // Aug
+    expect(result[1][0].getMonth()).toBe(9); // Sep
+  });
 });
 
-describe('shiftFiveMonths', () => {
+describe('shiftMonths', () => {
   it('should shift all months 5 forward when right is true', () => {
     const input: [Date, Date][] = [
       [new Date('2023-01-01'), new Date('2023-02-01')],
@@ -303,7 +311,7 @@ describe('shiftFiveMonths', () => {
       [new Date('2023-05-01'), new Date('2023-06-01')],
     ];
 
-    const result = shiftFiveMonths(input, true);
+    const result = shiftMonths(input, true);
     const months = result.map((d) => d[0].getMonth());
     const years = result.map((d) => d[0].getFullYear());
 
@@ -320,7 +328,7 @@ describe('shiftFiveMonths', () => {
       [new Date('2023-10-01'), new Date('2023-11-01')],
     ];
 
-    const result = shiftFiveMonths(input, false);
+    const result = shiftMonths(input, false);
     const months = result.map((d) => d[0].getMonth());
     const years = result.map((d) => d[0].getFullYear());
 
@@ -337,7 +345,7 @@ describe('shiftFiveMonths', () => {
       [new Date('2024-01-01'), new Date('2024-02-01')],
     ];
 
-    const result = shiftFiveMonths(input, true);
+    const result = shiftMonths(input, true);
     const months = result.map((d) => d[0].getMonth());
     const years = result.map((d) => d[0].getFullYear());
 
@@ -354,7 +362,7 @@ describe('shiftFiveMonths', () => {
       [new Date('2024-07-01'), new Date('2024-08-01')],
     ];
 
-    const result = shiftFiveMonths(input, false);
+    const result = shiftMonths(input, false);
     const months = result.map((d) => d[0].getMonth());
     const years = result.map((d) => d[0].getFullYear());
 
@@ -367,7 +375,7 @@ describe('getTwoYears', () => {
   it('should return the current year and the previous year', () => {
     const input = new Date('2025-08-07');
 
-    const result = getTwoYears(input);
+    const result = getYears(input);
     expect(result).toHaveLength(2);
 
     expect(result[0][0].getFullYear()).toBe(2024);
@@ -381,7 +389,7 @@ describe('shiftTwoYears', () => {
       [new Date('2022-01-01'), new Date('2023-01-01')],
       [new Date('2023-01-01'), new Date('2024-01-01')],
     ];
-    const result = shiftTwoYears(input, true);
+    const result = shiftYears(input, true);
 
     expect(result[0][0].getFullYear()).toBe(2024);
     expect(result[1][0].getFullYear()).toBe(2025);
@@ -392,7 +400,7 @@ describe('shiftTwoYears', () => {
       [new Date('2022-06-15'), new Date('2023-06-15')],
       [new Date('2023-06-15'), new Date('2024-06-15')],
     ];
-    const result = shiftTwoYears(input, false);
+    const result = shiftYears(input, false);
 
     expect(result[0][0].getFullYear()).toBe(2020);
     expect(result[1][0].getFullYear()).toBe(2021);

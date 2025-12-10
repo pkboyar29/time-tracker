@@ -14,7 +14,7 @@ export function animateCountUp(
   const startTime = performance.now();
 
   function update(now: number) {
-    const progress = Math.min((now - startTime) / duration, 1);
+    const progress = Math.min(Math.max((now - startTime) / duration, 0), 1);
     const value = Math.floor(progress * to);
 
     if (formatter) {

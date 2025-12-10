@@ -132,7 +132,7 @@ const AnalyticsRangePage: FC = () => {
   }, [isError]);
 
   return (
-    <div className="flex flex-col overflow-y-hidden lg:h-screen dark:text-textDark">
+    <div className="flex flex-col h-full lg:overflow-y-hidden lg:h-screen dark:text-textDark">
       <div className="lg:max-h-[156px] lg:h-full relative flex flex-col justify-center pb-5 py-[65px] sm:py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
         {rangeType == 'custom' ? (
           <CustomRangeBox fromDate={range.fromDate} toDate={range.toDate} />
