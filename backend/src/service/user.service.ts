@@ -268,9 +268,8 @@ async function exportUserData(userId: string): Promise<Buffer> {
     )} minutes, ${Math.floor(info.spentTimeSeconds / 3600)} hours)`;
   };
 
-  const activityGroups = await activityGroupService.getDetailedActivityGroups({
+  const activityGroups = await activityGroupService.getActivityGroups({
     userId,
-    onlyCompleted: true,
   });
   for (const group of activityGroups) {
     fileContent = fileContent.concat(
@@ -283,11 +282,9 @@ async function exportUserData(userId: string): Promise<Buffer> {
       '\n'
     );
 
-    const activities = await activityService.getActivitiesForActivityGroup({
+    const activities = await activityService.getActivities({
       activityGroupId: group._id.toString(),
       userId,
-      detailed: true,
-      onlyCompleted: true,
     });
     let activitiesContent = '';
     activities.forEach((activity, index) => {

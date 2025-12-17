@@ -8,16 +8,6 @@ export interface IActivityGroup {
   deleted: boolean;
   createdDate: Date;
   updatedDate: Date;
-}
-
-export interface IDetailedActivityGroup {
-  _id: Types.ObjectId;
-  name: string;
-  descr?: string;
-  user: Types.ObjectId;
-  deleted: boolean;
-  createdDate: Date;
-  updatedDate: Date;
   sessionsAmount: number;
   spentTimeSeconds: number;
 }
@@ -53,6 +43,16 @@ const activityGroupSchema = new Schema({
   deleted: {
     type: Boolean,
     default: false,
+    required: true,
+  },
+  sessionsAmount: {
+    type: Number,
+    default: 0,
+    required: true,
+  },
+  spentTimeSeconds: {
+    type: Number,
+    default: 0,
     required: true,
   },
 });
