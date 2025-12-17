@@ -59,9 +59,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
         <div
           ref={totalTimeRef}
           className="text-xl font-bold dark:text-textDark min-w-[165px]"
-        >
-          {getReadableTimeHMS(statistics.spentTimeSeconds)}
-        </div>
+        ></div>
         <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
           total time
         </div>
@@ -71,9 +69,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
         <div
           ref={totalSessionsRef}
           className="text-xl font-bold dark:text-textDark"
-        >
-          {statistics.sessionsAmount}
-        </div>
+        ></div>
         <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
           total sessions
         </div>
@@ -83,9 +79,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
         <div
           ref={distractedRef}
           className="text-xl font-bold dark:text-textDark"
-        >
-          {statistics.pausedAmount} times
-        </div>
+        ></div>
         <div className="relative w-fit">
           <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
             distracted
