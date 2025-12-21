@@ -164,7 +164,7 @@ const AnalyticsRangePage: FC = () => {
         </div>
       ) : rangeAnalytics &&
         rangeAnalytics.sessionStatistics.spentTimeSeconds !== 0 ? (
-        <div className="flex flex-col h-full pb-5 lg:pb-0 lg:flex-row">
+        <div className="flex flex-col pb-5 lg:h-full lg:flex-row">
           <div className="flex flex-col h-full gap-5 px-4 pt-5 lg:w-1/2 lg:border-r lg:border-gray-400 lg:border-solid lg:dark:border-gray-500">
             {rangeAnalytics.sessionStatistics && (
               <SessionStatisticsBox
@@ -175,9 +175,7 @@ const AnalyticsRangePage: FC = () => {
             {rangeAnalytics.activityDistributionItems && (
               <div className="overflow-y-auto h-[550px] lg:h-auto lg:basis-3/5">
                 <ActivityDistributionBox
-                  activityDistributionItems={
-                    rangeAnalytics.activityDistributionItems
-                  }
+                  adItems={rangeAnalytics.activityDistributionItems}
                   adBoxMode={adBoxMode}
                   setAdBoxMode={setAdBoxMode}
                 />
