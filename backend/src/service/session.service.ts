@@ -1,6 +1,8 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
+import Activity from '../model/activity.model';
+import ActivityGroup from '../model/activityGroup.model';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
@@ -8,15 +10,16 @@ import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { HttpError } from '../helpers/HttpError';
 
 interface PopulatedActivity {
+  id: mongoose.Types.ObjectId;
   name: string;
 }
 
 const activityPopulateConfig = {
   path: 'activity',
-  select: 'name activityGroup -_id',
+  select: 'name activityGroup id',
   populate: {
     path: 'activityGroup',
-    select: 'name -_id',
+    select: 'name id',
   },
 };
 
@@ -218,8 +221,6 @@ async function updateSession(
     session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
     session.spentTimeSeconds = sessionDTO.spentTimeSeconds;
     session.note = sessionDTO.note;
-    session.completed =
-      sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds;
     session.updatedDate = new Date();
 
     const validationError = session.validateSync();
@@ -231,6 +232,24 @@ async function updateSession(
         if (err) {
           throw new HttpError(400, err.toString());
         }
+      }
+    }
+
+    if (sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds) {
+      session.completed = true;
+      if (session.activity) {
+        const activity = await Activity.findById(session.activity.id);
+        const activityGroup = await ActivityGroup.findById(
+          activity!.activityGroup._id
+        );
+
+        activity!.sessionsAmount += 1;
+        activity!.spentTimeSeconds += session.totalTimeSeconds;
+        activityGroup!.sessionsAmount += 1;
+        activityGroup!.spentTimeSeconds += session.totalTimeSeconds;
+
+        await activity!.save();
+        await activityGroup!.save();
       }
     }
 

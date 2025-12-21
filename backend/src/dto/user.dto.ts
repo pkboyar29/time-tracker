@@ -1,3 +1,5 @@
+import { SessionStatistics } from './analytics.dto';
+
 export interface UserSignUpDTO {
   email: string;
   password: string;
@@ -9,9 +11,11 @@ export interface UserSignInDTO {
 }
 
 export interface UserResponseDTO {
-  firstName: string;
-  lastName: string;
+  // firstName: string;
+  // lastName: string;
   showTimerInTitle: boolean;
   email: string;
   createdDate: Date;
+  dailyGoal: number;
+  todayAnalytics: SessionStatistics;
 }

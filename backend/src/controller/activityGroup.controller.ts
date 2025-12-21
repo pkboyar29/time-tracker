@@ -6,19 +6,9 @@ const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const detailedParam = req.query.detailed === 'true';
-
-    let data;
-    if (detailedParam) {
-      data = await activityGroupService.getDetailedActivityGroups({
-        userId: res.locals.userId,
-        onlyCompleted: false,
-      });
-    } else {
-      data = await activityGroupService.getActivityGroups({
-        userId: res.locals.userId,
-      });
-    }
+    const data = await activityGroupService.getActivityGroups({
+      userId: res.locals.userId,
+    });
 
     res.status(200).json(data);
   } catch (e) {
@@ -28,10 +18,9 @@ router.get('/', async (req: Request, res: Response) => {
 
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await activityGroupService.getDetailedActivityGroup({
+    const data = await activityGroupService.getActivityGroup({
       activityGroupId: req.params.id,
       userId: res.locals.userId,
-      onlyCompleted: false,
     });
     res.status(200).json(data);
   } catch (e) {

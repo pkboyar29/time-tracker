@@ -353,7 +353,7 @@ async function getAnalyticsForRange({
 
   const userActivities = await activityService.getActivities({ userId });
 
-  const activityDistribution = await analyticsService.getActivityDistributions({
+  const activityDistribution = analyticsService.getActivityDistributions({
     allSessionsAmount: sessionStatistics.sessionsAmount,
     allSpentTimeSeconds: sessionStatistics.spentTimeSeconds,
     allPausedAmount: sessionStatistics.pausedAmount,

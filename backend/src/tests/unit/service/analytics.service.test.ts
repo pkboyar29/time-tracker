@@ -146,6 +146,8 @@ describe('analyticsService.getTimeBars', () => {
       updatedDate: new Date(),
       deleted: false,
       archived: false,
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
     },
     {
       _id: new Types.ObjectId(),
@@ -159,6 +161,8 @@ describe('analyticsService.getTimeBars', () => {
       updatedDate: new Date(),
       deleted: false,
       archived: false,
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
     },
   ];
 
@@ -545,6 +549,8 @@ describe('analyticsService.getActivityDistributions', () => {
       updatedDate: new Date(),
       deleted: false,
       archived: false,
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
     },
     {
       _id: new Types.ObjectId(),
@@ -558,6 +564,8 @@ describe('analyticsService.getActivityDistributions', () => {
       updatedDate: new Date(),
       deleted: false,
       archived: false,
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
     },
   ];
 

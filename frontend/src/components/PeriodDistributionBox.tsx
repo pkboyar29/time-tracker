@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState } from 'react';
 import { useAppSelector } from '../redux/store';
 import { getReadableTimeHMS } from '../helpers/timeHelpers';
 import { getRangeType } from '../helpers/dateHelpers';
@@ -169,7 +169,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
         )}
       </div>
 
-      <div className="pb-5 overflow-x-auto scroll-overlay">
+      <div className="pb-5 overflow-x-auto overflow-y-hidden scroll-overlay">
         <ResponsiveContainer
           minWidth={575}
           width="100%"

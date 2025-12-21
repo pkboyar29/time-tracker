@@ -21,11 +21,13 @@ const QuestionMarkTooltip: FC<QuestionMarkTooltipProps> = ({ tooltipText }) => {
     if (!isVisible) return;
 
     const hideAndUpdateTop = () => {
-      setIsVisible(false);
-      if (questionMarkRef.current) {
-        const questionMarkRect =
-          questionMarkRef.current.getBoundingClientRect();
-        setTop(questionMarkRect.y - 30);
+      if (isVisible) {
+        setIsVisible(false);
+        if (questionMarkRef.current) {
+          const questionMarkRect =
+            questionMarkRef.current.getBoundingClientRect();
+          setTop(questionMarkRect.y - 30);
+        }
       }
     };
 
@@ -56,8 +58,8 @@ const QuestionMarkTooltip: FC<QuestionMarkTooltipProps> = ({ tooltipText }) => {
   return (
     <div
       className="relative inline-block"
-      onMouseEnter={() => setIsVisible(true)}
-      onMouseLeave={() => setIsVisible(false)}
+      onPointerEnter={() => setIsVisible(true)}
+      onPointerLeave={() => setIsVisible(false)}
     >
       <div
         ref={questionMarkRef}

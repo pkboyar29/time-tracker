@@ -1,12 +1,14 @@
 import { genSaltSync, hashSync, compareSync } from 'bcrypt';
 import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import { DateTime } from 'luxon';
 
 import { HttpError } from '../helpers/HttpError';
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
 import activityGroupService from './activityGroup.service';
 import activityService from './activity.service';
 import sessionService from './session.service';
+import analyticsService from './analytics.service';
 import User from '../model/user.model';
 import ActivityGroup from '../model/activityGroup.model';
 import Activity from '../model/activity.model';
@@ -202,11 +204,38 @@ function refreshAccessToken(refreshToken: string): string | undefined {
   }
 }
 
-async function getProfileInfo(userId: string): Promise<UserResponseDTO> {
+async function getProfileInfo(
+  userId: string,
+  timezone: string
+): Promise<UserResponseDTO> {
   const profileInfo = await User.findById(userId).select(
     'email dailyGoal showTimerInTitle createdDate'
   ); // firstName lastName
-  return profileInfo as UserResponseDTO;
+
+  const startOfToday = DateTime.fromJSDate(new Date(), { zone: timezone })
+    .set({
+      hour: 0,
+      minute: 0,
+      millisecond: 0,
+    })
+    .toJSDate();
+  const endOfToday = new Date(startOfToday);
+  endOfToday.setDate(endOfToday.getDate() + 1);
+
+  const todayAnalytics = await analyticsService.getAnalyticsForRangeWithCache({
+    startOfRange: startOfToday,
+    endOfRange: endOfToday,
+    userId,
+    timezone,
+  });
+
+  return {
+    email: profileInfo!.email,
+    dailyGoal: profileInfo!.dailyGoal,
+    showTimerInTitle: profileInfo!.showTimerInTitle,
+    createdDate: profileInfo!.createdDate,
+    todayAnalytics: todayAnalytics.sessionStatistics,
+  };
 }
 
 async function updateDailyGoal(newDailyGoal: number, userId: string) {
@@ -268,9 +297,8 @@ async function exportUserData(userId: string): Promise<Buffer> {
     )} minutes, ${Math.floor(info.spentTimeSeconds / 3600)} hours)`;
   };
 
-  const activityGroups = await activityGroupService.getDetailedActivityGroups({
+  const activityGroups = await activityGroupService.getActivityGroups({
     userId,
-    onlyCompleted: true,
   });
   for (const group of activityGroups) {
     fileContent = fileContent.concat(
@@ -283,11 +311,9 @@ async function exportUserData(userId: string): Promise<Buffer> {
       '\n'
     );
 
-    const activities = await activityService.getActivitiesForActivityGroup({
+    const activities = await activityService.getActivities({
       activityGroupId: group._id.toString(),
       userId,
-      detailed: true,
-      onlyCompleted: true,
     });
     let activitiesContent = '';
     activities.forEach((activity, index) => {

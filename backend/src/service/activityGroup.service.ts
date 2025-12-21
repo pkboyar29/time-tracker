@@ -1,8 +1,5 @@
 import mongoose from 'mongoose';
-import ActivityGroup, {
-  IActivityGroup,
-  IDetailedActivityGroup,
-} from '../model/activityGroup.model';
+import ActivityGroup, { IActivityGroup } from '../model/activityGroup.model';
 import Activity from '../model/activity.model';
 import { ActivityGroupDTO } from '../dto/activityGroup.dto';
 import activityService from './activity.service';
@@ -12,17 +9,6 @@ interface GetActivityGroupsOptions {
   userId: string;
 }
 
-interface GetDetailedActivityGroupsOptions {
-  userId: string;
-  onlyCompleted: boolean;
-}
-
-interface GetDetailedActivityGroupOptions {
-  activityGroupId: string;
-  userId: string;
-  onlyCompleted: boolean;
-}
-
 interface GetActivityGroupOptions {
   activityGroupId: string;
   userId: string;
@@ -30,8 +16,6 @@ interface GetActivityGroupOptions {
 
 const activityGroupService = {
   getActivityGroups,
-  getDetailedActivityGroups,
-  getDetailedActivityGroup,
   getActivityGroup,
   createActivityGroup,
   updateActivityGroup,
@@ -50,59 +34,6 @@ async function getActivityGroups({
     const groups = await ActivityGroup.find(filter).sort({ createdDate: -1 });
 
     return groups;
-  } catch (e) {
-    throw e;
-  }
-}
-
-async function getDetailedActivityGroups({
-  userId,
-  onlyCompleted,
-}: GetDetailedActivityGroupsOptions): Promise<IDetailedActivityGroup[]> {
-  const groups = await activityGroupService.getActivityGroups({ userId });
-
-  const detailedGroups = await Promise.all(
-    groups.map(async (group) =>
-      activityGroupService.getDetailedActivityGroup({
-        activityGroupId: group._id.toString(),
-        userId,
-        onlyCompleted,
-      })
-    )
-  );
-
-  return detailedGroups;
-}
-
-async function getDetailedActivityGroup({
-  activityGroupId,
-  userId,
-  onlyCompleted,
-}: GetDetailedActivityGroupOptions): Promise<IDetailedActivityGroup> {
-  try {
-    const activityGroup = await activityGroupService.getActivityGroup({
-      activityGroupId,
-      userId,
-    });
-
-    const activities = await activityService.getActivitiesForActivityGroup({
-      activityGroupId: activityGroupId,
-      userId,
-      detailed: true,
-      onlyCompleted,
-    });
-    let sessionsAmount: number = 0;
-    let spentTimeSeconds: number = 0;
-    activities.forEach((activity) => {
-      sessionsAmount += activity.sessionsAmount;
-      spentTimeSeconds += activity.spentTimeSeconds;
-    });
-
-    return {
-      ...activityGroup.toObject(),
-      sessionsAmount,
-      spentTimeSeconds,
-    };
   } catch (e) {
     throw e;
   }
@@ -170,7 +101,7 @@ async function updateActivityGroup(
   activityGroupId: string,
   activityGroupDTO: ActivityGroupDTO,
   userId: string
-): Promise<IDetailedActivityGroup> {
+): Promise<IActivityGroup> {
   try {
     const activityGroup = await activityGroupService.getActivityGroup({
       activityGroupId,
@@ -192,10 +123,9 @@ async function updateActivityGroup(
 
     await activityGroup.save();
 
-    return activityGroupService.getDetailedActivityGroup({
+    return activityGroupService.getActivityGroup({
       activityGroupId,
       userId,
-      onlyCompleted: false,
     });
   } catch (e) {
     throw e;
@@ -224,10 +154,9 @@ async function deleteActivityGroup(
     await activityGroupService.getActivityGroup({ activityGroupId, userId });
 
     // TODO: удалять через updateMany, только тут как-то еще сессии для каждой активности удалять через updateMany
-    const activities = await activityService.getActivitiesForActivityGroup({
+    const activities = await activityService.getActivities({
       activityGroupId,
       userId,
-      detailed: false,
     });
     await Promise.all(
       activities.map(async (activity) => {

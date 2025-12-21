@@ -1,28 +1,54 @@
 import { FC, useRef, useMemo } from 'react';
 import { getReadableTimeHMS } from '../helpers/timeHelpers';
-import { PieChart, Pie, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, ResponsiveContainer, Tooltip } from 'recharts';
 import { colors } from '../../design-tokens';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: any[];
+  label?: number;
+}
+
+const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
+  const isVisible = active && payload && payload.length;
+
+  const adItem: IActivityDistribution = payload[0]?.payload;
+
+  return (
+    <div
+      className="p-2.5 bg-surfaceLight dark:bg-surfaceDark rounded-sm border border-solid border-gray-300/80 max-w-[220px] break-words text-sm"
+      style={{ visibility: isVisible ? 'visible' : 'hidden' }}
+    >
+      {isVisible && (
+        <div>
+          {adItem.activityName}{' '}
+          <span className="text-gray-500 dark:text-gray-400">
+            ({Math.trunc(adItem.spentTimePercentage * 100)}%)
+          </span>
+        </div>
+      )}
+    </div>
+  );
+};
+
 interface ActivityDistributionBoxProps {
-  activityDistributionItems: IActivityDistribution[];
+  adItems: IActivityDistribution[];
   adBoxMode: 'table' | 'chart';
   setAdBoxMode: (newAdMode: 'table' | 'chart') => void;
 }
 
 const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
-  activityDistributionItems,
+  adItems,
   adBoxMode,
   setAdBoxMode,
 }) => {
   const rootRef = useRef<HTMLDivElement>(null);
 
   const sortedItems = useMemo(() => {
-    return activityDistributionItems.toSorted(
-      (a, b) => b.spentTimeSeconds - a.spentTimeSeconds
-    );
-  }, [activityDistributionItems]);
+    return adItems.toSorted((a, b) => b.spentTimeSeconds - a.spentTimeSeconds);
+  }, [adItems]);
 
   const pieItems = useMemo(() => {
     let pieItems = [...sortedItems];
@@ -150,10 +176,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   <div className="w-1/5">
                     {getReadableTimeHMS(item.spentTimeSeconds, true)}
                   </div>
-                  <div className="w-1/5">
-                    {item.pausedAmount} times
-                    {/* {Math.trunc(item.spentTimePercentage * 100)}% */}
-                  </div>
+                  <div className="w-1/5">{item.pausedAmount} times</div>
                 </div>
               ))}
             </div>
@@ -166,6 +189,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           <div className="flex items-start self-center justify-center sm:pt-3 sm:sticky sm:self-start sm:w-1/2 top-10">
             <ResponsiveContainer minWidth={250} width="100%" height={300}>
               <PieChart>
+                <Tooltip content={<CustomTooltip />} />
                 <Pie
                   animationDuration={750}
                   data={pieItems}
@@ -197,8 +221,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                     {item.activityName}
                   </div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
-                    ({getReadableTimeHMS(item.spentTimeSeconds, true)} (
-                    {Math.trunc(item.spentTimePercentage * 100)}%),{' '}
+                    ({getReadableTimeHMS(item.spentTimeSeconds, true)},{' '}
                     {item.sessionsAmount} sessions)
                   </div>
                 </div>
