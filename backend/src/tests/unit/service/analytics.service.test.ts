@@ -45,7 +45,7 @@ describe('analyticsService.getSessionStatistics', () => {
         spentTimeSeconds: 300,
         note: 'Morning session',
         completed: true,
-        activity: { name: 'Reading' },
+        activity: { id: new Types.ObjectId(), name: 'Reading' },
         user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T08:00:00Z'),
         updatedDate: new Date('2025-09-20T08:30:00Z'),
@@ -57,7 +57,7 @@ describe('analyticsService.getSessionStatistics', () => {
         spentTimeSeconds: 180,
         note: 'Afternoon session',
         completed: true,
-        activity: { name: 'Coding' },
+        activity: { id: new Types.ObjectId(), name: 'Coding' },
         user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T14:00:00Z'),
         updatedDate: new Date('2025-09-20T14:30:00Z'),
@@ -196,7 +196,7 @@ describe('analyticsService.getTimeBars', () => {
   const completedSessions: ISession[] = [
     {
       _id: new Types.ObjectId(),
-      activity: { name: 'Reading' },
+      activity: { id: new Types.ObjectId(), name: 'Reading' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
@@ -207,7 +207,7 @@ describe('analyticsService.getTimeBars', () => {
     },
     {
       _id: new Types.ObjectId(),
-      activity: { name: 'Reading' },
+      activity: { id: new Types.ObjectId(), name: 'Reading' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
@@ -218,7 +218,7 @@ describe('analyticsService.getTimeBars', () => {
     },
     {
       _id: new Types.ObjectId(),
-      activity: { name: 'Coding' },
+      activity: { id: new Types.ObjectId(), name: 'Coding' },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
@@ -573,7 +573,7 @@ describe('analyticsService.getActivityDistributions', () => {
     const completedSessions: ISession[] = [
       {
         _id: new Types.ObjectId(),
-        activity: { name: 'Reading' },
+        activity: { id: new Types.ObjectId(), name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
@@ -584,7 +584,7 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         _id: new Types.ObjectId(),
-        activity: { name: 'Reading' },
+        activity: { id: new Types.ObjectId(), name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
@@ -595,7 +595,7 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         _id: new Types.ObjectId(),
-        activity: { name: 'Coding' },
+        activity: { id: new Types.ObjectId(), name: 'Coding' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
@@ -674,7 +674,7 @@ describe('analyticsService.getActivityDistributions', () => {
     const completedSessions: ISession[] = [
       {
         _id: new Types.ObjectId(),
-        activity: { name: 'Reading' },
+        activity: { id: new Types.ObjectId(), name: 'Reading' },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
