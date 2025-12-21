@@ -19,9 +19,17 @@ export const signUp = async (
 };
 
 export const fetchProfileInfo = async (): Promise<IUser> => {
-  const { data } = await axios.get('/users/profile');
+  const { data } = await axios.get(
+    `/users/profile?tz=${Intl.DateTimeFormat().resolvedOptions().timeZone}`
+  );
 
-  return { ...data, createdDate: new Date(data.createdDate) };
+  return {
+    ...data,
+    createdDate: new Date(data.createdDate),
+    todaySpentTimeSeconds: data.todayAnalytics.spentTimeSeconds,
+    dailyGoalCompletionNotified:
+      data.todayAnalytics.spentTimeSeconds >= data.dailyGoal,
+  };
 };
 
 export const updateDailyGoal = async (

@@ -7,7 +7,8 @@ import {
   FC,
   useContext,
 } from 'react';
-import { useAppSelector } from '../redux/store';
+import { useAppSelector, useAppDispatch } from '../redux/store';
+import { setUser } from '../redux/slices/userSlice';
 import { updateSession } from '../api/sessionApi';
 import {
   saveSessionToLocalStorage,
@@ -18,7 +19,7 @@ import {
   getRemainingTimeHoursMinutesSeconds,
   getTimerEndDate,
 } from '../helpers/timeHelpers';
-import { showNotification } from '../helpers/notificationHelpers';
+import { showSessionCompletedNotification } from '../helpers/notificationHelpers';
 import { toast } from 'react-toastify';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
@@ -67,6 +68,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const timerEndDate = useRef<Date>(new Date()); // here we store date when timer is going to end
 
   const currentUser = useAppSelector((state) => state.users.user);
+  const dispatch = useAppDispatch();
 
   const startTimer = async (session: ISession, paused?: boolean) => {
     if (timerState.status == 'running') {
@@ -157,8 +159,27 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const finishTimer = async () => {
     if (timerState.status != 'idle') {
+      let updatedUser = {
+        ...currentUser!,
+        todaySpentTimeSeconds:
+          currentUser!.todaySpentTimeSeconds +
+          timerState.session.totalTimeSeconds,
+      };
+      const isDailyGoalCompleted =
+        updatedUser.todaySpentTimeSeconds >= updatedUser.dailyGoal;
+
       playAudio();
-      showNotification(timerState.session);
+      showSessionCompletedNotification(
+        timerState.session,
+        isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified
+      );
+      if (isDailyGoalCompleted) {
+        updatedUser = {
+          ...updatedUser,
+          dailyGoalCompletionNotified: true,
+        };
+      }
+      dispatch(setUser(updatedUser));
 
       const completedSession: ISession = {
         ...timerState.session,
