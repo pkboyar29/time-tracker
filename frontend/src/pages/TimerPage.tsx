@@ -248,7 +248,7 @@ const TimerPage: FC = () => {
             </div>
 
             {/* Right part of timer */}
-            <div className="min-h-[450px] flex flex-col flex-1 w-full p-6 overflow-y-hidden rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
+            <div className="min-h-[450px] flex flex-col flex-1 w-full p-6 sm:overflow-y-hidden rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
               <div className="flex flex-col flex-grow gap-5">
                 {isTimerStarted && (
                   <>
