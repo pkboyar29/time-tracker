@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { createActivityGroup } from '../../api/activityGroupApi';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 import Button from '../common/Button';
 import Input from '../common/Input';
@@ -20,6 +21,8 @@ interface ActivityGroupFields {
 const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
   afterSubmitHandler,
 }) => {
+  const { t } = useTranslation();
+
   const {
     register,
     handleSubmit,
@@ -34,7 +37,7 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
 
       afterSubmitHandler(newActivityGroup);
     } catch (e) {
-      toast('A server error occurred while creating activity group', {
+      toast(t('serverErrors.createGroup'), {
         type: 'error',
       });
     }
@@ -48,12 +51,12 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
       <Input
         fieldName="name"
         register={register}
-        placeHolder="Enter name"
+        placeHolder={t('createGroupModal.namePlaceholder')}
         validationRules={{
-          required: 'Field is required',
+          required: t('createGroupModal.requiredError'),
           maxLength: {
             value: 50,
-            message: 'Max 50 is allowed',
+            message: t('createGroupModal.maxError', { count: 50 }),
           },
         }}
         errorMessage={
@@ -65,11 +68,11 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
         isTextArea={true}
         fieldName="descr"
         register={register}
-        placeHolder="Enter description (optional)"
+        placeHolder={t('createGroupModal.descrPlaceholder')}
         validationRules={{
           maxLength: {
             value: 500,
-            message: 'Max 500 is allowed',
+            message: t('createGroupModal.maxError', { count: 500 }),
           },
         }}
         errorMessage={
@@ -78,7 +81,7 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
       />
 
       <div className="ml-auto w-fit">
-        <Button type="submit">Create activity group</Button>
+        <Button type="submit">{t('createGroupModal.button')}</Button>
       </div>
     </form>
   );

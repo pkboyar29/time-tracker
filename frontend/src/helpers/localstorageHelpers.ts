@@ -53,3 +53,17 @@ export const toggleThemeInLocalStorage = () => {
 
   return newTheme;
 };
+
+export const getLangFromLocalStorage = (): 'en' | 'ru' => {
+  let currentLang = window.localStorage.getItem('lang');
+  if (currentLang !== 'en' && currentLang != 'ru') {
+    currentLang = 'en';
+    window.localStorage.setItem('lang', 'en');
+  }
+
+  return currentLang as 'en' | 'ru';
+};
+
+export const setLangInLocalStorage = (lang: 'en' | 'ru') => {
+  window.localStorage.setItem('lang', lang);
+};

@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface SessionDurationInputsProps {
   seconds: number;
@@ -9,6 +10,8 @@ const SessionDurationInputs: FC<SessionDurationInputsProps> = ({
   seconds,
   setSeconds,
 }) => {
+  const { t } = useTranslation();
+
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
 
@@ -16,7 +19,7 @@ const SessionDurationInputs: FC<SessionDurationInputsProps> = ({
     <div className="flex gap-4 mt-4">
       <div className="flex-1">
         <label className="block mb-1 text-base font-medium dark:text-textDark">
-          Hours
+          {t('timerPage.hours')}
         </label>
         <input
           type="number"
@@ -39,7 +42,7 @@ const SessionDurationInputs: FC<SessionDurationInputsProps> = ({
 
       <div className="flex-1">
         <label className="block mb-1 text-base font-medium dark:text-textDark">
-          Minutes
+          {t('timerPage.minutes')}
         </label>
         <input
           type="number"

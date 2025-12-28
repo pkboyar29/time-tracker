@@ -3,6 +3,7 @@ import { useTimer } from '../hooks/useTimer';
 import { deleteSession } from '../api/sessionApi';
 import { getSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
@@ -39,6 +40,8 @@ const SessionsList: FC<SessionsListProps> = ({
   sessions,
   updateSessionsListHandler,
 }) => {
+  const { t } = useTranslation();
+
   const { timerState, startTimer } = useTimer();
   const sessionFromLS = getSessionFromLocalStorage('session');
 
@@ -99,7 +102,7 @@ const SessionsList: FC<SessionsListProps> = ({
         selectedItemId: null,
       });
     } catch (e) {
-      toast('A server error occurred while deleting session', {
+      toast(t('serverErrors.deleteSession'), {
         type: 'error',
       });
     }
@@ -116,7 +119,7 @@ const SessionsList: FC<SessionsListProps> = ({
     <>
       {deleteModal.status && (
         <Modal
-          title="Deleting session"
+          title={t('deleteSessionModal.title')}
           modalClassnames="basis-5/6 md:basis-5/6"
           onCloseModal={() =>
             setDeleteModal({
@@ -126,8 +129,7 @@ const SessionsList: FC<SessionsListProps> = ({
           }
         >
           <p className="text-base/6 dark:text-textDark">
-            Are you sure you want to delete this session? The time spent on this
-            session will not be included in analytics.
+            {t('deleteSessionModal.descr')}
           </p>
 
           <div className="mt-10 ml-auto w-fit">
@@ -137,7 +139,7 @@ const SessionsList: FC<SessionsListProps> = ({
                 handleSessionDelete(deleteModal.selectedItemId)
               }
             >
-              Delete session
+              {t('deleteSessionModal.button')}
             </Button>
           </div>
         </Modal>

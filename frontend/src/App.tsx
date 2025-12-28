@@ -12,6 +12,7 @@ import {
   removeSessionFromLocalStorage,
 } from './helpers/localstorageHelpers';
 import { AxiosError } from 'axios';
+import { useTranslation } from 'react-i18next';
 
 import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
@@ -19,6 +20,7 @@ import BurgerButton from './components/BurgerButton';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
   const { startTimer } = useTimer();
 
   const location = useLocation();
@@ -79,7 +81,7 @@ const App: FC = () => {
           if (e instanceof AxiosError && e.response?.status === 404) {
             removeSessionFromLocalStorage('session');
           } else {
-            toast('A server error occurred while getting current session', {
+            toast(t('serverErrors.getSession'), {
               type: 'error',
             });
           }

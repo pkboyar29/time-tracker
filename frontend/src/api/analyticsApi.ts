@@ -1,5 +1,6 @@
 import axios from './axios';
 import { getBarName, getBarDetailedName } from '../helpers/barNaming';
+import i18n from 'i18next';
 
 import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
 import { IAnalytics } from '../ts/interfaces/Statistics/IAnaltytics';
@@ -41,8 +42,8 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
     sessionsAmount: bar.sessionStatistics.sessionsAmount,
     pausedAmount: bar.sessionStatistics.pausedAmount,
     spentTimeSeconds: bar.sessionStatistics.spentTimeSeconds,
-    barName: getBarName(bar),
-    barDetailedName: getBarDetailedName(bar),
+    barName: getBarName(bar, i18n.t),
+    barDetailedName: getBarDetailedName(bar, i18n.t, i18n.language),
     activityDistributionItems: bar.activityDistribution.map((ad: any) => {
       return {
         activityName: ad.activityName,

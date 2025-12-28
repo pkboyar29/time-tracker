@@ -1,6 +1,7 @@
 import { FC } from 'react';
 import { useAppSelector } from '../redux/store';
-import { getReadableTimeHMS } from '../helpers/timeHelpers';
+import { getReadableTime } from '../helpers/timeHelpers';
+import { useTranslation } from 'react-i18next';
 
 import CustomCircularProgress from './common/CustomCircularProgress';
 
@@ -9,10 +10,10 @@ interface DailyGoalBoxProps {
 }
 
 const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
+  const { t } = useTranslation();
   const userInfo = useAppSelector((state) => state.users.user);
 
-  const dailyGoalSeconds = userInfo!.dailyGoal;
-
+  const dailyGoalSeconds = userInfo?.dailyGoal ?? 0;
   const dailyGoalPercent =
     spentTimeSeconds > dailyGoalSeconds
       ? 100
@@ -26,15 +27,23 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
         <div className="flex flex-col items-center gap-5">
           <CustomCircularProgress
             valuePercent={dailyGoalPercent}
-            label={`Daily goal: ${getReadableTimeHMS(dailyGoalSeconds, true)}`}
+            label={`${t('dailyGoalBox.title')}: ${getReadableTime(
+              dailyGoalSeconds,
+              t,
+              {
+                short: true,
+              }
+            )}`}
             size="big"
           />
 
           <div className="text-center tex-lg md:text-xl dark:text-textDark">
-            You acheived{' '}
+            {t('dailyGoalBox.youAchieved')}:{' '}
             <span className="font-bold">
-              {getReadableTimeHMS(spentTimeSeconds, false)} (
-              {Math.trunc((spentTimeSeconds / dailyGoalSeconds) * 100)}%)
+              {getReadableTime(spentTimeSeconds, t, {
+                short: false,
+              })}{' '}
+              ({Math.trunc((spentTimeSeconds / dailyGoalSeconds) * 100)}%)
             </span>
           </div>
         </div>

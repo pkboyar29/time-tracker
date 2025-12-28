@@ -1,5 +1,6 @@
 import { FC } from 'react';
 import CrossIcon from '../../icons/CrossIcon';
+import { useTranslation } from 'react-i18next';
 
 interface SearchBarProps {
   searchString: string;
@@ -14,6 +15,8 @@ const SearchBar: FC<SearchBarProps> = ({
   compact = true,
   className,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <div
       className={`${
@@ -25,7 +28,7 @@ const SearchBar: FC<SearchBarProps> = ({
         onChange={(e) => setSearchString(e.target.value)}
         className="w-full pb-1 transition duration-300 bg-transparent border-b border-solid dark:text-textDark border-b-gray-500 focus:border-b-primary"
         type="text"
-        placeholder="Search..."
+        placeholder={t('search')}
       />
 
       {searchString && (

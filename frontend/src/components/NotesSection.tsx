@@ -1,12 +1,15 @@
 import { FC, useState } from 'react';
 import { useTimer } from '../hooks/useTimer';
 import { updateSession } from '../api/sessionApi';
+import { useTranslation } from 'react-i18next';
 
 interface NotesSectionProps {
   defaultNote?: string;
 }
 
 const NotesSection: FC<NotesSectionProps> = ({ defaultNote }) => {
+  const { t } = useTranslation();
+
   const { timerState, setNote: setNoteInsideTimer } = useTimer();
 
   const [note, setNote] = useState<string>(defaultNote ? defaultNote : '');
@@ -31,7 +34,7 @@ const NotesSection: FC<NotesSectionProps> = ({ defaultNote }) => {
 
   return (
     <textarea
-      placeholder="Enter your thoughts during this session..."
+      placeholder={t('timerPage.notesPlaceholder')}
       value={note}
       onChange={handleChangeNoteInput}
       onBlur={handleBlurNoteInput}

@@ -2,6 +2,8 @@ import { FC, useState, ReactNode } from 'react';
 import { useTimer } from '../../hooks/useTimer';
 import { createSession } from '../../api/sessionApi';
 import { toast } from 'react-toastify';
+import { getReadableTime } from '../../helpers/timeHelpers';
+import { useTranslation } from 'react-i18next';
 
 import Modal from './Modal';
 import Button from '../common/Button';
@@ -20,6 +22,8 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   onCloseModal,
   modalTitle,
 }) => {
+  const { t } = useTranslation();
+
   const { startTimer } = useTimer();
 
   const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
@@ -35,7 +39,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
 
       afterSubmitHandler();
     } catch (e) {
-      toast('A server error occurred while creating new session', {
+      toast(t('serverErrors.startSession'), {
         type: 'error',
       });
     }
@@ -46,16 +50,10 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
       <form className="flex flex-col items-start gap-10">
         <div className="flex flex-col w-full gap-3">
           <div className="flex gap-1 dark:text-textDark">
-            <div>{selectedMinutes} minutes</div>
-            {selectedMinutes > 60 && (
-              <div>
-                ({Math.floor(selectedMinutes / 60)} hours
-                {selectedMinutes % 60 > 0 && (
-                  <> {selectedMinutes % 60} minutes</>
-                )}
-                )
-              </div>
-            )}
+            {getReadableTime(selectedMinutes * 60, t, {
+              short: false,
+              zeroUnits: true,
+            })}
           </div>
 
           <RangeSlider
@@ -69,7 +67,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
         </div>
 
         <div className="ml-auto w-fit">
-          <Button onClick={onSubmit}>Start new session</Button>
+          <Button onClick={onSubmit}>{t('createSessionModal.button')}</Button>
         </div>
       </form>
     </Modal>

@@ -6,6 +6,7 @@ import { setIsSidebarOpen } from '../redux/slices/windowSlice';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { toggleThemeInLocalStorage } from '../helpers/localstorageHelpers';
 import { getWeekRange } from '../helpers/dateHelpers';
+import { useTranslation } from 'react-i18next';
 
 import CrossIcon from '../icons/CrossIcon';
 import TimerIcon from '../icons/TimerIcon';
@@ -16,6 +17,7 @@ import SettingsModal from './modals/SettingsModal';
 
 const Sidebar: FC = () => {
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   const [settingsModal, setSettingsModal] = useState<boolean>(false);
   const [startOfWeek, endOfWeek] = getWeekRange(new Date());
@@ -104,7 +106,7 @@ const Sidebar: FC = () => {
                 }
               >
                 <TimerIcon />
-                <div className="dark:text-textDark">Timer</div>
+                <div className="dark:text-textDark">{t('sidebar.timer')}</div>
               </NavLink>
             </li>
 
@@ -119,7 +121,9 @@ const Sidebar: FC = () => {
                 }
               >
                 <BookIcon />
-                <div className="dark:text-textDark">Activities</div>
+                <div className="dark:text-textDark">
+                  {t('sidebar.activities')}
+                </div>
               </NavLink>
             </li>
 
@@ -134,7 +138,9 @@ const Sidebar: FC = () => {
                 }
               >
                 <AnalyticsIcon />
-                <div className="dark:text-textDark">Analytics</div>
+                <div className="dark:text-textDark">
+                  {t('sidebar.analytics')}
+                </div>
               </NavLink>
             </li>
           </div>
@@ -144,18 +150,18 @@ const Sidebar: FC = () => {
               onClick={changeTheme}
               className="p-2 mb-8 transition duration-300 border border-transparent border-solid rounded-md hover:border-primary text-surfaceDark bg-textDark dark:bg-surfaceDark dark:text-textDark"
             >
-              change theme
+              {t('sidebar.changeTheme')}
             </button>
 
             <button
-              className="flex items-center gap-5 px-4 py-2 transition duration-200 sm:w-full rounded-xl hover:bg-primary/10 dark:hover:bg-surfaceDarkHover"
+              className="flex items-center gap-5 px-3 py-2 transition duration-200 sm:w-full rounded-xl hover:bg-primary/10 dark:hover:bg-surfaceDarkHover"
               onClick={() => {
                 closeSidebar();
                 setSettingsModal(true);
               }}
             >
               <SettingsIcon />
-              <div className="dark:text-textDark">Settings</div>
+              <div className="dark:text-textDark">{t('sidebar.settings')}</div>
             </button>
           </li>
         </ul>

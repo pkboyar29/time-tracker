@@ -1,11 +1,13 @@
+import { TFunction } from 'i18next';
 import {
   getRangeType,
   getMonthName,
   getMonthDetailedName,
+  formatDate,
 } from '../helpers/dateHelpers';
 import { getTimeHHmmFromDate } from '../helpers/timeHelpers';
 
-export const getBarName = (unmappedBar: any): string => {
+export const getBarName = (unmappedBar: any, t: TFunction): string => {
   const startOfRange: Date = new Date(unmappedBar.startOfRange);
   const endOfRange: Date = new Date(unmappedBar.endOfRange);
 
@@ -15,40 +17,51 @@ export const getBarName = (unmappedBar: any): string => {
   } else if (endOfRange.getTime() - startOfRange.getTime() < 86400000 - 1) {
     return startOfRange.getDate().toString();
   } else if (getRangeType(startOfRange, endOfRange) == 'months') {
-    return getMonthName(startOfRange.getMonth());
+    return getMonthName(startOfRange.getMonth(), t);
     // if there is more than one day in range
   } else if (endOfRange.getTime() - startOfRange.getTime() > 86400000 - 1) {
     return `${getMonthName(
-      startOfRange.getMonth()
+      startOfRange.getMonth(),
+      t
     )} ${startOfRange.getDate()} - ${getMonthName(
-      endOfRange.getMonth()
+      endOfRange.getMonth(),
+      t
     )} ${endOfRange.getDate()}`;
   }
 
   return '';
 };
 
-export const getBarDetailedName = (unmappedBar: any) => {
+export const getBarDetailedName = (
+  unmappedBar: any,
+  t: TFunction,
+  i18nLang: string
+) => {
   const startOfRange: Date = new Date(unmappedBar.startOfRange);
   const endOfRange: Date = new Date(unmappedBar.endOfRange);
 
   if (getRangeType(startOfRange, endOfRange) == 'days') {
-    return startOfRange.toDateString();
+    return formatDate(startOfRange, i18nLang);
     // if there is less than one day in range
   } else if (endOfRange.getTime() - startOfRange.getTime() < 86400000 - 1) {
-    return `${startOfRange.toDateString()} ${getTimeHHmmFromDate(
+    return `${formatDate(startOfRange, i18nLang)} ${getTimeHHmmFromDate(
       startOfRange
     )} - ${getTimeHHmmFromDate(endOfRange)}`;
   } else if (getRangeType(startOfRange, endOfRange) == 'months') {
-    return getMonthDetailedName(startOfRange);
+    return `${getMonthDetailedName(
+      startOfRange.getMonth(),
+      t
+    )} ${startOfRange.getFullYear()}`;
     // if there is more than one day in range
   } else if (endOfRange.getTime() - startOfRange.getTime() > 86400000 - 1) {
     return `${getMonthName(
-      startOfRange.getMonth()
+      startOfRange.getMonth(),
+      t
     )} ${startOfRange.getDate()} ${getTimeHHmmFromDate(
       startOfRange
     )} - ${getMonthName(
-      endOfRange.getMonth()
+      endOfRange.getMonth(),
+      t
     )} ${endOfRange.getDate()} ${getTimeHHmmFromDate(endOfRange)}`;
   }
 

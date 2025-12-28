@@ -35,10 +35,10 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
   const labelClassnames = useMemo(
     () =>
       size === 'big'
-        ? 'text-[18px] font-medium'
+        ? 'text-[18px] font-medium text-center'
         : size == 'verybig'
-        ? 'text-[24px] font-medium'
-        : 'text-[12px] font-medium',
+        ? 'text-[24px] font-medium text-center'
+        : 'text-[12px] font-medium text-center',
     [size]
   );
 

@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivityGroups } from '../api/activityGroupApi';
+import { useTranslation } from 'react-i18next';
 
 import PrimaryClipLoader from '../components/common/PrimaryClipLoader';
 import Button from '../components/common/Button';
@@ -16,6 +17,7 @@ import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
 
 const ActivityGroupsPage: FC = () => {
   const queryClient = useQueryClient();
+  const { t } = useTranslation();
 
   const {
     data: activityGroups,
@@ -32,7 +34,7 @@ const ActivityGroupsPage: FC = () => {
 
   useEffect(() => {
     if (isError) {
-      toast('A server error occurred while getting activity groups', {
+      toast(t('serverErrors.getGroups'), {
         type: 'error',
       });
     }
@@ -42,7 +44,7 @@ const ActivityGroupsPage: FC = () => {
     <>
       {createModal && (
         <Modal
-          title="Creating new activity group"
+          title={t('createGroupModal.title')}
           onCloseModal={() => setCreateModal(false)}
         >
           <ActivityGroupCreateForm
@@ -60,7 +62,7 @@ const ActivityGroupsPage: FC = () => {
 
       <div className="container my-[65px] xl:my-5">
         <div className="flex items-center justify-between">
-          <Title>All activity groups</Title>
+          <Title>{t('groupsPage.title')}</Title>
 
           <div className="flex h-full gap-5">
             <SearchBar
@@ -72,7 +74,7 @@ const ActivityGroupsPage: FC = () => {
 
             <div className="hidden md:block w-fit">
               <Button onClick={() => setCreateModal(true)}>
-                Create new activity group
+                {t('groupsPage.createButton')}
               </Button>
             </div>
 
@@ -137,7 +139,9 @@ const ActivityGroupsPage: FC = () => {
                     />
                   ))
               ) : (
-                <div className="text-base dark:text-textDark">Not found</div>
+                <div className="text-base dark:text-textDark">
+                  {t('groupsPage.notFound')}
+                </div>
               )}
             </div>
           )

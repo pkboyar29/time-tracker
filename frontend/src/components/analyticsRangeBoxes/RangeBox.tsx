@@ -18,8 +18,12 @@ import {
   isCurrentYear,
   shiftTwoDates,
   getRangeType,
+  getMonthDetailedName,
 } from '../../helpers/dateHelpers';
 import { RangeType } from '../../helpers/dateHelpers';
+import { useTranslation } from 'react-i18next';
+import { TFunction } from 'i18next';
+import { getLocaleFromLanguage } from '../../helpers/i18n/getLocaleFromLanguage';
 
 import LeftChevronIcon from '../../icons/LeftChevronIcon';
 import RightChevronIcon from '../../icons/RightChevronIcon';
@@ -101,23 +105,35 @@ const isCurrentRangeItem = (
 const renderDateLabel = (
   rangeType: RangeType,
   fromDate: Date,
-  toDate: Date
+  toDate: Date,
+  t: TFunction,
+  i18nLang: string
 ) => {
   if (rangeType == 'days') {
-    return <>{isCurrentDay(fromDate) ? 'Today' : fromDate.toDateString()}</>;
+    return (
+      <>
+        {isCurrentDay(fromDate)
+          ? t('rangeBox.today')
+          : fromDate.toLocaleDateString(getLocaleFromLanguage(i18nLang), {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })}
+      </>
+    );
   } else if (rangeType == 'weeks') {
     return (
       <>
         {isCurrentWeek([fromDate, toDate]) ? (
-          <>This week</>
+          <>{t('rangeBox.thisWeek')}</>
         ) : (
           <div className="flex gap-1.5 text-lg dark:text-textDark">
             <time>
-              {getMonthName(fromDate.getMonth())} {fromDate.getDate()}
+              {getMonthName(fromDate.getMonth(), t)} {fromDate.getDate()}
             </time>
             <span>-</span>
             <time>
-              {getMonthName(toDate.getMonth())} {toDate.getDate()}
+              {getMonthName(toDate.getMonth(), t)} {toDate.getDate()}
             </time>
           </div>
         )}
@@ -127,20 +143,26 @@ const renderDateLabel = (
     return (
       <>
         {isCurrentMonth(fromDate)
-          ? 'This month'
-          : `${fromDate.getFullYear()} ${new Intl.DateTimeFormat('en-US', {
-              month: 'long',
-            }).format(fromDate)}`}
+          ? t('rangeBox.thisMonth')
+          : `${fromDate.getFullYear()} ${getMonthDetailedName(
+              fromDate.getMonth(),
+              t
+            )}`}
       </>
     );
   } else if (rangeType == 'years') {
     return (
-      <>{isCurrentYear(fromDate) ? 'This year' : fromDate.getFullYear()}</>
+      <>
+        {isCurrentYear(fromDate)
+          ? t('rangeBox.thisYear')
+          : fromDate.getFullYear()}
+      </>
     );
   }
 };
 
 const RangeBox: FC<RangeBoxProps> = ({ range }) => {
+  const { t, i18n } = useTranslation();
   const { width: windowWidth } = useWindowSize();
   const debouncedWidth = useDebounce(windowWidth, 150);
   const navigate = useNavigate();
@@ -318,7 +340,13 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
           onClick={currentRangeItemClickHandler}
           className="flex items-center justify-center text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md dark:border-gray-500 w-52 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover dark:text-textDark"
         >
-          {renderDateLabel(rangeType, range.fromDate, range.toDate)}
+          {renderDateLabel(
+            rangeType,
+            range.fromDate,
+            range.toDate,
+            t,
+            i18n.language
+          )}
         </div>
 
         <button
@@ -346,7 +374,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
             {rangeType == 'days' && (
               <>
                 <div className="text-[13px] font-medium text-gray-500 dark:text-textDarkSecondary">
-                  {getDayOfWeekName(rangeItem[0].getDay())}
+                  {getDayOfWeekName(rangeItem[0].getDay(), t)}
                 </div>
 
                 <div className="text-lg font-semibold dark:text-textDark">
@@ -371,12 +399,12 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
 
                 <div className="flex gap-1.5 text-base lg:text-lg dark:text-textDark">
                   <time>
-                    {getMonthName(rangeItem[0].getMonth())}{' '}
+                    {getMonthName(rangeItem[0].getMonth(), t)}{' '}
                     {rangeItem[0].getDate()}
                   </time>
                   <span>-</span>
                   <time>
-                    {getMonthName(rangeItem[1].getMonth())}{' '}
+                    {getMonthName(rangeItem[1].getMonth(), t)}{' '}
                     {rangeItem[1].getDate()}
                   </time>
                 </div>
@@ -389,9 +417,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
                   {rangeItem[0].getFullYear()}
                 </div>
                 <div className="text-lg lg:text-xl dark:text-textDark">
-                  {new Intl.DateTimeFormat('en-US', { month: 'long' }).format(
-                    rangeItem[0]
-                  )}
+                  {getMonthDetailedName(rangeItem[0].getMonth(), t)}
                 </div>
               </>
             )}

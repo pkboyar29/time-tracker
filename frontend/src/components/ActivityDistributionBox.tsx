@@ -1,7 +1,8 @@
 import { FC, useRef, useMemo } from 'react';
-import { getReadableTimeHMS } from '../helpers/timeHelpers';
+import { getReadableTime } from '../helpers/timeHelpers';
 import { PieChart, Pie, ResponsiveContainer, Tooltip } from 'recharts';
 import { colors } from '../../design-tokens';
+import { useTranslation } from 'react-i18next';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
@@ -44,6 +45,8 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   adBoxMode,
   setAdBoxMode,
 }) => {
+  const { t } = useTranslation();
+
   const rootRef = useRef<HTMLDivElement>(null);
 
   const sortedItems = useMemo(() => {
@@ -85,7 +88,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
       pieItems = [
         ...pieItems,
         {
-          activityName: 'Others',
+          activityName: t('adBox.others'),
           sessionsAmount: othersSessionsAmount,
           pausedAmount: othersPausedAmount,
           spentTimeSeconds: othersSpentTimeSeconds,
@@ -137,7 +140,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 : 'dark:text-textDark'
             }`}
           >
-            Table
+            {t('adBox.table')}
           </button>
           <button
             onClick={onChartBarClick}
@@ -147,12 +150,12 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 : 'dark:text-textDark'
             }`}
           >
-            Chart
+            {t('adBox.chart')}
           </button>
         </div>
 
-        <div className="inline-block px-4 py-1 mr-0 text-lg font-medium tracking-wide text-right text-gray-800 bg-gray-200 rounded-lg dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
-          Activity distribution
+        <div className="inline-block px-4 py-1 mr-0 text-lg font-medium tracking-wide text-center text-gray-800 bg-gray-200 rounded-lg dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
+          {t('adBox.title')}
         </div>
       </div>
 
@@ -160,10 +163,10 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         <div className="overflow-x-auto scroll-overlay">
           <div className="min-w-[500px] px-5 sm:px-10 pb-5">
             <div className="flex my-3.5 text-lg tracking-wide text-gray-800 dark:text-textDarkSecondary">
-              <div className="w-1/2">Activity</div>
-              <div className="w-1/5">Sessions</div>
-              <div className="w-1/5">Time</div>
-              <div className="w-1/5">Distracted</div>
+              <div className="w-1/2">{t('adBox.activity')}</div>
+              <div className="w-1/5">{t('adBox.sessions')}</div>
+              <div className="w-1/5">{t('adBox.time')}</div>
+              <div className="w-1/5">{t('adBox.distracted')}</div>
             </div>
 
             <div className="flex flex-col gap-3 dark:text-textDark">
@@ -174,9 +177,13 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   </div>
                   <div className="w-1/5">{item.sessionsAmount}</div>
                   <div className="w-1/5">
-                    {getReadableTimeHMS(item.spentTimeSeconds, true)}
+                    {getReadableTime(item.spentTimeSeconds, t, {
+                      short: true,
+                    })}
                   </div>
-                  <div className="w-1/5">{item.pausedAmount} times</div>
+                  <div className="w-1/5">
+                    {t('plural.times', { count: item.pausedAmount })}
+                  </div>
                 </div>
               ))}
             </div>
@@ -221,8 +228,11 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                     {item.activityName}
                   </div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
-                    ({getReadableTimeHMS(item.spentTimeSeconds, true)},{' '}
-                    {item.sessionsAmount} sessions)
+                    (
+                    {getReadableTime(item.spentTimeSeconds, t, {
+                      short: true,
+                    })}
+                    , {t('plural.sessions', { count: item.sessionsAmount })})
                   </div>
                 </div>
               </div>

@@ -5,11 +5,12 @@ import { fetchActivities } from '../api/activityApi';
 import { getSessionFromLocalStorage } from '../helpers/localstorageHelpers';
 import {
   getRemainingTimeHoursMinutesSeconds,
-  getReadableTimeHMS,
+  getReadableTime,
   getTimeHHmmFromDate,
 } from '../helpers/timeHelpers';
 import { useTimer } from '../hooks/useTimer';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 import PrimaryClipLoader from '../components/common/PrimaryClipLoader';
 import PlayIcon from '../icons/PlayIcon';
@@ -27,6 +28,8 @@ import CustomSelect from '../components/common/CustomSelect';
 import { ISession } from '../ts/interfaces/Session/ISession';
 
 const TimerPage: FC = () => {
+  const { t } = useTranslation();
+
   const sessionFromLS = getSessionFromLocalStorage('session');
   const unsyncedSessionFromLS = getSessionFromLocalStorage('unsyncedSession');
 
@@ -146,7 +149,7 @@ const TimerPage: FC = () => {
 
       startTimer(newSession);
     } catch (e) {
-      toast('A server error occurred while starting new session', {
+      toast(t('serverErrors.startSession'), {
         type: 'error',
       });
     }
@@ -204,7 +207,7 @@ const TimerPage: FC = () => {
                     }}
                     className="py-[6.5px]"
                   >
-                    Start new session
+                    {t('timerPage.startSessionButton')}
                   </Button>
                 </div>
               ) : (
@@ -238,27 +241,26 @@ const TimerPage: FC = () => {
                   </div>
 
                   <div className="h-6 dark:text-textDark">
-                    {timerState.status == 'paused' && 'Paused'}
+                    {timerState.status == 'paused' && t('timerPage.paused')}
                   </div>
                 </>
               )}
             </div>
 
             {/* Right part of timer */}
-            <div className="min-h-[450px] flex flex-col flex-1 w-full p-6 overflow-y-hidden rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
+            <div className="min-h-[450px] flex flex-col flex-1 w-full p-6 sm:overflow-y-hidden rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
               <div className="flex flex-col flex-grow gap-5">
                 {isTimerStarted && (
                   <>
                     <div className="text-lg font-semibold dark:text-textDark">
-                      Session{' '}
-                      {getReadableTimeHMS(
-                        timerState.session.totalTimeSeconds,
-                        false
-                      )}
+                      {t('timerPage.session')}{' '}
+                      {getReadableTime(timerState.session.totalTimeSeconds, t, {
+                        short: false,
+                      })}
                     </div>
 
                     <div className="flex items-center dark:text-textDark">
-                      <span className="">Ends at</span>
+                      <span>{t('timerPage.endsAt')}</span>
                       <span className="inline-block min-w-[3.5rem] text-center font-bold">
                         {timerState.status === 'paused'
                           ? '...'
@@ -270,13 +272,13 @@ const TimerPage: FC = () => {
 
                 <div className="dark:text-textDark">
                   <span className="block mb-0 text-lg font-semibold sm:mb-2 dark:text-textDark">
-                    Activity
+                    {t('timerPage.activity')}
                     {isTimerStarted && (
                       <span className="text-base dark:text-textDark sm:hidden">
                         :{' '}
                         {timerState.session?.activity
                           ? timerState.session?.activity.name
-                          : 'Without activity'}
+                          : t('withoutActivity')}
                       </span>
                     )}
                   </span>
@@ -293,15 +295,19 @@ const TimerPage: FC = () => {
                               {
                                 optGroupName: '',
                                 color: 'grey',
-                                options: [{ id: '', name: 'Without activity' }],
+                                options: [
+                                  { id: '', name: t('withoutActivity') },
+                                ],
                               },
                               {
-                                optGroupName: 'Last activities ⭐',
+                                optGroupName: `${t(
+                                  'timerPage.lastActivities'
+                                )} ⭐`,
                                 color: 'red',
                                 options: activitiesToChoose.topActivities,
                               },
                               {
-                                optGroupName: 'All activities',
+                                optGroupName: t('timerPage.allActivities'),
                                 color: 'standart',
                                 options: [
                                   ...activitiesToChoose.remainingActivities,
@@ -318,7 +324,7 @@ const TimerPage: FC = () => {
                     </div>
                   ) : (
                     <div className="hidden text-base italic text-gray-500 sm:block dark:text-textDarkSecondary">
-                      Without activity
+                      {t('withoutActivity')}
                     </div>
                   )}
                 </div>
@@ -326,7 +332,7 @@ const TimerPage: FC = () => {
                 {!isTimerStarted && (
                   <div>
                     <span className="block mb-2 text-lg font-semibold dark:text-textDark">
-                      Session duration
+                      {t('timerPage.sessionDuration')}
                     </span>
                     <div className="hidden md:block">
                       <RangeSlider
@@ -350,7 +356,7 @@ const TimerPage: FC = () => {
                 {isTimerStarted && (
                   <div className="flex flex-col flex-grow">
                     <div className="mb-2 text-xl font-bold dark:text-textDark">
-                      Notes
+                      {t('timerPage.notes')}
                     </div>
                     <NotesSection defaultNote={timerState.session.note} />
                   </div>
@@ -377,7 +383,7 @@ const TimerPage: FC = () => {
             <div className="p-4 fixed xl:hidden top-0 right-0 h-full w-full min-[400px]:w-[400px] bg-[#fafafa] dark:bg-[#111] z-[70] shadow-lg transform animate-slide-in">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold dark:text-textDark">
-                  Uncompleted sessions
+                  {t('timerPage.uncompletedSessions')}
                 </h2>
                 <button
                   onClick={() => setIsSessionsBlockOpen(false)}
@@ -402,7 +408,7 @@ const TimerPage: FC = () => {
 
         <SessionsList
           classname="hidden xl:flex"
-          title="Uncompleted sessions"
+          title={t('timerPage.uncompletedSessions')}
           isExpandable={true}
           sessions={uncompletedSessions}
           updateSessionsListHandler={setUncompletedSessions}

@@ -1,6 +1,7 @@
 import { FC } from 'react';
-import { getReadableTimeHMS } from '../helpers/timeHelpers';
+import { getReadableTime } from '../helpers/timeHelpers';
 import { useTimer } from '../hooks/useTimer';
+import { useTranslation } from 'react-i18next';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -21,6 +22,8 @@ const SessionItem: FC<SessionItemProps> = ({
   sessionClickHandler,
   sessionDeleteHandler,
 }) => {
+  const { t } = useTranslation();
+
   const { timerState } = useTimer();
   const isActive = timerState.session?.id === session.id;
   const isEnabled = timerState.status == 'running';
@@ -36,20 +39,22 @@ const SessionItem: FC<SessionItemProps> = ({
           <div className="flex flex-col gap-3 ml-auto">
             <div className="flex flex-col gap-2">
               <div className="text-lg font-bold dark:text-textDark">
-                Duration
+                {t('sessionItem.duration')}
               </div>
               <div className="dark:text-textDarkSecondary">
-                {session.totalTimeSeconds >= 3600
-                  ? getReadableTimeHMS(session.totalTimeSeconds, true)
-                  : getReadableTimeHMS(session.totalTimeSeconds, false)}
+                {getReadableTime(session.totalTimeSeconds, t, {
+                  short: false,
+                })}
               </div>
             </div>
             <div className="flex flex-col gap-2">
               <div className="text-lg font-bold dark:text-textDark">
-                Activity
+                {t('sessionItem.activity')}
               </div>
               <div className="dark:text-textDarkSecondary">
-                {session.activity ? session.activity.name : 'without activity'}
+                {session.activity
+                  ? session.activity.name
+                  : t('withoutActivity')}
               </div>
             </div>
           </div>
