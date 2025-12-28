@@ -1,0 +1,275 @@
+{
+  "search": "Search...",
+  "sidebar": {
+    "timer": "Timer",
+    "activities": "Activities",
+    "analytics": "Analytics",
+    "settings": "Settings",
+    "changeTheme": "change theme"
+  },
+  "settingsModal": {
+    "title": "Settings",
+    "dailyGoal": "Your daily goal",
+    "timerInTitle": "Show timer in title",
+    "notifications": "Allow browser notifications",
+    "notificationsTooltip": "Browser notifications are shown when the timer is about to end",
+    "language": "Language",
+    "exportButton": "Export user data to file",
+    "logoutButton": "Log out of account"
+  },
+  "hotkeys": {
+    "title": "Hotkeys",
+    "space": "Start / pause / resume session",
+    "escape": "Stop session",
+    "arrow_left_right": "Navigate between dates in analytics",
+    "ctrl_arrow_left_right": "Navigate between date ranges in analytics"
+  },
+  "signin": {
+    "title": "Session Tracker. Sign in",
+    "button": "Sign in",
+    "noAccount": "Don't have account?",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "requiredError": "Field is required",
+    "userNotFound": "User with this email doesnt exists",
+    "incorrectPassword": "Password incorrect"
+  },
+  "signup": {
+    "title": "Session Tracker. Sign up",
+    "button": "Sign up",
+    "alreadyAccount": "Already have an account?",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "requiredError": "Field is required",
+    "maxError": "Maximum symbols: {{count}}",
+    "minError": "Minimum symbols: {{count}}",
+    "emailFormatError": "Invalid email format",
+    "emailUniqueError": "Email must be unique",
+    "passwordFormatError": "Must include uppercase, lowercase, number and special symbol"
+  },
+  "groupsPage": {
+    "title": "All activity groups",
+    "createButton": "Create new activity group",
+    "notFound": "Not found"
+  },
+  "groupPage": {
+    "activities": "Activities",
+    "groupsBreadcrumb": "Activity groups",
+    "createButton": "Create new activity",
+    "archiveAllButton": "Archive all activities",
+    "notFound": "Not found"
+  },
+  "activityItem": {
+    "editTooltip": "Edit",
+    "deleteTooltip": "Delete",
+    "archiveTitle": "Archive",
+    "archiveTooltip": "An archived activity will remain in analytics, but you cannot start session with this activity",
+    "unarchiveTitle": "Unarchive",
+    "deleteTitle": "Delete",
+    "sessions": "sessions",
+    "spentTime": "spent time",
+    "showActivitiesButton": "Show activities",
+    "startSessionButton": "Start session",
+    "successfulArchive": "Activity archived successfully",
+    "successfulUnarchive": "Activity unarchived successfully"
+  },
+  "deleteGroupModal": {
+    "title": "Deleting activity group",
+    "descr": "Are you sure you want to delete this activity group? Activity group sessions will not be included in analytics.",
+    "button": "Delete activity group"
+  },
+  "deleteActivityModal": {
+    "title": "Deleting activity",
+    "descr": "Are you sure you want to delete this activity? Activity sessions will not be included in analytics.",
+    "button": "Delete activity"
+  },
+  "createGroupModal": {
+    "title": "Creating new activity group",
+    "button": "Create activity group",
+    "namePlaceholder": "Enter name",
+    "descrPlaceholder": "Enter description (optional)",
+    "requiredError": "Field is required",
+    "maxError": "Maximum symbols: {{count}}"
+  },
+  "createActivityModal": {
+    "title": "creating new activity",
+    "button": "Create activity",
+    "namePlaceholder": "Enter name",
+    "descrPlaceholder": "Enter description (optional)",
+    "requiredError": "Field is required",
+    "maxError": "Maximum symbols: {{count}}"
+  },
+  "createSessionModal": {
+    "title": "starting new session",
+    "button": "Start new session"
+  },
+  "timerPage": {
+    "activity": "Activity",
+    "lastActivities": "Last activities",
+    "allActivities": "All activities",
+    "sessionDuration": "Session duration",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "session": "Session",
+    "endsAt": "Ends at",
+    "notes": "Notes",
+    "notesPlaceholder": "Enter your thoughts during this session...",
+    "paused": "Paused",
+    "startSessionButton": "Start new session",
+    "uncompletedSessions": "Uncompleted sessions"
+  },
+  "sessionItem": {
+    "duration": "Duration",
+    "activity": "Activity"
+  },
+  "deleteSessionModal": {
+    "title": "Deleting session",
+    "descr": "Are you sure you want to delete this session? The time spent on this session will not be included in analytics.",
+    "button": "Delete session"
+  },
+  "serverErrors": {
+    "signin": "A server error occurred while signing in",
+    "signup": "A server error occurred while signing up",
+    "deleteGroup": "A server error occurred while deleting activity group",
+    "deleteActivity": "A server error occurred while deleting activity",
+    "archiveActivity": "A server error occurred while archiving activity",
+    "updateActivity": "A server error occurred while updating activity",
+    "updateGroup": "A server error occurred while updating activity group",
+    "getGroups": "A server error occurred while getting activity groups",
+    "getGroup": "A server error occurred while getting activity group",
+    "getActivities": "A server error occurred while getting activities for group",
+    "archiveAllActivites": "A server error occurred while archiving all activities",
+    "createGroup": "A server error occurred while creating activity group",
+    "createActivity": "A server error occurred while creating activity",
+    "startSession": "A server error occurred while starting new session",
+    "updateSession": "A server error occurred while updating session",
+    "updateSessionButSaved": "A server error occurred while updating session, but it was saved locally",
+    "deleteSession": "A server error occurred while deleting session",
+    "getSession": "A server error occurred while getting current session",
+    "getAnalytics": "A server error occurred while getting analytics"
+  },
+  "analyticsPage": {
+    "invalidFormat": "Invalid date format in URL",
+    "noActivity": "No session activity for the specified dates",
+    "viewSelectTitle": "View by"
+  },
+  "sessionStatisticsBox": {
+    "totalTime": "total time",
+    "totalSessions": "total sessions",
+    "distracted": "distracted",
+    "distractedTooltip": "Number of times you pressed pause during the session"
+  },
+  "adBox": {
+    "title": "Activity distribution",
+    "table": "Table",
+    "chart": "Chart",
+    "others": "Others",
+    "activity": "Activity",
+    "sessions": "Sessions",
+    "time": "Time",
+    "distracted": "Distracted"
+  },
+  "pdBox": {
+    "title": "Period distribution",
+    "avg": "Avg.",
+    "perDay": "per day",
+    "perMonth": "per month",
+    "noActivity": "No session activity this period",
+    "dailyGoal": "daily goal"
+  },
+  "dailyGoalBox": {
+    "title": "Daily goal",
+    "youAchieved": "You achieved"
+  },
+  "rangeBox": {
+    "today": "Today",
+    "thisWeek": "This week",
+    "thisMonth": "This month",
+    "thisYear": "This year"
+  },
+  "overallAnalytics": {
+    "title": "Overall session analytics",
+    "now": "now"
+  },
+  "customRangeBox": {
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "error": "to date should be later than from date"
+  },
+  "months": {
+    "short": [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec"
+    ],
+    "long": [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December"
+    ]
+  },
+  "daysOfWeek": ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+  "viewOptions": {
+    "days": "days",
+    "weeks": "weeks",
+    "months": "months",
+    "years": "years",
+    "custom": "custom",
+    "overall": "overall"
+  },
+  "notifications": {
+    "sessionCompleted": "Session completed!",
+    "dailyGoalCompleted": "Daily goal completed 🎯 Great job"
+  },
+  "notFoundPage": {
+    "title": "Page Not Found",
+    "descr": "Sorry, the page you’re looking for doesn’t exist",
+    "goHome": "Go Home"
+  },
+  "title": {
+    "focus": "Focus",
+    "paused": "Paused"
+  },
+  "withoutActivity": "Without activity",
+  "plural": {
+    "times_one": "{{count}} time",
+    "times_other": "{{count}} times",
+    "sessions_one": "{{count}} session",
+    "sessions_other": "{{count}} sessions",
+    "pauses_one": "{{count}} pause",
+    "pauses_other": "{{count}} pauses"
+  },
+  "time": {
+    "hours_one": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+
+    "minutes_one": "{{count}} minute",
+    "minutes_other": "{{count}} minutes",
+
+    "seconds_one": "{{count}} second",
+    "seconds_other": "{{count}} seconds",
+
+    "hoursShort": "{{count}}h",
+    "minutesShort": "{{count}}m",
+    "secondsShort": "{{count}}s"
+  }
+}

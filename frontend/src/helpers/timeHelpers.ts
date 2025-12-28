@@ -1,3 +1,5 @@
+import { TFunction } from 'i18next';
+
 export const getRemainingTimeHoursMinutesSeconds = (
   totalTimeSeconds: number,
   spentTimeSeconds: number,
@@ -41,46 +43,49 @@ export const getTimeHMS = (allSeconds: number): string => {
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
 
-export const getReadableTimeHMS = (
+export const getTimeParts = (seconds: number) => {
+  const hours = Math.trunc(seconds / 3600);
+  const minutes = Math.trunc((seconds % 3600) / 60);
+  const secs = Math.trunc(seconds % 60);
+
+  return { hours, minutes, seconds: secs };
+};
+
+export const getReadableTime = (
   seconds: number,
-  short: boolean = false,
-  zeroUnits: boolean = false
+  t: TFunction,
+  options: { short: boolean; zeroUnits?: boolean }
 ): string => {
-  const hours: number = Math.trunc(seconds / 3600);
+  const { short, zeroUnits = false } = options;
+  const { hours, minutes, seconds: secs } = getTimeParts(seconds);
 
-  let hoursString = '';
-  if (hours === 0) {
-    if (zeroUnits) {
-      hoursString = short ? '0h' : '0 hours';
-    }
-  } else {
-    hoursString = short ? `${hours}h` : `${hours} hours`;
+  const parts: string[] = [];
+
+  if (hours > 0 || zeroUnits) {
+    parts.push(
+      short
+        ? t('time.hoursShort', { count: hours })
+        : t('time.hours', { count: hours })
+    );
   }
 
-  const remainingSeconds: number = seconds - hours * 3600;
-  const remainingMinutes: number = Math.trunc(remainingSeconds / 60);
-
-  let minutesString = '';
-  if (remainingMinutes === 0) {
-    if (zeroUnits) {
-      minutesString = short ? '0m' : '0 minutes';
-    }
-  } else {
-    minutesString = short
-      ? `${remainingMinutes}m`
-      : `${remainingMinutes} minutes`;
+  if (minutes > 0 || zeroUnits) {
+    parts.push(
+      short
+        ? t('time.minutesShort', { count: minutes })
+        : t('time.minutes', { count: minutes })
+    );
   }
 
-  const resultString =
-    hoursString === '' && minutesString === ''
-      ? `${
-          short == true
-            ? `${Math.trunc(seconds)}s`
-            : `${Math.trunc(seconds)} seconds`
-        }`
-      : `${hoursString} ${minutesString}`;
+  if (parts.length === 0) {
+    parts.push(
+      short
+        ? t('time.secondsShort', { count: secs })
+        : t('time.seconds', { count: secs })
+    );
+  }
 
-  return resultString.trim();
+  return parts.join(' ');
 };
 
 export const getTimeHHmmFromDate = (date: Date) => {

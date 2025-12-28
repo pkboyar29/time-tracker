@@ -2,6 +2,7 @@ import { FC } from 'react';
 import { useForm } from 'react-hook-form';
 import { createActivity } from '../../api/activityApi';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 import Button from '../common/Button';
 import Input from '../common/Input';
@@ -22,6 +23,8 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
   afterSubmitHandler,
   activityGroupId,
 }) => {
+  const { t } = useTranslation();
+
   const {
     register,
     handleSubmit,
@@ -36,7 +39,7 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
 
       afterSubmitHandler(newActivity);
     } catch (e) {
-      toast('A server error occurred while creating activity', {
+      toast(t('serverErrors.createActivity'), {
         type: 'error',
       });
     }
@@ -50,12 +53,12 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
       <Input
         fieldName="name"
         register={register}
-        placeHolder="Enter name"
+        placeHolder={t('createActivityModal.namePlaceholder')}
         validationRules={{
-          required: 'Field is required',
+          required: t('createActivityModal.requiredError'),
           maxLength: {
             value: 50,
-            message: 'Max 50 is allowed',
+            message: t('createActivityModal.maxError', { count: 50 }),
           },
         }}
         errorMessage={
@@ -67,11 +70,11 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
         isTextArea={true}
         fieldName="descr"
         register={register}
-        placeHolder="Enter description (optional)"
+        placeHolder={t('createActivityModal.descrPlaceholder')}
         validationRules={{
           maxLength: {
             value: 500,
-            message: 'Max 500 is allowed',
+            message: t('createActivityModal.maxError', { count: 500 }),
           },
         }}
         errorMessage={
@@ -80,7 +83,7 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
       />
 
       <div className="ml-auto w-fit">
-        <Button type="submit">Create activity</Button>
+        <Button type="submit">{t('createActivityModal.button')}</Button>
       </div>
     </form>
   );

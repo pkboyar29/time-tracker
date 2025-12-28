@@ -21,13 +21,12 @@ const QuestionMarkTooltip: FC<QuestionMarkTooltipProps> = ({ tooltipText }) => {
     if (!isVisible) return;
 
     const hideAndUpdateTop = () => {
+      if (!questionMarkRef.current) return;
+
       if (isVisible) {
         setIsVisible(false);
-        if (questionMarkRef.current) {
-          const questionMarkRect =
-            questionMarkRef.current.getBoundingClientRect();
-          setTop(questionMarkRect.y - 30);
-        }
+        const rect = questionMarkRef.current.getBoundingClientRect();
+        setTop(rect.y - 30);
       }
     };
 
@@ -40,19 +39,19 @@ const QuestionMarkTooltip: FC<QuestionMarkTooltipProps> = ({ tooltipText }) => {
   }, [isVisible]);
 
   useLayoutEffect(() => {
-    if (tooltipRef.current) {
-      if (isOutOfRightBoundary(tooltipRef.current)) {
-        setIsOnCenter(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (!tooltipRef.current || !questionMarkRef.current) return;
 
-        if (questionMarkRef.current) {
-          const questionMarkRect =
-            questionMarkRef.current.getBoundingClientRect();
-          setTop(questionMarkRect.y - 30);
+        if (isOutOfRightBoundary(tooltipRef.current)) {
+          setIsOnCenter(false);
+          const rect = questionMarkRef.current.getBoundingClientRect();
+          setTop(rect.y - 30);
+        } else {
+          setIsOnCenter(true);
         }
-      } else {
-        setIsOnCenter(true);
-      }
-    }
+      });
+    });
   }, []);
 
   return (

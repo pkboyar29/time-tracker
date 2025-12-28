@@ -1,3 +1,6 @@
+import { TFunction } from 'i18next';
+import { getLocaleFromLanguage } from './i18n/getLocaleFromLanguage';
+
 export const getDayRange = (date: Date): [Date, Date] => {
   const startOfDay = new Date(
     date.getFullYear(),
@@ -91,25 +94,8 @@ export const getWeekDays = (date: Date): [Date, Date][] => {
   return daysOfWeek;
 };
 
-export const getDayOfWeekName = (dayNumber: number): string => {
-  switch (dayNumber) {
-    case 0:
-      return 'SUN';
-    case 1:
-      return 'MON';
-    case 2:
-      return 'TUE';
-    case 3:
-      return 'WED';
-    case 4:
-      return 'THU';
-    case 5:
-      return 'FRI';
-    case 6:
-      return 'SAT';
-    default:
-      return 'undefined';
-  }
+export const getDayOfWeekName = (dayNumber: number, t: TFunction): string => {
+  return (t('daysOfWeek', { returnObjects: true }) as [])[dayNumber];
 };
 
 export const shiftWeekDays = (
@@ -130,42 +116,12 @@ export const shiftWeekDays = (
   return newDays;
 };
 
-export const getMonthName = (monthNumber: number) => {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  return `${months[monthNumber]}`;
+export const getMonthName = (monthNumber: number, t: TFunction) => {
+  return `${(t('months.short', { returnObjects: true }) as [])[monthNumber]}`;
 };
 
-export const getMonthDetailedName = (date: Date) => {
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
-  return `${months[date.getMonth()]} ${date.getFullYear()}`;
+export const getMonthDetailedName = (monthNumber: number, t: TFunction) => {
+  return (t('months.long', { returnObjects: true }) as [])[monthNumber];
 };
 
 export const getWeeks = (
@@ -505,8 +461,8 @@ export const shiftTwoDates = (
   return [new Date(), new Date()];
 };
 
-export const formatDate = (date: Date) =>
-  date.toLocaleDateString('en-US', {
+export const formatDate = (date: Date, i18nLang: string) =>
+  date.toLocaleDateString(getLocaleFromLanguage(i18nLang), {
     month: 'short',
     day: 'numeric',
     year: 'numeric',

@@ -1,5 +1,6 @@
-import { getReadableTimeHMS } from './timeHelpers';
+import { getReadableTime } from './timeHelpers';
 import { ISession } from '../ts/interfaces/Session/ISession';
+import { t } from 'i18next';
 
 export const showSessionCompletedNotification = (
   currentSession: ISession,
@@ -9,18 +10,27 @@ export const showSessionCompletedNotification = (
 
   try {
     if (Notification.permission === 'granted') {
-      let notificationBody = `${
-        currentSession.activity
-          ? currentSession.activity.name
-          : 'Without activity'
-      } - ${getReadableTimeHMS(currentSession.totalTimeSeconds)}`;
+      const activityName = currentSession.activity
+        ? currentSession.activity.name
+        : t('withoutActivity');
+
+      let notificationBody = `${activityName} - ${getReadableTime(
+        currentSession.totalTimeSeconds,
+        t,
+        {
+          short: false,
+        }
+      )}`;
       if (dailyGoalCompleted) {
-        notificationBody += '\nDaily goal completed 🎯 Great job!';
+        notificationBody += `\n${t('notifications.dailyGoalCompleted')}`;
       }
 
-      const notification = new Notification('Session completed!', {
-        body: notificationBody,
-      });
+      const notification = new Notification(
+        t('notifications.sessionCompleted'),
+        {
+          body: notificationBody,
+        }
+      );
       setTimeout(() => {
         notification.close();
       }, 5000);

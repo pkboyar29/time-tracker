@@ -8,8 +8,7 @@ export function animateCountUp(
   element: HTMLElement,
   to: number,
   duration = 1000,
-  formatter: ((v: number) => string) | null,
-  additionalText?: string
+  formatter: ((v: number) => string) | null
 ) {
   const startTime = performance.now();
 
@@ -20,9 +19,7 @@ export function animateCountUp(
     if (formatter) {
       element.textContent = formatter(value);
     } else {
-      element.textContent = additionalText
-        ? `${value.toString()} ${additionalText}`
-        : value.toString();
+      element.textContent = value.toString();
     }
 
     if (progress < 1) {
@@ -38,8 +35,7 @@ export function animateCountUpWithInterval(
   to: number,
   duration = 1000,
   initialProgress = 0,
-  formatter: ((v: number) => string) | null,
-  additionalText?: string
+  formatter: ((v: number) => string) | null
 ) {
   const interval = 50;
 
@@ -62,9 +58,7 @@ export function animateCountUpWithInterval(
     if (formatter) {
       element.textContent = formatter(value);
     } else {
-      element.textContent = additionalText
-        ? `${value.toString()} ${additionalText}`
-        : value.toString();
+      element.textContent = value.toString();
     }
 
     if (msCounter >= animationDuration) {

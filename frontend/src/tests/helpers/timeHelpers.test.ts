@@ -1,7 +1,9 @@
+import { TFunction } from 'i18next';
 import {
   getRemainingTimeHoursMinutesSeconds,
   getTimeHMS,
-  getReadableTimeHMS,
+  getTimeParts,
+  getReadableTime,
   getTimeHHmmFromDate,
 } from '../../helpers/timeHelpers';
 
@@ -84,70 +86,95 @@ describe('getTimeHMS', () => {
   });
 });
 
-describe('getReadableTimeHMS', () => {
-  it('returns only seconds when input is less than 1 minute and short is false', () => {
-    const result = getReadableTimeHMS(3);
-    expect(result).toBe('3 seconds');
+describe('getTimeParts', () => {
+  it('returns 1 hour, 0 minutes and 0 seconds for 3600 seconds', () => {
+    const parts = getTimeParts(3600);
+    expect(parts.hours).toBe(1);
+    expect(parts.minutes).toBe(0);
+    expect(parts.seconds).toBe(0);
   });
 
-  it('returns only seconds when input is less than 1 minute and short is true', () => {
-    const result = getReadableTimeHMS(14, true);
-    expect(result).toBe('14s');
+  it('returns 0 hours, 1 minute and 5 seconds for 65 seconds', () => {
+    const parts = getTimeParts(65);
+    expect(parts.hours).toBe(0);
+    expect(parts.minutes).toBe(1);
+    expect(parts.seconds).toBe(5);
   });
 
-  it('returns only minutes when hours are 0 and short is false', () => {
-    const result = getReadableTimeHMS(150); // 2m 30s
-    expect(result).toBe('2 minutes');
+  it('returns 0 hours, 0 minutes and 20 seconds for 20 seconds', () => {
+    const parts = getTimeParts(20);
+    expect(parts.hours).toBe(0);
+    expect(parts.minutes).toBe(0);
+    expect(parts.seconds).toBe(20);
+  });
+});
+
+describe('getReadableTime', () => {
+  const tEnMock = (key: string, opts: any) => {
+    const dict: Record<string, string> = {
+      'time.hours': `${opts.count} hours`,
+      'time.minutes': `${opts.count} minutes`,
+      'time.seconds': `${opts.count} seconds`,
+      'time.hoursShort': `${opts.count}h`,
+      'time.minutesShort': `${opts.count}m`,
+      'time.secondsShort': `${opts.count}s`,
+    };
+
+    return dict[key];
+  };
+
+  it('formats hours and minutes in full format', () => {
+    const result = getReadableTime(3800, tEnMock as TFunction, {
+      short: false,
+    });
+    expect(result).toBe('1 hours 3 minutes');
   });
 
-  it('returns only minutes when hours are 0 and short is true', () => {
-    const result = getReadableTimeHMS(120, true); // 2m
-    expect(result).toBe('2m');
+  it('formats hours and minutes in short format', () => {
+    const result = getReadableTime(3800, tEnMock as TFunction, { short: true });
+    expect(result).toBe('1h 3m');
   });
 
-  it('returns only hours when minutes are 0 and short is false', () => {
-    const result = getReadableTimeHMS(3600); // 1h
-    expect(result).toBe('1 hours');
+  it('formats seconds only in full format when less than a minute', () => {
+    const result = getReadableTime(50, tEnMock as TFunction, { short: false });
+    expect(result).toBe('50 seconds');
   });
 
-  it('returns only hours when minutes are 0 and short is true', () => {
-    const result = getReadableTimeHMS(7200, true); // 2h
-    expect(result).toBe('2h');
+  it('formats seconds only in short format when less than a minute', () => {
+    const result = getReadableTime(50, tEnMock as TFunction, { short: true });
+    expect(result).toBe('50s');
   });
 
-  it('returns hours and minutes when both are present, short = false', () => {
-    const result = getReadableTimeHMS(3660); // 1h 1m
-    expect(result).toBe('1 hours 1 minutes');
+  it('includes zero hours when zeroUnits is enabled in full format', () => {
+    const result = getReadableTime(3590, tEnMock as TFunction, {
+      short: false,
+      zeroUnits: true,
+    });
+    expect(result).toBe('0 hours 59 minutes');
   });
 
-  it('returns hours and minutes when both are present, short = true', () => {
-    const result = getReadableTimeHMS(7260, true); // 2h 1m
-    expect(result).toBe('2h 1m');
+  it('includes zero hours when zeroUnits is enabled in short format', () => {
+    const result = getReadableTime(3590, tEnMock as TFunction, {
+      short: true,
+      zeroUnits: true,
+    });
+    expect(result).toBe('0h 59m');
   });
 
-  it('trims extra whitespace when only one part is present', () => {
-    const result = getReadableTimeHMS(3600); // only hours
-    expect(result).toBe('1 hours');
-  });
-
-  it('returns 0 minutes, zeroUnits = true, short = false', () => {
-    const result = getReadableTimeHMS(3600, false, true);
+  it('includes zero minutes when zeroUnits is enabled in full format', () => {
+    const result = getReadableTime(3610, tEnMock as TFunction, {
+      short: false,
+      zeroUnits: true,
+    });
     expect(result).toBe('1 hours 0 minutes');
   });
 
-  it('returns 0m, zeroUnits = true, short = true', () => {
-    const result = getReadableTimeHMS(3600, true, true);
+  it('includes zero minutes when zeroUnits is enabled in short format', () => {
+    const result = getReadableTime(3610, tEnMock as TFunction, {
+      short: true,
+      zeroUnits: true,
+    });
     expect(result).toBe('1h 0m');
-  });
-
-  it('returns 0 hours, zeroUnits = true, short = false', () => {
-    const result = getReadableTimeHMS(300, false, true);
-    expect(result).toBe('0 hours 5 minutes');
-  });
-
-  it('returns 0h, zeroUnits = true, short = true', () => {
-    const result = getReadableTimeHMS(300, true, true);
-    expect(result).toBe('0h 5m');
   });
 });
 

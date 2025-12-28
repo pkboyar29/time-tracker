@@ -1,17 +1,20 @@
 import { FC, useState, useRef } from 'react';
-import { clearSession } from '../../helpers/authHelpers';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { logOutUser, setUser } from '../../redux/slices/userSlice';
 import { updateDailyGoal, updateShowTimerInTitle } from '../../api/userApi';
 import { useTimer } from '../../hooks/useTimer';
 import axios from '../../api/axios';
+import { useTranslation } from 'react-i18next';
+import { clearSession } from '../../helpers/authHelpers';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
-import { getReadableTimeHMS } from '../../helpers/timeHelpers';
+import { getReadableTime } from '../../helpers/timeHelpers';
+import { setLangInLocalStorage } from '../../helpers/localstorageHelpers';
 
 import Button from '../common/Button';
 import Modal from './Modal';
 import ToggleButton from '../common/ToggleButton';
 import RangeSlider from '../common/RangeSlider';
+import CustomSelect from '../common/CustomSelect';
 import QuestionMarkTooltip from '../common/QuestionMarkTooltip';
 import HotkeysInfo from '../HotkeysInfo';
 
@@ -22,6 +25,8 @@ interface SettingsModalProps {
 const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((state) => state.users.user);
+
+  const { t, i18n } = useTranslation();
 
   const { timerState, stopTimer } = useTimer();
 
@@ -85,17 +90,25 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
     );
   };
 
+  const onLangSelectChange = (lang: string) => {
+    setLangInLocalStorage(lang as 'ru' | 'en');
+    i18n.changeLanguage(lang);
+  };
+
   return (
-    <Modal title="Settings" onCloseModal={onCloseModal}>
+    <Modal title={t('settingsModal.title')} onCloseModal={onCloseModal}>
       <div className="h-[40vh] overflow-y-auto flex flex-col gap-4 justify-between pr-2">
         <div className="flex flex-col gap-4">
           {userInfo && (
             <div className="p-5 text-center rounded-3xl bg-surfaceLightHover dark:bg-surfaceDarkDarker">
               <h3 className="mb-2 text-lg font-semibold dark:text-gray-200">
-                Your daily goal
+                {t('settingsModal.dailyGoal')}
               </h3>
-              <div className="mb-2 text-3xl font-bold text-primary">
-                {getReadableTimeHMS(dailyGoalInput * 60, false, true)}
+              <div className="mb-2 text-xl font-bold sm:text-3xl text-primary">
+                {getReadableTime(dailyGoalInput * 60, t, {
+                  short: false,
+                  zeroUnits: true,
+                })}
               </div>
               <RangeSlider
                 minValue={1}
@@ -107,8 +120,8 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
           )}
 
           {userInfo && (
-            <div className="flex justify-between gap-4 text-lg dark:text-textDark">
-              <div>Show timer in title</div>
+            <div className="flex justify-between gap-4 text-base sm:text-lg dark:text-textDark">
+              <div>{t('settingsModal.timerInTitle')}</div>
               <ToggleButton
                 isChecked={userInfo.showTimerInTitle}
                 setIsChecked={showTimerInTitleButtonClick}
@@ -116,11 +129,13 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-4 text-lg dark:text-textDark">
-            <div className="flex items-center gap-2">
-              <div>Allow browser notifications</div>
-              <div className="pb-3.5">
-                <QuestionMarkTooltip tooltipText="Browser notifications are shown when the timer is about to end" />
+          <div className="flex items-center justify-between gap-4 text-base sm:text-lg dark:text-textDark">
+            <div className="relative w-fit">
+              <div>{t('settingsModal.notifications')}</div>
+              <div className="absolute pl-2 -top-2 left-full">
+                <QuestionMarkTooltip
+                  tooltipText={t('settingsModal.notificationsTooltip')}
+                />
               </div>
             </div>
             <ToggleButton
@@ -128,19 +143,42 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
               setIsChecked={changeNotificationPermission}
             />
           </div>
+
+          <div className="flex items-center justify-between gap-4 text-base sm:text-lg dark:text-textDark">
+            <div>{t('settingsModal.language')}</div>
+            <div className="w-[140px]">
+              <CustomSelect
+                lightBackground={false}
+                currentId={i18n.language}
+                onChange={onLangSelectChange}
+                optionGroups={[
+                  {
+                    optGroupName: '',
+                    color: 'standart',
+                    options: [
+                      { id: 'en', name: 'english' },
+                      { id: 'ru', name: 'русский' },
+                    ],
+                  },
+                ]}
+              />
+            </div>
+          </div>
         </div>
 
         <HotkeysInfo />
 
-        <div className="flex flex-col justify-end gap-3 md:flex-row">
+        <div className="flex flex-wrap justify-end gap-3">
           <div>
             <Button onClick={downloadUserDataFile}>
-              Export user data to file
+              {t('settingsModal.exportButton')}
             </Button>
           </div>
 
           <div>
-            <Button onClick={logOutHandler}>Log out of account</Button>
+            <Button onClick={logOutHandler}>
+              {t('settingsModal.logoutButton')}
+            </Button>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import {
 } from '../api/activityGroupApi';
 import { fetchGroupActivities } from '../api/activityApi';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 import Title from '../components/common/Title';
 import SearchBar from '../components/common/SearchBar';
@@ -22,6 +23,7 @@ import { IActivity } from '../ts/interfaces/Activity/IActivity';
 const ActivityGroupPage: FC = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const { activityGroupId } = useParams();
 
@@ -49,7 +51,7 @@ const ActivityGroupPage: FC = () => {
 
   useEffect(() => {
     if (isErrorGroup) {
-      toast('A server error occurred while getting activity group', {
+      toast(t('serverErrors.getGroup'), {
         type: 'error',
       });
     }
@@ -57,7 +59,7 @@ const ActivityGroupPage: FC = () => {
 
   useEffect(() => {
     if (isErrorActivities) {
-      toast('A server error occurred while getting activities for group', {
+      toast(t('serverErrors.getActivities'), {
         type: 'error',
       });
     }
@@ -73,7 +75,7 @@ const ActivityGroupPage: FC = () => {
           oldData.map((activity) => ({ ...activity, archived: true }))
       );
     } catch (e) {
-      toast('A server error occurred while archiving all activities', {
+      toast(t('serverErrors.archiveAllActivites'), {
         type: 'error',
       });
     }
@@ -85,8 +87,8 @@ const ActivityGroupPage: FC = () => {
         <Modal
           title={
             <div>
-              <span className="font-bold">{currentActivityGroup?.name}</span>:
-              creating a new activity
+              <span className="font-bold">{currentActivityGroup?.name}</span>:{' '}
+              {t('createActivityModal.title')}
             </div>
           }
           onCloseModal={() => {
@@ -122,7 +124,7 @@ const ActivityGroupPage: FC = () => {
                 onClick={() => navigate('/activity-groups')}
                 className="transition duration-300 cursor-pointer hover:text-primary"
               >
-                Activity groups
+                {t('groupPage.groupsBreadcrumb')}
               </span>{' '}
               / {currentActivityGroup.name}
             </div>
@@ -142,7 +144,7 @@ const ActivityGroupPage: FC = () => {
 
                 <div className="hidden md:block w-fit">
                   <Button onClick={() => setCreateModal(true)}>
-                    Create new activity
+                    {t('groupPage.createButton')}
                   </Button>
                 </div>
 
@@ -157,13 +159,13 @@ const ActivityGroupPage: FC = () => {
 
             <div className="flex items-end gap-7 mt-7">
               <div className="text-xl font-bold dark:text-textDark">
-                Activities
+                {t('groupPage.activities')}
               </div>
 
               {activities.length > 0 && (
                 <div className="w-fit">
                   <Button onClick={onArchiveAllActivities}>
-                    Archive all activities
+                    {t('groupPage.archiveAllButton')}
                   </Button>
                 </div>
               )}
@@ -215,7 +217,9 @@ const ActivityGroupPage: FC = () => {
                     />
                   ))
               ) : (
-                <div className="dark:text-textDark">Not found</div>
+                <div className="dark:text-textDark">
+                  {t('groupPage.notFound')}
+                </div>
               )}
             </div>
           </div>

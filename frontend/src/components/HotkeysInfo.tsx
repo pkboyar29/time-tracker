@@ -1,22 +1,25 @@
 import { FC } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const HotkeysInfo: FC = () => {
+  const { t } = useTranslation();
+
   const hotkeys = [
     {
       combo: 'Space',
-      description: 'Start / pause / resume session',
+      description: t('hotkeys.space'),
     },
     {
       combo: 'Escape',
-      description: 'Stop session',
+      description: t('hotkeys.escape'),
     },
     {
       combo: '← / →',
-      description: 'Navigate between dates in analytics',
+      description: t('hotkeys.arrow_left_right'),
     },
     {
       combo: 'Ctrl + ← / Ctrl + →',
-      description: 'Navigate between date ranges in analytics',
+      description: t('hotkeys.ctrl_arrow_left_right'),
     },
   ];
 
@@ -24,7 +27,7 @@ const HotkeysInfo: FC = () => {
     <div className="hidden p-5 shadow-md md:block rounded-2xl dark:text-textDark bg-surfaceLightHover dark:bg-surfaceDarkDarker">
       <div className="flex items-center gap-2 mb-4 text-xl font-semibold">
         <span>⌨️</span>
-        Hotkeys
+        {t('hotkeys.title')}
       </div>
 
       <div className="flex flex-col gap-3">
@@ -33,8 +36,10 @@ const HotkeysInfo: FC = () => {
             key={i}
             className="flex items-center justify-between pb-2 border-b border-gray-300 dark:border-gray-700"
           >
-            <div className="font-mono text-lg">{item.combo}</div>
-            <div className="text-base opacity-80">{item.description}</div>
+            <div className="font-mono text-base lg:text-lg">{item.combo}</div>
+            <div className="text-sm text-right lg:text-base opacity-80">
+              {item.description}
+            </div>
           </div>
         ))}
       </div>

@@ -11,7 +11,7 @@ import {
 import { getTimeHMS } from '../helpers/timeHelpers';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { AxiosError } from 'axios';
+import { useTranslation } from 'react-i18next';
 
 import { IActivity } from '../ts/interfaces/Activity/IActivity';
 import { IActivityGroup } from '../ts/interfaces/ActivityGroup/IActivityGroup';
@@ -39,6 +39,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
   afterDeleteHandler,
 }) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const isActivity = 'activityGroup' in activityCommon;
 
@@ -69,11 +70,16 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
         afterUpdateHandler({ ...activityCommon, archived });
 
-        toast(`Activity ${archived ? 'archived' : 'unarchived'} successfully`, {
-          type: 'success',
-        });
+        toast(
+          archived
+            ? t('activityItem.successfulArchive')
+            : t('activityItem.successfulUnarchive'),
+          {
+            type: 'success',
+          }
+        );
       } catch (e) {
-        toast('A server error occurred while archiving activity', {
+        toast(t('serverErrors.archiveActivity'), {
           type: 'error',
         });
       }
@@ -96,8 +102,8 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     } catch (e) {
       toast(
         isActivity
-          ? 'A server error occurred while deleting activity'
-          : 'A server error occurred while deleting activity group',
+          ? t('serverErrors.deleteActivity')
+          : t('serverErrors.deleteGroup'),
         {
           type: 'error',
         }
@@ -115,20 +121,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
         afterUpdateHandler(updatedData);
       } catch (e) {
-        if (e instanceof AxiosError) {
-          toast(
-            e.response
-              ? e.response.data
-              : 'A server error occurred while updating activity',
-            {
-              type: 'error',
-            }
-          );
-        } else {
-          toast('A server error occurred while updating activity', {
-            type: 'error',
-          });
-        }
+        toast(t('serverErrors.updateActivity'), { type: 'error' });
         setName(activityCommon.name);
       }
     } else {
@@ -140,20 +133,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
         afterUpdateHandler(updatedData);
       } catch (e) {
-        if (e instanceof AxiosError) {
-          toast(
-            e.response
-              ? e.response.data
-              : 'A server error occurred while updating activity group',
-            {
-              type: 'error',
-            }
-          );
-        } else {
-          toast('A server error occurred while updating activity group', {
-            type: 'error',
-          });
-        }
+        toast(t('serverErrors.updateGroup'), { type: 'error' });
         setName(activityCommon.name);
       }
     }
@@ -167,17 +147,23 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     <>
       {deleteModal && (
         <Modal
-          title={isActivity ? 'Deleting activity' : 'Deleting activity group'}
+          title={
+            isActivity
+              ? t('deleteActivityModal.title')
+              : t('deleteGroupModal.title')
+          }
           onCloseModal={() => setDeleteModal(false)}
         >
           <p className="text-base/6 dark:text-textDark">
             {isActivity
-              ? 'Are you sure you want to delete this activity? Activity sessions will not be included in analytics.'
-              : 'Are you sure you want to delete this activity group? Activity group sessions will not be included in analytics.'}
+              ? t('deleteActivityModal.descr')
+              : t('deleteGroupModal.descr')}
           </p>
           <div className="mt-10 ml-auto w-fit">
             <Button onClick={onDeleteActivityCommon}>
-              {isActivity ? 'Delete activity' : 'Delete activity group'}
+              {isActivity
+                ? t('deleteActivityModal.button')
+                : t('deleteGroupModal.button')}
             </Button>
           </div>
         </Modal>
@@ -187,8 +173,8 @@ const ActivityItem: FC<ActivityBoxProps> = ({
         <SessionCreateModal
           modalTitle={
             <div>
-              <span className="font-bold">{activityCommon.name}</span>: starting
-              new session
+              <span className="font-bold">{activityCommon.name}</span>:{' '}
+              {t('createSessionModal.title')}
             </div>
           }
           onCloseModal={() => {
@@ -219,7 +205,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
             <button
               className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
               onClick={editButtonClickHandler}
-              title="Edit"
+              title={t('activityItem.editTooltip')}
             >
               {isEditing ? <SaveIcon /> : <EditIcon />}
             </button>
@@ -238,7 +224,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
                   <div className="flex flex-col gap-1.5">
                     <button
                       className="flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
-                      title="An archived activity will remain in analytics, but you cannot start session with this activity"
+                      title={t('activityItem.archiveTooltip')}
                       onClick={() => {
                         setDropdown(false);
                         archiveButtonClickHandler(!activityCommon.archived);
@@ -246,14 +232,16 @@ const ActivityItem: FC<ActivityBoxProps> = ({
                     >
                       {activityCommon.archived ? (
                         <>
-                          <div className="w-24 dark:text-textDark">
-                            Unarchive
+                          <div className="truncate w-28 dark:text-textDark">
+                            {t('activityItem.unarchiveTitle')}
                           </div>
                           <UnarchiveIcon />
                         </>
                       ) : (
                         <>
-                          <div className="w-24 dark:text-textDark">Archive</div>
+                          <div className="truncate w-28 dark:text-textDark">
+                            {t('activityItem.archiveTitle')}
+                          </div>
                           <ArchiveIcon />
                         </>
                       )}
@@ -265,9 +253,11 @@ const ActivityItem: FC<ActivityBoxProps> = ({
                         setDropdown(false);
                         deleteButtonClickHandler();
                       }}
-                      title="Delete"
+                      title={t('activityItem.deleteTooltip')}
                     >
-                      <div className="w-24 dark:text-textDark">Delete</div>
+                      <div className="truncate w-28 dark:text-textDark">
+                        {t('activityItem.deleteTitle')}
+                      </div>
                       <DeleteIcon />
                     </button>
                   </div>
@@ -277,7 +267,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
               <button
                 className="p-1 transition duration-300 rounded-lg hover:bg-primaryHover/35 dark:hover:bg-primaryHover/35"
                 onClick={deleteButtonClickHandler}
-                title="Delete"
+                title={t('activityItem.deleteTooltip')}
               >
                 <DeleteIcon />
               </button>
@@ -292,11 +282,11 @@ const ActivityItem: FC<ActivityBoxProps> = ({
                 disabled={activityCommon.archived}
                 onClick={() => setStartSessionModal(true)}
               >
-                <span>Start session</span>
+                <span>{t('activityItem.startSessionButton')}</span>
               </Button>
             ) : (
               <Button onClick={() => navigate(`${activityCommon.id}`)}>
-                <span>Show activities</span>
+                <span>{t('activityItem.showActivitiesButton')}</span>
               </Button>
             )}
           </div>
@@ -308,7 +298,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
               {activityCommon.sessionsAmount}
             </div>
             <div className="text-[13px] dark:text-textDarkSecondary">
-              sessions
+              {t('activityItem.sessions')}
             </div>
           </div>
           <div className="text-center">
@@ -316,7 +306,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
               {getTimeHMS(activityCommon.spentTimeSeconds)}
             </div>
             <div className="text-[13px] dark:text-textDarkSecondary">
-              spent time
+              {t('activityItem.spentTime')}
             </div>
           </div>
         </div>

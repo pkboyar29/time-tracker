@@ -8,6 +8,7 @@ import { setUser } from '../redux/slices/userSlice';
 import { isAuth } from '../helpers/authHelpers';
 import { signIn } from '../api/userApi';
 import { toast } from 'react-toastify';
+import { useTranslation } from 'react-i18next';
 
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
@@ -20,6 +21,7 @@ interface SignInFields {
 const SignInPage: FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { t } = useTranslation();
 
   const {
     register,
@@ -53,17 +55,17 @@ const SignInPage: FC = () => {
       case 'User with this email doesnt exists':
         setError('email', {
           type: 'custom',
-          message: errorMessage,
+          message: t('signin.userNotFound'),
         });
         break;
       case 'Password incorrect':
         setError('password', {
           type: 'custom',
-          message: errorMessage,
+          message: t('signin.incorrectPassword'),
         });
         break;
       default:
-        toast('A server error occurred while signing in', {
+        toast(t('serverErrors.signin'), {
           type: 'error',
         });
         break;
@@ -74,16 +76,16 @@ const SignInPage: FC = () => {
     <div className="flex items-center justify-center w-full min-h-screen bg-backgroundLight dark:bg-backgroundDark">
       <div className="w-full max-w-md px-5 py-10 mx-3 border shadow-xl md:px-10 rounded-2xl bg-white/5 dark:bg-black/40 backdrop-blur-md border-white/10">
         <h1 className="mb-8 text-2xl font-semibold text-center md:text-3xl text-primary dark:text-textDark">
-          Session Tracker. Sign in
+          {t('signin.title')}
         </h1>
 
         <form className="flex flex-col gap-6" onSubmit={handleSubmit(onSubmit)}>
           <Input
             fieldName="email"
-            placeHolder="Email"
+            placeHolder={t('signin.emailPlaceholder')}
             register={register}
             validationRules={{
-              required: 'Field is required',
+              required: t('signin.requiredError'),
             }}
             inputProps={{
               maxLength: 40,
@@ -98,10 +100,10 @@ const SignInPage: FC = () => {
 
           <Input
             fieldName="password"
-            placeHolder="Password"
+            placeHolder={t('signin.passwordPlaceholder')}
             register={register}
             validationRules={{
-              required: 'Field is required',
+              required: t('signin.requiredError'),
             }}
             inputProps={{
               maxLength: 20,
@@ -116,7 +118,7 @@ const SignInPage: FC = () => {
           />
 
           <Button className="text-[18px] py-3" type="submit">
-            Sign in
+            {t('signin.button')}
           </Button>
 
           <div className="mt-2 text-center">
@@ -124,7 +126,7 @@ const SignInPage: FC = () => {
               className="text-base transition cursor-pointer dark:text-textDark hover:text-primary dark:hover:text-primary"
               onClick={() => navigate('/sign-up')}
             >
-              Don't have account?
+              {t('signin.noAccount')}
             </a>
           </div>
         </form>

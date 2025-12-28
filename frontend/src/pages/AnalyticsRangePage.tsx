@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchRangeAnalytics } from '../api/analyticsApi';
@@ -11,6 +11,7 @@ import {
   getMonthRange,
   getYearRange,
 } from '../helpers/dateHelpers';
+import { useTranslation } from 'react-i18next';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
@@ -23,23 +24,23 @@ import RangeBox from '../components/analyticsRangeBoxes/RangeBox';
 import CustomRangeBox from '../components/analyticsRangeBoxes/CustomRangeBox';
 import OverallAnalyticsLabel from '../components/analyticsRangeBoxes/OverallAnalyticsLabel';
 
-const viewOptions: Record<RangeType, string> = {
-  days: '0',
-  weeks: '1',
-  months: '2',
-  years: '3',
-  overall: '4',
-  custom: '5',
-};
-const viewOptionsArr = Object.entries(viewOptions).map((opt) => {
-  return { id: opt[1], name: opt[0] };
-});
-
 const AnalyticsRangePage: FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
+
+  const viewOptionsArr = useMemo(
+    () =>
+      ['days', 'weeks', 'months', 'years', 'overall', 'custom'].map(
+        (rangeType) => ({
+          id: rangeType,
+          name: t(`viewOptions.${rangeType}`),
+        })
+      ),
+    [t]
+  );
 
   // валидация search params
   if (
@@ -49,8 +50,8 @@ const AnalyticsRangePage: FC = () => {
     isNaN(new Date(toParam).getTime())
   ) {
     return (
-      <div className="mt-4 text-lg text-center dark:text-textDark">
-        Invalid date format in URL
+      <div className="mt-20 text-xl text-center dark:text-textDark">
+        {t('analyticsPage.invalidFormat')}
       </div>
     );
   }
@@ -65,8 +66,6 @@ const AnalyticsRangePage: FC = () => {
     getRangeType(range.fromDate, range.toDate)
   );
 
-  const viewId = viewOptions[rangeType];
-
   const {
     data: rangeAnalytics,
     isLoading,
@@ -76,36 +75,36 @@ const AnalyticsRangePage: FC = () => {
     queryFn: () => fetchRangeAnalytics(range.fromDate, range.toDate),
   });
 
-  const onViewSelectChange = (id: string) => {
-    if (id == viewId) {
+  const onViewSelectChange = (newRangeType: RangeType) => {
+    if (newRangeType == rangeType) {
       return;
     }
 
-    if (id == '0') {
+    if (newRangeType == 'days') {
       const [startOfToday, endOfToday] = getDayRange(new Date());
       navigate(
         `/analytics/range?from=${startOfToday.toISOString()}&to=${endOfToday.toISOString()}`
       );
-    } else if (id == '1') {
+    } else if (newRangeType == 'weeks') {
       const [startOfWeek, endOfWeek] = getWeekRange(new Date());
       navigate(
         `/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`
       );
-    } else if (id == '2') {
+    } else if (newRangeType == 'months') {
       const [startOfMonth, endOfMonth] = getMonthRange(new Date());
       navigate(
         `/analytics/range?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`
       );
-    } else if (id == '3') {
+    } else if (newRangeType == 'years') {
       const [startOfYear, endOfYear] = getYearRange(new Date());
       navigate(
         `/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`
       );
-    } else if (id == '4') {
+    } else if (newRangeType == 'overall') {
       navigate(
         `/analytics/range?from=2000-01-01T00:00:00&to=${new Date().toISOString()}`
       );
-    } else if (id == '5') {
+    } else if (newRangeType == 'custom') {
       const [startOfToday, endOfToday] = getDayRange(new Date());
       const customFromDate = new Date(startOfToday);
       customFromDate.setDate(customFromDate.getDate() - 1);
@@ -125,7 +124,7 @@ const AnalyticsRangePage: FC = () => {
 
   useEffect(() => {
     if (isError) {
-      toast('A server error occurred while getting analytics', {
+      toast(t('serverErrors.getAnalytics'), {
         type: 'error',
       });
     }
@@ -143,10 +142,14 @@ const AnalyticsRangePage: FC = () => {
         )}
 
         <div className="w-[140px] ml-auto mr-4 mt-4 lg:ml-0 lg:mt-0 lg:mr-4 lg:absolute lg:top-10 lg:right-[8%]">
-          <div className="text-right mb-1.5 text-lg font-semibold">View by</div>
+          <div className="text-right mb-1.5 text-lg font-semibold">
+            {t('analyticsPage.viewSelectTitle')}
+          </div>
           <CustomSelect
-            currentId={viewId}
-            onChange={onViewSelectChange}
+            currentId={rangeType}
+            onChange={(newRangeType) =>
+              onViewSelectChange(newRangeType as RangeType)
+            }
             optionGroups={[
               {
                 optGroupName: '',
@@ -164,7 +167,7 @@ const AnalyticsRangePage: FC = () => {
         </div>
       ) : rangeAnalytics &&
         rangeAnalytics.sessionStatistics.spentTimeSeconds !== 0 ? (
-        <div className="flex flex-col pb-5 lg:h-full lg:flex-row">
+        <div className="flex flex-col pb-5 lg:pb-0 lg:h-full lg:flex-row">
           <div className="flex flex-col h-full gap-5 px-4 pt-5 lg:w-1/2 lg:border-r lg:border-gray-400 lg:border-solid lg:dark:border-gray-500">
             {rangeAnalytics.sessionStatistics && (
               <SessionStatisticsBox
@@ -200,7 +203,7 @@ const AnalyticsRangePage: FC = () => {
         </div>
       ) : (
         <div className="h-full px-2 pt-5 text-xl font-bold text-center md:text-2xl dark:text-textDark">
-          No session activity for the specified dates
+          {t('analyticsPage.noActivity')}
         </div>
       )}
     </div>

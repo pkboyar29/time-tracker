@@ -16,12 +16,14 @@ interface CustomSelectProps {
   currentId: string;
   onChange: (newCurrentId: string) => void;
   optionGroups: OptionGroup[];
+  lightBackground?: boolean;
 }
 
 const CustomSelect: FC<CustomSelectProps> = ({
   currentId,
   onChange,
   optionGroups,
+  lightBackground = true,
 }) => {
   const [dropdown, setDropdown] = useState<boolean>(false);
   const customSelectRef = useRef<HTMLDivElement | null>(null);
@@ -54,7 +56,9 @@ const CustomSelect: FC<CustomSelectProps> = ({
   return (
     <div
       ref={customSelectRef}
-      className={`relative w-full text-base bg-white rounded-lg select-none dark:text-textDark dark:bg-surfaceDarkHover`}
+      className={`relative w-full text-base ${
+        lightBackground ? 'bg-white' : 'bg-surfaceLightHover'
+      } rounded-lg select-none dark:text-textDark dark:bg-surfaceDarkHover`}
     >
       <div
         onClick={() => {

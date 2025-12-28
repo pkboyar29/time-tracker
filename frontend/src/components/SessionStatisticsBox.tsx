@@ -1,10 +1,11 @@
 import { FC, useRef, useLayoutEffect } from 'react';
 import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
-import { getReadableTimeHMS } from '../helpers/timeHelpers';
+import { getReadableTime } from '../helpers/timeHelpers';
 import {
   animateCountUp,
   animateCountUpWithInterval,
 } from '../helpers/htmlHelpers';
+import { useTranslation } from 'react-i18next';
 
 import QuestionMarkTooltip from './common/QuestionMarkTooltip';
 
@@ -15,16 +16,18 @@ interface SessionStatisticsBoxProps {
 const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
   statistics,
 }) => {
+  const { t, i18n } = useTranslation();
+
   const totalTimeRef = useRef<HTMLDivElement | null>(null);
   const totalSessionsRef = useRef<HTMLDivElement | null>(null);
   const distractedRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
     if (statistics.sessionsAmount < 2 || statistics.spentTimeSeconds < 300) {
-      totalTimeRef.current!.textContent = getReadableTimeHMS(
+      totalTimeRef.current!.textContent = getReadableTime(
         statistics.spentTimeSeconds,
-        false,
-        true
+        t,
+        { short: false, zeroUnits: true }
       );
       totalSessionsRef.current!.textContent =
         statistics.sessionsAmount.toString();
@@ -35,7 +38,8 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
         statistics.spentTimeSeconds,
         1500,
         0.5,
-        (seconds) => getReadableTimeHMS(seconds, false, true)
+        (seconds) =>
+          getReadableTime(seconds, t, { short: false, zeroUnits: true })
       );
       animateCountUp(
         totalSessionsRef.current!,
@@ -47,21 +51,20 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
         distractedRef.current!,
         statistics.pausedAmount,
         1500,
-        null,
-        'times'
+        (seconds) => t('plural.times', { count: seconds })
       );
     }
-  }, [statistics]);
+  }, [statistics, i18n.language]);
 
   return (
     <div className="flex flex-wrap justify-center gap-5 px-10 py-5 border border-solid rounded-lg md:gap-10 2xl:gap-20 bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
       <div className="text-center">
         <div
           ref={totalTimeRef}
-          className="text-xl font-bold dark:text-textDark min-w-[165px]"
+          className="text-xl font-bold dark:text-textDark min-w-[170px]"
         ></div>
         <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
-          total time
+          {t('sessionStatisticsBox.totalTime')}
         </div>
       </div>
 
@@ -71,7 +74,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
           className="text-xl font-bold dark:text-textDark"
         ></div>
         <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
-          total sessions
+          {t('sessionStatisticsBox.totalSessions')}
         </div>
       </div>
 
@@ -82,11 +85,13 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
         ></div>
         <div className="relative w-fit">
           <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
-            distracted
+            {t('sessionStatisticsBox.distracted')}
           </div>
 
           <div className="absolute pl-2 -top-0.5 left-full">
-            <QuestionMarkTooltip tooltipText="Number of times you pressed pause during the session" />
+            <QuestionMarkTooltip
+              tooltipText={t('sessionStatisticsBox.distractedTooltip')}
+            />
           </div>
         </div>
       </div>

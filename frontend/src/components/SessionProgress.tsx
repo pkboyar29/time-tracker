@@ -1,22 +1,27 @@
 import { FC, useState } from 'react';
-import CustomCircularProgress from './common/CustomCircularProgress';
-
 import {
   getRemainingTimeHoursMinutesSeconds,
-  getReadableTimeHMS,
+  getReadableTime,
 } from '../helpers/timeHelpers';
+import { useTranslation } from 'react-i18next';
+
 import { ISession } from '../ts/interfaces/Session/ISession';
+import CustomCircularProgress from './common/CustomCircularProgress';
 
 interface SessionProgressProps {
   session: ISession;
 }
 
 const SessionProgress: FC<SessionProgressProps> = ({ session }) => {
+  const { t } = useTranslation();
+
   const remainingLabel = getRemainingTimeHoursMinutesSeconds(
     session.totalTimeSeconds,
     session.spentTimeSeconds
   );
-  const passedLabel = getReadableTimeHMS(session.spentTimeSeconds, true);
+  const passedLabel = getReadableTime(session.spentTimeSeconds, t, {
+    short: true,
+  });
 
   const percent = (session.spentTimeSeconds / session.totalTimeSeconds) * 100;
 

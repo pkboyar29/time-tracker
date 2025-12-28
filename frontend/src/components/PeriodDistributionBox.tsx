@@ -1,8 +1,9 @@
 import { FC, useState } from 'react';
 import { useAppSelector } from '../redux/store';
-import { getReadableTimeHMS } from '../helpers/timeHelpers';
+import { getReadableTime } from '../helpers/timeHelpers';
 import { getRangeType } from '../helpers/dateHelpers';
 import { colors } from '../../design-tokens';
+import { useTranslation } from 'react-i18next';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
@@ -27,6 +28,8 @@ interface CustomTooltipProps {
   adMode: boolean;
 }
 const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
+  const { t } = useTranslation();
+
   const isVisible = active && payload && payload.length;
 
   const timeBar: ITimeBar = payload[0]?.payload;
@@ -44,33 +47,49 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
           <p className="text-primary text-[15px]">{`${timeBar.barDetailedName}`}</p>
           {timeBar.spentTimeSeconds == 0 ? (
             <p className="text-gray-800 dark:text-textDark">
-              No session activity this period
+              {t('pdBox.noActivity')}
             </p>
           ) : (
             <>
               {!adMode ? (
                 <>
-                  <p className="text-gray-800 dark:text-textDark">
-                    {getReadableTimeHMS(timeBar.spentTimeSeconds)}
+                  {getRangeType(timeBar.startOfRange, timeBar.endOfRange) ==
+                    'days' && (
+                    <p className="text-gray-800 dark:text-textDark">
+                      {`${t('pdBox.dailyGoal')} ${
+                        timeBar.spentTimeSeconds >= dailyGoalSeconds
+                          ? '✅'
+                          : '❌'
+                      }`}
+                    </p>
+                  )}
 
-                    {getRangeType(timeBar.startOfRange, timeBar.endOfRange) ==
-                      'days' &&
-                      (timeBar.spentTimeSeconds >= dailyGoalSeconds
-                        ? ' (daily goal ✅)'
-                        : ' (daily goal ❌)')}
-                  </p>
                   <p className="text-gray-800 dark:text-textDark">
-                    {timeBar.sessionsAmount} sessions
+                    {getReadableTime(timeBar.spentTimeSeconds, t, {
+                      short: false,
+                    })}
                   </p>
+
                   <p className="text-gray-800 dark:text-textDark">
-                    {timeBar.pausedAmount} pauses
+                    {t('plural.sessions', { count: timeBar.sessionsAmount })}
+                  </p>
+
+                  <p className="text-gray-800 dark:text-textDark">
+                    {t('plural.pauses', { count: timeBar.pausedAmount })}
                   </p>
                 </>
               ) : (
-                <p className="text-gray-800 dark:text-textDark">
-                  {getReadableTimeHMS(timeBar.spentTimeSeconds)},{' '}
-                  {timeBar.sessionsAmount} sessions
-                </p>
+                <>
+                  <p className="text-gray-800 dark:text-textDark">
+                    {getReadableTime(timeBar.spentTimeSeconds, t, {
+                      short: false,
+                    })}
+                  </p>
+
+                  <p className="text-gray-800 dark:text-textDark">
+                    {t('plural.sessions', { count: timeBar.sessionsAmount })}
+                  </p>
+                </>
               )}
 
               {adMode && (
@@ -87,9 +106,17 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                           <div className="text-[15px] truncate dark:text-textDark">
                             {item.activityName}
                           </div>
+
                           <div className="text-[13px] mt-1 text-gray-600 dark:text-textDarkSecondary">
-                            ({getReadableTimeHMS(item.spentTimeSeconds, true)},{' '}
-                            {item.sessionsAmount} sessions)
+                            (
+                            {getReadableTime(item.spentTimeSeconds, t, {
+                              short: true,
+                            })}
+                            ,{' '}
+                            {t('plural.sessions', {
+                              count: item.sessionsAmount,
+                            })}
+                            )
                           </div>
                         </div>
                       </div>
@@ -114,6 +141,8 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   analytics,
   setAdBoxMode,
 }) => {
+  const { t } = useTranslation();
+
   const [adMode, setAdMode] = useState<boolean>(false);
 
   const userInfo = useAppSelector((state) => state.users.user);
@@ -138,38 +167,38 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   return (
     <div className="relative pt-5 border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
       <div className="sticky top-0 z-[39] flex justify-center px-5 pb-5 border-b border-solid min-[360px]:justify-end sm:px-10 border-gray-300/80 dark:border-gray-500">
-        <div className="inline-block px-4 py-1 text-lg font-medium tracking-wide rounded-lg text-gray-800 bg-gray-200 dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
-          Period distribution
+        <div className="inline-block px-4 py-1 text-lg text-center font-medium tracking-wide rounded-lg text-gray-800 bg-gray-200 dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
+          {t('pdBox.title')}
         </div>
       </div>
 
-      <div className="flex flex-col justify-between gap-4 px-5 py-5 sm:gap-2 sm:items-center sm:flex-row sm:px-10">
+      <div className="flex flex-col flex-wrap justify-between gap-4 px-5 py-5 sm:gap-2 sm:items-center sm:flex-row sm:px-10">
         <div className="flex items-center gap-4 text-[16px] dark:text-textDark">
           <ToggleButton isChecked={adMode} setIsChecked={toggleAdMode} />
-          <div>Activity distribution</div>
+          <div>{t('adBox.title')}</div>
         </div>
 
         {analytics.timeBars.length > 1 && (
           <div className="text-lg font-semibold dark:text-textDark">
-            Avg.{' '}
+            {t('pdBox.avg')}{' '}
             <span className="text-primary">
-              {getReadableTimeHMS(
+              {getReadableTime(
                 analytics.sessionStatistics.averageSpentTimeSeconds,
-                true
+                t,
+                { short: true }
               )}
             </span>{' '}
-            per{' '}
             {getRangeType(
               analytics.timeBars[1].startOfRange,
               analytics.timeBars[1].endOfRange
             ) == 'days'
-              ? 'day'
-              : 'month'}
+              ? t('pdBox.perDay')
+              : t('pdBox.perMonth')}
           </div>
         )}
       </div>
 
-      <div className="pb-5 overflow-x-auto overflow-y-hidden scroll-overlay">
+      <div className="pb-5 overflow-x-auto scroll-overlay">
         <ResponsiveContainer
           minWidth={575}
           width="100%"
