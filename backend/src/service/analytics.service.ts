@@ -177,7 +177,7 @@ function getActivityDistributions({
 
 function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
   let daysInRange = Math.ceil(
-    (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24)
+    (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24) // ms in one day
   );
   if (daysInRange == 1) {
     return 'hour';
@@ -190,6 +190,7 @@ function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
   }
 }
 
+// TODO: Так как bar type можно передавать сюда, то надо добавить какие-то проверки?
 function getTimeBars({
   startOfRange,
   endOfRange,
@@ -208,7 +209,14 @@ function getTimeBars({
   let prevPeriod = new Date(startOfRange);
   let nextPeriod = new Date(prevPeriod);
 
-  if (barType == 'day') {
+  if (barType == 'hour') {
+    // if date is exact start of hour (0 minutes)
+    if (prevPeriod.getMinutes() == 0) {
+      nextPeriod.setHours(nextPeriod.getHours() + 1);
+    } else {
+      nextPeriod.setMinutes(60);
+    }
+  } else if (barType == 'day') {
     const dt = DateTime.fromJSDate(nextPeriod, { zone: timezone });
     // if date is exact start of day in given time zone
     if (
@@ -241,7 +249,7 @@ function getTimeBars({
       nextPeriod = startOfNextMonth.toJSDate();
     }
   } else {
-    // if bar type is year or hour
+    // if bar type is year
     return [];
   }
 
@@ -298,12 +306,13 @@ function getTimeBars({
       break;
     }
 
-    if (barType == 'day') {
-      prevPeriod = new Date(nextPeriod);
+    // change periods
+    prevPeriod = new Date(nextPeriod);
+    if (barType == 'hour') {
+      nextPeriod.setHours(nextPeriod.getHours() + 1);
+    } else if (barType == 'day') {
       nextPeriod.setDate(nextPeriod.getDate() + 1);
     } else if (barType == 'month') {
-      prevPeriod = new Date(nextPeriod);
-
       const nextPeriodLuxon = DateTime.fromJSDate(nextPeriod, {
         zone: timezone,
       }).plus({ months: 1 });

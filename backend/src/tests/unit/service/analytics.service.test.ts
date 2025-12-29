@@ -229,6 +229,81 @@ describe('analyticsService.getTimeBars', () => {
     },
   ];
 
+  it('should return correct hour-based time bars', () => {
+    const start = new Date('2025-12-29T00:00:00Z');
+    const end = new Date('2025-12-29T12:00:00Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      sessionParts,
+      completedSessions,
+      barType: 'hour',
+      timezone: 'UTC',
+      userActivities: mockActivities,
+    });
+
+    expect(result).toHaveLength(12);
+    expect(result[0].startOfRange).toEqual(new Date('2025-12-29T00:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+
+    expect(result[1].startOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-12-29T02:00:00Z'));
+
+    expect(result[11].startOfRange).toEqual(new Date('2025-12-29T11:00:00Z'));
+    expect(result[11].endOfRange).toEqual(new Date('2025-12-29T12:00:00Z'));
+  });
+
+  it('should return correct hour-based time bars when the range starts at a non-zero minute', () => {
+    const start = new Date('2025-12-29T00:12:00Z');
+    const end = new Date('2025-12-29T12:00:00Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      sessionParts,
+      completedSessions,
+      barType: 'hour',
+      timezone: 'UTC',
+      userActivities: mockActivities,
+    });
+
+    expect(result).toHaveLength(12);
+    expect(result[0].startOfRange).toEqual(new Date('2025-12-29T00:12:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+
+    expect(result[1].startOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-12-29T02:00:00Z'));
+
+    expect(result[11].startOfRange).toEqual(new Date('2025-12-29T11:00:00Z'));
+    expect(result[11].endOfRange).toEqual(new Date('2025-12-29T12:00:00Z'));
+  });
+
+  it('should return correct hour-based time bars and cut last period to end of range', () => {
+    const start = new Date('2025-12-29T00:12:00Z');
+    const end = new Date('2025-12-29T12:25:00Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      sessionParts,
+      completedSessions,
+      barType: 'hour',
+      timezone: 'UTC',
+      userActivities: mockActivities,
+    });
+
+    expect(result).toHaveLength(13);
+    expect(result[0].startOfRange).toEqual(new Date('2025-12-29T00:12:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+
+    expect(result[1].startOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-12-29T02:00:00Z'));
+
+    expect(result[12].startOfRange).toEqual(new Date('2025-12-29T12:00:00Z'));
+    expect(result[12].endOfRange).toEqual(new Date('2025-12-29T12:25:00Z'));
+  });
+
   it('should return correct day-based time bars', () => {
     const start = new Date('2025-07-01T00:00:00Z');
     const end = new Date('2025-07-03T00:00:00Z');
