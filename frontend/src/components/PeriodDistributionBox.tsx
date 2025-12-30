@@ -188,10 +188,14 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                 { short: true }
               )}
             </span>{' '}
-            {getRangeType(
-              analytics.timeBars[1].startOfRange,
-              analytics.timeBars[1].endOfRange
-            ) == 'days'
+            {analytics.timeBars[1].endOfRange.getTime() -
+              analytics.timeBars[1].startOfRange.getTime() <=
+            3_600_000
+              ? t('pdBox.perHour')
+              : getRangeType(
+                  analytics.timeBars[1].startOfRange,
+                  analytics.timeBars[1].endOfRange
+                ) == 'days'
               ? t('pdBox.perDay')
               : t('pdBox.perMonth')}
           </div>

@@ -13,13 +13,19 @@ export const getBarName = (unmappedBar: any, t: TFunction): string => {
 
   if (getRangeType(startOfRange, endOfRange) == 'days') {
     return startOfRange.getDate().toString();
+  } else if (endOfRange.getTime() - startOfRange.getTime() <= 3_600_000) {
+    // if there is less than one hour in range
+    return startOfRange.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  } else if (endOfRange.getTime() - startOfRange.getTime() < 86_400_000 - 1) {
     // if there is less than one day in range
-  } else if (endOfRange.getTime() - startOfRange.getTime() < 86400000 - 1) {
     return startOfRange.getDate().toString();
   } else if (getRangeType(startOfRange, endOfRange) == 'months') {
     return getMonthName(startOfRange.getMonth(), t);
+  } else if (endOfRange.getTime() - startOfRange.getTime() > 86_400_000 - 1) {
     // if there is more than one day in range
-  } else if (endOfRange.getTime() - startOfRange.getTime() > 86400000 - 1) {
     return `${getMonthName(
       startOfRange.getMonth(),
       t
