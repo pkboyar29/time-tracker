@@ -65,7 +65,7 @@ const analyticsService = {
   getActivityDistributions,
   getTimeBarType,
   getTimeBars,
-  getAnalyticsForRange,
+  getAnalyticsForRangeInternal,
   getAnalyticsForRangeWithCache,
   mergeActivityDistributions,
   mergeAnalytics,
@@ -177,7 +177,7 @@ function getActivityDistributions({
 
 function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
   let daysInRange = Math.ceil(
-    (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24)
+    (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24) // ms in one day
   );
   if (daysInRange == 1) {
     return 'hour';
@@ -190,6 +190,7 @@ function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
   }
 }
 
+// TODO: Так как bar type можно передавать сюда, то надо добавить какие-то проверки?
 function getTimeBars({
   startOfRange,
   endOfRange,
@@ -208,7 +209,14 @@ function getTimeBars({
   let prevPeriod = new Date(startOfRange);
   let nextPeriod = new Date(prevPeriod);
 
-  if (barType == 'day') {
+  if (barType == 'hour') {
+    // if date is exact start of hour (0 minutes)
+    if (prevPeriod.getMinutes() == 0) {
+      nextPeriod.setHours(nextPeriod.getHours() + 1);
+    } else {
+      nextPeriod.setMinutes(60);
+    }
+  } else if (barType == 'day') {
     const dt = DateTime.fromJSDate(nextPeriod, { zone: timezone });
     // if date is exact start of day in given time zone
     if (
@@ -241,7 +249,7 @@ function getTimeBars({
       nextPeriod = startOfNextMonth.toJSDate();
     }
   } else {
-    // if bar type is year or hour
+    // if bar type is year
     return [];
   }
 
@@ -298,12 +306,13 @@ function getTimeBars({
       break;
     }
 
-    if (barType == 'day') {
-      prevPeriod = new Date(nextPeriod);
+    // change periods
+    prevPeriod = new Date(nextPeriod);
+    if (barType == 'hour') {
+      nextPeriod.setHours(nextPeriod.getHours() + 1);
+    } else if (barType == 'day') {
       nextPeriod.setDate(nextPeriod.getDate() + 1);
     } else if (barType == 'month') {
-      prevPeriod = new Date(nextPeriod);
-
       const nextPeriodLuxon = DateTime.fromJSDate(nextPeriod, {
         zone: timezone,
       }).plus({ months: 1 });
@@ -314,7 +323,7 @@ function getTimeBars({
   return timeBars;
 }
 
-async function getAnalyticsForRange({
+async function getAnalyticsForRangeInternal({
   startOfRange,
   endOfRange,
   userId,
@@ -392,24 +401,21 @@ async function getAnalyticsForRangeWithCache({
 
     // if it's today analytics
     if (startOfRange >= startOfToday && endOfRange <= startOfTomorrow) {
-      const analyticsForToday = await analyticsService.getAnalyticsForRange({
-        startOfRange,
-        endOfRange,
-        userId,
-        timezone,
-      });
+      const analyticsForToday =
+        await analyticsService.getAnalyticsForRangeInternal({
+          startOfRange,
+          endOfRange,
+          userId,
+          timezone,
+        });
 
       return analyticsForToday;
     }
 
     // if the date range includes any parts of today
     if (endOfRange > startOfToday) {
-      const cacheKey = await redisClient.get(
-        `analytics:${userId}:${startOfRange.toISOString()}:${startOfToday.toISOString()}`
-      );
-      if (cacheKey) {
-        const analyticsUntilToday: AnalyticsForRangeDTO = JSON.parse(cacheKey);
-        const analyticsForToday = await analyticsService.getAnalyticsForRange({
+      const analyticsForToday =
+        await analyticsService.getAnalyticsForRangeInternal({
           startOfRange:
             startOfRange > startOfToday ? startOfRange : startOfToday,
           endOfRange:
@@ -418,6 +424,12 @@ async function getAnalyticsForRangeWithCache({
           timezone,
         });
 
+      const cacheKey = `analytics:${userId}:${startOfRange.toISOString()}:${startOfToday.toISOString()}`;
+
+      const cacheValue = await redisClient.get(cacheKey);
+      if (cacheValue) {
+        const analyticsUntilToday: AnalyticsForRangeDTO =
+          JSON.parse(cacheValue);
         return analyticsService.mergeAnalytics({
           finalObjStartOfRange: startOfRange,
           finalObjEndOfRange: endOfRange,
@@ -427,21 +439,15 @@ async function getAnalyticsForRangeWithCache({
         });
       }
 
-      const analyticsUntilToday = await analyticsService.getAnalyticsForRange({
-        startOfRange,
-        endOfRange: startOfToday,
-        userId,
-        timezone,
-      });
-      const analyticsForToday = await analyticsService.getAnalyticsForRange({
-        startOfRange: startOfRange > startOfToday ? startOfRange : startOfToday,
-        endOfRange: endOfRange < startOfTomorrow ? endOfRange : startOfTomorrow,
-        userId,
-        timezone,
-      });
+      const analyticsUntilToday =
+        await analyticsService.getAnalyticsForRangeInternal({
+          startOfRange,
+          endOfRange: startOfToday,
+          userId,
+          timezone,
+        });
 
-      const newCacheKey = `analytics:${userId}:${startOfRange.toISOString()}:${startOfToday.toISOString()}`;
-      await redisClient.set(newCacheKey, JSON.stringify(analyticsUntilToday), {
+      await redisClient.set(cacheKey, JSON.stringify(analyticsUntilToday), {
         expiration: {
           type: 'EXAT',
           value: Math.trunc(startOfTomorrow.getTime() / 1000),
@@ -456,22 +462,22 @@ async function getAnalyticsForRangeWithCache({
         timezone,
       });
     } else {
-      const cacheKey = await redisClient.get(
-        `analytics:${userId}:${startOfRange.toISOString()}:${endOfRange.toISOString()}`
-      );
-      if (cacheKey) {
-        return JSON.parse(cacheKey) as AnalyticsForRangeDTO;
+      const cacheKey = `analytics:${userId}:${startOfRange.toISOString()}:${endOfRange.toISOString()}`;
+
+      const cacheValue = await redisClient.get(cacheKey);
+      if (cacheValue) {
+        return JSON.parse(cacheValue) as AnalyticsForRangeDTO;
       }
 
-      const analyticsForRange = await analyticsService.getAnalyticsForRange({
-        startOfRange,
-        endOfRange,
-        userId,
-        timezone,
-      });
+      const analyticsForRange =
+        await analyticsService.getAnalyticsForRangeInternal({
+          startOfRange,
+          endOfRange,
+          userId,
+          timezone,
+        });
 
-      const newCacheKey = `analytics:${userId}:${startOfRange.toISOString()}:${endOfRange.toISOString()}`;
-      await redisClient.set(newCacheKey, JSON.stringify(analyticsForRange), {
+      await redisClient.set(cacheKey, JSON.stringify(analyticsForRange), {
         expiration: { type: 'EX', value: 604800 }, // 7 days
       });
 
@@ -568,13 +574,18 @@ function mergeAnalytics({
     finalObjEndOfRange
   );
   let finalObjTimeBars: TimeBar[] = [];
-  if (finalObjTimeBarType == 'day') {
+  if (finalObjTimeBarType == 'hour') {
+    finalObjTimeBars = [...untilTodayObj.timeBars, ...todayObj.timeBars];
+  } else if (finalObjTimeBarType == 'day') {
     let untilTodayObjTimeBars = untilTodayObj.timeBars;
+
     if (
-      untilTodayObjTimeBars.length == 0 &&
-      finalObjStartOfRange < startOfToday
+      startOfToday.getTime() - finalObjStartOfRange.getTime() <= 86_400_000 &&
+      startOfToday > finalObjStartOfRange
     ) {
-      // if until today obj is day or less than day (when timeBarType is hour, there are no time bars)
+      // if until today obj is day or less than day
+      untilTodayObjTimeBars = [];
+
       untilTodayObjTimeBars.push({
         startOfRange: finalObjStartOfRange,
         endOfRange: startOfToday,
@@ -634,35 +645,37 @@ function mergeAnalytics({
     });
 
     let untilTodayTimeBars = untilTodayObj.timeBars;
-    if (untilTodayTimeBars.length == 0) {
-      // if until today obj is today or less than today
+    if (startOfToday.getTime() - finalObjStartOfRange.getTime() <= 86_400_000) {
+      // if until today obj is day or less than day OR start of range is today
+      const isStartingFromToday = finalObjStartOfRange >= startOfToday;
 
       const currentMonthTimeBar: TimeBar = {
-        startOfRange:
-          finalObjStartOfRange > startOfToday
-            ? startOfToday
-            : finalObjStartOfRange,
+        startOfRange: finalObjStartOfRange,
         endOfRange:
           finalObjEndOfRange < startOfNextMonth
             ? finalObjEndOfRange
             : startOfNextMonth,
-        sessionStatistics: {
-          sessionsAmount:
-            untilTodayObj.sessionStatistics.sessionsAmount +
-            todayObj.sessionStatistics.sessionsAmount,
-          spentTimeSeconds:
-            untilTodayObj.sessionStatistics.spentTimeSeconds +
-            todayObj.sessionStatistics.spentTimeSeconds,
-          pausedAmount:
-            untilTodayObj.sessionStatistics.pausedAmount +
-            todayObj.sessionStatistics.pausedAmount,
-        },
-        activityDistribution: analyticsService.mergeActivityDistributions({
-          adsList: [
-            untilTodayObj.activityDistribution,
-            todayObj.activityDistribution,
-          ],
-        }),
+        sessionStatistics: isStartingFromToday
+          ? todayObj.sessionStatistics
+          : {
+              sessionsAmount:
+                untilTodayObj.sessionStatistics.sessionsAmount +
+                todayObj.sessionStatistics.sessionsAmount,
+              spentTimeSeconds:
+                untilTodayObj.sessionStatistics.spentTimeSeconds +
+                todayObj.sessionStatistics.spentTimeSeconds,
+              pausedAmount:
+                untilTodayObj.sessionStatistics.pausedAmount +
+                todayObj.sessionStatistics.pausedAmount,
+            },
+        activityDistribution: isStartingFromToday
+          ? todayObj.activityDistribution
+          : analyticsService.mergeActivityDistributions({
+              adsList: [
+                untilTodayObj.activityDistribution,
+                todayObj.activityDistribution,
+              ],
+            }),
       };
 
       finalObjTimeBars = [currentMonthTimeBar, ...afterCurrentMonthTimeBars];
@@ -672,7 +685,8 @@ function mergeAnalytics({
         new Date(untilTodayTimeBars[0].endOfRange)
       ) == 'hour'
     ) {
-      // if until today obj is month or less than month (timeBarType is day)
+      // TODO: странная проверка, надо ее сделать нормальной
+      // if until today obj is month or less than month (timeBarType of range is day, timeBarType of bar is hour)
       const untilTodayTimeBarsSessionsAmount = untilTodayTimeBars.reduce(
         (totalSessionsAmount, timeBar) =>
           totalSessionsAmount + timeBar.sessionStatistics.sessionsAmount,

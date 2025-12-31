@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { clearSession } from '../../helpers/authHelpers';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
 import { getReadableTime } from '../../helpers/timeHelpers';
-import { setLangInLocalStorage } from '../../helpers/localstorageHelpers';
+import { setLangInLS } from '../../helpers/localstorageHelpers';
 
 import Button from '../common/Button';
 import Modal from './Modal';
@@ -91,7 +91,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
   };
 
   const onLangSelectChange = (lang: string) => {
-    setLangInLocalStorage(lang as 'ru' | 'en');
+    setLangInLS(lang as 'ru' | 'en');
     i18n.changeLanguage(lang);
   };
 

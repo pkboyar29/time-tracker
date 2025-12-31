@@ -186,19 +186,21 @@ const AnalyticsRangePage: FC = () => {
             )}
           </div>
 
-          <div className="px-4 pt-5 lg:w-1/2">
-            {rangeType == 'days' ? (
+          <div className="flex flex-col h-full gap-5 px-4 pt-5 lg:w-1/2">
+            {rangeType != 'overall' && rangeAnalytics.timeBars.length > 0 && (
+              <PeriodDistributionBox
+                analytics={rangeAnalytics}
+                setAdBoxMode={setAdBoxMode}
+              />
+            )}
+
+            {rangeType == 'days' && (
               <DailyGoalBox
                 spentTimeSeconds={
                   rangeAnalytics.sessionStatistics.spentTimeSeconds
                 }
               />
-            ) : rangeType != 'overall' && rangeAnalytics.timeBars.length > 0 ? (
-              <PeriodDistributionBox
-                analytics={rangeAnalytics}
-                setAdBoxMode={setAdBoxMode}
-              />
-            ) : null}
+            )}
           </div>
         </div>
       ) : (

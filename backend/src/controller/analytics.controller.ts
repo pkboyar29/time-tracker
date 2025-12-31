@@ -48,7 +48,7 @@ router.get('/', async (req: Request, res: Response) => {
       userId: res.locals.userId,
       timezone: tz as string,
     });
-    // const data = await analyticsService.getAnalyticsForRange({
+    // const data = await analyticsService.getAnalyticsForRangeInternal({
     //   startOfRange: fromDate,
     //   endOfRange: toDate,
     //   userId: res.locals.userId,

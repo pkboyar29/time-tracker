@@ -1,8 +1,14 @@
-import { FC, useEffect, useState, useRef } from 'react';
+import { FC, useEffect, useState, useRef, act } from 'react';
 import { fetchSessions, createSession } from '../api/sessionApi';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivities } from '../api/activityApi';
-import { getSessionFromLocalStorage } from '../helpers/localstorageHelpers';
+import {
+  getSessionFromLS,
+  getActivityFromLS,
+  setActivityInLS,
+  getSelectedSecondsFromLS,
+  setSelectedSecondsInLS,
+} from '../helpers/localstorageHelpers';
 import {
   getRemainingTimeHoursMinutesSeconds,
   getReadableTime,
@@ -30,8 +36,8 @@ import { ISession } from '../ts/interfaces/Session/ISession';
 const TimerPage: FC = () => {
   const { t } = useTranslation();
 
-  const sessionFromLS = getSessionFromLocalStorage('session');
-  const unsyncedSessionFromLS = getSessionFromLocalStorage('unsyncedSession');
+  const sessionFromLS = getSessionFromLS('session');
+  const unsyncedSessionFromLS = getSessionFromLS('unsyncedSession');
 
   const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
     []
@@ -45,8 +51,12 @@ const TimerPage: FC = () => {
       queryFn: () => fetchActivities(),
     });
 
-  const [selectedSeconds, setSelectedSeconds] = useState<number>(1500);
-  const [selectedActivityId, setSelectedActivityId] = useState<string>('');
+  const [selectedSeconds, setSelectedSeconds] = useState<number>(() =>
+    getSelectedSecondsFromLS()
+  );
+  const [selectedActivityId, setSelectedActivityId] = useState<string>(() =>
+    getActivityFromLS()
+  );
 
   const {
     startTimer,
@@ -60,6 +70,20 @@ const TimerPage: FC = () => {
   const isTimerStarted = timerState.status != 'idle';
   const [spentMs, setSpentMs] = useState<number>(0);
   const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (activitiesToChoose) {
+      if (
+        ![
+          ...activitiesToChoose.topActivities,
+          ...activitiesToChoose.remainingActivities,
+        ].find((a) => a.id === selectedActivityId)
+      ) {
+        setSelectedActivityId('');
+        setActivityInLS('');
+      }
+    }
+  }, [activitiesToChoose]);
 
   // TODO bug: переключаясь между сессиями, может происходить туда сюда метание прогресса
   useEffect(() => {
@@ -157,6 +181,18 @@ const TimerPage: FC = () => {
 
   const onActivitiesSelectChange = (id: string) => {
     setSelectedActivityId(id);
+    setActivityInLS(id);
+  };
+
+  const onRangeSliderChange = (newValue: number) => {
+    const newSeconds = newValue * 60;
+    setSelectedSeconds(newSeconds);
+    setSelectedSecondsInLS(newSeconds);
+  };
+
+  const onSessionInputsChange = (newSeconds: number) => {
+    setSelectedSeconds(newSeconds);
+    setSelectedSecondsInLS(newSeconds);
   };
 
   const handleToggleButtonClick = () => {
@@ -339,15 +375,13 @@ const TimerPage: FC = () => {
                         minValue={1}
                         maxValue={600}
                         currentValue={selectedSeconds / 60}
-                        changeCurrentValue={(newCurrentValue) =>
-                          setSelectedSeconds(newCurrentValue * 60)
-                        }
+                        changeCurrentValue={onRangeSliderChange}
                       />
                     </div>
                     <div className="block md:hidden">
                       <SessionDurationInputs
                         seconds={selectedSeconds}
-                        setSeconds={setSelectedSeconds}
+                        setSeconds={onSessionInputsChange}
                       />
                     </div>
                   </div>
@@ -358,7 +392,7 @@ const TimerPage: FC = () => {
                     <div className="mb-2 text-xl font-bold dark:text-textDark">
                       {t('timerPage.notes')}
                     </div>
-                    <NotesSection defaultNote={timerState.session.note} />
+                    <NotesSection />
                   </div>
                 )}
               </div>

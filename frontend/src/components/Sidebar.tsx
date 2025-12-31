@@ -4,7 +4,7 @@ import { useTimer } from '../hooks/useTimer';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import { setIsSidebarOpen } from '../redux/slices/windowSlice';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
-import { toggleThemeInLocalStorage } from '../helpers/localstorageHelpers';
+import { toggleThemeInLS } from '../helpers/localstorageHelpers';
 import { getWeekRange } from '../helpers/dateHelpers';
 import { useTranslation } from 'react-i18next';
 
@@ -53,7 +53,7 @@ const Sidebar: FC = () => {
   };
 
   const changeTheme = () => {
-    const newTheme = toggleThemeInLocalStorage();
+    const newTheme = toggleThemeInLS();
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {

@@ -6,6 +6,7 @@ import { ISession } from '../../../model/session.model';
 import {
   ActivityDistribution,
   AnalyticsForRangeDTO,
+  TimeBar,
 } from '../../../dto/analytics.dto';
 import * as dateUtils from '../../../helpers/getTodayRange';
 
@@ -228,6 +229,81 @@ describe('analyticsService.getTimeBars', () => {
       deleted: false,
     },
   ];
+
+  it('should return correct hour-based time bars', () => {
+    const start = new Date('2025-12-29T00:00:00Z');
+    const end = new Date('2025-12-29T12:00:00Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      sessionParts,
+      completedSessions,
+      barType: 'hour',
+      timezone: 'UTC',
+      userActivities: mockActivities,
+    });
+
+    expect(result).toHaveLength(12);
+    expect(result[0].startOfRange).toEqual(new Date('2025-12-29T00:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+
+    expect(result[1].startOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-12-29T02:00:00Z'));
+
+    expect(result[11].startOfRange).toEqual(new Date('2025-12-29T11:00:00Z'));
+    expect(result[11].endOfRange).toEqual(new Date('2025-12-29T12:00:00Z'));
+  });
+
+  it('should return correct hour-based time bars when the range starts at a non-zero minute', () => {
+    const start = new Date('2025-12-29T00:12:00Z');
+    const end = new Date('2025-12-29T12:00:00Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      sessionParts,
+      completedSessions,
+      barType: 'hour',
+      timezone: 'UTC',
+      userActivities: mockActivities,
+    });
+
+    expect(result).toHaveLength(12);
+    expect(result[0].startOfRange).toEqual(new Date('2025-12-29T00:12:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+
+    expect(result[1].startOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-12-29T02:00:00Z'));
+
+    expect(result[11].startOfRange).toEqual(new Date('2025-12-29T11:00:00Z'));
+    expect(result[11].endOfRange).toEqual(new Date('2025-12-29T12:00:00Z'));
+  });
+
+  it('should return correct hour-based time bars and cut last period to end of range', () => {
+    const start = new Date('2025-12-29T00:12:00Z');
+    const end = new Date('2025-12-29T12:25:00Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      sessionParts,
+      completedSessions,
+      barType: 'hour',
+      timezone: 'UTC',
+      userActivities: mockActivities,
+    });
+
+    expect(result).toHaveLength(13);
+    expect(result[0].startOfRange).toEqual(new Date('2025-12-29T00:12:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+
+    expect(result[1].startOfRange).toEqual(new Date('2025-12-29T01:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-12-29T02:00:00Z'));
+
+    expect(result[12].startOfRange).toEqual(new Date('2025-12-29T12:00:00Z'));
+    expect(result[12].endOfRange).toEqual(new Date('2025-12-29T12:25:00Z'));
+  });
 
   it('should return correct day-based time bars', () => {
     const start = new Date('2025-07-01T00:00:00Z');
@@ -920,6 +996,17 @@ describe('analyticsService.mergeAnalytics', () => {
   const startOfToday = new Date('2025-09-20T00:00:00Z');
   const startOfTomorrow = new Date('2025-09-21T00:00:00Z');
 
+  const dayTimeBars: TimeBar[] = Array.from({ length: 24 }, (_, h) => ({
+    startOfRange: new Date(`2025-09-19T${String(h).padStart(2, '0')}:00:00Z`),
+    endOfRange: new Date(`2025-09-19T${String(h + 1).padStart(2, '0')}:00:00Z`),
+    sessionStatistics: {
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
+      pausedAmount: 0,
+    },
+    activityDistribution: [],
+  }));
+
   const untilTodayObj: AnalyticsForRangeDTO = {
     sessionStatistics: {
       sessionsAmount: 2,
@@ -992,7 +1079,290 @@ describe('analyticsService.mergeAnalytics', () => {
         },
       },
     ],
-    timeBars: [],
+    timeBars: [
+      // 00:00 – 01:00
+      {
+        startOfRange: new Date('2025-09-20T00:00:00Z'),
+        endOfRange: new Date('2025-09-20T01:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 01:00 – 02:00
+      {
+        startOfRange: new Date('2025-09-20T01:00:00Z'),
+        endOfRange: new Date('2025-09-20T02:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 02:00 – 03:00
+      {
+        startOfRange: new Date('2025-09-20T02:00:00Z'),
+        endOfRange: new Date('2025-09-20T03:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 03:00 – 04:00
+      {
+        startOfRange: new Date('2025-09-20T03:00:00Z'),
+        endOfRange: new Date('2025-09-20T04:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 04:00 – 05:00
+      {
+        startOfRange: new Date('2025-09-20T04:00:00Z'),
+        endOfRange: new Date('2025-09-20T05:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 05:00 – 06:00
+      {
+        startOfRange: new Date('2025-09-20T05:00:00Z'),
+        endOfRange: new Date('2025-09-20T06:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 06:00 – 07:00
+      {
+        startOfRange: new Date('2025-09-20T06:00:00Z'),
+        endOfRange: new Date('2025-09-20T07:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 07:00 – 08:00
+      {
+        startOfRange: new Date('2025-09-20T07:00:00Z'),
+        endOfRange: new Date('2025-09-20T08:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 08:00 – 09:00
+      {
+        startOfRange: new Date('2025-09-20T08:00:00Z'),
+        endOfRange: new Date('2025-09-20T09:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 09:00 – 10:00 (Activity A)
+      {
+        startOfRange: new Date('2025-09-20T09:00:00Z'),
+        endOfRange: new Date('2025-09-20T10:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 50,
+          pausedAmount: 1,
+        },
+        activityDistribution: [
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
+          },
+        ],
+      },
+      // 10:00 – 11:00
+      {
+        startOfRange: new Date('2025-09-20T10:00:00Z'),
+        endOfRange: new Date('2025-09-20T11:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 11:00 – 12:00
+      {
+        startOfRange: new Date('2025-09-20T11:00:00Z'),
+        endOfRange: new Date('2025-09-20T12:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 12:00 – 13:00
+      {
+        startOfRange: new Date('2025-09-20T12:00:00Z'),
+        endOfRange: new Date('2025-09-20T13:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 13:00 – 14:00
+      {
+        startOfRange: new Date('2025-09-20T13:00:00Z'),
+        endOfRange: new Date('2025-09-20T14:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      // 14:00 – 15:00 (Activity C)
+      {
+        startOfRange: new Date('2025-09-20T14:00:00Z'),
+        endOfRange: new Date('2025-09-20T15:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 100,
+          pausedAmount: 0,
+        },
+        activityDistribution: [
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
+          },
+        ],
+      },
+      // 15:00 – 16:00
+      // {
+      //   startOfRange: new Date('2025-09-20T15:00:00Z'),
+      //   endOfRange: new Date('2025-09-20T16:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+      // 16:00 – 17:00
+      // {
+      //   startOfRange: new Date('2025-09-20T16:00:00Z'),
+      //   endOfRange: new Date('2025-09-20T17:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+      // 17:00 – 18:00
+      // {
+      //   startOfRange: new Date('2025-09-20T17:00:00Z'),
+      //   endOfRange: new Date('2025-09-20T18:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+      // 18:00 – 19:00
+      // {
+      //   startOfRange: new Date('2025-09-20T18:00:00Z'),
+      //   endOfRange: new Date('2025-09-20T19:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+      // 19:00 – 20:00
+      // {
+      //   startOfRange: new Date('2025-09-20T19:00:00Z'),
+      //   endOfRange: new Date('2025-09-20T20:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+      // 20:00 – 21:00
+      // {
+      //   startOfRange: new Date('2025-09-20T20:00:00Z'),
+      //   endOfRange: new Date('2025-09-20T21:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+      // 21:00 – 22:00
+      // {
+      //   startOfRange: new Date('2025-09-20T21:00:00Z'),
+      //   endOfRange: new Date('2025-09-20T22:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+      // 22:00 – 23:00
+      // {
+      //   startOfRange: new Date('2025-09-20T22:00:00Z'),
+      //   endOfRange: new Date('2025-09-20T23:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+      // 23:00 – 00:00
+      // {
+      //   startOfRange: new Date('2025-09-20T23:00:00Z'),
+      //   endOfRange: new Date('2025-09-21T00:00:00Z'),
+      //   sessionStatistics: {
+      //     sessionsAmount: 0,
+      //     spentTimeSeconds: 0,
+      //     pausedAmount: 0,
+      //   },
+      //   activityDistribution: [],
+      // },
+    ],
   };
 
   it('should sum sessionsAmount and spentTimeSeconds correctly', () => {
@@ -1007,6 +1377,138 @@ describe('analyticsService.mergeAnalytics', () => {
     expect(result.sessionStatistics.sessionsAmount).toBe(3);
     expect(result.sessionStatistics.spentTimeSeconds).toBe(450);
     expect(result.sessionStatistics.pausedAmount).toBe(3);
+  });
+
+  it('should create correct hour timeBars', () => {
+    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
+      startOfToday,
+      startOfTomorrow,
+    });
+
+    const untilTodayObj: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        spentTimeSeconds: 300,
+        sessionsAmount: 3,
+        pausedAmount: 0,
+      },
+      activityDistribution: [
+        {
+          activityName: 'A',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 100,
+            pausedAmount: 0,
+          },
+        },
+        {
+          activityName: 'C',
+          sessionStatistics: {
+            sessionsAmount: 2,
+            spentTimeSeconds: 200,
+            pausedAmount: 0,
+          },
+        },
+      ],
+      timeBars: [
+        {
+          startOfRange: new Date('2025-09-19T22:00:00Z'),
+          endOfRange: new Date('2025-09-19T23:00:00Z'),
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 100,
+            pausedAmount: 0,
+          },
+          activityDistribution: [
+            {
+              activityName: 'A',
+              sessionStatistics: {
+                sessionsAmount: 1,
+                spentTimeSeconds: 100,
+                pausedAmount: 0,
+              },
+            },
+          ],
+        },
+        {
+          startOfRange: new Date('2025-09-19T23:00:00Z'),
+          endOfRange: new Date('2025-09-20T00:00:00Z'),
+          sessionStatistics: {
+            sessionsAmount: 2,
+            spentTimeSeconds: 200,
+            pausedAmount: 0,
+          },
+          activityDistribution: [
+            {
+              activityName: 'C',
+              sessionStatistics: {
+                sessionsAmount: 2,
+                spentTimeSeconds: 200,
+                pausedAmount: 0,
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeAnalytics({
+      finalObjStartOfRange: new Date('2025-09-19T22:00:00Z'),
+      finalObjEndOfRange: new Date('2025-09-20T15:00:00Z'),
+      untilTodayObj,
+      todayObj,
+      timezone,
+    });
+
+    const timeBars = result.timeBars;
+    expect(timeBars.length).toBe(17);
+    expect(timeBars[0]).toEqual({
+      startOfRange: new Date('2025-09-19T22:00:00Z'),
+      endOfRange: new Date('2025-09-19T23:00:00Z'),
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 100,
+        pausedAmount: 0,
+      },
+      activityDistribution: [
+        {
+          activityName: 'A',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 100,
+            pausedAmount: 0,
+          },
+        },
+      ],
+    });
+    expect(timeBars[1]).toEqual({
+      startOfRange: new Date('2025-09-19T23:00:00Z'),
+      endOfRange: new Date('2025-09-20T00:00:00Z'),
+      sessionStatistics: {
+        sessionsAmount: 2,
+        spentTimeSeconds: 200,
+        pausedAmount: 0,
+      },
+      activityDistribution: [
+        {
+          activityName: 'C',
+          sessionStatistics: {
+            sessionsAmount: 2,
+            spentTimeSeconds: 200,
+            pausedAmount: 0,
+          },
+        },
+      ],
+    });
+    expect(timeBars[2]).toEqual({
+      startOfRange: new Date('2025-09-20T00:00:00Z'),
+      endOfRange: new Date('2025-09-20T01:00:00Z'),
+      sessionStatistics: {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
+      activityDistribution: [],
+    });
   });
 
   it('should create correct day timeBars', () => {
@@ -1458,7 +1960,7 @@ describe('analyticsService.mergeAnalytics', () => {
     ]);
   });
 
-  it('should create correct day timebars when starting from yesterday', () => {
+  it('should create correct day timebars when starting from yesterday (1 day until today)', () => {
     jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
       startOfToday,
       startOfTomorrow,
@@ -1487,6 +1989,114 @@ describe('analyticsService.mergeAnalytics', () => {
     expect(timeBars).toEqual([
       {
         startOfRange: new Date('2025-09-19T00:00:00Z'),
+        endOfRange: new Date('2025-09-20T00:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 200,
+          pausedAmount: 2,
+        },
+        activityDistribution: [],
+      },
+      {
+        startOfRange: new Date('2025-09-20T00:00:00Z'),
+        endOfRange: new Date('2025-09-21T00:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 1,
+          spentTimeSeconds: 150,
+          pausedAmount: 1,
+        },
+        activityDistribution: [
+          {
+            activityName: 'A',
+            sessionStatistics: {
+              sessionsAmount: 1,
+              spentTimeSeconds: 50,
+              pausedAmount: 1,
+            },
+          },
+          {
+            activityName: 'C',
+            sessionStatistics: {
+              sessionsAmount: 0,
+              spentTimeSeconds: 100,
+              pausedAmount: 0,
+            },
+          },
+        ],
+      },
+      {
+        startOfRange: new Date('2025-09-21T00:00:00Z'),
+        endOfRange: new Date('2025-09-22T00:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+      {
+        startOfRange: new Date('2025-09-22T00:00:00Z'),
+        endOfRange: new Date('2025-09-23T00:00:00Z'),
+        sessionStatistics: {
+          sessionsAmount: 0,
+          spentTimeSeconds: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+      },
+    ]);
+  });
+
+  it('should create correct day timebars when starting 2 hours until today', () => {
+    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
+      startOfToday,
+      startOfTomorrow,
+    });
+
+    const untilTodayObj: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 200,
+        pausedAmount: 2,
+      },
+      activityDistribution: [],
+      timeBars: [
+        {
+          startOfRange: new Date('2025-09-19T22:00:00Z'),
+          endOfRange: new Date('2025-09-19T23:00:00Z'),
+          sessionStatistics: {
+            sessionsAmount: 0,
+            spentTimeSeconds: 0,
+            pausedAmount: 0,
+          },
+          activityDistribution: [],
+        },
+        {
+          startOfRange: new Date('2025-09-19T23:00:00Z'),
+          endOfRange: new Date('2025-09-20T00:00:00Z'),
+          sessionStatistics: {
+            sessionsAmount: 1,
+            spentTimeSeconds: 200,
+            pausedAmount: 2,
+          },
+          activityDistribution: [],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeAnalytics({
+      finalObjStartOfRange: new Date('2025-09-19T22:00:00Z'),
+      finalObjEndOfRange: new Date('2025-09-23T00:00:00Z'),
+      untilTodayObj,
+      todayObj,
+      timezone,
+    });
+
+    const timeBars = result.timeBars;
+    expect(timeBars.length).toBe(4);
+    expect(timeBars).toEqual([
+      {
+        startOfRange: new Date('2025-09-19T22:00:00Z'),
         endOfRange: new Date('2025-09-20T00:00:00Z'),
         sessionStatistics: {
           sessionsAmount: 1,
@@ -1703,7 +2313,7 @@ describe('analyticsService.mergeAnalytics', () => {
         pausedAmount: 3,
       },
       activityDistribution: [],
-      timeBars: [],
+      timeBars: dayTimeBars,
     };
 
     const result = analyticsService.mergeAnalytics({
@@ -1777,6 +2387,7 @@ describe('analyticsService.mergeAnalytics', () => {
     ]);
   });
 
+  // FOCUS: fix
   it('should create correct month time bars when the range starts today', () => {
     jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
       startOfToday,

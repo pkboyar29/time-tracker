@@ -1,5 +1,6 @@
 import axios from './axios';
 import { getBarName, getBarDetailedName } from '../helpers/barNaming';
+import { getRandomBrightColor } from '../helpers/colorHelpers';
 import i18n from 'i18next';
 
 import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
@@ -7,16 +8,9 @@ import { IAnalytics } from '../ts/interfaces/Statistics/IAnaltytics';
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
 const mapResponseData = (unmappedData: any): IAnalytics => {
-  // TODO: можно установить исключения для нескольких цветов, которые есть в самом интерфейсе
   const activityFillMap = new Map();
   unmappedData.activityDistribution.forEach((unmappedAd: any) => {
-    activityFillMap.set(
-      unmappedAd.activityName,
-      '#' +
-        Math.floor(Math.random() * 0xffffff)
-          .toString(16)
-          .padStart(6, '0')
-    );
+    activityFillMap.set(unmappedAd.activityName, getRandomBrightColor());
   });
 
   const activityDistributionItems: IActivityDistribution[] =

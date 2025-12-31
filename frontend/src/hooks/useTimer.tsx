@@ -11,8 +11,8 @@ import { useAppSelector, useAppDispatch } from '../redux/store';
 import { setUser } from '../redux/slices/userSlice';
 import { updateSession } from '../api/sessionApi';
 import {
-  saveSessionToLocalStorage,
-  removeSessionFromLocalStorage,
+  saveSessionToLS,
+  removeSessionFromLS,
 } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
 import {
@@ -35,7 +35,6 @@ interface TimerContextType {
   startTimer: (session: ISession, paused?: boolean) => Promise<void>;
   toggleTimer: () => Promise<void>;
   stopTimer: (shouldUpdateSession?: boolean) => Promise<void>;
-  setNote: (note: string) => void;
   timerState: TimerState;
   timerEndDate: Date;
   startTimestamp: number;
@@ -46,7 +45,6 @@ const TimerContext = createContext<TimerContextType>({
   startTimer: async () => {},
   toggleTimer: async () => {},
   stopTimer: async () => {},
-  setNote: () => {},
   timerState: { status: 'idle', session: null },
   timerEndDate: new Date(),
   startTimestamp: 0,
@@ -83,7 +81,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       }
     }
 
-    saveSessionToLocalStorage(session, 'session');
+    saveSessionToLS(session, 'session');
 
     if (paused) {
       setTimerState({ status: 'paused', session });
@@ -138,7 +136,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       setTimerState({ status: 'idle', session: null });
       startTimestamp.current = 0;
       startSpentSeconds.current = 0;
-      removeSessionFromLocalStorage('session');
+      removeSessionFromLS('session');
 
       if (timerState.status == 'running' && shouldUpdateSession) {
         try {
@@ -147,7 +145,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           toast(t('serverErrors.updateSessionButSaved'), {
             type: 'error',
           });
-          saveSessionToLocalStorage(timerState.session, 'unsyncedSession');
+          saveSessionToLS(timerState.session, 'unsyncedSession');
         }
       }
     }
@@ -187,19 +185,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         toast(t('serverErrors.updateSessionButSaved'), {
           type: 'error',
         });
-        saveSessionToLocalStorage(completedSession, 'unsyncedSession');
+        saveSessionToLS(completedSession, 'unsyncedSession');
       }
 
       stopTimer();
-    }
-  };
-
-  const setNote = (note: string) => {
-    if (timerState.status != 'idle') {
-      setTimerState({
-        status: timerState.status,
-        session: { ...timerState.session, note },
-      });
     }
   };
 
@@ -231,7 +220,9 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
         // automatic timer update in local storage every 2 seconds
         if ((ev.data - startSpentSeconds.current) % 2 == 0) {
-          saveSessionToLocalStorage(
+          // console.log('before save to LS:');
+          // console.log(timerState.session.note);
+          saveSessionToLS(
             {
               ...timerState.session,
               spentTimeSeconds: ev.data,
@@ -292,7 +283,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         startTimer,
         toggleTimer,
         stopTimer,
-        setNote,
         timerState,
         timerEndDate: timerEndDate.current,
         startTimestamp: startTimestamp.current,

@@ -205,6 +205,13 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   cx="50%"
                   cy="50%"
                   outerRadius="80%"
+                  activeShape={{
+                    stroke:
+                      localStorage.getItem('theme') === 'dark'
+                        ? '#fff'
+                        : '#111',
+                    strokeWidth: 2,
+                  }}
                   stroke={
                     localStorage.getItem('theme') === 'dark'
                       ? colors.surfaceDark
