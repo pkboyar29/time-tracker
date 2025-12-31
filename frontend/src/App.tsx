@@ -8,8 +8,8 @@ import { useTimer } from './hooks/useTimer';
 import { fetchProfileInfo } from './api/userApi';
 import { setUser } from './redux/slices/userSlice';
 import {
-  getSessionFromLocalStorage,
-  removeSessionFromLocalStorage,
+  getSessionFromLS,
+  removeSessionFromLS,
 } from './helpers/localstorageHelpers';
 import { AxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -41,13 +41,12 @@ const App: FC = () => {
 
   useEffect(() => {
     const updateSessionInCaseOfError = async () => {
-      const unsyncedSessionFromLS =
-        getSessionFromLocalStorage('unsyncedSession');
+      const unsyncedSessionFromLS = getSessionFromLS('unsyncedSession');
 
       if (requiredAuth && unsyncedSessionFromLS) {
         try {
           await updateSession(unsyncedSessionFromLS);
-          removeSessionFromLocalStorage('unsyncedSession');
+          removeSessionFromLS('unsyncedSession');
         } catch (e) {}
       }
     };
@@ -57,13 +56,13 @@ const App: FC = () => {
 
   useEffect(() => {
     const fetchCurrentSession = async () => {
-      const sessionFromLS = getSessionFromLocalStorage('session');
+      const sessionFromLS = getSessionFromLS('session');
 
       if (requiredAuth && sessionFromLS) {
         try {
           const sessionFromServer = await fetchSession(sessionFromLS.id);
           if (sessionFromServer.completed) {
-            removeSessionFromLocalStorage('session');
+            removeSessionFromLS('session');
             return;
           }
 
@@ -79,7 +78,7 @@ const App: FC = () => {
           }
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
-            removeSessionFromLocalStorage('session');
+            removeSessionFromLS('session');
           } else {
             toast(t('serverErrors.getSession'), {
               type: 'error',

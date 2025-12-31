@@ -11,8 +11,8 @@ import { useAppSelector, useAppDispatch } from '../redux/store';
 import { setUser } from '../redux/slices/userSlice';
 import { updateSession } from '../api/sessionApi';
 import {
-  saveSessionToLocalStorage,
-  removeSessionFromLocalStorage,
+  saveSessionToLS,
+  removeSessionFromLS,
 } from '../helpers/localstorageHelpers';
 import { playAudio } from '../helpers/audioHelpers';
 import {
@@ -81,7 +81,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       }
     }
 
-    saveSessionToLocalStorage(session, 'session');
+    saveSessionToLS(session, 'session');
 
     if (paused) {
       setTimerState({ status: 'paused', session });
@@ -136,7 +136,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       setTimerState({ status: 'idle', session: null });
       startTimestamp.current = 0;
       startSpentSeconds.current = 0;
-      removeSessionFromLocalStorage('session');
+      removeSessionFromLS('session');
 
       if (timerState.status == 'running' && shouldUpdateSession) {
         try {
@@ -145,7 +145,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           toast(t('serverErrors.updateSessionButSaved'), {
             type: 'error',
           });
-          saveSessionToLocalStorage(timerState.session, 'unsyncedSession');
+          saveSessionToLS(timerState.session, 'unsyncedSession');
         }
       }
     }
@@ -185,7 +185,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         toast(t('serverErrors.updateSessionButSaved'), {
           type: 'error',
         });
-        saveSessionToLocalStorage(completedSession, 'unsyncedSession');
+        saveSessionToLS(completedSession, 'unsyncedSession');
       }
 
       stopTimer();
@@ -222,7 +222,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         if ((ev.data - startSpentSeconds.current) % 2 == 0) {
           // console.log('before save to LS:');
           // console.log(timerState.session.note);
-          saveSessionToLocalStorage(
+          saveSessionToLS(
             {
               ...timerState.session,
               spentTimeSeconds: ev.data,
