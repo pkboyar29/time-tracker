@@ -358,7 +358,7 @@ const TimerPage: FC = () => {
                     <div className="mb-2 text-xl font-bold dark:text-textDark">
                       {t('timerPage.notes')}
                     </div>
-                    <NotesSection defaultNote={timerState.session.note} />
+                    <NotesSection />
                   </div>
                 )}
               </div>

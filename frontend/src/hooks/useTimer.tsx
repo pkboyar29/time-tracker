@@ -35,7 +35,6 @@ interface TimerContextType {
   startTimer: (session: ISession, paused?: boolean) => Promise<void>;
   toggleTimer: () => Promise<void>;
   stopTimer: (shouldUpdateSession?: boolean) => Promise<void>;
-  setNote: (note: string) => void;
   timerState: TimerState;
   timerEndDate: Date;
   startTimestamp: number;
@@ -46,7 +45,6 @@ const TimerContext = createContext<TimerContextType>({
   startTimer: async () => {},
   toggleTimer: async () => {},
   stopTimer: async () => {},
-  setNote: () => {},
   timerState: { status: 'idle', session: null },
   timerEndDate: new Date(),
   startTimestamp: 0,
@@ -194,15 +192,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     }
   };
 
-  const setNote = (note: string) => {
-    if (timerState.status != 'idle') {
-      setTimerState({
-        status: timerState.status,
-        session: { ...timerState.session, note },
-      });
-    }
-  };
-
   useEffect(() => {
     if (timerState.status == 'running') {
       timerWorker.postMessage({
@@ -231,6 +220,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
         // automatic timer update in local storage every 2 seconds
         if ((ev.data - startSpentSeconds.current) % 2 == 0) {
+          // console.log('before save to LS:');
+          // console.log(timerState.session.note);
           saveSessionToLocalStorage(
             {
               ...timerState.session,
@@ -292,7 +283,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         startTimer,
         toggleTimer,
         stopTimer,
-        setNote,
         timerState,
         timerEndDate: timerEndDate.current,
         startTimestamp: startTimestamp.current,

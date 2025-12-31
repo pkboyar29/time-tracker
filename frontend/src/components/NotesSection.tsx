@@ -1,35 +1,43 @@
-import { FC, useState } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useTimer } from '../hooks/useTimer';
 import { updateSession } from '../api/sessionApi';
 import { useTranslation } from 'react-i18next';
+import { setNoteInLS, getNoteFromLS } from '../helpers/localstorageHelpers';
 
-interface NotesSectionProps {
-  defaultNote?: string;
-}
+// TODO: мы никак не удаляем ключи из local storage, даже если сессия завершила свою работу, и ее заметка никогда больше не будет нужна. Так можно полностью засорить local storage
 
-const NotesSection: FC<NotesSectionProps> = ({ defaultNote }) => {
+const NotesSection: FC = () => {
   const { t } = useTranslation();
 
-  const { timerState, setNote: setNoteInsideTimer } = useTimer();
+  const { timerState } = useTimer();
 
-  const [note, setNote] = useState<string>(defaultNote ? defaultNote : '');
+  const [note, setNote] = useState<string>('');
+
+  useEffect(() => {
+    if (!timerState.session) return;
+
+    const sessionNoteFromLS = getNoteFromLS(timerState.session.id);
+    setNote(
+      sessionNoteFromLS ? sessionNoteFromLS : timerState.session.note ?? ''
+    );
+  }, [timerState.session?.id]);
 
   const handleChangeNoteInput = (
     event: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
+    if (!timerState.session) return;
+
     setNote(event.target.value);
+    setNoteInLS(timerState.session.id, event.target.value);
   };
 
   const handleBlurNoteInput = async () => {
-    if (timerState.status != 'idle' && timerState.session.note !== note) {
-      // TODO: обрабатывать серверные ошибки
-      await updateSession({
-        ...timerState.session,
-        note,
-      });
+    if (timerState.status == 'idle') return;
 
-      setNoteInsideTimer(note);
-    }
+    // TODO: будет работать только если мы не изменяли ввод. Если же его немного изменить, то все, timerState.session.note мы не изменяем, и соответственно проверка всегда будет false
+    if (note === timerState.session.note) return;
+
+    await updateSession(timerState.session);
   };
 
   return (

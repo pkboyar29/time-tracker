@@ -67,3 +67,17 @@ export const getLangFromLocalStorage = (): 'en' | 'ru' => {
 export const setLangInLocalStorage = (lang: 'en' | 'ru') => {
   window.localStorage.setItem('lang', lang);
 };
+
+export const getNoteFromLS = (sessionId: string): string => {
+  const sessionNote = window.localStorage.getItem(`sessionNote:${sessionId}`);
+
+  return sessionNote ? sessionNote : '';
+};
+
+export const setNoteInLS = (sessionId: string, note: string) => {
+  window.localStorage.setItem(`sessionNote:${sessionId}`, note);
+};
+
+export const removeNoteFromLS = (sessionId: string) => {
+  window.localStorage.removeItem(`sessionNote:${sessionId}`);
+};

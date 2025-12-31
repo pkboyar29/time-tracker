@@ -1,4 +1,5 @@
 import axios from './axios';
+import { getNoteFromLS } from '../helpers/localstorageHelpers';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 import { ISessionCreate } from '../ts/interfaces/Session/ISessionCreate';
@@ -48,8 +49,11 @@ export const updateSession = async (
   payload: ISession,
   isPaused?: boolean
 ): Promise<ISession> => {
+  const noteFromLS = getNoteFromLS(payload.id);
+
   const body = {
     ...payload,
+    note: noteFromLS,
     isPaused: isPaused !== undefined ? isPaused : false,
   };
 
