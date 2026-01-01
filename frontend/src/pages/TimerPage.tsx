@@ -30,6 +30,7 @@ import RangeSlider from '../components/common/RangeSlider';
 import SessionDurationInputs from '../components/SessionDurationInputs';
 import NotesSection from '../components/NotesSection';
 import CustomSelect from '../components/common/CustomSelect';
+import SegmentedControl from '../components/common/SegmentedControl';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -51,6 +52,9 @@ const TimerPage: FC = () => {
       queryFn: () => fetchActivities(),
     });
 
+  const [durationMode, setDurationMode] = useState<'rangeSlider' | 'inputs'>(
+    'rangeSlider'
+  );
   const [selectedSeconds, setSelectedSeconds] = useState<number>(() =>
     getSelectedSecondsFromLS()
   );
@@ -367,23 +371,41 @@ const TimerPage: FC = () => {
 
                 {!isTimerStarted && (
                   <div>
-                    <span className="block mb-2 text-lg font-semibold dark:text-textDark">
-                      {t('timerPage.sessionDuration')}
-                    </span>
-                    <div className="hidden md:block">
-                      <RangeSlider
-                        minValue={1}
-                        maxValue={600}
-                        currentValue={selectedSeconds / 60}
-                        changeCurrentValue={onRangeSliderChange}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="block text-lg font-semibold dark:text-textDark">
+                        {t('timerPage.sessionDuration')}
+                      </span>
+
+                      <SegmentedControl
+                        options={[
+                          {
+                            value: 'rangeSlider',
+                            label: t('timerPage.rangeSlider'),
+                          },
+                          { value: 'inputs', label: t('timerPage.inputs') },
+                        ]}
+                        value={durationMode}
+                        onChange={(value) =>
+                          setDurationMode(value as 'rangeSlider' | 'inputs')
+                        }
                       />
                     </div>
-                    <div className="block md:hidden">
+
+                    {durationMode == 'rangeSlider' ? (
+                      <div className="mt-4">
+                        <RangeSlider
+                          minValue={1}
+                          maxValue={600}
+                          currentValue={selectedSeconds / 60}
+                          changeCurrentValue={onRangeSliderChange}
+                        />
+                      </div>
+                    ) : (
                       <SessionDurationInputs
                         seconds={selectedSeconds}
                         setSeconds={onSessionInputsChange}
                       />
-                    </div>
+                    )}
                   </div>
                 )}
 
