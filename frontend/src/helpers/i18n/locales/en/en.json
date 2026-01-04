@@ -173,10 +173,12 @@
   },
   "pdBox": {
     "title": "Period distribution",
+    "default": "default",
+    "4parts": "4 parts",
+    "3parts": "3 parts",
+    "2parts": "2 parts",
     "avg": "Avg.",
-    "perDay": "per day",
-    "perMonth": "per month",
-    "perHour": "per hour",
+    "perPart": "per part",
     "noActivity": "No session activity this period",
     "dailyGoal": "daily goal"
   },

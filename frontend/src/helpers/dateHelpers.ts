@@ -461,8 +461,13 @@ export const shiftTwoDates = (
   return [new Date(), new Date()];
 };
 
-export const formatDate = (date: Date, i18nLang: string) =>
+export const formatDate = (
+  date: Date,
+  i18nLang: string,
+  options?: { withWeekDay?: boolean }
+) =>
   date.toLocaleDateString(getLocaleFromLanguage(i18nLang), {
+    weekday: options?.withWeekDay ? 'short' : undefined,
     month: 'short',
     day: 'numeric',
     year: 'numeric',

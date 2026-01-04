@@ -19,7 +19,7 @@ const SegmentedControl: FC<SegmentedControlProps> = ({
   return (
     <div
       role="radiogroup"
-      className="inline-flex items-center gap-1 p-1 rounded-full  bg-backgroundLight dark:bg-surfaceDark"
+      className="inline-flex flex-wrap items-center gap-1 p-1 rounded-full bg-backgroundLight dark:bg-surfaceDark"
     >
       {options.map((option) => {
         const active = option.value === value;

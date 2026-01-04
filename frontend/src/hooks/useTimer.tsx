@@ -220,8 +220,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
         // automatic timer update in local storage every 2 seconds
         if ((ev.data - startSpentSeconds.current) % 2 == 0) {
-          // console.log('before save to LS:');
-          // console.log(timerState.session.note);
           saveSessionToLS(
             {
               ...timerState.session,
