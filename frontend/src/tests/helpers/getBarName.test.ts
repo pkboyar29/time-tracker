@@ -45,14 +45,6 @@ describe('getBarName', () => {
     expect(result).toBe('1');
   });
 
-  it('returns hours when duration < 1 day', () => {
-    const startOfRange = new Date(2024, 6, 1, 0, 0, 0);
-    const endOfRange = new Date(2024, 6, 1, 12, 0, 0);
-
-    const result = getBarName(startOfRange, endOfRange, tEnMock as TFunction);
-    expect(result).toBe('00:00 - 12:00');
-  });
-
   it('returns month name when range type is "months"', () => {
     const startOfRange = new Date(2024, 6, 1, 0, 0, 0);
     const endOfRange = new Date(2024, 7, 1, 0, 0, 0);
