@@ -41,32 +41,23 @@ describe('getBarName', () => {
     const startOfRange = new Date(2024, 6, 1, 0, 0, 0);
     const endOfRange = new Date(2024, 6, 2, 0, 0, 0);
 
-    const result = getBarName(
-      { startOfRange, endOfRange },
-      tEnMock as TFunction
-    );
+    const result = getBarName(startOfRange, endOfRange, tEnMock as TFunction);
     expect(result).toBe('1');
   });
 
-  it('returns day of month when duration < 1 day', () => {
+  it('returns hours when duration < 1 day', () => {
     const startOfRange = new Date(2024, 6, 1, 0, 0, 0);
     const endOfRange = new Date(2024, 6, 1, 12, 0, 0);
 
-    const result = getBarName(
-      { startOfRange, endOfRange },
-      tEnMock as TFunction
-    );
-    expect(result).toBe('1');
+    const result = getBarName(startOfRange, endOfRange, tEnMock as TFunction);
+    expect(result).toBe('00:00 - 12:00');
   });
 
   it('returns month name when range type is "months"', () => {
     const startOfRange = new Date(2024, 6, 1, 0, 0, 0);
     const endOfRange = new Date(2024, 7, 1, 0, 0, 0);
 
-    const result = getBarName(
-      { startOfRange, endOfRange },
-      tEnMock as TFunction
-    );
+    const result = getBarName(startOfRange, endOfRange, tEnMock as TFunction);
     expect(result).toBe('Jul');
   });
 
@@ -74,10 +65,7 @@ describe('getBarName', () => {
     const startOfRange = new Date(2024, 6, 1, 0, 0, 0);
     const endOfRange = new Date(2024, 7, 8, 0, 0, 0);
 
-    const result = getBarName(
-      { startOfRange, endOfRange },
-      tEnMock as TFunction
-    );
+    const result = getBarName(startOfRange, endOfRange, tEnMock as TFunction);
     expect(result).toBe('Jul 1 - Aug 8');
   });
 });
@@ -88,12 +76,13 @@ describe('getBarDetailedName', () => {
     const endOfRange = new Date(2024, 6, 2, 0, 0, 0); // July 2, 2024
 
     const result = getBarDetailedName(
-      { startOfRange, endOfRange },
+      startOfRange,
+      endOfRange,
       tEnMock as TFunction,
       'en'
     );
 
-    expect(result).toBe('Jul 1, 2024');
+    expect(result).toBe('Mon, Jul 1, 2024');
   });
 
   it('returns time range when duration < 1 day', () => {
@@ -101,7 +90,8 @@ describe('getBarDetailedName', () => {
     const endOfRange = new Date(2024, 6, 1, 14, 45, 0); // Jul 1, 14:45
 
     const result = getBarDetailedName(
-      { startOfRange, endOfRange },
+      startOfRange,
+      endOfRange,
       tEnMock as TFunction,
       'en'
     );
@@ -114,7 +104,8 @@ describe('getBarDetailedName', () => {
     const endOfRange = new Date(2024, 7, 1, 0, 0, 0); // August 1
 
     const result = getBarDetailedName(
-      { startOfRange, endOfRange },
+      startOfRange,
+      endOfRange,
       tEnMock as TFunction,
       'en'
     );
@@ -127,7 +118,8 @@ describe('getBarDetailedName', () => {
     const endOfRange = new Date(2024, 7, 5, 19, 45, 0); // Aug 5 19:45
 
     const result = getBarDetailedName(
-      { startOfRange, endOfRange },
+      startOfRange,
+      endOfRange,
       tEnMock as TFunction,
       'en'
     );

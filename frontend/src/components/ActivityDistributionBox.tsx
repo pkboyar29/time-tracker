@@ -50,7 +50,11 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   const rootRef = useRef<HTMLDivElement>(null);
 
   const sortedItems = useMemo(() => {
-    return adItems.toSorted((a, b) => b.spentTimeSeconds - a.spentTimeSeconds);
+    return adItems.toSorted(
+      (a, b) =>
+        b.sessionStatistics.spentTimeSeconds -
+        a.sessionStatistics.spentTimeSeconds
+    );
   }, [adItems]);
 
   const pieItems = useMemo(() => {
@@ -72,13 +76,13 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
       for (let i = 1; i <= lessOnePercentageCount; i++) {
         const deletedLastItem = pieItems.pop();
         othersSessionsAmount += deletedLastItem
-          ? deletedLastItem.sessionsAmount
+          ? deletedLastItem.sessionStatistics.sessionsAmount
           : 0;
         othersPausedAmount += deletedLastItem
-          ? deletedLastItem.pausedAmount
+          ? deletedLastItem.sessionStatistics.pausedAmount
           : 0;
         othersSpentTimeSeconds += deletedLastItem
-          ? deletedLastItem.spentTimeSeconds
+          ? deletedLastItem.sessionStatistics.spentTimeSeconds
           : 0;
         othersSpentTimePercentage += deletedLastItem
           ? deletedLastItem.spentTimePercentage
@@ -89,9 +93,11 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         ...pieItems,
         {
           activityName: t('adBox.others'),
-          sessionsAmount: othersSessionsAmount,
-          pausedAmount: othersPausedAmount,
-          spentTimeSeconds: othersSpentTimeSeconds,
+          sessionStatistics: {
+            sessionsAmount: othersSessionsAmount,
+            pausedAmount: othersPausedAmount,
+            spentTimeSeconds: othersSpentTimeSeconds,
+          },
           spentTimePercentage: othersSpentTimePercentage,
           fill: '#4287f5',
         },
@@ -175,14 +181,22 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   <div className="w-1/2 text-lg font-bold truncate">
                     {item.activityName}
                   </div>
-                  <div className="w-1/5">{item.sessionsAmount}</div>
                   <div className="w-1/5">
-                    {getReadableTime(item.spentTimeSeconds, t, {
-                      short: true,
-                    })}
+                    {item.sessionStatistics.sessionsAmount}
                   </div>
                   <div className="w-1/5">
-                    {t('plural.times', { count: item.pausedAmount })}
+                    {getReadableTime(
+                      item.sessionStatistics.spentTimeSeconds,
+                      t,
+                      {
+                        short: true,
+                      }
+                    )}
+                  </div>
+                  <div className="w-1/5">
+                    {t('plural.times', {
+                      count: item.sessionStatistics.pausedAmount,
+                    })}
                   </div>
                 </div>
               ))}
@@ -200,7 +214,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 <Pie
                   animationDuration={750}
                   data={pieItems}
-                  dataKey="spentTimeSeconds"
+                  dataKey="sessionStatistics.spentTimeSeconds"
                   nameKey="activityName"
                   cx="50%"
                   cy="50%"
@@ -236,10 +250,18 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   </div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
                     (
-                    {getReadableTime(item.spentTimeSeconds, t, {
-                      short: true,
+                    {getReadableTime(
+                      item.sessionStatistics.spentTimeSeconds,
+                      t,
+                      {
+                        short: true,
+                      }
+                    )}
+                    ,{' '}
+                    {t('plural.sessions', {
+                      count: item.sessionStatistics.sessionsAmount,
                     })}
-                    , {t('plural.sessions', { count: item.sessionsAmount })})
+                    )
                   </div>
                 </div>
               </div>

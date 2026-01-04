@@ -4,6 +4,6 @@ import { ITimeBar } from './ITimeBar';
 
 export interface IAnalytics {
   sessionStatistics: ISessionStatistics;
-  activityDistributionItems: IActivityDistribution[];
+  adItems: IActivityDistribution[];
   timeBars: ITimeBar[];
 }

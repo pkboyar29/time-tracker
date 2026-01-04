@@ -175,10 +175,10 @@ const AnalyticsRangePage: FC = () => {
               />
             )}
 
-            {rangeAnalytics.activityDistributionItems && (
+            {rangeAnalytics.adItems && (
               <div className="overflow-y-auto h-[550px] lg:h-auto lg:basis-3/5">
                 <ActivityDistributionBox
-                  adItems={rangeAnalytics.activityDistributionItems}
+                  adItems={rangeAnalytics.adItems}
                   adBoxMode={adBoxMode}
                   setAdBoxMode={setAdBoxMode}
                 />
