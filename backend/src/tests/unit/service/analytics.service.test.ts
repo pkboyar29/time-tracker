@@ -6,6 +6,7 @@ import { ISession } from '../../../model/session.model';
 import {
   ActivityDistribution,
   AnalyticsForRangeDTO,
+  SessionStatistics,
   TimeBar,
 } from '../../../dto/analytics.dto';
 import * as dateUtils from '../../../helpers/getTodayRange';
@@ -791,6 +792,82 @@ describe('analyticsService.getActivityDistributions', () => {
   });
 });
 
+describe('analyticsService.mergeSessionStatistics', () => {
+  it('correctly sums statistics from multiple entries', () => {
+    const input: SessionStatistics[] = [
+      {
+        sessionsAmount: 2,
+        spentTimeSeconds: 120,
+        pausedAmount: 1,
+      },
+      {
+        sessionsAmount: 3,
+        spentTimeSeconds: 300,
+        pausedAmount: 2,
+      },
+    ];
+
+    const result = analyticsService.mergeSessionStatistics(input);
+
+    expect(result).toEqual({
+      sessionsAmount: 5,
+      spentTimeSeconds: 420,
+      pausedAmount: 3,
+    });
+  });
+
+  it('returns zeros when an empty array is provided', () => {
+    const result = analyticsService.mergeSessionStatistics([]);
+
+    expect(result).toEqual({
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
+      pausedAmount: 0,
+    });
+  });
+
+  it('correctly handles a single entry', () => {
+    const input: SessionStatistics[] = [
+      {
+        sessionsAmount: 1,
+        spentTimeSeconds: 60,
+        pausedAmount: 0,
+      },
+    ];
+
+    const result = analyticsService.mergeSessionStatistics(input);
+
+    expect(result).toEqual({
+      sessionsAmount: 1,
+      spentTimeSeconds: 60,
+      pausedAmount: 0,
+    });
+  });
+
+  it('correctly sums zero values', () => {
+    const input: SessionStatistics[] = [
+      {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
+      {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      },
+    ];
+
+    const result = analyticsService.mergeSessionStatistics(input);
+
+    expect(result).toEqual({
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
+      pausedAmount: 0,
+    });
+  });
+});
+
 describe('analyticsService.mergeActivityDistributions', () => {
   const firstAd: ActivityDistribution[] = [
     {
@@ -1364,20 +1441,6 @@ describe('analyticsService.mergeAnalytics', () => {
       // },
     ],
   };
-
-  it('should sum sessionsAmount and spentTimeSeconds correctly', () => {
-    const result = analyticsService.mergeAnalytics({
-      finalObjStartOfRange: new Date('2025-09-18T00:00:00Z'),
-      finalObjEndOfRange: new Date('2025-09-22T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
-      timezone,
-    });
-
-    expect(result.sessionStatistics.sessionsAmount).toBe(3);
-    expect(result.sessionStatistics.spentTimeSeconds).toBe(450);
-    expect(result.sessionStatistics.pausedAmount).toBe(3);
-  });
 
   it('should create correct hour timeBars', () => {
     jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
