@@ -1,9 +1,10 @@
 import { Router, Request, Response } from 'express';
 import userService from '../service/user.service';
-import { upload } from '../helpers/multer';
+import { memoryUpload } from '../helpers/multer';
 import { sendErrorResponse } from '../helpers/sendErrorResponse';
 import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { isValidTimeZone } from '../helpers/isValidTimeZone';
+import * as mm from 'music-metadata';
 
 const router = Router();
 
@@ -95,7 +96,7 @@ router.get('/export', async (req: Request, res: Response) => {
 
 router.post(
   '/import',
-  upload.single('file'),
+  memoryUpload.single('file'),
   async (req: Request, res: Response) => {
     const file = req.file;
 
@@ -138,5 +139,103 @@ router.post(
     res.status(200).send(responseMessage);
   }
 );
+
+// TODO: обрабатывать ошибку, когда отправляем несколько файлов
+router.post(
+  '/audio/uploadAudio',
+  memoryUpload.single('audio'),
+  async (req: Request, res: Response) => {
+    const file = req.file;
+    if (!file) {
+      return res.status(400).send('You didnt send file!');
+    }
+
+    // application/octet-stream - m4r
+    // audio/ogg - ogg
+    // audio/mpeg - mp3
+    if (
+      !['application/octet-stream', 'audio/ogg', 'audio/mpeg'].includes(
+        file.mimetype
+      )
+    ) {
+      return res
+        .status(400)
+        .send('audio file should be mp3, m4r or ogg format');
+    }
+
+    const ONE_MB_BYTES = 1_000_000;
+    if (file.size > ONE_MB_BYTES) {
+      return res.status(400).send('audio file max size is 1 megabyte');
+    }
+
+    const metadata = await mm.parseBuffer(file.buffer);
+    if (metadata.format.duration && metadata.format.duration > 45) {
+      return res.status(400).send('audio file max duration is 45 seconds');
+    }
+
+    try {
+      const data = await userService.uploadAudio(
+        file.originalname,
+        file.buffer,
+        res.locals.userId
+      );
+
+      res.status(200).json(data);
+    } catch (e) {
+      sendErrorResponse(e, res);
+    }
+  }
+);
+
+router.get('/audio/:id', async (req: Request, res: Response) => {
+  try {
+    const { buffer, fileName } = await userService.getAudioFile(
+      req.params.id,
+      res.locals.userId
+    );
+
+    const fileNameArray = fileName.split('.');
+    const fileExtension = fileNameArray[fileNameArray.length - 1];
+    if (fileExtension === 'mp3') {
+      res.setHeader('Content-Type', 'audio/mpeg');
+    } else if (fileExtension === 'm4r') {
+      res.setHeader('Content-Type', 'audio/mp4');
+    } else if (fileExtension === 'ogg') {
+      res.setHeader('Content-Type', 'audio/ogg');
+    }
+
+    res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+    res.status(200).send(buffer);
+  } catch (e) {
+    sendErrorResponse(e, res);
+  }
+});
+
+router.put('/audio/:id', async (req: Request, res: Response) => {
+  try {
+    const responseMessage = await userService.updateAudioCurrent(
+      req.params.id,
+      res.locals.userId,
+      convertParamToBoolean(req.body.current)
+    );
+
+    res.status(200).send(responseMessage);
+  } catch (e) {
+    sendErrorResponse(e, res);
+  }
+});
+
+router.delete('/audio/:id', async (req: Request, res: Response) => {
+  try {
+    const responseMessage = await userService.deleteAudio(
+      req.params.id,
+      res.locals.userId
+    );
+
+    res.status(200).send(responseMessage);
+  } catch (e) {
+    sendErrorResponse(e, res);
+  }
+});
 
 export default router;

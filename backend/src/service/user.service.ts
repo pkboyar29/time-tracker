@@ -2,6 +2,8 @@ import { genSaltSync, hashSync, compareSync } from 'bcrypt';
 import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import { DateTime } from 'luxon';
+import fs from 'fs';
+import path from 'path';
 
 import { HttpError } from '../helpers/HttpError';
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
@@ -10,6 +12,7 @@ import activityService from './activity.service';
 import sessionService from './session.service';
 import analyticsService from './analytics.service';
 import User from '../model/user.model';
+import UserAudio, { IUserAudio } from '../model/userAudio.model';
 import ActivityGroup from '../model/activityGroup.model';
 import Activity from '../model/activity.model';
 import Session from '../model/session.model';
@@ -35,6 +38,11 @@ const userService = {
   updateShowTimerInTitle,
   exportUserData,
   importFile,
+  uploadAudio,
+  getAudioObject,
+  getAudioFile,
+  updateAudioCurrent,
+  deleteAudio,
 };
 
 async function signUp(
@@ -229,12 +237,15 @@ async function getProfileInfo(
     timezone,
   });
 
+  const userAudios = await UserAudio.find({ userId });
+
   return {
     email: profileInfo!.email,
     dailyGoal: profileInfo!.dailyGoal,
     showTimerInTitle: profileInfo!.showTimerInTitle,
     createdDate: profileInfo!.createdDate,
     todayAnalytics: todayAnalytics.sessionStatistics,
+    audios: userAudios,
   };
 }
 
@@ -437,6 +448,137 @@ async function importFile(
   }
 
   return 'Импорт успешен';
+}
+
+async function uploadAudio(
+  originalName: string,
+  fileBuffer: Buffer,
+  userId: string
+): Promise<IUserAudio> {
+  try {
+    const userAudios = await UserAudio.find({ userId });
+    if (userAudios.length == 5) {
+      throw new HttpError(400, 'User can only have 5 ringtones');
+    }
+
+    const originalNameArray = originalName.split('.');
+    const fileExtension = originalNameArray[originalNameArray.length - 1];
+
+    const UPLOADS_ROOT = path.resolve(process.env.UPLOADS_ROOT ?? '');
+    const relativeAudioPath = path.join(
+      userId,
+      `${crypto.randomUUID()}.${fileExtension}`
+    );
+
+    const absoluteAudioPath = path.join(UPLOADS_ROOT, relativeAudioPath);
+    if (!fs.existsSync(UPLOADS_ROOT)) {
+      await fs.promises.mkdir(UPLOADS_ROOT);
+    }
+    if (!fs.existsSync(path.join(UPLOADS_ROOT, userId))) {
+      await fs.promises.mkdir(path.join(UPLOADS_ROOT, userId));
+    }
+    await fs.promises.writeFile(absoluteAudioPath, fileBuffer);
+
+    const newUserAudio = new UserAudio({
+      userId,
+      audioName: originalName,
+      audioPath: relativeAudioPath,
+      current: false,
+    });
+    await newUserAudio.save();
+
+    return newUserAudio;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function getAudioObject(
+  audioId: string,
+  userId: string
+): Promise<mongoose.HydratedDocument<IUserAudio>> {
+  const notFoundError = new HttpError(404, 'Audio Not Found');
+  try {
+    if (!mongoose.Types.ObjectId.isValid(audioId)) {
+      throw notFoundError;
+    }
+    const userAudio = await UserAudio.findById(audioId);
+    if (!userAudio) {
+      throw notFoundError;
+    }
+    if (userAudio.userId.toString() !== userId) {
+      throw notFoundError;
+    }
+
+    return userAudio;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function getAudioFile(
+  audioId: string,
+  userId: string
+): Promise<{
+  fileName: string;
+  buffer: Buffer;
+}> {
+  try {
+    const userAudio = await userService.getAudioObject(audioId, userId);
+
+    const UPLOADS_ROOT = path.resolve(process.env.UPLOADS_ROOT ?? '');
+    const absoluteFilePath = path.join(UPLOADS_ROOT, userAudio.audioPath);
+
+    const buffer = await fs.promises.readFile(absoluteFilePath);
+    return {
+      fileName: userAudio.audioName,
+      buffer,
+    };
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function updateAudioCurrent(
+  audioId: string,
+  userId: string,
+  current: boolean
+): Promise<{ message: string }> {
+  try {
+    const userAudio = await userService.getAudioObject(audioId, userId);
+
+    if (current) {
+      await UserAudio.findOneAndUpdate(
+        { userId, current: true },
+        { current: false }
+      );
+    }
+
+    userAudio.current = current;
+    userAudio.save();
+
+    return {
+      message: `Successfuly ${current ? 'set' : 'unset'} current for audio`,
+    };
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function deleteAudio(
+  audioId: string,
+  userId: string
+): Promise<{ message: string }> {
+  const userAudio = await userService.getAudioObject(audioId, userId);
+  const UPLOADS_ROOT = path.resolve(process.env.UPLOADS_ROOT ?? '');
+  const absoluteFilePath = path.join(UPLOADS_ROOT, userAudio.audioPath);
+
+  await userAudio.deleteOne();
+  await fs.promises.rm(absoluteFilePath);
+
+  return {
+    message: 'Deleted successfuly',
+  };
 }
 
 export default userService;

@@ -1,3 +1,4 @@
+import { IUserAudio } from '../model/userAudio.model';
 import { SessionStatistics } from './analytics.dto';
 
 export interface UserSignUpDTO {
@@ -18,4 +19,5 @@ export interface UserResponseDTO {
   createdDate: Date;
   dailyGoal: number;
   todayAnalytics: SessionStatistics;
+  audios: IUserAudio[];
 }

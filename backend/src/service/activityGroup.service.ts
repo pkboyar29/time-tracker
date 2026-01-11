@@ -169,7 +169,7 @@ async function deleteActivityGroup(
     });
 
     return {
-      message: 'Deleted successful',
+      message: 'Deleted successfuly',
     };
   } catch (e) {
     throw e;
