@@ -9,6 +9,8 @@
   },
   "settingsModal": {
     "title": "Settings",
+    "general": "General",
+    "audio": "Audio",
     "dailyGoal": "Your daily goal",
     "timerInTitle": "Show timer in title",
     "notifications": "Allow browser notifications",

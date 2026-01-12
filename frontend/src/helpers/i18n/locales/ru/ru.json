@@ -9,6 +9,8 @@
   },
   "settingsModal": {
     "title": "Настройки",
+    "general": "Общее",
+    "audio": "Аудио",
     "dailyGoal": "Ежедневная цель",
     "timerInTitle": "Таймер в заголовке",
     "notifications": "Браузерные уведомления",
