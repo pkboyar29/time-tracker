@@ -14,7 +14,6 @@ import RangeSlider from '../common/RangeSlider';
 import CustomSelect from '../common/CustomSelect';
 import ToggleButton from '../common/ToggleButton';
 import QuestionMarkTooltip from '../common/QuestionMarkTooltip';
-import HotkeysInfo from '../HotkeysInfo';
 import Button from '../common/Button';
 
 const SettingsGeneralSection: FC = () => {
@@ -63,13 +62,9 @@ const SettingsGeneralSection: FC = () => {
     if (Notification.permission == 'default') {
       Notification.requestPermission();
     } else if (Notification.permission == 'denied') {
-      alert(
-        'You have blocked notifications. Please enable them manually in your browser settings.'
-      );
+      alert(t('notifications.blocked'));
     } else if (Notification.permission == 'granted') {
-      alert(
-        'If you want to block notifications, do it manually in your browser settings.'
-      );
+      alert(t('notifications.wantToBlock'));
     }
   };
 
@@ -159,8 +154,6 @@ const SettingsGeneralSection: FC = () => {
           </div>
         </div>
       </div>
-
-      <HotkeysInfo />
 
       <div className="flex flex-wrap justify-end gap-3 pb-5">
         <div>

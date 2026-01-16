@@ -3,12 +3,12 @@ import { FC } from 'react';
 const DeleteIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
   return (
     <svg
+      {...props}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
       strokeWidth="1.5"
-      className="size-6 stroke-black dark:stroke-textDark"
-      {...props}
+      className={`size-6 stroke-black dark:stroke-textDark ${props.className}`}
     >
       <path
         strokeLinecap="round"

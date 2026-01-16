@@ -2,12 +2,14 @@ import { FC } from 'react';
 
 interface SettingsNavItemProps {
   label: string;
+  className?: string;
   isActive: boolean;
   onClick: () => void;
 }
 
 const SettingsNavItem: FC<SettingsNavItemProps> = ({
   label,
+  className = '',
   isActive,
   onClick,
 }) => {
@@ -27,6 +29,7 @@ const SettingsNavItem: FC<SettingsNavItemProps> = ({
           dark:bg-white/10 dark:text-white`
         : ''
     }
+    ${className}
   `}
     >
       {label}

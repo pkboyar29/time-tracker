@@ -7,6 +7,14 @@ export interface IUser {
   dailyGoalCompletionNotified: boolean;
   showTimerInTitle: boolean;
   createdDate: Date;
+  audios: IUserAudio[];
+}
+
+export interface IUserAudio {
+  id: string;
+  audioName: string;
+  url: string;
+  current: boolean;
 }
 
 export interface ISignIn {
