@@ -13,7 +13,7 @@ import TimerIcon from '../icons/TimerIcon';
 import BookIcon from '../icons/BookIcon';
 import AnalyticsIcon from '../icons/AnalyticsIcon';
 import SettingsIcon from '../icons/SettingsIcon';
-import SettingsModal from './modals/SettingsModal';
+import SettingsModal from './settings/SettingsModal';
 
 const Sidebar: FC = () => {
   const dispatch = useAppDispatch();

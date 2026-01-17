@@ -276,7 +276,7 @@ async function deleteSession(
     // TODO: удалять session parts, удалять через deleteMany? а в getSessionPartsInDateRange не фильтровать среди удаленных
 
     return {
-      message: 'Deleted successful',
+      message: 'Deleted successfuly',
     };
   } catch (e) {
     throw e;

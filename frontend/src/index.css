@@ -13,7 +13,6 @@
   .red-dot {
     position: relative;
   }
-
   .red-dot::after {
     @apply absolute transform -translate-x-1/2 bg-primary -bottom-3 left-1/2;
     content: '';
@@ -23,24 +22,22 @@
   }
 
   /* range slider */
-
-  .range {
-    @apply bg-[#f0f2f5] dark:bg-surfaceDarkHover;
-    -webkit-appearance: none;
-    box-shadow: inset 0px 0px 4px rgba(0, 0, 0, 0.2);
-    height: 12px;
-    border-radius: 25px;
+  .range-slider-custom {
+    @apply transition-all duration-150;
   }
-
-  .range::-webkit-slider-thumb {
+  /* Стили для бегунка (Chrome, Safari, Edge) */
+  .range-slider-custom::-webkit-slider-thumb {
+    @apply w-5 h-5 transition-transform bg-white border-4 border-solid rounded-full shadow-md appearance-none cursor-pointer border-primary active:scale-110;
     -webkit-appearance: none;
-    @apply appearance-none w-[25px] h-[25px] border-[3px] border-solid border-primary bg-white dark:bg-[#333333] rounded-full cursor-pointer;
+  }
+  /* Стили для Firefox */
+  .range-slider-custom::-moz-range-thumb {
+    @apply w-5 h-5 transition-transform bg-white border-4 border-solid rounded-full shadow-md cursor-pointer border-primary active:scale-110;
   }
 
   .active svg {
     @apply stroke-primary dark:stroke-primary;
   }
-
   .active div {
     @apply text-primary dark:text-primary;
   }
@@ -233,16 +230,20 @@ h6 {
 }
 
 /* scrollbar overlay */
-
 .scroll-overlay {
-  scrollbar-gutter: stable both-edges;
+  /* Стандартные свойства для Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(130, 130, 130, 0.4) transparent;
 }
+/* Для Chrome, Safari и Edge */
 .scroll-overlay::-webkit-scrollbar {
-  height: 10px;
-  background: transparent;
-  position: absolute;
+  width: 10px; /* Ширина вертикального */
+  height: 10px; /* Высота горизонтального */
+}
+.scroll-overlay::-webkit-scrollbar-track {
+  background: transparent; /* Фон дорожки */
 }
 .scroll-overlay::-webkit-scrollbar-thumb {
-  background: rgba(130, 130, 130, 0.4);
-  border-radius: 5px;
+  background-color: rgba(130, 130, 130, 0.4);
+  border-radius: 10px;
 }

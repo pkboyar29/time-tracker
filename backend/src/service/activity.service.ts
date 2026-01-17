@@ -253,7 +253,7 @@ async function deleteActivity(
     await analyticsService.invalidateCache(userId);
 
     return {
-      message: 'Deleted successful',
+      message: 'Deleted successfuly',
     };
   } catch (e) {
     throw e;

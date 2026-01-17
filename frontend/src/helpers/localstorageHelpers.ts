@@ -113,3 +113,25 @@ export const getSelectedSecondsFromLS = (): number => {
 export const setSelectedSecondsInLS = (selectedSeconds: number) => {
   window.localStorage.setItem('selectedSeconds', selectedSeconds.toString());
 };
+
+export const getVolumeFromLS = (): number => {
+  const volumeFromLS = window.localStorage.getItem('volume');
+
+  let volume;
+  if (!volumeFromLS) {
+    volume = 35;
+  } else {
+    volume = Number(volumeFromLS);
+
+    if (isNaN(volume) || volume < 0 || volume > 100) {
+      volume = 35;
+      setVolumeInLS(35);
+    }
+  }
+
+  return volume;
+};
+
+export const setVolumeInLS = (volume: number) => {
+  window.localStorage.setItem('volume', volume.toString());
+};

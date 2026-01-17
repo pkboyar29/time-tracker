@@ -14,7 +14,6 @@ import {
   saveSessionToLS,
   removeSessionFromLS,
 } from '../helpers/localstorageHelpers';
-import { playAudio } from '../helpers/audioHelpers';
 import {
   getRemainingTimeHoursMinutesSeconds,
   getTimerEndDate,
@@ -22,6 +21,7 @@ import {
 import { showSessionCompletedNotification } from '../helpers/notificationHelpers';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { useAudioPlayer } from './useAudioPlayer';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -69,6 +69,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const currentUser = useAppSelector((state) => state.users.user);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
+  const { playAudio, stopAudio } = useAudioPlayer();
 
   const startTimer = async (session: ISession, paused?: boolean) => {
     if (timerState.status == 'running') {
@@ -165,7 +166,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       playAudio();
       showSessionCompletedNotification(
         timerState.session,
-        isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified
+        isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified,
+        () => stopAudio()
       );
       if (isDailyGoalCompleted) {
         updatedUser = {

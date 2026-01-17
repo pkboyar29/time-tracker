@@ -9,6 +9,8 @@
   },
   "settingsModal": {
     "title": "Settings",
+    "general": "General",
+    "audio": "Audio",
     "dailyGoal": "Your daily goal",
     "timerInTitle": "Show timer in title",
     "notifications": "Allow browser notifications",
@@ -16,6 +18,14 @@
     "language": "Language",
     "exportButton": "Export user data to file",
     "logoutButton": "Log out of account"
+  },
+  "audioSettings": {
+    "default": "Default",
+    "userAudios": "User audios",
+    "uploadAudio": "Upload audio",
+    "uploadAudioConstraints": "Formats: mp3, m4r, ogg. Maximum: 5 audio files. File size: up to 3 MB. Duration: up to 45 seconds",
+    "deleteTitle": "Delete",
+    "downloadTitle": "Download"
   },
   "hotkeys": {
     "title": "Hotkeys",
@@ -114,6 +124,7 @@
     "minutes": "Minutes",
     "session": "Session",
     "endsAt": "Ends at",
+    "volume": "Audio volume",
     "notes": "Notes",
     "notesPlaceholder": "Enter your thoughts during this session...",
     "paused": "Paused",
@@ -148,7 +159,10 @@
     "updateSessionButSaved": "A server error occurred while updating session, but it was saved locally",
     "deleteSession": "A server error occurred while deleting session",
     "getSession": "A server error occurred while getting current session",
-    "getAnalytics": "A server error occurred while getting analytics"
+    "getAnalytics": "A server error occurred while getting analytics",
+    "uploadAudio": "A server error occurred while uploading audio",
+    "deleteAudio": "A server error occurred while deleting audio",
+    "updateAudio": "A server error occurred while updating audio"
   },
   "analyticsPage": {
     "invalidFormat": "Invalid date format in URL",
@@ -243,7 +257,9 @@
   },
   "notifications": {
     "sessionCompleted": "Session completed!",
-    "dailyGoalCompleted": "Daily goal completed 🎯 Great job"
+    "dailyGoalCompleted": "Daily goal completed 🎯 Great job",
+    "blocked": "You have blocked notifications. Please enable them manually in your browser settings.",
+    "wantToBlock": "If you want to block notifications, do it manually in your browser settings."
   },
   "notFoundPage": {
     "title": "Page Not Found",
