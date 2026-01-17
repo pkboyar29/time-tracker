@@ -230,16 +230,20 @@ h6 {
 }
 
 /* scrollbar overlay */
-
 .scroll-overlay {
-  scrollbar-gutter: stable both-edges;
+  /* Стандартные свойства для Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(130, 130, 130, 0.4) transparent;
 }
+/* Для Chrome, Safari и Edge */
 .scroll-overlay::-webkit-scrollbar {
-  height: 10px;
-  background: transparent;
-  position: absolute;
+  width: 10px; /* Ширина вертикального */
+  height: 10px; /* Высота горизонтального */
+}
+.scroll-overlay::-webkit-scrollbar-track {
+  background: transparent; /* Фон дорожки */
 }
 .scroll-overlay::-webkit-scrollbar-thumb {
-  background: rgba(130, 130, 130, 0.4);
-  border-radius: 5px;
+  background-color: rgba(130, 130, 130, 0.4);
+  border-radius: 10px;
 }
