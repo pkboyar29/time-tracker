@@ -4,7 +4,6 @@ import { memoryUpload } from '../helpers/multer';
 import { sendErrorResponse } from '../helpers/sendErrorResponse';
 import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { isValidTimeZone } from '../helpers/isValidTimeZone';
-import * as mm from 'music-metadata';
 
 const router = Router();
 
@@ -168,6 +167,7 @@ router.post(
       return res.status(400).send('audio file max size is 3 megabytes');
     }
 
+    const mm = await import('music-metadata');
     const metadata = await mm.parseBuffer(file.buffer);
     if (metadata.format.duration && metadata.format.duration > 45) {
       return res.status(400).send('audio file max duration is 45 seconds');
