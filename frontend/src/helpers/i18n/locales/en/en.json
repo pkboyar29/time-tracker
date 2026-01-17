@@ -124,6 +124,7 @@
     "minutes": "Minutes",
     "session": "Session",
     "endsAt": "Ends at",
+    "volume": "Audio volume",
     "notes": "Notes",
     "notesPlaceholder": "Enter your thoughts during this session...",
     "paused": "Paused",

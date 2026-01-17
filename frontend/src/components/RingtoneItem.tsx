@@ -83,7 +83,6 @@ const RingtoneItem: FC<RingtoneItemProps> = ({
     }
   };
 
-  // TODO: может у меня уже есть какая-то функция, которая так время форматирует?
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60);
     const s = Math.floor(sec % 60);
@@ -97,10 +96,9 @@ const RingtoneItem: FC<RingtoneItemProps> = ({
   };
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3 transition-colors rounded-full bg-surfaceLight dark:bg-surfaceDark hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover">
+    <div className="flex items-center gap-2.5 md:gap-4 px-0.5 py-3 transition-colors rounded-full md:px-4 bg-surfaceLight dark:bg-surfaceDark hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover">
       <audio ref={audioRef} src={audio.url} preload="metadata" />
 
-      {/* TODO: что с версткой у RadioButton, почему круг не отображается посередине? */}
       <RadioButton isChecked={audio.current} onSelect={toggleCurrent} />
 
       <button onClick={togglePlay} className="shrink-0">
@@ -130,7 +128,7 @@ const RingtoneItem: FC<RingtoneItemProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center w-24 gap-2">
+      <div className="flex items-center w-20 gap-2 md:w-24">
         {volume === 0 ? (
           <SpeakerCrossIcon className="fill-gray-400 dark:fill-gray-400 size-5" />
         ) : (

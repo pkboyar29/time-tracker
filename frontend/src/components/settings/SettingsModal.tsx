@@ -21,7 +21,7 @@ const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
 
   return (
     <Modal
-      modalClassnames="pt-5 pb-0"
+      modalClassnames="pt-5 pb-0 md:basis-2/3 xl:basis-2/4 2xl:basis-1/3"
       title={t('settingsModal.title')}
       onCloseModal={onCloseModal}
     >

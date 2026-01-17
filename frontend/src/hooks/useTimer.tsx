@@ -69,7 +69,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const currentUser = useAppSelector((state) => state.users.user);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
-  const { playAudio } = useAudioPlayer();
+  const { playAudio, stopAudio } = useAudioPlayer();
 
   const startTimer = async (session: ISession, paused?: boolean) => {
     if (timerState.status == 'running') {
@@ -166,7 +166,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       playAudio();
       showSessionCompletedNotification(
         timerState.session,
-        isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified
+        isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified,
+        () => stopAudio()
       );
       if (isDailyGoalCompleted) {
         updatedUser = {

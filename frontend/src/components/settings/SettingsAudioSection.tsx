@@ -6,6 +6,7 @@ import { uploadAudio, deleteAudio, updateAudio } from '../../api/userApi';
 import { toast } from 'react-toastify';
 import defaultAudioUrl from '../../assets/discordSound.mp3';
 
+import UploadIcon from '../../icons/UploadIcon';
 import QuestionMarkTooltip from '../common/QuestionMarkTooltip';
 import ActionButton from '../common/ActionButton';
 import RingtoneItem from '../RingtoneItem';
@@ -152,15 +153,14 @@ const SettingsAudioSection: FC = () => {
           disabled={userInfo.audios.length == 5}
           clickHandler={onUploadAudioButtonClick}
           children={
-            <>
-              {/* TODO: попробовать иконку */}
-              {/* <UploadIcon /> */}
+            <div className="flex items-center justify-between gap-2">
+              <UploadIcon className="stroke-primary dark:stroke-primary size-5" />
               {t('audioSettings.uploadAudio')}
-            </>
+            </div>
           }
         />
-        {/* TODO: у этого инпута через html можно огранчиения по типу файла установить? еще может ограничение по размеру */}
         <input
+          accept=".mp3, .m4r, .ogg"
           onChange={onAudioFileInputChange}
           id="audioFileInput"
           type="file"

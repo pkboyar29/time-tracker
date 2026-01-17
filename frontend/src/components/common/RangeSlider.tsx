@@ -1,4 +1,6 @@
 import { FC } from 'react';
+import { colors } from '../../../design-tokens';
+import { getThemeFromLS } from '../../helpers/localstorageHelpers';
 
 interface RangeSliderProps {
   minValue: number;
@@ -13,6 +15,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
   currentValue,
   changeCurrentValue,
 }) => {
+  const percentage = ((currentValue - minValue) / (maxValue - minValue)) * 100;
+
   return (
     <input
       type="range"
@@ -20,7 +24,14 @@ const RangeSlider: FC<RangeSliderProps> = ({
       max={maxValue}
       value={currentValue}
       onChange={(e) => changeCurrentValue(Number(e.target.value))}
-      className="w-full range"
+      style={{
+        background: `linear-gradient(to right, ${
+          colors.primary
+        } ${percentage}%, ${
+          getThemeFromLS() === 'dark' ? '#333' : '#fff'
+        } ${percentage}%)`,
+      }}
+      className="w-full h-[8px] appearance-none rounded-full cursor-pointer range-slider-custom"
     />
   );
 };

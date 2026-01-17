@@ -1,5 +1,6 @@
 import { FC, useMemo } from 'react';
 import { colors } from '../../../design-tokens';
+import { getThemeFromLS } from '../../helpers/localstorageHelpers';
 
 import { CircularProgress, Box } from '@mui/material';
 
@@ -50,7 +51,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
         sx={{
           // 800 если темный
           color: (theme) =>
-            localStorage.getItem('theme') === 'dark'
+            getThemeFromLS() === 'dark'
               ? theme.palette.grey[800]
               : theme.palette.grey[200],
         }}

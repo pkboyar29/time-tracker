@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, useRef, act } from 'react';
+import { FC, useEffect, useState, useRef } from 'react';
 import { fetchSessions, createSession } from '../api/sessionApi';
 import { useQueryCustom } from '../hooks/useQueryCustom';
 import { fetchActivities } from '../api/activityApi';
@@ -17,6 +17,7 @@ import {
 import { useTimer } from '../hooks/useTimer';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import { useAudioPlayer } from '../hooks/useAudioPlayer';
 
 import PrimaryClipLoader from '../components/common/PrimaryClipLoader';
 import PlayIcon from '../icons/PlayIcon';
@@ -31,6 +32,8 @@ import SessionDurationInputs from '../components/SessionDurationInputs';
 import NotesSection from '../components/NotesSection';
 import CustomSelect from '../components/common/CustomSelect';
 import SegmentedControl from '../components/common/SegmentedControl';
+import SpeakerCrossIcon from '../icons/SpeakerCrossIcon';
+import SpeakerWaveIcon from '../icons/SpeakerWaveIcon';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -61,6 +64,7 @@ const TimerPage: FC = () => {
   const [selectedActivityId, setSelectedActivityId] = useState<string>(() =>
     getActivityFromLS()
   );
+  const { currentVolume, updateVolume } = useAudioPlayer();
 
   const {
     startTimer,
@@ -406,6 +410,29 @@ const TimerPage: FC = () => {
                         setSeconds={onSessionInputsChange}
                       />
                     )}
+                  </div>
+                )}
+
+                {isTimerStarted && (
+                  <div className="flex flex-col gap-4">
+                    <span className="block text-lg font-semibold dark:text-textDark">
+                      {t('timerPage.volume')}
+                    </span>
+
+                    <div className="flex items-center gap-2">
+                      {currentVolume === 0 ? (
+                        <SpeakerCrossIcon />
+                      ) : (
+                        <SpeakerWaveIcon />
+                      )}
+
+                      <RangeSlider
+                        minValue={0}
+                        maxValue={100}
+                        currentValue={currentVolume}
+                        changeCurrentValue={updateVolume}
+                      />
+                    </div>
                   </div>
                 )}
 

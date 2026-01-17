@@ -4,7 +4,8 @@ import { t } from 'i18next';
 
 export const showSessionCompletedNotification = (
   currentSession: ISession,
-  dailyGoalCompleted: boolean
+  dailyGoalCompleted: boolean,
+  onClose?: () => void
 ) => {
   if (typeof window.Notification === 'undefined') return;
 
@@ -31,6 +32,11 @@ export const showSessionCompletedNotification = (
           body: notificationBody,
         }
       );
+      if (onClose) {
+        notification.addEventListener('close', () => {
+          onClose();
+        });
+      }
       setTimeout(() => {
         notification.close();
       }, 5000);

@@ -163,9 +163,9 @@ router.post(
         .send('audio file should be mp3, m4r or ogg format');
     }
 
-    const ONE_MB_BYTES = 1_000_000;
-    if (file.size > ONE_MB_BYTES) {
-      return res.status(400).send('audio file max size is 1 megabyte');
+    const THREE_MB_BYTES = 3_000_000;
+    if (file.size > THREE_MB_BYTES) {
+      return res.status(400).send('audio file max size is 3 megabytes');
     }
 
     const metadata = await mm.parseBuffer(file.buffer);
