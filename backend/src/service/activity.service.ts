@@ -233,6 +233,8 @@ async function updateActivityColor(
 
   await activity.save();
 
+  await analyticsService.invalidateCache(userId);
+
   return activity;
 }
 
