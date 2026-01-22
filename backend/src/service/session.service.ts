@@ -40,6 +40,7 @@ const sessionService = {
   getSession,
   createSession,
   updateSession,
+  updateSessionNote,
   deleteSession,
 };
 
@@ -84,7 +85,7 @@ async function getSessionsForActivity({
 // TODO: добавить параметр, при котором не будет искать информацию об активности
 async function getSession(
   sessionId: string,
-  userId: string
+  userId: string,
 ): Promise<mongoose.HydratedDocument<ISession>> {
   const notFoundError = new HttpError(404, 'Session Not Found');
   try {
@@ -115,7 +116,7 @@ async function getSession(
 
 async function createSession(
   sessionDTO: SessionCreateDTO,
-  userId: string
+  userId: string,
 ): Promise<ISession> {
   try {
     if (sessionDTO.activity) {
@@ -126,7 +127,7 @@ async function createSession(
       if (activity.archived) {
         throw new HttpError(
           400,
-          'Cannot create session with archived activity'
+          'Cannot create session with archived activity',
         );
       }
     }
@@ -143,7 +144,7 @@ async function createSession(
       if (validationError.errors.totalTimeSeconds) {
         throw new HttpError(
           400,
-          validationError.errors.totalTimeSeconds.toString()
+          validationError.errors.totalTimeSeconds.toString(),
         );
       }
     }
@@ -151,7 +152,7 @@ async function createSession(
     if (sessionDTO.activity) {
       await activityService.addActivityToLastActivities(
         sessionDTO.activity,
-        userId
+        userId,
       );
     }
 
@@ -164,7 +165,7 @@ async function createSession(
 async function updateSession(
   sessionId: string,
   sessionDTO: SessionUpdateDTO,
-  userId: string
+  userId: string,
 ): Promise<ISession> {
   try {
     if (
@@ -172,7 +173,7 @@ async function updateSession(
     ) {
       throw new HttpError(
         400,
-        'Total time must be greater or equal spent time'
+        'Total time must be greater or equal spent time',
       );
     }
 
@@ -181,14 +182,14 @@ async function updateSession(
     if (session.completed) {
       throw new HttpError(
         400,
-        'You cannot update an already completed session'
+        'You cannot update an already completed session',
       );
     }
 
     if (session.spentTimeSeconds > sessionDTO.spentTimeSeconds) {
       throw new HttpError(
         400,
-        "You cannot reduce a session's spentTimeSeconds"
+        "You cannot reduce a session's spentTimeSeconds",
       );
     }
 
@@ -212,7 +213,7 @@ async function updateSession(
       paused: convertParamToBoolean(
         sessionDTO.isPaused !== undefined
           ? sessionDTO.isPaused.toString()
-          : undefined
+          : undefined,
       ),
       createdDate: Date.now(),
     });
@@ -240,7 +241,7 @@ async function updateSession(
       if (session.activity) {
         const activity = await Activity.findById(session.activity.id);
         const activityGroup = await ActivityGroup.findById(
-          activity!.activityGroup._id
+          activity!.activityGroup._id,
         );
 
         activity!.sessionsAmount += 1;
@@ -261,10 +262,41 @@ async function updateSession(
   }
 }
 
+async function updateSessionNote(
+  sessionId: string,
+  note: string,
+  userId: string,
+): Promise<ISession> {
+  try {
+    const session = await sessionService.getSession(sessionId, userId);
+
+    if (session.completed) {
+      throw new HttpError(
+        400,
+        'You cannot update an already completed session',
+      );
+    }
+
+    session.note = note;
+
+    const validationError = session.validateSync();
+    const noteError = validationError?.errors.note;
+    if (noteError) {
+      throw new HttpError(400, noteError.toString());
+    }
+
+    await session.save();
+
+    return session;
+  } catch (e) {
+    throw e;
+  }
+}
+
 // TODO: делать это атомарно
 async function deleteSession(
   sessionId: string,
-  userId: string
+  userId: string,
 ): Promise<{ message: string }> {
   try {
     const session = await sessionService.getSession(sessionId, userId);
