@@ -35,6 +35,7 @@ const activityService = {
   getActivity,
   createActivity,
   updateActivity,
+  updateActivityColor,
   archiveActivity,
   deleteActivity,
   addActivityToLastActivities,
@@ -85,7 +86,7 @@ async function getSplitActivities({
 
   const userTopActivities = await UserTopActivity.find(
     { userId },
-    'activityId'
+    'activityId',
   ).sort({
     createdDate: -1,
   });
@@ -98,7 +99,7 @@ async function getSplitActivities({
     .filter((a): a is IActivity => Boolean(a));
 
   const remainingActivities = allActivities.filter(
-    (a) => !topActivityIdsSet.has(a._id.toString())
+    (a) => !topActivityIdsSet.has(a._id.toString()),
   );
 
   return {
@@ -118,10 +119,9 @@ async function getActivity({
     }
 
     let activity = await Activity.findById(activityId)
-      .populate<{ activityGroup: PopulatedActivityGroup }>(
-        'activityGroup',
-        'id name'
-      )
+      .populate<{
+        activityGroup: PopulatedActivityGroup;
+      }>('activityGroup', 'id name')
       .exec();
     if (!activity) {
       throw notFoundError;
@@ -142,7 +142,7 @@ async function getActivity({
 
 async function createActivity(
   activityDTO: ActivityCreateDTO,
-  userId: string
+  userId: string,
 ): Promise<IActivity> {
   try {
     await activityGroupService.getActivityGroup({
@@ -152,6 +152,7 @@ async function createActivity(
 
     const newActivity = new Activity({
       name: activityDTO.name,
+      color: activityDTO.color,
       descr: activityDTO.descr,
       activityGroup: activityDTO.activityGroupId,
       user: userId,
@@ -159,11 +160,13 @@ async function createActivity(
 
     const validationError = newActivity.validateSync();
     if (validationError) {
-      if (validationError.errors.name) {
-        throw new HttpError(400, validationError.errors.name.toString());
-      }
-      if (validationError.errors.descr) {
-        throw new HttpError(400, validationError.errors.descr.toString());
+      const fields = ['name', 'descr', 'color'] as const;
+
+      for (const field of fields) {
+        const err = validationError.errors[field];
+        if (err) {
+          throw new HttpError(400, err.toString());
+        }
       }
     }
 
@@ -177,7 +180,7 @@ async function createActivity(
 async function updateActivity(
   activityId: string,
   activityDTO: ActivityUpdateDTO,
-  userId: string
+  userId: string,
 ): Promise<IActivity> {
   try {
     const activity = await activityService.getActivity({
@@ -191,11 +194,13 @@ async function updateActivity(
 
     const validationError = activity.validateSync();
     if (validationError) {
-      if (validationError.errors.name) {
-        throw new HttpError(400, validationError.errors.name.toString());
-      }
-      if (validationError.errors.descr) {
-        throw new HttpError(400, validationError.errors.descr.toString());
+      const fields = ['name', 'descr'] as const;
+
+      for (const field of fields) {
+        const err = validationError.errors[field];
+        if (err) {
+          throw new HttpError(400, err.toString());
+        }
       }
     }
 
@@ -209,17 +214,41 @@ async function updateActivity(
   }
 }
 
+async function updateActivityColor(
+  activityId: string,
+  color: string,
+  userId: string,
+): Promise<IActivity> {
+  const activity = await activityService.getActivity({
+    activityId,
+    userId,
+  });
+  activity.color = color;
+
+  const validationError = activity.validateSync();
+  const colorErr = validationError?.errors.color;
+  if (colorErr) {
+    throw new HttpError(400, colorErr.toString());
+  }
+
+  await activity.save();
+
+  await analyticsService.invalidateCache(userId);
+
+  return activity;
+}
+
 async function archiveActivity(
   activityId: string,
   archived: boolean,
-  userId: string
+  userId: string,
 ): Promise<IActivity> {
   const activity = await activityService.getActivity({
     activityId,
     userId,
   });
   activity.archived = archived;
-  activity.save();
+  await activity.save();
 
   return activity;
 }
@@ -227,7 +256,7 @@ async function archiveActivity(
 // TODO: делать это атомарно
 async function deleteActivity(
   activityId: string,
-  userId: string
+  userId: string,
 ): Promise<{ message: string }> {
   try {
     const activity = await activityService.getActivity({
@@ -243,7 +272,7 @@ async function deleteActivity(
     await Promise.all(
       sessions.map(async (session) => {
         await sessionService.deleteSession(session._id.toString(), userId);
-      })
+      }),
     );
 
     await activity.updateOne({
@@ -279,7 +308,7 @@ async function addActivityToLastActivities(activityId: string, userId: string) {
   });
 
   const foundLastActivity = userLastActivities.find((lastActivity) =>
-    lastActivity.activityId.equals(activityId)
+    lastActivity.activityId.equals(activityId),
   );
   if (!foundLastActivity) {
     if (userLastActivities.length == 5) {

@@ -1,6 +1,7 @@
 export interface IActivity {
   id: string;
   name: string;
+  color: string;
   descr?: string;
   archived: boolean;
   sessionsAmount: number;
@@ -13,6 +14,7 @@ export interface IActivity {
 
 export interface IActivityCreate {
   name: string;
+  color: string;
   descr?: string;
   activityGroupId: string;
 }
@@ -26,4 +28,9 @@ export interface IActivityUpdate {
 export interface IActivityArchive {
   id: string;
   archived: boolean;
+}
+
+export interface IActivityColor {
+  id: string;
+  color: string;
 }

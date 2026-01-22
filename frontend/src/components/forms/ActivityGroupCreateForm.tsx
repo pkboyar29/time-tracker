@@ -15,7 +15,6 @@ interface ActivityGroupCreateFormProps {
 
 interface ActivityGroupFields {
   name: string;
-  descr?: string;
 }
 
 const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
@@ -61,22 +60,6 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
         }}
         errorMessage={
           typeof errors.name?.message === 'string' ? errors.name.message : ''
-        }
-      />
-
-      <Input
-        isTextArea={true}
-        fieldName="descr"
-        register={register}
-        placeHolder={t('createGroupModal.descrPlaceholder')}
-        validationRules={{
-          maxLength: {
-            value: 500,
-            message: t('createGroupModal.maxError', { count: 500 }),
-          },
-        }}
-        errorMessage={
-          typeof errors.descr?.message === 'string' ? errors.descr.message : ''
         }
       />
 

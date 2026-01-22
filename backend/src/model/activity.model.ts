@@ -4,6 +4,7 @@ export interface IActivity {
   _id: Types.ObjectId;
   name: string;
   descr?: string;
+  color: string;
   user: Types.ObjectId;
   activityGroup: { _id: Types.ObjectId; name: string };
   createdDate: Date;
@@ -26,6 +27,16 @@ const activitySchema = new Schema<IActivity>({
     type: String,
     maxLength: [500, 'Description maximum length is 500 characters'],
     required: false,
+  },
+  color: {
+    type: String,
+    maxLength: [9, 'Color maximum length is 9 characters'], // hex с альфа каналом
+    minLength: [7, 'Color minimum length is 7 characters'],
+    match: [
+      /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/,
+      'Color must be a valid HEX value (#RRGGBB or #RRGGBBAA)',
+    ],
+    required: true,
   },
   activityGroup: {
     type: Schema.Types.ObjectId,

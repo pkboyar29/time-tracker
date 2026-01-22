@@ -16,7 +16,7 @@ interface ActivityCreateFormProps {
 
 interface ActivityFields {
   name: string;
-  descr?: string;
+  color: string;
 }
 
 const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
@@ -28,9 +28,14 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ActivityFields>({
     mode: 'onBlur',
+    defaultValues: {
+      name: '',
+      color: '#3B82F6',
+    },
   });
 
   const onSubmit = async (data: ActivityFields) => {
@@ -66,21 +71,29 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
         }
       />
 
-      <Input
-        isTextArea={true}
-        fieldName="descr"
-        register={register}
-        placeHolder={t('createActivityModal.descrPlaceholder')}
-        validationRules={{
-          maxLength: {
-            value: 500,
-            message: t('createActivityModal.maxError', { count: 500 }),
-          },
-        }}
-        errorMessage={
-          typeof errors.descr?.message === 'string' ? errors.descr.message : ''
-        }
-      />
+      <div className="flex items-center gap-3">
+        <label
+          htmlFor="color"
+          className="text-sm text-gray-600 dark:text-textDark"
+        >
+          {t('createActivityModal.colorLabel')}
+        </label>
+
+        <div className="flex items-center gap-3">
+          <input
+            type="color"
+            id="color"
+            {...register('color', {
+              required: true,
+            })}
+            className="p-0 rounded-md cursor-pointer dark:bg-surfaceDark"
+          />
+
+          <span className="font-mono text-sm text-gray-400 opacity-60">
+            {watch('color')}
+          </span>
+        </div>
+      </div>
 
       <div className="ml-auto w-fit">
         <Button type="submit">{t('createActivityModal.button')}</Button>

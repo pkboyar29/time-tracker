@@ -43,7 +43,7 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const data = await activityService.createActivity(
       req.body,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -56,7 +56,20 @@ router.put('/:id', async (req: Request, res: Response) => {
     const data = await activityService.updateActivity(
       req.params.id,
       req.body,
-      res.locals.userId
+      res.locals.userId,
+    );
+    res.status(200).json(data);
+  } catch (e) {
+    sendErrorResponse(e, res);
+  }
+});
+
+router.patch('/:id/color', async (req: Request, res: Response) => {
+  try {
+    const data = await activityService.updateActivityColor(
+      req.params.id,
+      req.body.color ?? '',
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -69,7 +82,7 @@ router.patch('/:id/archive', async (req: Request, res: Response) => {
     const data = await activityService.archiveActivity(
       req.params.id,
       convertParamToBoolean(req.body.archived),
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -81,7 +94,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const data = await activityService.deleteActivity(
       req.params.id,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {

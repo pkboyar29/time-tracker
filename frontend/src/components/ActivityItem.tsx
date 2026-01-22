@@ -6,6 +6,7 @@ import {
 import {
   updateActivity,
   archiveActivity,
+  updateActivityColor,
   deleteActivity,
 } from '../api/activityApi';
 import { getTimeHMS } from '../helpers/timeHelpers';
@@ -49,6 +50,10 @@ const ActivityItem: FC<ActivityBoxProps> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [name, setName] = useState<string>(activityCommon.name);
 
+  const [color, setColor] = useState<string>(
+    isActivity ? activityCommon.color : '',
+  );
+
   const [dropdown, setDropdown] = useState<boolean>(false);
 
   const inputChangeHandler = async (e: React.FormEvent<HTMLInputElement>) => {
@@ -76,7 +81,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
             : t('activityItem.successfulUnarchive'),
           {
             type: 'success',
-          }
+          },
         );
       } catch (e) {
         toast(t('serverErrors.archiveActivity'), {
@@ -106,7 +111,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           : t('serverErrors.deleteGroup'),
         {
           type: 'error',
-        }
+        },
       );
     }
   };
@@ -135,6 +140,25 @@ const ActivityItem: FC<ActivityBoxProps> = ({
       } catch (e) {
         toast(t('serverErrors.updateGroup'), { type: 'error' });
         setName(activityCommon.name);
+      }
+    }
+  };
+
+  const onColorInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setColor(e.target.value);
+  };
+
+  const onColorInputBlur = async (e: React.FocusEvent<HTMLInputElement>) => {
+    if (isActivity && activityCommon.color !== color) {
+      try {
+        const updatedData = await updateActivityColor({
+          id: activityCommon.id,
+          color,
+        });
+
+        afterUpdateHandler(updatedData);
+      } catch (e) {
+        toast(t('serverErrors.updateActivityColor'), { type: 'error' });
       }
     }
   };
@@ -186,20 +210,29 @@ const ActivityItem: FC<ActivityBoxProps> = ({
       )}
 
       <div className="p-5 bg-surfaceLight dark:bg-surfaceDark border border-gray-300/80 dark:border-gray-500 border-solid rounded-xl w-[320px] min-h-[150px] flex flex-col">
-        <div className="flex items-start justify-between flex-1 gap-5">
-          <input
-            value={name}
-            onChange={inputChangeHandler}
-            onBlur={editButtonClickHandler}
-            className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-primary dark:text-textDark ${
-              isEditing
-                ? 'border-gray-300 dark:border-gray-500'
-                : 'border-transparent text-ellipsis'
-            }`}
-            minLength={1}
-            maxLength={50}
-            disabled={!isEditing}
-          />
+        <div className="flex items-start justify-between flex-1 gap-4">
+          <div className="flex items-center gap-2">
+            {isActivity && (
+              <span
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ backgroundColor: activityCommon.color }}
+              />
+            )}
+
+            <input
+              value={name}
+              onChange={inputChangeHandler}
+              onBlur={editButtonClickHandler}
+              className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-primary dark:text-textDark ${
+                isEditing
+                  ? 'border-gray-300 dark:border-gray-500'
+                  : 'border-transparent text-ellipsis'
+              }`}
+              minLength={1}
+              maxLength={50}
+              disabled={!isEditing}
+            />
+          </div>
 
           <div className="flex gap-2">
             <button
@@ -222,6 +255,27 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
                 <DropdownMenu dropdown={dropdown} setDropdown={setDropdown}>
                   <div className="flex flex-col gap-1.5">
+                    <label
+                      htmlFor={`color:${activityCommon.id}`}
+                      title={t('activityItem.colorTooltip')}
+                      className="cursor-pointer flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
+                    >
+                      <div className="truncate w-28 dark:text-textDark">
+                        {t('activityItem.colorTitle')}
+                      </div>
+
+                      <div className="w-6 h-6 overflow-hidden rounded-md">
+                        <input
+                          id={`color:${activityCommon.id}`}
+                          type="color"
+                          className="w-full h-full p-0 border-none cursor-pointer dark:bg-surfaceDark"
+                          value={color}
+                          onChange={onColorInputChange}
+                          onBlur={onColorInputBlur}
+                        />
+                      </div>
+                    </label>
+
                     <button
                       className="flex items-center justify-between px-1.5 py-1 text-left transition duration-300 rounded-lg gap-7 hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
                       title={t('activityItem.archiveTooltip')}

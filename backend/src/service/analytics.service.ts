@@ -82,7 +82,7 @@ function getSessionsStatistics({
   const spentTimeSeconds = sessionParts.reduce(
     (spentTimeSeconds, sessionPart) =>
       spentTimeSeconds + sessionPart.spentTimeSeconds,
-    0
+    0,
   );
 
   const pausedSessionParts = sessionParts.filter((part) => part.paused);
@@ -108,6 +108,7 @@ function getActivityDistributions({
   activityDistributions = userActivities.map((activity) => {
     const activityDistribution: ActivityDistribution = {
       activityName: activity.name,
+      activityColor: activity.color,
       sessionStatistics: {
         sessionsAmount: 0,
         spentTimeSeconds: 0,
@@ -125,7 +126,7 @@ function getActivityDistributions({
   completedSessions.forEach((session) => {
     if (session.activity) {
       const adIndex: number = activityDistributions.findIndex(
-        (ad) => ad.activityName === session.activity.name
+        (ad) => ad.activityName === session.activity.name,
       );
       activityDistributions[adIndex].sessionStatistics.sessionsAmount += 1;
       activitiesSessions += 1;
@@ -136,7 +137,7 @@ function getActivityDistributions({
   sessionParts.forEach((part) => {
     if (part.session.activity) {
       const adIndex: number = activityDistributions.findIndex(
-        (ad) => ad.activityName === part.session.activity.name
+        (ad) => ad.activityName === part.session.activity.name,
       );
 
       activityDistributions[adIndex].sessionStatistics.spentTimeSeconds +=
@@ -155,7 +156,7 @@ function getActivityDistributions({
     (ad) =>
       ad.sessionStatistics.sessionsAmount > 0 ||
       ad.sessionStatistics.spentTimeSeconds > 0 ||
-      ad.sessionStatistics.pausedAmount > 0
+      ad.sessionStatistics.pausedAmount > 0,
   );
 
   // set without activity to activityDistributions
@@ -165,6 +166,7 @@ function getActivityDistributions({
   if (woActivitySeconds > 0) {
     activityDistributions.push({
       activityName: 'Without activity',
+      activityColor: '#9CA3AF',
       sessionStatistics: {
         sessionsAmount: woActivitySessions,
         spentTimeSeconds: woActivitySeconds,
@@ -178,7 +180,7 @@ function getActivityDistributions({
 
 function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
   let daysInRange = Math.ceil(
-    (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24) // ms in one day
+    (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24), // ms in one day
   );
   if (daysInRange == 1) {
     return 'hour';
@@ -274,11 +276,11 @@ function getTimeBars({
 
     const barSpentTimeSeconds = filteredSessionParts.reduce(
       (total: number, sessionPart) => total + sessionPart.spentTimeSeconds,
-      0
+      0,
     );
     const barSessionsAmount = filteredSessions.length;
     const barPausedAmount = filteredSessionParts.filter(
-      (part) => part.paused
+      (part) => part.paused,
     ).length;
 
     if (nextPeriod.getTime() > endOfRange.getTime()) {
@@ -490,19 +492,19 @@ async function getAnalyticsForRangeWithCache({
 }
 
 function mergeSessionStatistics(
-  statisticsList: SessionStatistics[]
+  statisticsList: SessionStatistics[],
 ): SessionStatistics {
   const sessionsAmount = statisticsList.reduce(
     (amount, statistics) => amount + statistics.sessionsAmount,
-    0
+    0,
   );
   const spentTimeSeconds = statisticsList.reduce(
     (seconds, statistics) => seconds + statistics.spentTimeSeconds,
-    0
+    0,
   );
   const pausedAmount = statisticsList.reduce(
     (amount, statistics) => amount + statistics.pausedAmount,
-    0
+    0,
   );
 
   return {
@@ -527,27 +529,18 @@ function mergeActivityDistributions({
     finalAd = finalAd.map((ad) => {
       for (let j = 0; j < adsList[i].length; j++) {
         if (ad.activityName === adsList[i][j].activityName) {
-          const {
-            activityName,
-            sessionStatistics: {
-              sessionsAmount,
-              spentTimeSeconds,
-              pausedAmount,
-            },
-          } = adsList[i][j];
+          const { activityName, sessionStatistics } = adsList[i][j];
           adsList[i] = adsList[i].filter(
-            (ad) => ad.activityName !== activityName
+            (ad) => ad.activityName !== activityName,
           );
 
           return {
             activityName: ad.activityName,
-            sessionStatistics: {
-              sessionsAmount:
-                ad.sessionStatistics.sessionsAmount + sessionsAmount,
-              spentTimeSeconds:
-                ad.sessionStatistics.spentTimeSeconds + spentTimeSeconds,
-              pausedAmount: ad.sessionStatistics.pausedAmount + pausedAmount,
-            },
+            activityColor: ad.activityColor,
+            sessionStatistics: analyticsService.mergeSessionStatistics([
+              ad.sessionStatistics,
+              sessionStatistics,
+            ]),
           };
         }
       }
@@ -588,7 +581,7 @@ function mergeAnalytics({
 
   const finalObjTimeBarType = analyticsService.getTimeBarType(
     finalObjStartOfRange,
-    finalObjEndOfRange
+    finalObjEndOfRange,
   );
   let finalObjTimeBars: TimeBar[] = [];
   if (finalObjTimeBarType == 'hour') {
@@ -684,7 +677,7 @@ function mergeAnalytics({
     } else if (
       analyticsService.getTimeBarType(
         new Date(untilTodayTimeBars[0].startOfRange),
-        new Date(untilTodayTimeBars[0].endOfRange)
+        new Date(untilTodayTimeBars[0].endOfRange),
       ) == 'hour'
     ) {
       // TODO: странная проверка, надо ее сделать нормальной
@@ -692,17 +685,17 @@ function mergeAnalytics({
       const untilTodayTimeBarsSessionsAmount = untilTodayTimeBars.reduce(
         (totalSessionsAmount, timeBar) =>
           totalSessionsAmount + timeBar.sessionStatistics.sessionsAmount,
-        0
+        0,
       );
       const untilTodayTimeBarsSpentSeconds = untilTodayTimeBars.reduce(
         (totalSpentTimeSeconds, timeBar) =>
           totalSpentTimeSeconds + timeBar.sessionStatistics.spentTimeSeconds,
-        0
+        0,
       );
       const untilTodayTimeBarsPausedAmount = untilTodayTimeBars.reduce(
         (totalPausedAmount, timeBar) =>
           totalPausedAmount + timeBar.sessionStatistics.pausedAmount,
-        0
+        0,
       );
       const untilTodayTimeBarsAd = analyticsService.mergeActivityDistributions({
         adsList: [

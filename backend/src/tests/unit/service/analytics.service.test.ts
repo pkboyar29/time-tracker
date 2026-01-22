@@ -139,6 +139,7 @@ describe('analyticsService.getTimeBars', () => {
     {
       _id: new Types.ObjectId(),
       name: 'Reading',
+      color: '#fff000',
       user: new Types.ObjectId(),
       activityGroup: {
         _id: new Types.ObjectId(),
@@ -154,6 +155,7 @@ describe('analyticsService.getTimeBars', () => {
     {
       _id: new Types.ObjectId(),
       name: 'Coding',
+      color: '#000fff',
       user: new Types.ObjectId(),
       activityGroup: {
         _id: new Types.ObjectId(),
@@ -584,6 +586,7 @@ describe('analyticsService.getTimeBars', () => {
     expect(result[0].activityDistribution).toEqual([
       {
         activityName: 'Reading',
+        activityColor: '#fff000',
         sessionStatistics: {
           spentTimeSeconds: 1800,
           sessionsAmount: 1,
@@ -594,6 +597,7 @@ describe('analyticsService.getTimeBars', () => {
     expect(result[1].activityDistribution).toEqual([
       {
         activityName: 'Reading',
+        activityColor: '#fff000',
         sessionStatistics: {
           spentTimeSeconds: 900,
           sessionsAmount: 1,
@@ -602,6 +606,7 @@ describe('analyticsService.getTimeBars', () => {
       },
       {
         activityName: 'Coding',
+        activityColor: '#000fff',
         sessionStatistics: {
           spentTimeSeconds: 0,
           sessionsAmount: 1,
@@ -617,6 +622,7 @@ describe('analyticsService.getActivityDistributions', () => {
     {
       _id: new Types.ObjectId(),
       name: 'Reading',
+      color: '#fff000',
       user: new Types.ObjectId(),
       activityGroup: {
         _id: new Types.ObjectId(),
@@ -632,6 +638,7 @@ describe('analyticsService.getActivityDistributions', () => {
     {
       _id: new Types.ObjectId(),
       name: 'Coding',
+      color: '#000fff',
       user: new Types.ObjectId(),
       activityGroup: {
         _id: new Types.ObjectId(),
@@ -722,6 +729,7 @@ describe('analyticsService.getActivityDistributions', () => {
     expect(result).toEqual([
       {
         activityName: 'Reading',
+        activityColor: '#fff000',
         sessionStatistics: {
           spentTimeSeconds: 100,
           sessionsAmount: 2,
@@ -730,6 +738,7 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         activityName: 'Coding',
+        activityColor: '#000fff',
         sessionStatistics: {
           spentTimeSeconds: 400,
           sessionsAmount: 1,
@@ -738,6 +747,7 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         activityName: 'Without activity',
+        activityColor: '#9CA3AF',
         sessionStatistics: {
           spentTimeSeconds: 100, // 400 - (100 + 200)
           sessionsAmount: 1, // 4 - 3
@@ -787,7 +797,7 @@ describe('analyticsService.getActivityDistributions', () => {
     expect(result).not.toEqual(
       expect.arrayContaining([
         expect.objectContaining({ activityName: 'Without activity' }),
-      ])
+      ]),
     );
   });
 });
@@ -872,6 +882,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
   const firstAd: ActivityDistribution[] = [
     {
       activityName: 'A',
+      activityColor: '#aaa000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 100,
@@ -880,6 +891,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     },
     {
       activityName: 'B',
+      activityColor: '#bbb000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 200,
@@ -890,6 +902,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
   const secondAd: ActivityDistribution[] = [
     {
       activityName: 'A',
+      activityColor: '#aaa000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 50,
@@ -898,6 +911,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     },
     {
       activityName: 'C',
+      activityColor: '#ccc000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 100,
@@ -908,6 +922,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
   const thirdAd: ActivityDistribution[] = [
     {
       activityName: 'A',
+      activityColor: '#aaa000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 50,
@@ -916,6 +931,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     },
     {
       activityName: 'B',
+      activityColor: '#bbb000',
       sessionStatistics: {
         sessionsAmount: 2,
         spentTimeSeconds: 200,
@@ -924,6 +940,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     },
     {
       activityName: 'D',
+      activityColor: '#ddd000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 100,
@@ -934,6 +951,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
   const fourthAd: ActivityDistribution[] = [
     {
       activityName: 'B',
+      activityColor: '#bbb000',
       sessionStatistics: {
         sessionsAmount: 2,
         spentTimeSeconds: 100,
@@ -942,6 +960,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     },
     {
       activityName: 'D',
+      activityColor: '#ddd000',
       sessionStatistics: {
         sessionsAmount: 0,
         spentTimeSeconds: 300,
@@ -950,6 +969,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     },
     {
       activityName: 'E',
+      activityColor: '#eee000',
       sessionStatistics: {
         sessionsAmount: 2,
         spentTimeSeconds: 200,
@@ -982,6 +1002,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityA = result.find((a) => a.activityName === 'A');
     expect(activityA).toEqual({
       activityName: 'A',
+      activityColor: '#aaa000',
       sessionStatistics: {
         sessionsAmount: 2,
         spentTimeSeconds: 150,
@@ -992,6 +1013,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityB = result.find((a) => a.activityName === 'B');
     expect(activityB).toEqual({
       activityName: 'B',
+      activityColor: '#bbb000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 200,
@@ -1002,6 +1024,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityC = result.find((a) => a.activityName === 'C');
     expect(activityC).toEqual({
       activityName: 'C',
+      activityColor: '#ccc000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 100,
@@ -1019,6 +1042,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityA = result.find((a) => a.activityName === 'A');
     expect(activityA).toEqual({
       activityName: 'A',
+      activityColor: '#aaa000',
       sessionStatistics: {
         sessionsAmount: 3,
         spentTimeSeconds: 200,
@@ -1029,6 +1053,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityB = result.find((a) => a.activityName === 'B');
     expect(activityB).toEqual({
       activityName: 'B',
+      activityColor: '#bbb000',
       sessionStatistics: {
         sessionsAmount: 5,
         spentTimeSeconds: 500,
@@ -1039,6 +1064,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityC = result.find((a) => a.activityName === 'C');
     expect(activityC).toEqual({
       activityName: 'C',
+      activityColor: '#ccc000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 100,
@@ -1049,6 +1075,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityD = result.find((a) => a.activityName === 'D');
     expect(activityD).toEqual({
       activityName: 'D',
+      activityColor: '#ddd000',
       sessionStatistics: {
         sessionsAmount: 1,
         spentTimeSeconds: 400,
@@ -1059,6 +1086,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
     const activityE = result.find((a) => a.activityName === 'E');
     expect(activityE).toEqual({
       activityName: 'E',
+      activityColor: '#eee000',
       sessionStatistics: {
         sessionsAmount: 2,
         spentTimeSeconds: 200,
@@ -1093,6 +1121,7 @@ describe('analyticsService.mergeAnalytics', () => {
     activityDistribution: [
       {
         activityName: 'A',
+        activityColor: '#aaa000',
         sessionStatistics: {
           sessionsAmount: 1,
           spentTimeSeconds: 100,
@@ -1101,6 +1130,7 @@ describe('analyticsService.mergeAnalytics', () => {
       },
       {
         activityName: 'B',
+        activityColor: '#bbb000',
         sessionStatistics: {
           sessionsAmount: 1,
           spentTimeSeconds: 200,
@@ -1141,6 +1171,7 @@ describe('analyticsService.mergeAnalytics', () => {
     activityDistribution: [
       {
         activityName: 'A',
+        activityColor: '#aaa000',
         sessionStatistics: {
           sessionsAmount: 1,
           spentTimeSeconds: 50,
@@ -1149,6 +1180,7 @@ describe('analyticsService.mergeAnalytics', () => {
       },
       {
         activityName: 'C',
+        activityColor: '#ccc000',
         sessionStatistics: {
           sessionsAmount: 0,
           spentTimeSeconds: 100,
@@ -1268,6 +1300,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -1332,6 +1365,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -1457,6 +1491,7 @@ describe('analyticsService.mergeAnalytics', () => {
       activityDistribution: [
         {
           activityName: 'A',
+          activityColor: '#aaa000',
           sessionStatistics: {
             sessionsAmount: 1,
             spentTimeSeconds: 100,
@@ -1465,6 +1500,7 @@ describe('analyticsService.mergeAnalytics', () => {
         },
         {
           activityName: 'C',
+          activityColor: '#ccc000',
           sessionStatistics: {
             sessionsAmount: 2,
             spentTimeSeconds: 200,
@@ -1484,6 +1520,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'A',
+              activityColor: '#aaa000',
               sessionStatistics: {
                 sessionsAmount: 1,
                 spentTimeSeconds: 100,
@@ -1503,6 +1540,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'C',
+              activityColor: '#ccc000',
               sessionStatistics: {
                 sessionsAmount: 2,
                 spentTimeSeconds: 200,
@@ -1535,6 +1573,7 @@ describe('analyticsService.mergeAnalytics', () => {
       activityDistribution: [
         {
           activityName: 'A',
+          activityColor: '#aaa000',
           sessionStatistics: {
             sessionsAmount: 1,
             spentTimeSeconds: 100,
@@ -1554,6 +1593,7 @@ describe('analyticsService.mergeAnalytics', () => {
       activityDistribution: [
         {
           activityName: 'C',
+          activityColor: '#ccc000',
           sessionStatistics: {
             sessionsAmount: 2,
             spentTimeSeconds: 200,
@@ -1622,6 +1662,7 @@ describe('analyticsService.mergeAnalytics', () => {
       activityDistribution: [
         {
           activityName: 'A',
+          activityColor: '#aaa000',
           sessionStatistics: {
             sessionsAmount: 1,
             spentTimeSeconds: 50,
@@ -1630,6 +1671,7 @@ describe('analyticsService.mergeAnalytics', () => {
         },
         {
           activityName: 'C',
+          activityColor: '#ccc000',
           sessionStatistics: {
             sessionsAmount: 0,
             spentTimeSeconds: 100,
@@ -1685,6 +1727,7 @@ describe('analyticsService.mergeAnalytics', () => {
       activityDistribution: [
         {
           activityName: 'A',
+          activityColor: '#aaa000',
           sessionStatistics: {
             sessionsAmount: 1,
             spentTimeSeconds: 100,
@@ -1693,6 +1736,7 @@ describe('analyticsService.mergeAnalytics', () => {
         },
         {
           activityName: 'B',
+          activityColor: '#bbb000',
           sessionStatistics: {
             sessionsAmount: 1,
             spentTimeSeconds: 200,
@@ -1897,6 +1941,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -1905,6 +1950,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -1984,6 +2030,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -1992,6 +2039,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -2071,6 +2119,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -2079,6 +2128,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -2179,6 +2229,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -2187,6 +2238,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -2243,6 +2295,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'A',
+              activityColor: '#aaa000',
               sessionStatistics: {
                 sessionsAmount: 1,
                 spentTimeSeconds: 200,
@@ -2262,6 +2315,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'A',
+              activityColor: '#aaa000',
               sessionStatistics: {
                 sessionsAmount: 1,
                 spentTimeSeconds: 200,
@@ -2281,6 +2335,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'A',
+              activityColor: '#aaa000',
               sessionStatistics: {
                 sessionsAmount: 1,
                 spentTimeSeconds: 200,
@@ -2314,6 +2369,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 4,
               spentTimeSeconds: 650,
@@ -2322,6 +2378,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -2401,6 +2458,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -2409,6 +2467,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -2450,7 +2509,6 @@ describe('analyticsService.mergeAnalytics', () => {
     ]);
   });
 
-  // FOCUS: fix
   it('should create correct month time bars when the range starts today', () => {
     jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
       startOfToday,
@@ -2489,6 +2547,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -2497,6 +2556,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -2553,6 +2613,7 @@ describe('analyticsService.mergeAnalytics', () => {
       activityDistribution: [
         {
           activityName: 'A',
+          activityColor: '#aaa000',
           sessionStatistics: {
             sessionsAmount: 3,
             spentTimeSeconds: 300,
@@ -2561,6 +2622,7 @@ describe('analyticsService.mergeAnalytics', () => {
         },
         {
           activityName: 'C',
+          activityColor: '#ccc000',
           sessionStatistics: {
             sessionsAmount: 2,
             spentTimeSeconds: 200,
@@ -2580,6 +2642,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'A',
+              activityColor: '#aaa000',
               sessionStatistics: {
                 sessionsAmount: 0,
                 spentTimeSeconds: 0,
@@ -2588,6 +2651,7 @@ describe('analyticsService.mergeAnalytics', () => {
             },
             {
               activityName: 'C',
+              activityColor: '#ccc000',
               sessionStatistics: {
                 sessionsAmount: 1,
                 spentTimeSeconds: 100,
@@ -2607,6 +2671,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'A',
+              activityColor: '#aaa000',
               sessionStatistics: {
                 sessionsAmount: 3,
                 spentTimeSeconds: 300,
@@ -2615,6 +2680,7 @@ describe('analyticsService.mergeAnalytics', () => {
             },
             {
               activityName: 'C',
+              activityColor: '#ccc000',
               sessionStatistics: {
                 sessionsAmount: 1,
                 spentTimeSeconds: 100,
@@ -2658,6 +2724,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 3,
               spentTimeSeconds: 300,
@@ -2666,6 +2733,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 2,
               spentTimeSeconds: 200,
@@ -2685,6 +2753,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -2693,6 +2762,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,
@@ -2729,6 +2799,7 @@ describe('analyticsService.mergeAnalytics', () => {
       activityDistribution: [
         {
           activityName: 'A',
+          activityColor: '#aaa000',
           sessionStatistics: {
             sessionsAmount: 3,
             spentTimeSeconds: 300,
@@ -2737,6 +2808,7 @@ describe('analyticsService.mergeAnalytics', () => {
         },
         {
           activityName: 'C',
+          activityColor: '#ccc000',
           sessionStatistics: {
             sessionsAmount: 2,
             spentTimeSeconds: 200,
@@ -2756,6 +2828,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'A',
+              activityColor: '#aaa000',
               sessionStatistics: {
                 sessionsAmount: 3,
                 spentTimeSeconds: 300,
@@ -2764,6 +2837,7 @@ describe('analyticsService.mergeAnalytics', () => {
             },
             {
               activityName: 'C',
+              activityColor: '#ccc000',
               sessionStatistics: {
                 sessionsAmount: 0,
                 spentTimeSeconds: 0,
@@ -2783,6 +2857,7 @@ describe('analyticsService.mergeAnalytics', () => {
           activityDistribution: [
             {
               activityName: 'A',
+              activityColor: '#aaa000',
               sessionStatistics: {
                 sessionsAmount: 0,
                 spentTimeSeconds: 0,
@@ -2791,6 +2866,7 @@ describe('analyticsService.mergeAnalytics', () => {
             },
             {
               activityName: 'C',
+              activityColor: '#ccc000',
               sessionStatistics: {
                 sessionsAmount: 2,
                 spentTimeSeconds: 200,
@@ -2824,6 +2900,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 3,
               spentTimeSeconds: 300,
@@ -2832,6 +2909,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 0,
@@ -2851,6 +2929,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 0,
@@ -2859,6 +2938,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 2,
               spentTimeSeconds: 200,
@@ -2878,6 +2958,7 @@ describe('analyticsService.mergeAnalytics', () => {
         activityDistribution: [
           {
             activityName: 'A',
+            activityColor: '#aaa000',
             sessionStatistics: {
               sessionsAmount: 1,
               spentTimeSeconds: 50,
@@ -2886,6 +2967,7 @@ describe('analyticsService.mergeAnalytics', () => {
           },
           {
             activityName: 'C',
+            activityColor: '#ccc000',
             sessionStatistics: {
               sessionsAmount: 0,
               spentTimeSeconds: 100,

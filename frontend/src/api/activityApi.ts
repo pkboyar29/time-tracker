@@ -5,6 +5,7 @@ import {
   IActivityCreate,
   IActivityUpdate,
   IActivityArchive,
+  IActivityColor,
 } from '../ts/interfaces/Activity/IActivity';
 
 const mapResponseData = (unmappedActivity: any): IActivity => {
@@ -33,13 +34,13 @@ export const fetchActivities = async (): Promise<{
   return {
     topActivities: data.topActivities.map((a: any) => mapResponseData(a)),
     remainingActivities: data.remainingActivities.map((a: any) =>
-      mapResponseData(a)
+      mapResponseData(a),
     ),
   };
 };
 
 export const fetchGroupActivities = async (
-  activityGroupId: string
+  activityGroupId: string,
 ): Promise<IActivity[]> => {
   const searchParams = new URLSearchParams();
   searchParams.append('activityGroupId', activityGroupId);
@@ -56,7 +57,7 @@ export const fetchActivity = async (activityId: string): Promise<IActivity> => {
 };
 
 export const createActivity = async (
-  payload: IActivityCreate
+  payload: IActivityCreate,
 ): Promise<IActivity> => {
   const { data } = await axios.post('/activities', payload);
 
@@ -64,7 +65,7 @@ export const createActivity = async (
 };
 
 export const updateActivity = async (
-  payload: IActivityUpdate
+  payload: IActivityUpdate,
 ): Promise<IActivity> => {
   const { data } = await axios.put(`/activities/${payload.id}`, payload);
 
@@ -72,14 +73,25 @@ export const updateActivity = async (
 };
 
 export const archiveActivity = async (
-  payload: IActivityArchive
+  payload: IActivityArchive,
 ): Promise<string> => {
   const { data } = await axios.patch(
     `/activities/${payload.id}/archive`,
-    payload
+    payload,
   );
 
   return data;
+};
+
+export const updateActivityColor = async (
+  payload: IActivityColor,
+): Promise<IActivity> => {
+  const { data } = await axios.patch(
+    `/activities/${payload.id}/color`,
+    payload,
+  );
+
+  return mapResponseData(data);
 };
 
 export const deleteActivity = async (activityId: string): Promise<string> => {

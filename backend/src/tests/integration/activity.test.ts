@@ -15,7 +15,7 @@ describe('Activity controller endpoints', () => {
 
     await authorizedRequest(getAccessToken())
       .post('/activities/')
-      .send({ name: 'name', activityGroupId: _id })
+      .send({ name: 'name', color: '#fff000', activityGroupId: _id })
       .expect(200);
   });
 
@@ -32,7 +32,7 @@ describe('Activity controller endpoints', () => {
 
     const createActivityResponse = await authorizedRequest(getAccessToken())
       .post('/activities/')
-      .send({ name: 'name', activityGroupId: _id });
+      .send({ name: 'name', color: '#fff000', activityGroupId: _id });
 
     await authorizedRequest(getAccessToken())
       .put(`/activities/${createActivityResponse.body._id}`)
@@ -53,7 +53,7 @@ describe('Activity controller endpoints', () => {
 
     const createActivityResponse = await authorizedRequest(getAccessToken())
       .post('/activities/')
-      .send({ name: 'name', activityGroupId: _id });
+      .send({ name: 'name', color: '#fff000', activityGroupId: _id });
 
     await authorizedRequest(getAccessToken())
       .delete(`/activities/${createActivityResponse.body._id}`)
@@ -67,13 +67,17 @@ describe('Activity controller endpoints', () => {
       .post('/activity-groups/')
       .send({ name: 'name' });
 
-    await authorizedRequest(getAccessToken())
-      .post('/activities/')
-      .send({ name: 'activity name 1', activityGroupId: _id });
+    await authorizedRequest(getAccessToken()).post('/activities/').send({
+      name: 'activity name 1',
+      color: '#fff000',
+      activityGroupId: _id,
+    });
 
-    await authorizedRequest(getAccessToken())
-      .post('/activities/')
-      .send({ name: 'activity name 2', activityGroupId: _id });
+    await authorizedRequest(getAccessToken()).post('/activities/').send({
+      name: 'activity name 2',
+      color: '#000fff',
+      activityGroupId: _id,
+    });
 
     await authorizedRequest(getAccessToken())
       .get('/activities/')
@@ -92,7 +96,11 @@ describe('Activity controller endpoints', () => {
 
     const createActivityResponse = await authorizedRequest(getAccessToken())
       .post('/activities/')
-      .send({ name: 'activity name 1', activityGroupId: _id });
+      .send({
+        name: 'activity name 1',
+        color: '#fff000',
+        activityGroupId: _id,
+      });
 
     await authorizedRequest(getAccessToken())
       .get(`/activities/${createActivityResponse.body._id}`)
