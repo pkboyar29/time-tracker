@@ -27,7 +27,7 @@ const Input: FC<InputProps> = ({
   enlarged = false,
 }) => {
   const [toggledType, setToggledType] = useState<'text' | 'password'>(
-    inputType
+    inputType,
   );
 
   return (

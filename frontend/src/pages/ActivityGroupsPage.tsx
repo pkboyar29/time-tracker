@@ -44,6 +44,7 @@ const ActivityGroupsPage: FC = () => {
     <>
       {createModal && (
         <Modal
+          modalClassnames="md:basis-2/5 xl:basis-1/5"
           title={t('createGroupModal.title')}
           onCloseModal={() => setCreateModal(false)}
         >
@@ -51,7 +52,7 @@ const ActivityGroupsPage: FC = () => {
             afterSubmitHandler={(newActivityGroup) => {
               queryClient.setQueryData(
                 ['activityGroups'],
-                (oldData: IActivityGroup[]) => [newActivityGroup, ...oldData]
+                (oldData: IActivityGroup[]) => [newActivityGroup, ...oldData],
               );
 
               setCreateModal(false);
@@ -106,13 +107,13 @@ const ActivityGroupsPage: FC = () => {
               {activityGroups.filter((activityGroup) =>
                 activityGroup.name
                   .toLowerCase()
-                  .includes(searchString.toLowerCase())
+                  .includes(searchString.toLowerCase()),
               ).length !== 0 ? (
                 activityGroups
                   .filter((activityGroup) =>
                     activityGroup.name
                       .toLowerCase()
-                      .includes(searchString.toLowerCase())
+                      .includes(searchString.toLowerCase()),
                   )
                   .map((activityGroup) => (
                     <ActivityItem
@@ -123,8 +124,10 @@ const ActivityGroupsPage: FC = () => {
                           ['activityGroups'],
                           (oldData: IActivityGroup[]) =>
                             oldData.map((group) =>
-                              group.id == updatedGroup.id ? updatedGroup : group
-                            )
+                              group.id == updatedGroup.id
+                                ? updatedGroup
+                                : group,
+                            ),
                         );
                       }}
                       afterDeleteHandler={(deletedItemId) => {
@@ -132,8 +135,8 @@ const ActivityGroupsPage: FC = () => {
                           ['activityGroups'],
                           (oldData: IActivityGroup[]) =>
                             oldData.filter(
-                              (group) => group.id !== deletedItemId
-                            )
+                              (group) => group.id !== deletedItemId,
+                            ),
                         );
                       }}
                     />

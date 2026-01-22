@@ -72,7 +72,7 @@ const ActivityGroupPage: FC = () => {
       queryClient.setQueryData(
         ['activities', activityGroupId],
         (oldData: IActivity[]) =>
-          oldData.map((activity) => ({ ...activity, archived: true }))
+          oldData.map((activity) => ({ ...activity, archived: true })),
       );
     } catch (e) {
       toast(t('serverErrors.archiveAllActivites'), {
@@ -85,6 +85,7 @@ const ActivityGroupPage: FC = () => {
     <>
       {createModal && (
         <Modal
+          modalClassnames="md:basis-2/5 xl:basis-1/5"
           title={
             <div>
               <span className="font-bold">{currentActivityGroup?.name}</span>:{' '}
@@ -100,7 +101,7 @@ const ActivityGroupPage: FC = () => {
               afterSubmitHandler={(newActivity) => {
                 queryClient.setQueryData(
                   ['activities', activityGroupId],
-                  (oldData: IActivity[]) => [newActivity, ...oldData]
+                  (oldData: IActivity[]) => [newActivity, ...oldData],
                 );
 
                 setCreateModal(false);
@@ -182,13 +183,15 @@ const ActivityGroupPage: FC = () => {
 
             <div className="flex flex-wrap justify-center gap-4 md:justify-start mt-7">
               {activities.filter((activity) =>
-                activity.name.toLowerCase().includes(searchString.toLowerCase())
+                activity.name
+                  .toLowerCase()
+                  .includes(searchString.toLowerCase()),
               ).length !== 0 ? (
                 activities
                   .filter((activity) =>
                     activity.name
                       .toLowerCase()
-                      .includes(searchString.toLowerCase())
+                      .includes(searchString.toLowerCase()),
                   )
                   .map((activity) => (
                     <ActivityItem
@@ -201,8 +204,8 @@ const ActivityGroupPage: FC = () => {
                             oldData.map((activity) =>
                               activity.id == updatedActivity.id
                                 ? updatedActivity
-                                : activity
-                            )
+                                : activity,
+                            ),
                         );
                       }}
                       afterDeleteHandler={(deletedItemId) => {
@@ -210,8 +213,8 @@ const ActivityGroupPage: FC = () => {
                           ['activities', activityGroupId],
                           (oldData: IActivity[]) =>
                             oldData.filter(
-                              (activity) => activity.id !== deletedItemId
-                            )
+                              (activity) => activity.id !== deletedItemId,
+                            ),
                         );
                       }}
                     />

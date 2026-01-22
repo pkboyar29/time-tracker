@@ -72,6 +72,8 @@
   "activityItem": {
     "editTooltip": "Edit",
     "deleteTooltip": "Delete",
+    "colorTitle": "Color",
+    "colorTooltip": "Change color",
     "archiveTitle": "Archive",
     "archiveTooltip": "An archived activity will remain in analytics, but you cannot start session with this activity",
     "unarchiveTitle": "Unarchive",
@@ -107,7 +109,8 @@
     "namePlaceholder": "Enter name",
     "descrPlaceholder": "Enter description (optional)",
     "requiredError": "Field is required",
-    "maxError": "Maximum symbols: {{count}}"
+    "maxError": "Maximum symbols: {{count}}",
+    "colorLabel": "Color"
   },
   "createSessionModal": {
     "title": "starting new session",
@@ -162,7 +165,8 @@
     "getAnalytics": "A server error occurred while getting analytics",
     "uploadAudio": "A server error occurred while uploading audio",
     "deleteAudio": "A server error occurred while deleting audio",
-    "updateAudio": "A server error occurred while updating audio"
+    "updateAudio": "A server error occurred while updating audio",
+    "updateActivityColor": "A server error occurred while updating activity color"
   },
   "analyticsPage": {
     "invalidFormat": "Invalid date format in URL",
