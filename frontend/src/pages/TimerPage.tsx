@@ -44,7 +44,7 @@ const TimerPage: FC = () => {
   const unsyncedSessionFromLS = getSessionFromLS('unsyncedSession');
 
   const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
-    []
+    [],
   );
   const [isSessionsBlockOpen, setIsSessionsBlockOpen] =
     useState<boolean>(false);
@@ -56,13 +56,13 @@ const TimerPage: FC = () => {
     });
 
   const [durationMode, setDurationMode] = useState<'rangeSlider' | 'inputs'>(
-    'rangeSlider'
+    'rangeSlider',
   );
   const [selectedSeconds, setSelectedSeconds] = useState<number>(() =>
-    getSelectedSecondsFromLS()
+    getSelectedSecondsFromLS(),
   );
   const [selectedActivityId, setSelectedActivityId] = useState<string>(() =>
-    getActivityFromLS()
+    getActivityFromLS(),
   );
   const { currentVolume, updateVolume } = useAudioPlayer();
 
@@ -74,7 +74,8 @@ const TimerPage: FC = () => {
     timerEndDate,
     startTimestamp,
     startSpentSeconds,
-  } = useTimer();
+    currentTick: { seconds: currentSeconds },
+  } = useTimer(true);
   const isTimerStarted = timerState.status != 'idle';
   const [spentMs, setSpentMs] = useState<number>(0);
   const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -104,7 +105,7 @@ const TimerPage: FC = () => {
         setSpentMs(newSpentMs);
       }, 100);
     } else if (timerState.status == 'paused') {
-      setSpentMs(timerState.session.spentTimeSeconds * 1000); // set milliseconds rounded to full seconds
+      setSpentMs(currentSeconds * 1000); // set milliseconds rounded to full seconds
     } else {
       setSpentMs(0);
     }
@@ -152,7 +153,7 @@ const TimerPage: FC = () => {
           unsyncedSessionFromLS.totalTimeSeconds
         ) {
           sessions = sessions.filter(
-            (session) => session.id != unsyncedSessionFromLS.id
+            (session) => session.id != unsyncedSessionFromLS.id,
           );
         } else {
           sessions = sessions.map((session) => {
@@ -223,7 +224,7 @@ const TimerPage: FC = () => {
                   valuePercent={0}
                   label={`${getRemainingTimeHoursMinutesSeconds(
                     selectedSeconds,
-                    0
+                    0,
                   )}`}
                   size="verybig"
                 />
@@ -235,7 +236,7 @@ const TimerPage: FC = () => {
                   }
                   label={`${getRemainingTimeHoursMinutesSeconds(
                     timerState.session.totalTimeSeconds,
-                    timerState.session.spentTimeSeconds
+                    currentSeconds,
                   )}`}
                   size="verybig"
                 />
@@ -345,7 +346,7 @@ const TimerPage: FC = () => {
                               },
                               {
                                 optGroupName: `${t(
-                                  'timerPage.lastActivities'
+                                  'timerPage.lastActivities',
                                 )} ⭐`,
                                 color: 'red',
                                 options: activitiesToChoose.topActivities,

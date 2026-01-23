@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
 import BurgerButton from './components/BurgerButton';
+import TimerTitleUpdater from './components/TimerTitleUpdater';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -105,6 +106,8 @@ const App: FC = () => {
         position="top-right"
         limit={3}
       />
+
+      <TimerTitleUpdater />
 
       <div
         id="app"

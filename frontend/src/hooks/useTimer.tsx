@@ -6,6 +6,7 @@ import {
   ReactNode,
   FC,
   useContext,
+  useSyncExternalStore,
 } from 'react';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import { setUser } from '../redux/slices/userSlice';
@@ -14,14 +15,12 @@ import {
   saveSessionToLS,
   removeSessionFromLS,
 } from '../helpers/localstorageHelpers';
-import {
-  getRemainingTimeHoursMinutesSeconds,
-  getTimerEndDate,
-} from '../helpers/timeHelpers';
+import { getTimerEndDate } from '../helpers/timeHelpers';
 import { showSessionCompletedNotification } from '../helpers/notificationHelpers';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { useAudioPlayer } from './useAudioPlayer';
+import { timerTickStore } from './timerTickStore';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -30,6 +29,11 @@ const timerWorker = new Worker(new URL('./timerWorker.js', import.meta.url));
 type TimerState =
   | { status: 'idle'; session: null }
   | { status: 'running' | 'paused'; session: ISession };
+
+export type TimerTick = {
+  sessionId: string;
+  seconds: number;
+};
 
 interface TimerContextType {
   startTimer: (session: ISession, paused?: boolean) => Promise<void>;
@@ -56,6 +60,7 @@ interface TimerProviderProps {
 }
 
 const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
+  // Don't rely on spentTimeSeconds in timerState. It does not change during timer working
   const [timerState, setTimerState] = useState<TimerState>({
     status: 'idle',
     session: null,
@@ -74,7 +79,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const startTimer = async (session: ISession, paused?: boolean) => {
     if (timerState.status == 'running') {
       try {
-        await updateSession(timerState.session, true);
+        await updateSession(
+          {
+            ...timerState.session,
+            spentTimeSeconds: timerTickStore.getSnapshot().seconds,
+          },
+          true,
+        );
       } catch (e) {
         toast(t('serverErrors.updateSession'), {
           type: 'error',
@@ -94,11 +105,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       timerEndDate.current = getTimerEndDate(
         newStartTimestamp,
         session.spentTimeSeconds,
-        session.totalTimeSeconds
+        session.totalTimeSeconds,
       );
 
       setTimerState({ status: 'running', session });
     }
+
+    timerTickStore.setTick(session.id, session.spentTimeSeconds);
   };
 
   const toggleTimer = async () => {
@@ -109,7 +122,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       setTimerState({ session: timerState.session, status: 'paused' });
 
       try {
-        await updateSession(timerState.session, true);
+        await updateSession(
+          {
+            ...timerState.session,
+            spentTimeSeconds: timerTickStore.getSnapshot().seconds,
+          },
+          true,
+        );
       } catch (e) {
         toast(t('serverErrors.updateSessionButSaved'), {
           type: 'error',
@@ -118,12 +137,12 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     } else if (timerState.status == 'paused') {
       const newStartTimestamp = Date.now();
       startTimestamp.current = newStartTimestamp;
-      startSpentSeconds.current = timerState.session.spentTimeSeconds;
+      startSpentSeconds.current = timerTickStore.getSnapshot().seconds;
 
       timerEndDate.current = getTimerEndDate(
         newStartTimestamp,
-        timerState.session.spentTimeSeconds,
-        timerState.session.totalTimeSeconds
+        timerTickStore.getSnapshot().seconds,
+        timerState.session.totalTimeSeconds,
       );
 
       setTimerState({ session: timerState.session, status: 'running' });
@@ -132,9 +151,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const stopTimer = async (shouldUpdateSession?: boolean) => {
     if (timerState.status != 'idle') {
-      const sessionToUpdate = timerState.session;
+      const sessionToUpdate: ISession = {
+        ...timerState.session,
+        spentTimeSeconds: timerTickStore.getSnapshot().seconds,
+      };
 
       setTimerState({ status: 'idle', session: null });
+      timerTickStore.setTick('', 0);
       startTimestamp.current = 0;
       startSpentSeconds.current = 0;
       removeSessionFromLS('session');
@@ -156,6 +179,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     if (timerState.status != 'idle') {
       let updatedUser = {
         ...currentUser!,
+        // TODO: вот мы завершили сессию на половину, обновили страницу, в todaySpentTimeSeconds времени уже больше, и мы к этому значению прибавляем totalTimeSeconds? вообще не та цифра будет
         todaySpentTimeSeconds:
           currentUser!.todaySpentTimeSeconds +
           timerState.session.totalTimeSeconds,
@@ -167,7 +191,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       showSessionCompletedNotification(
         timerState.session,
         isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified,
-        () => stopAudio()
+        () => stopAudio(),
       );
       if (isDailyGoalCompleted) {
         updatedUser = {
@@ -202,17 +226,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         action: 'run',
       });
       timerWorker.onmessage = (ev) => {
-        setTimerState((prev) => {
-          if (prev.status == 'idle') return prev;
-
-          return {
-            status: 'running',
-            session: {
-              ...prev.session,
-              spentTimeSeconds: ev.data,
-            },
-          };
-        });
+        timerTickStore.setTick(timerState.session.id, ev.data);
 
         if (ev.data >= timerState.session.totalTimeSeconds) {
           finishTimer();
@@ -227,7 +241,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
               ...timerState.session,
               spentTimeSeconds: ev.data,
             },
-            'session'
+            'session',
           );
         }
 
@@ -249,34 +263,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     }
   }, [timerState.status, timerState.session?.id]);
 
-  useEffect(() => {
-    if (timerState.status != 'idle' && currentUser) {
-      const timerInTitle = currentUser.showTimerInTitle
-        ? `${getRemainingTimeHoursMinutesSeconds(
-            timerState.session.totalTimeSeconds,
-            timerState.session.spentTimeSeconds,
-            true
-          )}`
-        : '';
-
-      if (timerState.status == 'running') {
-        document.title = `${timerInTitle} ${t('title.focus')} | ${
-          timerState.session.activity
-            ? timerState.session.activity.name
-            : t('withoutActivity')
-        }`;
-      } else if (timerState.status == 'paused') {
-        document.title = `${timerInTitle} ${t('title.paused')} | ${
-          timerState.session.activity
-            ? timerState.session.activity.name
-            : t('withoutActivity')
-        }`;
-      }
-    } else {
-      document.title = 'Session Tracker';
-    }
-  }, [timerState.status, timerState.session, currentUser]);
-
   return (
     <TimerContext.Provider
       value={{
@@ -296,4 +282,21 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
 export default TimerProvider;
 
-export const useTimer = () => useContext(TimerContext);
+export const useTimer = <T extends boolean = false>(
+  needSeconds?: T,
+): T extends true
+  ? TimerContextType & { currentTick: TimerTick }
+  : TimerContextType => {
+  const context = useContext(TimerContext);
+
+  if (!needSeconds) {
+    return context as any;
+  }
+
+  const currentTick = useSyncExternalStore(
+    timerTickStore.subscribe,
+    timerTickStore.getSnapshot,
+  );
+
+  return { ...context, currentTick } as any;
+};

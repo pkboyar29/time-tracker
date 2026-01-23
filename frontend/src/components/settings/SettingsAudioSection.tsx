@@ -32,7 +32,7 @@ const SettingsAudioSection: FC = () => {
     document.getElementById('audioFileInput')?.click();
   };
   const onAudioFileInputChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -41,7 +41,7 @@ const SettingsAudioSection: FC = () => {
       const newUserAudio = await uploadAudio(file);
 
       dispatch(
-        setUser({ ...userInfo, audios: [...userInfo.audios, newUserAudio] })
+        setUser({ ...userInfo, audios: [...userInfo.audios, newUserAudio] }),
       );
     } catch (e) {
       toast(t('serverErrors.uploadAudio'), { type: 'error' });
@@ -58,7 +58,7 @@ const SettingsAudioSection: FC = () => {
         setUser({
           ...userInfo,
           audios: userInfo.audios.filter((a) => a.id !== audioId),
-        })
+        }),
       );
     } catch (e) {
       toast(t('serverErrors.deleteAudio'), { type: 'error' });
@@ -67,7 +67,7 @@ const SettingsAudioSection: FC = () => {
 
   const onSelectAudioButtonClick = async (
     audioId: string,
-    newCurrent: boolean
+    newCurrent: boolean,
   ) => {
     try {
       if (audioId === '') {
@@ -84,7 +84,7 @@ const SettingsAudioSection: FC = () => {
             setUser({
               ...userInfo,
               audios: newUserAudios,
-            })
+            }),
           );
         }
       } else {
@@ -100,7 +100,7 @@ const SettingsAudioSection: FC = () => {
             setUser({
               ...userInfo,
               audios: newUserAudios,
-            })
+            }),
           );
         } else {
           const newUserAudios = userInfo.audios.map((a) => ({
@@ -112,7 +112,7 @@ const SettingsAudioSection: FC = () => {
             setUser({
               ...userInfo,
               audios: newUserAudios,
-            })
+            }),
           );
         }
       }
@@ -122,7 +122,7 @@ const SettingsAudioSection: FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2 ">
+    <div className="flex flex-col gap-2">
       <h3 className="text-sm font-semibold tracking-wide text-gray-600 uppercase dark:text-textDarkSecondary">
         {t('audioSettings.default')}
       </h3>

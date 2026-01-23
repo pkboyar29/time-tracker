@@ -22,7 +22,11 @@ const Sidebar: FC = () => {
   const [settingsModal, setSettingsModal] = useState<boolean>(false);
   const [startOfWeek, endOfWeek] = getWeekRange(new Date());
 
-  const { timerState } = useTimer();
+  const {
+    timerState,
+    currentTick: { seconds: currentSeconds },
+  } = useTimer(true);
+
   const isSidebarOpen = useAppSelector((state) => state.window.isSidebarOpen);
 
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -89,7 +93,7 @@ const Sidebar: FC = () => {
                 <div className="px-4 py-2 text-sm shadow-sm rounded-xl bg-primary/10 text-primary dark:bg-surfaceDark dark:text-textDark">
                   {getRemainingTimeHoursMinutesSeconds(
                     timerState.session.totalTimeSeconds,
-                    timerState.session.spentTimeSeconds
+                    currentSeconds,
                   )}
                 </div>
               )}

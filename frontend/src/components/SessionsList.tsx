@@ -20,17 +20,10 @@ interface SessionsListProps {
   setIsSessionsBlockOpen?: (state: boolean) => void;
   isExpandable: boolean;
   sessions: ISession[];
-  updateSessionsListHandler: (updatedSessions: ISession[]) => void;
+  updateSessionsListHandler: (
+    updater: (prev: ISession[]) => ISession[],
+  ) => void;
 }
-
-const getSessionsListAfterSessionUpdate = (
-  oldList: ISession[],
-  updatedSession: ISession
-) => {
-  return oldList.map((session) =>
-    updatedSession.id == session.id ? updatedSession : session
-  );
-};
 
 const SessionsList: FC<SessionsListProps> = ({
   title,
@@ -42,12 +35,12 @@ const SessionsList: FC<SessionsListProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { timerState, startTimer } = useTimer();
+  const { timerState, startTimer, currentTick } = useTimer(true);
   const sessionFromLS = getSessionFromLS('session');
 
   // removing current session from the list
   const sessionsWithoutCurrent = sessions.filter(
-    (session) => session.id !== sessionFromLS?.id
+    (session) => session.id !== sessionFromLS?.id,
   );
 
   const [deleteModal, setDeleteModal] = useState<ModalState>({
@@ -58,29 +51,39 @@ const SessionsList: FC<SessionsListProps> = ({
   const [less, setLess] = useState<boolean>(false); // less - true, more - false
 
   useEffect(() => {
-    if (timerState.session) {
-      const isCurrentSessionInList = sessions.find(
-        (s) => s.id === timerState.session.id
+    if (!timerState.session) {
+      return;
+    }
+    if (timerState.session.id !== currentTick.sessionId) {
+      return;
+    }
+    const currentSession = timerState.session;
+
+    updateSessionsListHandler((prev) => {
+      const currentSessionIndex = prev.findIndex(
+        (s) => s.id === currentSession.id,
       );
 
-      if (isCurrentSessionInList) {
-        if (
-          timerState.session.spentTimeSeconds ==
-          timerState.session.totalTimeSeconds
-        ) {
-          updateSessionsListHandler(
-            sessions.filter((s) => s.id !== timerState.session.id)
-          );
+      if (currentSessionIndex !== -1) {
+        if (currentTick.seconds >= currentSession.totalTimeSeconds) {
+          return prev.filter((s) => s.id !== currentSession.id);
         } else {
-          updateSessionsListHandler(
-            getSessionsListAfterSessionUpdate(sessions, timerState.session)
-          );
+          return prev.map((s) => {
+            if (s.id === currentSession.id) {
+              return {
+                ...currentSession,
+                spentTimeSeconds: currentTick.seconds,
+              };
+            } else {
+              return s;
+            }
+          });
         }
-      } else {
-        updateSessionsListHandler([...sessions, timerState.session]);
       }
-    }
-  }, [timerState.session]);
+
+      return [...prev, currentSession];
+    });
+  }, [timerState.session?.id, currentTick.seconds]);
 
   const handleSessionClick = async (session: ISession) => {
     startTimer(session);
@@ -93,8 +96,8 @@ const SessionsList: FC<SessionsListProps> = ({
   const handleSessionDelete = async (sessionId: string) => {
     try {
       await deleteSession(sessionId);
-      updateSessionsListHandler(
-        sessions.filter((session) => session.id !== sessionId)
+      updateSessionsListHandler((prev) =>
+        prev.filter((s) => s.id !== sessionId),
       );
 
       setDeleteModal({

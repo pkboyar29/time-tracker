@@ -1,6 +1,6 @@
 import { FC, useState, useEffect } from 'react';
 import { useTimer } from '../hooks/useTimer';
-import { updateSession } from '../api/sessionApi';
+import { updateSessionNote } from '../api/sessionApi';
 import { useTranslation } from 'react-i18next';
 import { setNoteInLS, getNoteFromLS } from '../helpers/localstorageHelpers';
 
@@ -18,12 +18,12 @@ const NotesSection: FC = () => {
 
     const sessionNoteFromLS = getNoteFromLS(timerState.session.id);
     setNote(
-      sessionNoteFromLS ? sessionNoteFromLS : timerState.session.note ?? ''
+      sessionNoteFromLS ? sessionNoteFromLS : (timerState.session.note ?? ''),
     );
   }, [timerState.session?.id]);
 
   const handleChangeNoteInput = (
-    event: React.ChangeEvent<HTMLTextAreaElement>
+    event: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     if (!timerState.session) return;
 
@@ -37,7 +37,7 @@ const NotesSection: FC = () => {
     // TODO: будет работать только если мы не изменяли ввод. Если же его немного изменить, то все, timerState.session.note мы не изменяем, и соответственно проверка всегда будет false
     if (note === timerState.session.note) return;
 
-    await updateSession(timerState.session);
+    await updateSessionNote(timerState.session.id);
   };
 
   return (
