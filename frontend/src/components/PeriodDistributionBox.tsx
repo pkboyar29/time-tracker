@@ -37,7 +37,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
   const timeBar: ITimeBar = payload[0]?.payload;
 
   const userInfo = useAppSelector((state) => state.users.user);
-  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 0;
+  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 1_000_000;
 
   return (
     <div
@@ -73,7 +73,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                       t,
                       {
                         short: false,
-                      }
+                      },
                     )}
                   </p>
 
@@ -97,7 +97,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                       t,
                       {
                         short: false,
-                      }
+                      },
                     )}
                   </p>
 
@@ -131,7 +131,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                               t,
                               {
                                 short: true,
-                              }
+                              },
                             )}
                             ,{' '}
                             {t('plural.sessions', {
@@ -141,7 +141,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                           </div>
                         </div>
                       </div>
-                    )
+                    ),
                   )}
                 </>
               )}
@@ -228,7 +228,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   }, [analytics.sessionStatistics, displayTimeBars]);
 
   const userInfo = useAppSelector((state) => state.users.user);
-  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 0;
+  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 1_000_000;
 
   // const [isBarAnimationActive, setIsBarAnimationActive] = useState(true);
   // useEffect(() => {
@@ -317,8 +317,8 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                     bar.sessionStatistics.spentTimeSeconds >= dailyGoalSeconds
                       ? colors.primary
                       : localStorage.getItem('theme') === 'dark'
-                      ? '#424242'
-                      : '#E5E7EB';
+                        ? '#424242'
+                        : '#E5E7EB';
 
                   return <Cell key={index} fill={color} />;
                 })}
@@ -331,7 +331,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                     dataKey={(bar) => {
                       const barActivityItem = bar.adItems.find(
                         (item: IActivityDistribution) =>
-                          item.activityName === ad.activityName
+                          item.activityName === ad.activityName,
                       );
                       return barActivityItem
                         ? barActivityItem.sessionStatistics.spentTimeSeconds
