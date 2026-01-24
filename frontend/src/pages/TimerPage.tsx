@@ -14,7 +14,7 @@ import {
   getReadableTime,
   getTimeHHmmFromDate,
 } from '../helpers/timeHelpers';
-import { useTimer } from '../hooks/useTimer';
+import { useTimerWithSeconds } from '../hooks/useTimer';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
@@ -74,8 +74,7 @@ const TimerPage: FC = () => {
     timerEndDate,
     startTimestamp,
     startSpentSeconds,
-    currentTick: { seconds: currentSeconds },
-  } = useTimer(true);
+  } = useTimerWithSeconds();
   const isTimerStarted = timerState.status != 'idle';
   const [spentMs, setSpentMs] = useState<number>(0);
   const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -105,7 +104,8 @@ const TimerPage: FC = () => {
         setSpentMs(newSpentMs);
       }, 100);
     } else if (timerState.status == 'paused') {
-      setSpentMs(currentSeconds * 1000); // set milliseconds rounded to full seconds
+      // TODO: проверить работоспособность
+      setSpentMs(timerState.session.spentTimeSeconds * 1000); // set milliseconds rounded to full seconds
     } else {
       setSpentMs(0);
     }
@@ -236,7 +236,7 @@ const TimerPage: FC = () => {
                   }
                   label={`${getRemainingTimeHoursMinutesSeconds(
                     timerState.session.totalTimeSeconds,
-                    currentSeconds,
+                    timerState.session.spentTimeSeconds,
                   )}`}
                   size="verybig"
                 />

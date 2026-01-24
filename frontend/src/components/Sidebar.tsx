@@ -1,6 +1,6 @@
 import { FC, useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useTimer } from '../hooks/useTimer';
+import { useTimerWithSeconds } from '../hooks/useTimer';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import { setIsSidebarOpen } from '../redux/slices/windowSlice';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
@@ -22,10 +22,7 @@ const Sidebar: FC = () => {
   const [settingsModal, setSettingsModal] = useState<boolean>(false);
   const [startOfWeek, endOfWeek] = getWeekRange(new Date());
 
-  const {
-    timerState,
-    currentTick: { seconds: currentSeconds },
-  } = useTimer(true);
+  const { timerState } = useTimerWithSeconds();
 
   const isSidebarOpen = useAppSelector((state) => state.window.isSidebarOpen);
 
@@ -89,11 +86,11 @@ const Sidebar: FC = () => {
         <ul className="flex flex-col items-center justify-between flex-1">
           <div className="flex flex-col items-center gap-5">
             <li className="flex flex-col items-center min-h-[32px]">
-              {timerState.status != 'idle' && (
+              {timerState.status !== 'idle' && (
                 <div className="px-4 py-2 text-sm shadow-sm rounded-xl bg-primary/10 text-primary dark:bg-surfaceDark dark:text-textDark">
                   {getRemainingTimeHoursMinutesSeconds(
                     timerState.session.totalTimeSeconds,
-                    currentSeconds,
+                    timerState.session.spentTimeSeconds,
                   )}
                 </div>
               )}

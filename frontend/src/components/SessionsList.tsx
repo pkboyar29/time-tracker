@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from 'react';
-import { useTimer } from '../hooks/useTimer';
+import { useTimerWithSeconds } from '../hooks/useTimer';
 import { deleteSession } from '../api/sessionApi';
 import { getSessionFromLS } from '../helpers/localstorageHelpers';
 import { toast } from 'react-toastify';
@@ -35,7 +35,7 @@ const SessionsList: FC<SessionsListProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { timerState, startTimer, currentTick } = useTimer(true);
+  const { timerState, startTimer, stopTimer } = useTimerWithSeconds();
   const sessionFromLS = getSessionFromLS('session');
 
   // removing current session from the list
@@ -54,9 +54,6 @@ const SessionsList: FC<SessionsListProps> = ({
     if (!timerState.session) {
       return;
     }
-    if (timerState.session.id !== currentTick.sessionId) {
-      return;
-    }
     const currentSession = timerState.session;
 
     updateSessionsListHandler((prev) => {
@@ -65,15 +62,14 @@ const SessionsList: FC<SessionsListProps> = ({
       );
 
       if (currentSessionIndex !== -1) {
-        if (currentTick.seconds >= currentSession.totalTimeSeconds) {
+        if (
+          currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
+        ) {
           return prev.filter((s) => s.id !== currentSession.id);
         } else {
           return prev.map((s) => {
             if (s.id === currentSession.id) {
-              return {
-                ...currentSession,
-                spentTimeSeconds: currentTick.seconds,
-              };
+              return currentSession;
             } else {
               return s;
             }
@@ -83,7 +79,7 @@ const SessionsList: FC<SessionsListProps> = ({
 
       return [...prev, currentSession];
     });
-  }, [timerState.session?.id, currentTick.seconds]);
+  }, [timerState.session?.id, timerState.session?.spentTimeSeconds]);
 
   const handleSessionClick = async (session: ISession) => {
     startTimer(session);

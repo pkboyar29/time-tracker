@@ -1,11 +1,11 @@
 import { FC, useEffect } from 'react';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
-import { useTimer } from '../hooks/useTimer';
+import { useTimerWithSeconds } from '../hooks/useTimer';
 import { useAppSelector } from '../redux/store';
 import { useTranslation } from 'react-i18next';
 
 const TimerTitleUpdater: FC = () => {
-  const { timerState, currentSeconds } = useTimer(true);
+  const { timerState } = useTimerWithSeconds();
   const currentUser = useAppSelector((state) => state.users.user);
   const { t } = useTranslation();
 
@@ -14,7 +14,7 @@ const TimerTitleUpdater: FC = () => {
       const timerInTitle = currentUser.showTimerInTitle
         ? `${getRemainingTimeHoursMinutesSeconds(
             timerState.session.totalTimeSeconds,
-            currentSeconds,
+            timerState.session.spentTimeSeconds,
             true,
           )}`
         : '';
@@ -35,7 +35,12 @@ const TimerTitleUpdater: FC = () => {
     } else {
       document.title = 'Session Tracker';
     }
-  }, [timerState.status, timerState.session, currentSeconds, currentUser]);
+  }, [
+    timerState.status,
+    timerState.session,
+    timerState.session?.spentTimeSeconds,
+    currentUser,
+  ]);
 
   return <></>;
 };

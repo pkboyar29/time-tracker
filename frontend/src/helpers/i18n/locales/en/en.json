@@ -136,7 +136,9 @@
   },
   "sessionItem": {
     "duration": "Duration",
-    "activity": "Activity"
+    "activity": "Activity",
+    "disabledPlayButtonTitle": "Cannot start a session while another is running",
+    "deleteButtonTitle": "Delete session"
   },
   "deleteSessionModal": {
     "title": "Deleting session",

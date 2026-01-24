@@ -61,9 +61,11 @@ const SessionItem: FC<SessionItemProps> = ({
         </div>
 
         <div className="flex flex-col gap-5">
-          <div className="flex gap-3">
+          <div className="flex gap-2">
             <button
-              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover translate-y-[1px]"
+              title={t('sessionItem.disabledPlayButtonTitle')}
+              disabled={isEnabled}
+              className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover translate-y-[1px] disabled:opacity-40"
               onClick={() => sessionClickHandler(session)}
             >
               {isActive ? (
@@ -78,6 +80,7 @@ const SessionItem: FC<SessionItemProps> = ({
             </button>
 
             <button
+              title={t('sessionItem.deleteButtonTitle')}
               className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover"
               onClick={() => sessionDeleteHandler(session.id)}
             >

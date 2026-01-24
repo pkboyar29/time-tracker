@@ -45,7 +45,7 @@ interface TimerContextType {
   startSpentSeconds: number;
 }
 
-const TimerContext = createContext<TimerContextType>({
+const defaultContext: TimerContextType = {
   startTimer: async () => {},
   toggleTimer: async () => {},
   stopTimer: async () => {},
@@ -53,7 +53,9 @@ const TimerContext = createContext<TimerContextType>({
   timerEndDate: new Date(),
   startTimestamp: 0,
   startSpentSeconds: 0,
-});
+};
+
+const TimerContext = createContext<TimerContextType>(defaultContext);
 
 interface TimerProviderProps {
   children: ReactNode;
@@ -282,21 +284,32 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
 export default TimerProvider;
 
-export const useTimer = <T extends boolean = false>(
-  needSeconds?: T,
-): T extends true
-  ? TimerContextType & { currentTick: TimerTick }
-  : TimerContextType => {
-  const context = useContext(TimerContext);
+export const useTimer = (): TimerContextType => {
+  return useContext(TimerContext);
+};
 
-  if (!needSeconds) {
-    return context as any;
-  }
+export const useTimerWithSeconds = (): TimerContextType => {
+  const context = useContext(TimerContext);
+  const session = context.timerState.session;
 
   const currentTick = useSyncExternalStore(
     timerTickStore.subscribe,
     timerTickStore.getSnapshot,
   );
 
-  return { ...context, currentTick } as any;
+  // TODO: второе условие странное, так как возвращая context, мы возвращаем старые данные, потому что в context секунды не обновляются
+  if (!session || currentTick.sessionId !== session.id) {
+    return context;
+  }
+
+  return {
+    ...context,
+    timerState: {
+      ...context.timerState,
+      session: {
+        ...session,
+        spentTimeSeconds: currentTick.seconds,
+      },
+    },
+  };
 };

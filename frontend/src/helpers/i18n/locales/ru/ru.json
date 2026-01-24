@@ -136,7 +136,9 @@
   },
   "sessionItem": {
     "duration": "Длительность",
-    "activity": "Активность"
+    "activity": "Активность",
+    "disabledPlayButtonTitle": "Невозможно начать сессию, пока другая сессия запущена",
+    "deleteButtonTitle": "Удалить сессию"
   },
   "deleteSessionModal": {
     "title": "Удаление сессии",
