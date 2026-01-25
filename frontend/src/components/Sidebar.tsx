@@ -68,6 +68,13 @@ const Sidebar: FC = () => {
         <SettingsModal onCloseModal={() => setSettingsModal(false)} />
       )}
 
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 xl:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       <div
         ref={sidebarRef}
         className={`absolute flex flex-col bg-backgroundLight dark:bg-backgroundDark h-full transition duration-300 ease-in-out z-50 top-0 left-0 xl:relative xl:translate-x-0 w-[200px] sm:w-[170px] pt-2 p-5 xl:p-5 border-r border-solid border-r-gray-500 ${
