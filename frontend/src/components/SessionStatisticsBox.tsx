@@ -27,7 +27,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
       totalTimeRef.current!.textContent = getReadableTime(
         statistics.spentTimeSeconds,
         t,
-        { short: false, zeroUnits: true }
+        { short: false, zeroUnits: true },
       );
       totalSessionsRef.current!.textContent =
         statistics.sessionsAmount.toString();
@@ -39,25 +39,25 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
         1500,
         0.5,
         (seconds) =>
-          getReadableTime(seconds, t, { short: false, zeroUnits: true })
+          getReadableTime(seconds, t, { short: false, zeroUnits: true }),
       );
       animateCountUp(
         totalSessionsRef.current!,
         statistics.sessionsAmount,
         1500,
-        null
+        null,
       );
       animateCountUp(
         distractedRef.current!,
         statistics.pausedAmount,
         1500,
-        (seconds) => t('plural.times', { count: seconds })
+        (seconds) => t('plural.times', { count: seconds }),
       );
     }
   }, [statistics, i18n.language]);
 
   return (
-    <div className="flex flex-wrap justify-center gap-5 px-10 py-5 border border-solid rounded-lg md:gap-10 2xl:gap-20 bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
+    <div className="flex flex-wrap justify-center gap-5 px-10 py-5 border border-solid rounded-lg md:gap-10 2xl:gap-20 bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-white/10">
       <div className="text-center">
         <div
           ref={totalTimeRef}

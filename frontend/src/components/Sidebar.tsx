@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 import { useTimerWithSeconds } from '../hooks/useTimer';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import { setIsSidebarOpen } from '../redux/slices/windowSlice';
+import { setTheme } from '../redux/slices/themeSlice';
 import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
 import { toggleThemeInLS } from '../helpers/localstorageHelpers';
 import { getWeekRange } from '../helpers/dateHelpers';
@@ -13,6 +14,7 @@ import TimerIcon from '../icons/TimerIcon';
 import BookIcon from '../icons/BookIcon';
 import AnalyticsIcon from '../icons/AnalyticsIcon';
 import SettingsIcon from '../icons/SettingsIcon';
+import ToggleButton from './common/ToggleButton';
 import SettingsModal from './settings/SettingsModal';
 
 const Sidebar: FC = () => {
@@ -25,6 +27,7 @@ const Sidebar: FC = () => {
   const { timerState } = useTimerWithSeconds();
 
   const isSidebarOpen = useAppSelector((state) => state.window.isSidebarOpen);
+  const theme = useAppSelector((state) => state.theme.theme);
 
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -57,8 +60,10 @@ const Sidebar: FC = () => {
     const newTheme = toggleThemeInLS();
     if (newTheme === 'dark') {
       document.documentElement.classList.add('dark');
+      dispatch(setTheme('dark'));
     } else {
       document.documentElement.classList.remove('dark');
+      dispatch(setTheme('light'));
     }
   };
 
@@ -70,18 +75,18 @@ const Sidebar: FC = () => {
 
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 xl:hidden"
+          className="fixed inset-0 z-40 bg-black/50 min-[1340px]:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
 
       <div
         ref={sidebarRef}
-        className={`absolute flex flex-col bg-backgroundLight dark:bg-backgroundDark h-full transition duration-300 ease-in-out z-50 top-0 left-0 xl:relative xl:translate-x-0 w-[200px] sm:w-[170px] pt-2 p-5 xl:p-5 border-r border-solid border-r-gray-500 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`absolute flex flex-col bg-backgroundLight dark:bg-backgroundDark h-full transition duration-300 ease-in-out z-50 top-0 left-0 
+        min-[1340px]:relative min-[1340px]:translate-x-0 w-[200px] pt-2 p-5 min-[1340px]:p-5 border-r border-solid border-gray-400 dark:border-white/10 
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className={`flex justify-end mb-3 xl:hidden`}>
+        <div className={`flex justify-end mb-3 min-[1340px]:hidden`}>
           <button
             className="p-1.5 transition duration-300 hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover rounded-full"
             onClick={() => dispatch(setIsSidebarOpen(false))}
@@ -153,16 +158,21 @@ const Sidebar: FC = () => {
             </li>
           </div>
 
-          <li className="flex flex-col items-center w-full mt-5">
-            <button
-              onClick={changeTheme}
-              className="p-2 mb-8 transition duration-300 border border-transparent border-solid rounded-md hover:border-primary text-surfaceDark bg-textDark dark:bg-surfaceDark dark:text-textDark"
-            >
-              {t('sidebar.changeTheme')}
-            </button>
+          <li className="flex flex-col items-center w-full gap-6 mt-5">
+            <div className="flex items-center justify-between w-full gap-2 px-4">
+              <span className="dark:text-textDark">
+                {t('sidebar.darkTheme')}
+              </span>
+
+              <ToggleButton
+                isChecked={theme === 'dark'}
+                setIsChecked={changeTheme}
+                uncheckedVariant="danger"
+              />
+            </div>
 
             <button
-              className="flex items-center gap-5 px-3 py-2 transition duration-200 sm:w-full rounded-xl hover:bg-primary/10 dark:hover:bg-surfaceDarkHover"
+              className="flex items-center gap-5 px-4 py-2 transition duration-200 rounded-xl hover:bg-primary/10 dark:hover:bg-surfaceDarkHover"
               onClick={() => {
                 closeSidebar();
                 setSettingsModal(true);

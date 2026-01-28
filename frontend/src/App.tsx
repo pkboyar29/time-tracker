@@ -112,7 +112,9 @@ const App: FC = () => {
       <div
         id="app"
         className={`relative App h-screen bg-backgroundLight dark:bg-backgroundDark ${
-          requiredAuth ? 'xl:grid xl:grid-cols-[auto,1fr]' : ''
+          requiredAuth
+            ? 'min-[1340px]:grid min-[1340px]:grid-cols-[auto,1fr]'
+            : ''
         }`}
       >
         {requiredAuth && (

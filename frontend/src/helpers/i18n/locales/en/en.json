@@ -5,7 +5,7 @@
     "activities": "Activities",
     "analytics": "Analytics",
     "settings": "Settings",
-    "changeTheme": "change theme"
+    "darkTheme": "Dark theme"
   },
   "settingsModal": {
     "title": "Settings",

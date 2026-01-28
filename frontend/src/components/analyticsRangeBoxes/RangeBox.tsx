@@ -35,7 +35,7 @@ interface RangeBoxProps {
 const getRangeItems = (
   rangeType: RangeType,
   fromDate: Date,
-  windowWidth: number
+  windowWidth: number,
 ): [Date, Date][] => {
   switch (rangeType) {
     case 'days':
@@ -54,7 +54,7 @@ const getRangeItems = (
 const isRangeItemSelected = (
   rangeType: RangeType,
   fromDate: Date,
-  rangeItemDate: [Date, Date]
+  rangeItemDate: [Date, Date],
 ): boolean => {
   if (rangeType == 'days') {
     return (
@@ -84,7 +84,7 @@ const isRangeItemSelected = (
 
 const isCurrentRangeItem = (
   rangeType: RangeType,
-  rangeItemDate: [Date, Date]
+  rangeItemDate: [Date, Date],
 ): boolean => {
   if (rangeType == 'days') {
     return isCurrentDay(rangeItemDate[0]);
@@ -107,7 +107,7 @@ const renderDateLabel = (
   fromDate: Date,
   toDate: Date,
   t: TFunction,
-  i18nLang: string
+  i18nLang: string,
 ) => {
   if (rangeType == 'days') {
     return (
@@ -146,7 +146,7 @@ const renderDateLabel = (
           ? t('rangeBox.thisMonth')
           : `${fromDate.getFullYear()} ${getMonthDetailedName(
               fromDate.getMonth(),
-              t
+              t,
             )}`}
       </>
     );
@@ -178,7 +178,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   }`;
 
   const [rangeItems, setRangeItems] = useState<[Date, Date][]>(() =>
-    getRangeItems(rangeType, range.fromDate, windowWidth)
+    getRangeItems(rangeType, range.fromDate, windowWidth),
   );
 
   useLayoutEffect(() => {
@@ -202,17 +202,17 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
           const [newFromDate, newToDate] = shiftTwoDates(
             range.fromDate,
             range.toDate,
-            false
+            false,
           );
           navigate(
             `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
-            { replace: true }
+            { replace: true },
           );
 
           const index = rangeItems.findIndex(
             (rangeItem) =>
               rangeItem[0].getTime() == range.fromDate.getTime() &&
-              rangeItem[1].getTime() == range.toDate.getTime()
+              rangeItem[1].getTime() == range.toDate.getTime(),
           );
           if (index == 0) {
             leftArrowClickHandler();
@@ -224,17 +224,17 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
           const [newFromDate, newToDate] = shiftTwoDates(
             range.fromDate,
             range.toDate,
-            true
+            true,
           );
           navigate(
             `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
-            { replace: true }
+            { replace: true },
           );
 
           const index = rangeItems.findIndex(
             (rangeItem) =>
               rangeItem[0].getTime() == range.fromDate.getTime() &&
-              rangeItem[1].getTime() == range.toDate.getTime()
+              rangeItem[1].getTime() == range.toDate.getTime(),
           );
           if (index == rangeItems.length - 1) {
             rightArrowClickHandler();
@@ -322,7 +322,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   function rangeItemClickHandler(rangeItem: [Date, Date]) {
     navigate(
       `/analytics/range?from=${rangeItem[0].toISOString()}&to=${rangeItem[1].toISOString()}`,
-      { replace: true }
+      { replace: true },
     );
   }
 
@@ -330,7 +330,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
     <div className={`h-full flex flex-col items-center gap-3 select-none`}>
       <div className="flex gap-1 px-2 pb-1">
         <button
-          className="rounded-md p-[6px] border border-solid border-gray-400 dark:border-gray-500 transition duration-300 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover"
+          className="rounded-md p-[6px] border border-solid border-gray-400 dark:border-white/10 transition duration-300 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover"
           onClick={leftArrowClickHandler}
         >
           <LeftChevronIcon />
@@ -338,19 +338,19 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
 
         <div
           onClick={currentRangeItemClickHandler}
-          className="flex items-center justify-center text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md dark:border-gray-500 w-52 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover dark:text-textDark"
+          className="flex items-center justify-center text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md dark:border-white/10 w-52 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover dark:text-textDark"
         >
           {renderDateLabel(
             rangeType,
             range.fromDate,
             range.toDate,
             t,
-            i18n.language
+            i18n.language,
           )}
         </div>
 
         <button
-          className="rounded-md p-[6px] border border-solid border-gray-400 dark:border-gray-500 transition duration-300 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover"
+          className="rounded-md p-[6px] border border-solid border-gray-400 dark:border-white/10 transition duration-300 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover"
           onClick={rightArrowClickHandler}
         >
           <RightChevronIcon />

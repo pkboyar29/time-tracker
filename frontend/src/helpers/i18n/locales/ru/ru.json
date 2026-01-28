@@ -5,7 +5,7 @@
     "activities": "Активности",
     "analytics": "Аналитика",
     "settings": "Настройки",
-    "changeTheme": "сменить тему"
+    "darkTheme": "Темная тема"
   },
   "settingsModal": {
     "title": "Настройки",

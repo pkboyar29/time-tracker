@@ -149,7 +149,7 @@ const SessionsList: FC<SessionsListProps> = ({
           {isExpandable && (
             <button
               onClick={() => setLess(!less)}
-              className="flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"
+              className="z-30 flex items-center justify-end w-full gap-1 my-5 text-xl font-bold dark:text-textDark bg-surfaceLight dark:bg-backgroundDark"
             >
               {title}
               {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}

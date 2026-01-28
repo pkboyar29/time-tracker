@@ -30,7 +30,7 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
     }
 
     navigate(
-      `/analytics/range?from=${fromDate.toISOString()}&to=${toDate.toISOString()}`
+      `/analytics/range?from=${fromDate.toISOString()}&to=${toDate.toISOString()}`,
     );
     setIsEditing(false);
   };
@@ -46,7 +46,7 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
               setIsEditing(true);
               setFrom(e.target.value);
             }}
-            className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-gray-500"
+            className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-white/10"
             type="datetime-local"
           />
         </label>
@@ -59,7 +59,7 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
               setIsEditing(true);
               setTo(e.target.value);
             }}
-            className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-gray-500"
+            className="px-3 py-2 text-lg bg-transparent border border-gray-300 border-solid rounded-md shadow-sm dark:border-white/10"
             type="datetime-local"
           />
         </label>

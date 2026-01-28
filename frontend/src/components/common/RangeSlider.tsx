@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import { colors } from '../../../design-tokens';
-import { getThemeFromLS } from '../../helpers/localstorageHelpers';
+import { useAppSelector } from '../../redux/store';
 
 interface RangeSliderProps {
   minValue: number;
@@ -17,6 +17,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
 }) => {
   const percentage = ((currentValue - minValue) / (maxValue - minValue)) * 100;
 
+  const themeState = useAppSelector((state) => state.theme.theme);
+
   return (
     <input
       type="range"
@@ -28,7 +30,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
         background: `linear-gradient(to right, ${
           colors.primary
         } ${percentage}%, ${
-          getThemeFromLS() === 'dark' ? '#333' : '#fff'
+          themeState === 'dark' ? '#333' : '#fff'
         } ${percentage}%)`,
       }}
       className="w-full h-[8px] appearance-none rounded-full cursor-pointer range-slider-custom"

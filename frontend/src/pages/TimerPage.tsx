@@ -452,7 +452,7 @@ const TimerPage: FC = () => {
 
         {/* Uncompleted sessions block */}
         <button
-          className="fixed z-50 p-4 transition-colors duration-300 rounded-full shadow-lg xl:hidden bottom-6 right-6 bg-primary hover:bg-primaryHover"
+          className="fixed z-[30] p-4 transition-colors duration-300 rounded-full shadow-lg xl:hidden bottom-6 right-6 bg-primary hover:bg-primaryHover"
           onClick={() => setIsSessionsBlockOpen(true)}
         >
           <TimerIcon className="stroke-textDark" />
@@ -464,7 +464,7 @@ const TimerPage: FC = () => {
               onClick={() => setIsSessionsBlockOpen(false)}
             />
 
-            <div className="p-4 fixed xl:hidden top-0 right-0 h-full w-full min-[400px]:w-[400px] bg-[#fafafa] dark:bg-[#111] z-[70] shadow-lg transform animate-slide-in">
+            <div className="p-4 fixed xl:hidden top-0 right-0 h-full w-full min-[400px]:w-[400px] bg-[#fafafa] dark:bg-[#111] z-[61] shadow-lg transform animate-slide-in">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold dark:text-textDark">
                   {t('timerPage.uncompletedSessions')}

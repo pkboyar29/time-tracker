@@ -1,6 +1,6 @@
 import { FC, useMemo } from 'react';
 import { colors } from '../../../design-tokens';
-import { getThemeFromLS } from '../../helpers/localstorageHelpers';
+import { useAppSelector } from '../../redux/store';
 
 import { CircularProgress, Box } from '@mui/material';
 
@@ -31,17 +31,19 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
   const circleSize = useMemo(() => getSize(size), [size]);
   const circleThinkness = useMemo(
     () => (size === 'big' ? 4 : size == 'verybig' ? 2.5 : 2),
-    [size]
+    [size],
   );
   const labelClassnames = useMemo(
     () =>
       size === 'big'
         ? 'text-[18px] font-medium text-center'
         : size == 'verybig'
-        ? 'text-[24px] font-medium text-center'
-        : 'text-[12px] font-medium text-center',
-    [size]
+          ? 'text-[24px] font-medium text-center'
+          : 'text-[12px] font-medium text-center',
+    [size],
   );
+
+  const themeState = useAppSelector((state) => state.theme.theme);
 
   return (
     <Box sx={{ position: 'relative', width: circleSize, height: circleSize }}>
@@ -51,7 +53,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
         sx={{
           // 800 если темный
           color: (theme) =>
-            getThemeFromLS() === 'dark'
+            themeState === 'dark'
               ? theme.palette.grey[800]
               : theme.palette.grey[200],
         }}
