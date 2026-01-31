@@ -1,14 +1,21 @@
-export function isOutOfRightBoundary(elem: HTMLDivElement) {
-  const elemRect = elem.getBoundingClientRect();
+export function isOutOfBoundary(
+  elemRect: { x: number; width: number },
+  boundary: 'left' | 'right',
+) {
   const rootRect = document.getElementById('root')!.getBoundingClientRect();
-  return elemRect.x + elemRect.width > rootRect.width;
+
+  if (boundary === 'right') {
+    return elemRect.x + elemRect.width > rootRect.width;
+  } else {
+    return elemRect.x < 0;
+  }
 }
 
 export function animateCountUp(
   element: HTMLElement,
   to: number,
   duration = 1000,
-  formatter: ((v: number) => string) | null
+  formatter: ((v: number) => string) | null,
 ) {
   const startTime = performance.now();
 
@@ -35,7 +42,7 @@ export function animateCountUpWithInterval(
   to: number,
   duration = 1000,
   initialProgress = 0,
-  formatter: ((v: number) => string) | null
+  formatter: ((v: number) => string) | null,
 ) {
   const interval = 50;
 

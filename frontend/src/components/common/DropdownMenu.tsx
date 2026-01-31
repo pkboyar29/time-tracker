@@ -6,7 +6,7 @@ import {
   useRef,
   FC,
 } from 'react';
-import { isOutOfRightBoundary } from '../../helpers/htmlHelpers';
+import { isOutOfBoundary } from '../../helpers/htmlHelpers';
 
 interface DropdownMenuProps {
   children: ReactNode;
@@ -40,7 +40,13 @@ const DropdownMenu: FC<DropdownMenuProps> = ({
 
   useLayoutEffect(() => {
     if (dropdownRef.current) {
-      if (isOutOfRightBoundary(dropdownRef.current)) {
+      const dropdownRect = dropdownRef.current.getBoundingClientRect();
+      if (
+        isOutOfBoundary(
+          { x: dropdownRect.x, width: dropdownRect.width },
+          'right',
+        )
+      ) {
         setIsOnLeft(true);
       } else {
         setIsOnLeft(false);
