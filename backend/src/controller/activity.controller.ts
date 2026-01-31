@@ -14,6 +14,7 @@ router.get('/', async (req: Request, res: Response) => {
       data = await activityService.getActivities({
         activityGroupId: activityGroupIdParam.toString(),
         userId: res.locals.userId,
+        sortCreatedDateDesc: true,
       });
     } else {
       data = await activityService.getSplitActivities({

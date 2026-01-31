@@ -37,11 +37,11 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
   const timeBar: ITimeBar = payload[0]?.payload;
 
   const userInfo = useAppSelector((state) => state.users.user);
-  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 0;
+  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 1_000_000;
 
   return (
     <div
-      className="p-2.5 bg-surfaceLight dark:bg-surfaceDark rounded-sm border border-gray-300/80 border-solid w-[210px]"
+      className="p-2.5 bg-surfaceLight dark:bg-surfaceDark rounded-sm border border-gray-300/80 dark:border-white/10 border-solid w-[210px]"
       style={{ visibility: isVisible ? 'visible' : 'hidden' }}
     >
       {isVisible && (
@@ -73,7 +73,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                       t,
                       {
                         short: false,
-                      }
+                      },
                     )}
                   </p>
 
@@ -97,7 +97,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                       t,
                       {
                         short: false,
-                      }
+                      },
                     )}
                   </p>
 
@@ -131,7 +131,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                               t,
                               {
                                 short: true,
-                              }
+                              },
                             )}
                             ,{' '}
                             {t('plural.sessions', {
@@ -141,7 +141,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
                           </div>
                         </div>
                       </div>
-                    )
+                    ),
                   )}
                 </>
               )}
@@ -165,6 +165,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   setAdBoxMode,
 }) => {
   const { t } = useTranslation();
+  const themeState = useAppSelector((state) => state.theme.theme);
 
   const [adMode, setAdMode] = useState<boolean>(false);
 
@@ -228,7 +229,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   }, [analytics.sessionStatistics, displayTimeBars]);
 
   const userInfo = useAppSelector((state) => state.users.user);
-  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 0;
+  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 1_000_000;
 
   // const [isBarAnimationActive, setIsBarAnimationActive] = useState(true);
   // useEffect(() => {
@@ -247,8 +248,8 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   };
 
   return (
-    <div className="relative pt-5 border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
-      <div className="sticky top-0 z-[39] flex justify-center px-5 pb-5 border-b border-solid min-[360px]:justify-end sm:px-10 border-gray-300/80 dark:border-gray-500">
+    <div className="relative pt-5 border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-white/10">
+      <div className="sticky top-0 z-[39] flex justify-center px-5 pb-5 border-b border-solid min-[360px]:justify-end sm:px-10 border-gray-300/80 dark:border-white/10">
         <div className="inline-block px-4 py-1 text-lg text-center font-medium tracking-wide rounded-lg text-gray-800 bg-gray-200 dark:bg-[rgba(255,255,255,0.05)] dark:text-textDark">
           {t('pdBox.title')}
         </div>
@@ -299,7 +300,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
               dataKey="barName"
               // tick={{
               //   fill:
-              //     localStorage.getItem('theme') === 'dark'
+              //     themeState === 'dark'
               //       ? colors.textDarkSecondary
               //       : '#000',
               // }}
@@ -316,9 +317,9 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                     getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
                     bar.sessionStatistics.spentTimeSeconds >= dailyGoalSeconds
                       ? colors.primary
-                      : localStorage.getItem('theme') === 'dark'
-                      ? '#424242'
-                      : '#E5E7EB';
+                      : themeState === 'dark'
+                        ? '#424242'
+                        : '#E5E7EB';
 
                   return <Cell key={index} fill={color} />;
                 })}
@@ -331,7 +332,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                     dataKey={(bar) => {
                       const barActivityItem = bar.adItems.find(
                         (item: IActivityDistribution) =>
-                          item.activityName === ad.activityName
+                          item.activityName === ad.activityName,
                       );
                       return barActivityItem
                         ? barActivityItem.sessionStatistics.spentTimeSeconds

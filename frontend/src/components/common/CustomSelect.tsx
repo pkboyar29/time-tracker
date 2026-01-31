@@ -30,11 +30,11 @@ const CustomSelect: FC<CustomSelectProps> = ({
 
   const allOptions = useMemo(
     () => optionGroups.flatMap((optGroup) => optGroup.options),
-    [optionGroups]
+    [optionGroups],
   );
   const currentOption = useMemo(
     () => allOptions.find((o) => o.id === currentId),
-    [currentId, allOptions]
+    [currentId, allOptions],
   );
 
   useEffect(() => {
@@ -77,7 +77,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
 
       {dropdown && (
         <div
-          className={`absolute z-[2000] top-full left-0 w-full px-3 py-2 rounded-lg bg-white dark:bg-surfaceDarkHover border border-solid border-gray-500 overflow-y-auto max-h-[500px] `}
+          className={`absolute z-[2000] top-full left-0 w-full px-3 py-2 rounded-lg bg-white dark:bg-surfaceDarkHover border border-solid border-gray-500 dark:border-white/10 overflow-y-auto max-h-[500px] `}
         >
           {optionGroups
             .filter((optGroup) => optGroup.options.length > 0)
@@ -88,8 +88,8 @@ const CustomSelect: FC<CustomSelectProps> = ({
                     optGroup.color == 'red'
                       ? 'text-primary'
                       : optGroup.color == 'grey'
-                      ? 'text-gray-500'
-                      : 'dark:text-textDark'
+                        ? 'text-gray-500'
+                        : 'dark:text-textDark'
                   }`}
                 >
                   {optGroup.optGroupName}
@@ -107,8 +107,8 @@ const CustomSelect: FC<CustomSelectProps> = ({
                         optGroup.color == 'red'
                           ? 'text-primary'
                           : optGroup.color == 'grey'
-                          ? 'text-gray-500'
-                          : 'dark:text-textDark'
+                            ? 'text-gray-500'
+                            : 'dark:text-textDark'
                       }`}
                     >
                       {option.name}

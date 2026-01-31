@@ -16,7 +16,7 @@ interface PopulatedActivityGroup {
 interface GetActivitiesOptions {
   userId: string;
   activityGroupId?: string;
-  sortByCreatedDate?: boolean; // true - -1 (descending), false - without sorting
+  sortCreatedDateDesc?: boolean; // true: -1 (descending), false: without sorting
   archived?: boolean;
 }
 
@@ -44,7 +44,7 @@ const activityService = {
 async function getActivities({
   userId,
   activityGroupId,
-  sortByCreatedDate,
+  sortCreatedDateDesc,
   archived,
 }: GetActivitiesOptions): Promise<IActivity[]> {
   try {
@@ -63,7 +63,7 @@ async function getActivities({
 
     // TODO: вызывать метод lean?
 
-    if (sortByCreatedDate) {
+    if (sortCreatedDateDesc) {
       return await Activity.find(filter).sort({ createdDate: -1 });
     }
 
@@ -156,6 +156,7 @@ async function createActivity(
       descr: activityDTO.descr,
       activityGroup: activityDTO.activityGroupId,
       user: userId,
+      createdDate: new Date(),
     });
 
     const validationError = newActivity.validateSync();

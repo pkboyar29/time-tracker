@@ -17,6 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
 import BurgerButton from './components/BurgerButton';
+import TimerTitleUpdater from './components/TimerTitleUpdater';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
@@ -106,10 +107,14 @@ const App: FC = () => {
         limit={3}
       />
 
+      <TimerTitleUpdater />
+
       <div
         id="app"
         className={`relative App h-screen bg-backgroundLight dark:bg-backgroundDark ${
-          requiredAuth ? 'xl:grid xl:grid-cols-[auto,1fr]' : ''
+          requiredAuth
+            ? 'min-[1340px]:grid min-[1340px]:grid-cols-[auto,1fr]'
+            : ''
         }`}
       >
         {requiredAuth && (

@@ -27,7 +27,7 @@ const Modal: FC<ModalProps> = ({
   }, []);
 
   const handleMouseDown = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
     if (modalRef.current?.contains(event.target as Node)) {
       isMouseDownInside.current = true;
@@ -37,7 +37,7 @@ const Modal: FC<ModalProps> = ({
   };
 
   const handleMouseUp = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
   ) => {
     if (
       !isMouseDownInside.current &&
@@ -55,7 +55,8 @@ const Modal: FC<ModalProps> = ({
     >
       <div
         ref={modalRef}
-        className={`${modalClassnames} px-3 py-5 overflow-hidden border border-solid rounded-md bg-surfaceLight dark:bg-surfaceDark basis-[92%] md:basis-2/3 xl:basis-1/3 border-gray-300/80 dark:border-gray-500`}
+        className={`${modalClassnames} px-3 py-5 overflow-hidden border border-solid rounded-md bg-surfaceLight dark:bg-surfaceDark basis-[92%] 
+          md:basis-2/3 xl:basis-1/3 border-gray-300/80 dark:border-gray-500`}
       >
         <div className="flex items-center justify-between mb-5">
           <div className="text-lg dark:text-textDark">{title}</div>

@@ -37,9 +37,9 @@ const AnalyticsRangePage: FC = () => {
         (rangeType) => ({
           id: rangeType,
           name: t(`viewOptions.${rangeType}`),
-        })
+        }),
       ),
-    [t]
+    [t],
   );
 
   // валидация search params
@@ -63,7 +63,7 @@ const AnalyticsRangePage: FC = () => {
     toDate: new Date(toParam),
   });
   const [rangeType, setRangeType] = useState<RangeType>(
-    getRangeType(range.fromDate, range.toDate)
+    getRangeType(range.fromDate, range.toDate),
   );
 
   const {
@@ -83,33 +83,33 @@ const AnalyticsRangePage: FC = () => {
     if (newRangeType == 'days') {
       const [startOfToday, endOfToday] = getDayRange(new Date());
       navigate(
-        `/analytics/range?from=${startOfToday.toISOString()}&to=${endOfToday.toISOString()}`
+        `/analytics/range?from=${startOfToday.toISOString()}&to=${endOfToday.toISOString()}`,
       );
     } else if (newRangeType == 'weeks') {
       const [startOfWeek, endOfWeek] = getWeekRange(new Date());
       navigate(
-        `/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`
+        `/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`,
       );
     } else if (newRangeType == 'months') {
       const [startOfMonth, endOfMonth] = getMonthRange(new Date());
       navigate(
-        `/analytics/range?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`
+        `/analytics/range?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`,
       );
     } else if (newRangeType == 'years') {
       const [startOfYear, endOfYear] = getYearRange(new Date());
       navigate(
-        `/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`
+        `/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`,
       );
     } else if (newRangeType == 'overall') {
       navigate(
-        `/analytics/range?from=2000-01-01T00:00:00&to=${new Date().toISOString()}`
+        `/analytics/range?from=2000-01-01T00:00:00&to=${new Date().toISOString()}`,
       );
     } else if (newRangeType == 'custom') {
       const [startOfToday, endOfToday] = getDayRange(new Date());
       const customFromDate = new Date(startOfToday);
       customFromDate.setDate(customFromDate.getDate() - 1);
       navigate(
-        `/analytics/range?from=${customFromDate.toISOString()}&to=${endOfToday.toISOString()}`
+        `/analytics/range?from=${customFromDate.toISOString()}&to=${endOfToday.toISOString()}`,
       );
     }
   };
@@ -132,7 +132,7 @@ const AnalyticsRangePage: FC = () => {
 
   return (
     <div className="flex flex-col h-full lg:overflow-y-hidden lg:h-screen dark:text-textDark">
-      <div className="lg:max-h-[156px] lg:h-full relative flex flex-col justify-center pb-5 py-[65px] sm:py-5 border-b border-solid border-b-gray-400 dark:border-b-gray-500">
+      <div className="lg:max-h-[156px] lg:h-full relative flex flex-col justify-center pb-5 py-[65px] sm:py-5 border-b border-solid border-gray-400 dark:border-white/10">
         {rangeType == 'custom' ? (
           <CustomRangeBox fromDate={range.fromDate} toDate={range.toDate} />
         ) : rangeType == 'overall' ? (
@@ -168,7 +168,7 @@ const AnalyticsRangePage: FC = () => {
       ) : rangeAnalytics &&
         rangeAnalytics.sessionStatistics.spentTimeSeconds !== 0 ? (
         <div className="flex flex-col pb-5 lg:pb-0 lg:h-full lg:flex-row">
-          <div className="flex flex-col h-full gap-5 px-4 pt-5 lg:w-1/2 lg:border-r lg:border-gray-400 lg:border-solid lg:dark:border-gray-500">
+          <div className="flex flex-col h-full gap-5 px-4 pt-5 lg:w-1/2 lg:border-r lg:border-gray-400 lg:border-solid lg:dark:border-white/10">
             {rangeAnalytics.sessionStatistics && (
               <SessionStatisticsBox
                 statistics={rangeAnalytics.sessionStatistics}
@@ -176,7 +176,7 @@ const AnalyticsRangePage: FC = () => {
             )}
 
             {rangeAnalytics.adItems && (
-              <div className="overflow-y-auto h-[550px] lg:h-auto lg:basis-3/5">
+              <div className="overflow-y-auto max-h-[550px] lg:h-auto lg:basis-3/5">
                 <ActivityDistributionBox
                   adItems={rangeAnalytics.adItems}
                   adBoxMode={adBoxMode}

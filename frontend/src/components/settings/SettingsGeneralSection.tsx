@@ -10,6 +10,7 @@ import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
 import { getReadableTime } from '../../helpers/timeHelpers';
 import { setLangInLS } from '../../helpers/localstorageHelpers';
 
+import PrimaryClipLoader from '../common/PrimaryClipLoader';
 import RangeSlider from '../common/RangeSlider';
 import CustomSelect from '../common/CustomSelect';
 import ToggleButton from '../common/ToggleButton';
@@ -20,12 +21,20 @@ const SettingsGeneralSection: FC = () => {
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((state) => state.users.user);
 
+  if (!userInfo) {
+    return (
+      <div className="pb-5 text-center">
+        <PrimaryClipLoader />
+      </div>
+    );
+  }
+
   const { t, i18n } = useTranslation();
 
   const { timerState, stopTimer } = useTimer();
 
   const [dailyGoalInput, setDailyGoalInput] = useState<number>(
-    userInfo ? Math.trunc(userInfo.dailyGoal / 60) : 0
+    Math.trunc(userInfo.dailyGoal / 60),
   ); // minutes
   const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -47,7 +56,7 @@ const SettingsGeneralSection: FC = () => {
       const newDailyGoal = min * 60;
       await updateDailyGoal(newDailyGoal);
 
-      dispatch(setUser({ ...userInfo!, dailyGoal: newDailyGoal }));
+      dispatch(setUser({ ...userInfo, dailyGoal: newDailyGoal }));
     }, 200);
     timeoutRef.current = timeoutId;
   };
@@ -55,7 +64,7 @@ const SettingsGeneralSection: FC = () => {
   const showTimerInTitleButtonClick = async (newState: boolean) => {
     await updateShowTimerInTitle(newState);
 
-    dispatch(setUser({ ...userInfo!, showTimerInTitle: newState }));
+    dispatch(setUser({ ...userInfo, showTimerInTitle: newState }));
   };
 
   const changeNotificationPermission = () => {
@@ -76,7 +85,7 @@ const SettingsGeneralSection: FC = () => {
 
     resolveAndDownloadBlob(
       response,
-      contentDisposition.substring(22, contentDisposition.length - 1)
+      contentDisposition.substring(22, contentDisposition.length - 1),
     );
   };
 
@@ -88,35 +97,31 @@ const SettingsGeneralSection: FC = () => {
   return (
     <div className="flex flex-col justify-between h-full gap-4">
       <div className="flex flex-col gap-4">
-        {userInfo && (
-          <div className="p-5 text-center rounded-3xl bg-surfaceLightHover dark:bg-surfaceDarkDarker">
-            <h3 className="mb-2 text-lg font-semibold dark:text-gray-200">
-              {t('settingsModal.dailyGoal')}
-            </h3>
-            <div className="mb-2 text-xl font-bold sm:text-3xl text-primary">
-              {getReadableTime(dailyGoalInput * 60, t, {
-                short: false,
-                zeroUnits: true,
-              })}
-            </div>
-            <RangeSlider
-              minValue={1}
-              maxValue={1440}
-              currentValue={dailyGoalInput}
-              changeCurrentValue={dailyGoalInputChange}
-            />
+        <div className="p-5 text-center rounded-3xl bg-surfaceLightHover dark:bg-surfaceDarkDarker">
+          <h3 className="mb-2 text-lg font-semibold dark:text-gray-200">
+            {t('settingsModal.dailyGoal')}
+          </h3>
+          <div className="mb-2 text-xl font-bold sm:text-3xl text-primary">
+            {getReadableTime(dailyGoalInput * 60, t, {
+              short: false,
+              zeroUnits: true,
+            })}
           </div>
-        )}
+          <RangeSlider
+            minValue={1}
+            maxValue={1440}
+            currentValue={dailyGoalInput}
+            changeCurrentValue={dailyGoalInputChange}
+          />
+        </div>
 
-        {userInfo && (
-          <div className="flex justify-between gap-4 text-base sm:text-lg dark:text-textDark">
-            <div>{t('settingsModal.timerInTitle')}</div>
-            <ToggleButton
-              isChecked={userInfo.showTimerInTitle}
-              setIsChecked={showTimerInTitleButtonClick}
-            />
-          </div>
-        )}
+        <div className="flex justify-between gap-4 text-base sm:text-lg dark:text-textDark">
+          <div>{t('settingsModal.timerInTitle')}</div>
+          <ToggleButton
+            isChecked={userInfo.showTimerInTitle}
+            setIsChecked={showTimerInTitleButtonClick}
+          />
+        </div>
 
         <div className="flex items-center justify-between gap-4 text-base sm:text-lg dark:text-textDark">
           <div className="relative w-fit">

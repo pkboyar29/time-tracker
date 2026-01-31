@@ -42,7 +42,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   try {
     const data = await sessionService.getSession(
       req.params.id,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -54,7 +54,7 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     const data = await sessionService.createSession(
       req.body,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -67,18 +67,32 @@ router.put('/:id', async (req: Request, res: Response) => {
     const data = await sessionService.updateSession(
       req.params.id,
       req.body,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);
   }
 });
+
+router.patch('/:id/note', async (req: Request, res: Response) => {
+  try {
+    const data = await sessionService.updateSessionNote(
+      req.params.id,
+      req.body.note ?? '',
+      res.locals.userId,
+    );
+    res.status(200).json(data);
+  } catch (e) {
+    sendErrorResponse(e, res);
+  }
+});
+
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
     const data = await sessionService.deleteSession(
       req.params.id,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {

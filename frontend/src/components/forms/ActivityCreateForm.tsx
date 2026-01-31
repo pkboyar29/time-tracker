@@ -8,6 +8,7 @@ import Button from '../common/Button';
 import Input from '../common/Input';
 
 import { IActivity } from '../../ts/interfaces/Activity/IActivity';
+import { getRandomBrightColor } from '../../helpers/colorHelpers';
 
 interface ActivityCreateFormProps {
   afterSubmitHandler: (newActivity: IActivity) => void;
@@ -34,7 +35,7 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
     mode: 'onBlur',
     defaultValues: {
       name: '',
-      color: '#3B82F6',
+      color: getRandomBrightColor(),
     },
   });
 

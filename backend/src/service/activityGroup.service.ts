@@ -70,13 +70,14 @@ async function getActivityGroup({
 
 async function createActivityGroup(
   activityGroupDTO: ActivityGroupDTO,
-  userId: string
+  userId: string,
 ): Promise<IActivityGroup> {
   try {
     const newActivityGroup = new ActivityGroup({
       name: activityGroupDTO.name,
       descr: activityGroupDTO.descr,
       user: userId,
+      createdDate: new Date(),
     });
 
     const validationError = newActivityGroup.validateSync();
@@ -100,7 +101,7 @@ async function createActivityGroup(
 async function updateActivityGroup(
   activityGroupId: string,
   activityGroupDTO: ActivityGroupDTO,
-  userId: string
+  userId: string,
 ): Promise<IActivityGroup> {
   try {
     const activityGroup = await activityGroupService.getActivityGroup({
@@ -134,13 +135,13 @@ async function updateActivityGroup(
 
 async function archiveGroupActivities(
   activityGroupId: string,
-  userId: string
+  userId: string,
 ): Promise<{ message: string }> {
   await activityGroupService.getActivityGroup({ activityGroupId, userId });
 
   await Activity.updateMany(
     { activityGroup: activityGroupId },
-    { archived: true }
+    { archived: true },
   );
 
   return { message: 'Archived all activities successful' };
@@ -148,7 +149,7 @@ async function archiveGroupActivities(
 
 async function deleteActivityGroup(
   activityGroupId: string,
-  userId: string
+  userId: string,
 ): Promise<{ message: string }> {
   try {
     await activityGroupService.getActivityGroup({ activityGroupId, userId });
@@ -161,7 +162,7 @@ async function deleteActivityGroup(
     await Promise.all(
       activities.map(async (activity) => {
         await activityService.deleteActivity(activity._id.toString(), userId);
-      })
+      }),
     );
 
     await ActivityGroup.findById(activityGroupId).updateOne({

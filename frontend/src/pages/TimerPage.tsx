@@ -14,7 +14,7 @@ import {
   getReadableTime,
   getTimeHHmmFromDate,
 } from '../helpers/timeHelpers';
-import { useTimer } from '../hooks/useTimer';
+import { useTimerWithSeconds } from '../hooks/useTimer';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
 import { useAudioPlayer } from '../hooks/useAudioPlayer';
@@ -44,7 +44,7 @@ const TimerPage: FC = () => {
   const unsyncedSessionFromLS = getSessionFromLS('unsyncedSession');
 
   const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
-    []
+    [],
   );
   const [isSessionsBlockOpen, setIsSessionsBlockOpen] =
     useState<boolean>(false);
@@ -56,13 +56,13 @@ const TimerPage: FC = () => {
     });
 
   const [durationMode, setDurationMode] = useState<'rangeSlider' | 'inputs'>(
-    'rangeSlider'
+    'rangeSlider',
   );
   const [selectedSeconds, setSelectedSeconds] = useState<number>(() =>
-    getSelectedSecondsFromLS()
+    getSelectedSecondsFromLS(),
   );
   const [selectedActivityId, setSelectedActivityId] = useState<string>(() =>
-    getActivityFromLS()
+    getActivityFromLS(),
   );
   const { currentVolume, updateVolume } = useAudioPlayer();
 
@@ -74,7 +74,7 @@ const TimerPage: FC = () => {
     timerEndDate,
     startTimestamp,
     startSpentSeconds,
-  } = useTimer();
+  } = useTimerWithSeconds();
   const isTimerStarted = timerState.status != 'idle';
   const [spentMs, setSpentMs] = useState<number>(0);
   const intervalId = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -104,6 +104,7 @@ const TimerPage: FC = () => {
         setSpentMs(newSpentMs);
       }, 100);
     } else if (timerState.status == 'paused') {
+      // TODO: проверить работоспособность
       setSpentMs(timerState.session.spentTimeSeconds * 1000); // set milliseconds rounded to full seconds
     } else {
       setSpentMs(0);
@@ -152,7 +153,7 @@ const TimerPage: FC = () => {
           unsyncedSessionFromLS.totalTimeSeconds
         ) {
           sessions = sessions.filter(
-            (session) => session.id != unsyncedSessionFromLS.id
+            (session) => session.id != unsyncedSessionFromLS.id,
           );
         } else {
           sessions = sessions.map((session) => {
@@ -223,7 +224,7 @@ const TimerPage: FC = () => {
                   valuePercent={0}
                   label={`${getRemainingTimeHoursMinutesSeconds(
                     selectedSeconds,
-                    0
+                    0,
                   )}`}
                   size="verybig"
                 />
@@ -235,7 +236,7 @@ const TimerPage: FC = () => {
                   }
                   label={`${getRemainingTimeHoursMinutesSeconds(
                     timerState.session.totalTimeSeconds,
-                    timerState.session.spentTimeSeconds
+                    timerState.session.spentTimeSeconds,
                   )}`}
                   size="verybig"
                 />
@@ -345,7 +346,7 @@ const TimerPage: FC = () => {
                               },
                               {
                                 optGroupName: `${t(
-                                  'timerPage.lastActivities'
+                                  'timerPage.lastActivities',
                                 )} ⭐`,
                                 color: 'red',
                                 options: activitiesToChoose.topActivities,
@@ -451,7 +452,7 @@ const TimerPage: FC = () => {
 
         {/* Uncompleted sessions block */}
         <button
-          className="fixed z-50 p-4 transition-colors duration-300 rounded-full shadow-lg xl:hidden bottom-6 right-6 bg-primary hover:bg-primaryHover"
+          className="fixed z-[30] p-4 transition-colors duration-300 rounded-full shadow-lg xl:hidden bottom-6 right-6 bg-primary hover:bg-primaryHover"
           onClick={() => setIsSessionsBlockOpen(true)}
         >
           <TimerIcon className="stroke-textDark" />
@@ -463,7 +464,7 @@ const TimerPage: FC = () => {
               onClick={() => setIsSessionsBlockOpen(false)}
             />
 
-            <div className="p-4 fixed xl:hidden top-0 right-0 h-full w-full min-[400px]:w-[400px] bg-[#fafafa] dark:bg-[#111] z-[70] shadow-lg transform animate-slide-in">
+            <div className="p-4 fixed xl:hidden top-0 right-0 h-full w-full min-[400px]:w-[400px] bg-[#fafafa] dark:bg-[#111] z-[61] shadow-lg transform animate-slide-in">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold dark:text-textDark">
                   {t('timerPage.uncompletedSessions')}

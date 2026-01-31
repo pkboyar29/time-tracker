@@ -22,7 +22,7 @@ export const fetchSession = async (sessionId: string): Promise<ISession> => {
 };
 
 export const fetchSessions = async (
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
 ): Promise<ISession[]> => {
   const { data } = await axios.get('/sessions', {
     params: {
@@ -31,14 +31,14 @@ export const fetchSessions = async (
   });
 
   const mappedData: ISession[] = data.map((unmappedSession: any) =>
-    mapResponseData(unmappedSession)
+    mapResponseData(unmappedSession),
   );
 
   return mappedData;
 };
 
 export const createSession = async (
-  payload: ISessionCreate
+  payload: ISessionCreate,
 ): Promise<ISession> => {
   const { data } = await axios.post('/sessions', payload);
 
@@ -47,7 +47,7 @@ export const createSession = async (
 
 export const updateSession = async (
   payload: ISession,
-  isPaused?: boolean
+  isPaused?: boolean,
 ): Promise<ISession> => {
   const noteFromLS = getNoteFromLS(payload.id);
 
@@ -58,6 +58,18 @@ export const updateSession = async (
   };
 
   const { data } = await axios.put(`/sessions/${payload.id}`, body);
+
+  return mapResponseData(data);
+};
+
+export const updateSessionNote = async (sessionId: string) => {
+  const noteFromLS = getNoteFromLS(sessionId);
+
+  const body = {
+    note: noteFromLS,
+  };
+
+  const { data } = await axios.patch(`/sessions/${sessionId}/note`, body);
 
   return mapResponseData(data);
 };

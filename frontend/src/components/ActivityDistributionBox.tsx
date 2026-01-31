@@ -3,6 +3,7 @@ import { getReadableTime } from '../helpers/timeHelpers';
 import { PieChart, Pie, ResponsiveContainer, Tooltip } from 'recharts';
 import { colors } from '../../design-tokens';
 import { useTranslation } from 'react-i18next';
+import { useAppSelector } from '../redux/store';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
@@ -19,7 +20,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
 
   return (
     <div
-      className="p-2.5 bg-surfaceLight dark:bg-surfaceDark rounded-sm border border-solid border-gray-300/80 max-w-[220px] break-words text-sm"
+      className="p-2.5 bg-surfaceLight dark:bg-surfaceDark rounded-sm border border-solid border-gray-300/80 dark:border-white/10 max-w-[220px] break-words text-sm"
       style={{ visibility: isVisible ? 'visible' : 'hidden' }}
     >
       {isVisible && (
@@ -46,6 +47,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   setAdBoxMode,
 }) => {
   const { t } = useTranslation();
+  const themeState = useAppSelector((state) => state.theme.theme);
 
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -53,7 +55,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
     return adItems.toSorted(
       (a, b) =>
         b.sessionStatistics.spentTimeSeconds -
-        a.sessionStatistics.spentTimeSeconds
+        a.sessionStatistics.spentTimeSeconds,
     );
   }, [adItems]);
 
@@ -134,9 +136,12 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   return (
     <div
       ref={rootRef}
-      className="h-full overflow-y-auto border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500"
+      className="h-full overflow-y-auto border border-solid rounded-lg bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-white/10"
     >
-      <div className="sticky top-0 z-[39] flex flex-wrap-reverse gap-4 items-center justify-center min-[360px]:justify-between px-5 sm:px-10 pt-5 pb-4 border-b border-solid bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-gray-500">
+      <div
+        className="sticky top-0 z-[39] flex flex-wrap-reverse gap-4 items-center justify-center min-[360px]:justify-between px-5 sm:px-10 pt-5 pb-4 
+      border-b border-solid bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-white/10"
+      >
         <div className="flex gap-2.5 text-[15px]">
           <button
             onClick={onTableBarClick}
@@ -190,7 +195,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                       t,
                       {
                         short: true,
-                      }
+                      },
                     )}
                   </div>
                   <div className="w-1/5">
@@ -220,17 +225,10 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   cy="50%"
                   outerRadius="80%"
                   activeShape={{
-                    stroke:
-                      localStorage.getItem('theme') === 'dark'
-                        ? '#fff'
-                        : '#111',
+                    stroke: themeState === 'dark' ? '#fff' : '#111',
                     strokeWidth: 2,
                   }}
-                  stroke={
-                    localStorage.getItem('theme') === 'dark'
-                      ? colors.surfaceDark
-                      : '#fff'
-                  }
+                  stroke={themeState === 'dark' ? colors.surfaceDark : '#fff'}
                 />
               </PieChart>
             </ResponsiveContainer>
@@ -255,7 +253,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                       t,
                       {
                         short: true,
-                      }
+                      },
                     )}
                     ,{' '}
                     {t('plural.sessions', {

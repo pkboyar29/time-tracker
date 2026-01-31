@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from 'react';
-import { useTimer } from '../hooks/useTimer';
+import { useTimerWithSeconds } from '../hooks/useTimer';
 import { deleteSession } from '../api/sessionApi';
 import { getSessionFromLS } from '../helpers/localstorageHelpers';
 import { toast } from 'react-toastify';
@@ -20,17 +20,10 @@ interface SessionsListProps {
   setIsSessionsBlockOpen?: (state: boolean) => void;
   isExpandable: boolean;
   sessions: ISession[];
-  updateSessionsListHandler: (updatedSessions: ISession[]) => void;
+  updateSessionsListHandler: (
+    updater: (prev: ISession[]) => ISession[],
+  ) => void;
 }
-
-const getSessionsListAfterSessionUpdate = (
-  oldList: ISession[],
-  updatedSession: ISession
-) => {
-  return oldList.map((session) =>
-    updatedSession.id == session.id ? updatedSession : session
-  );
-};
 
 const SessionsList: FC<SessionsListProps> = ({
   title,
@@ -42,12 +35,12 @@ const SessionsList: FC<SessionsListProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { timerState, startTimer } = useTimer();
+  const { timerState, startTimer, stopTimer } = useTimerWithSeconds();
   const sessionFromLS = getSessionFromLS('session');
 
   // removing current session from the list
   const sessionsWithoutCurrent = sessions.filter(
-    (session) => session.id !== sessionFromLS?.id
+    (session) => session.id !== sessionFromLS?.id,
   );
 
   const [deleteModal, setDeleteModal] = useState<ModalState>({
@@ -58,29 +51,35 @@ const SessionsList: FC<SessionsListProps> = ({
   const [less, setLess] = useState<boolean>(false); // less - true, more - false
 
   useEffect(() => {
-    if (timerState.session) {
-      const isCurrentSessionInList = sessions.find(
-        (s) => s.id === timerState.session.id
+    if (!timerState.session) {
+      return;
+    }
+    const currentSession = timerState.session;
+
+    updateSessionsListHandler((prev) => {
+      const currentSessionIndex = prev.findIndex(
+        (s) => s.id === currentSession.id,
       );
 
-      if (isCurrentSessionInList) {
+      if (currentSessionIndex !== -1) {
         if (
-          timerState.session.spentTimeSeconds ==
-          timerState.session.totalTimeSeconds
+          currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
         ) {
-          updateSessionsListHandler(
-            sessions.filter((s) => s.id !== timerState.session.id)
-          );
+          return prev.filter((s) => s.id !== currentSession.id);
         } else {
-          updateSessionsListHandler(
-            getSessionsListAfterSessionUpdate(sessions, timerState.session)
-          );
+          return prev.map((s) => {
+            if (s.id === currentSession.id) {
+              return currentSession;
+            } else {
+              return s;
+            }
+          });
         }
-      } else {
-        updateSessionsListHandler([...sessions, timerState.session]);
       }
-    }
-  }, [timerState.session]);
+
+      return [...prev, currentSession];
+    });
+  }, [timerState.session?.id, timerState.session?.spentTimeSeconds]);
 
   const handleSessionClick = async (session: ISession) => {
     startTimer(session);
@@ -93,8 +92,8 @@ const SessionsList: FC<SessionsListProps> = ({
   const handleSessionDelete = async (sessionId: string) => {
     try {
       await deleteSession(sessionId);
-      updateSessionsListHandler(
-        sessions.filter((session) => session.id !== sessionId)
+      updateSessionsListHandler((prev) =>
+        prev.filter((s) => s.id !== sessionId),
       );
 
       setDeleteModal({
@@ -150,7 +149,7 @@ const SessionsList: FC<SessionsListProps> = ({
           {isExpandable && (
             <button
               onClick={() => setLess(!less)}
-              className="flex dark:text-textDark items-center justify-end gap-1 my-5 text-xl font-bold bg-surfaceLight dark:bg-backgroundDark z-[5000] w-full"
+              className="z-30 flex items-center justify-end w-full gap-1 my-5 text-xl font-bold dark:text-textDark bg-surfaceLight dark:bg-backgroundDark"
             >
               {title}
               {less ? <ExpandMoreIcon /> : <ExpandLessIcon />}

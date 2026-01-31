@@ -209,7 +209,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
         />
       )}
 
-      <div className="p-5 bg-surfaceLight dark:bg-surfaceDark border border-gray-300/80 dark:border-gray-500 border-solid rounded-xl w-[320px] min-h-[150px] flex flex-col">
+      <div className="p-5 bg-surfaceLight dark:bg-surfaceDark border border-gray-300/80 dark:border-white/10 border-solid rounded-xl w-[320px] min-h-[150px] flex flex-col">
         <div className="flex items-start justify-between flex-1 gap-4">
           <div className="flex items-center gap-2">
             {isActivity && (
@@ -223,9 +223,9 @@ const ActivityItem: FC<ActivityBoxProps> = ({
               value={name}
               onChange={inputChangeHandler}
               onBlur={editButtonClickHandler}
-              className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 text-primary dark:text-textDark ${
+              className={`w-full border border-solid rounded-lg bg-transparent text-base p-0.5 dark:text-textDark ${
                 isEditing
-                  ? 'border-gray-300 dark:border-gray-500'
+                  ? 'border-gray-300 dark:border-white/10'
                   : 'border-transparent text-ellipsis'
               }`}
               minLength={1}
