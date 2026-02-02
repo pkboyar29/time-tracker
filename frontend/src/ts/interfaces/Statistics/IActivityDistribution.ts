@@ -1,7 +1,8 @@
 import { ISessionStatistics } from './ISessionStatistics';
 
 export interface IActivityDistribution {
-  activityName: string;
+  id: string;
+  name: string;
   fill: string;
   sessionStatistics: ISessionStatistics;
   spentTimePercentage: number;

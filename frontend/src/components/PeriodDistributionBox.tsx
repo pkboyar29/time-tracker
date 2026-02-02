@@ -121,7 +121,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
 
                         <div className="flex flex-col min-w-0">
                           <div className="text-[15px] truncate dark:text-textDark">
-                            {item.activityName}
+                            {item.name}
                           </div>
 
                           <div className="text-[13px] mt-1 text-gray-600 dark:text-textDarkSecondary">
@@ -331,8 +331,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                     key={index}
                     dataKey={(bar) => {
                       const barActivityItem = bar.adItems.find(
-                        (item: IActivityDistribution) =>
-                          item.activityName === ad.activityName,
+                        (item: IActivityDistribution) => item.id === ad.id,
                       );
                       return barActivityItem
                         ? barActivityItem.sessionStatistics.spentTimeSeconds

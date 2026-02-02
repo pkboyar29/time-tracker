@@ -10,7 +10,9 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
   const activityDistributionItems: IActivityDistribution[] =
     unmappedData.activityDistribution.map((ad: any) => {
       return {
-        activityName: ad.activityName,
+        id: ad.id,
+        name: ad.name,
+        fill: ad.color,
         sessionStatistics: ad.sessionStatistics,
         spentTimePercentage: parseFloat(
           (
@@ -18,7 +20,6 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
             unmappedData.sessionStatistics.spentTimeSeconds
           ).toFixed(2),
         ),
-        fill: ad.activityColor,
       };
     });
 
@@ -39,7 +40,9 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
       sessionStatistics: bar.sessionStatistics,
       adItems: bar.activityDistribution.map((ad: any) => {
         return {
-          activityName: ad.activityName,
+          id: ad.id,
+          name: ad.name,
+          fill: ad.color,
           sessionStatistics: ad.sessionStatistics,
           spentTimePercentage: parseFloat(
             (
@@ -47,7 +50,6 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
               unmappedData.sessionStatistics.spentTimeSeconds
             ).toFixed(2),
           ),
-          fill: ad.activityColor,
         };
       }),
     };
