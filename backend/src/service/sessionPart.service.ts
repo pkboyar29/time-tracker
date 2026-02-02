@@ -1,8 +1,10 @@
 import SessionPart, { ISessionPart } from '../model/sessionPart.model';
+import mongoose from 'mongoose';
 
 interface PopulatedSession {
   deleted: boolean;
   activity: {
+    id: mongoose.Types.ObjectId;
     name: string;
   };
 }
@@ -12,7 +14,7 @@ const sessionPopulateConfig = {
   select: 'deleted activity',
   populate: {
     path: 'activity',
-    select: 'name -_id',
+    select: 'name id',
   },
 };
 
@@ -40,7 +42,7 @@ async function getSessionPartsInDateRange({
     }>(sessionPopulateConfig);
 
     const filteredSessionsParts = sessionParts.filter(
-      (sessionPart) => !sessionPart.session.deleted
+      (sessionPart) => !sessionPart.session.deleted,
     );
 
     return filteredSessionsParts;

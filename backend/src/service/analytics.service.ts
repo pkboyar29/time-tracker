@@ -107,8 +107,9 @@ function getActivityDistributions({
 
   activityDistributions = userActivities.map((activity) => {
     const activityDistribution: ActivityDistribution = {
-      activityName: activity.name,
-      activityColor: activity.color,
+      id: activity._id.toString(),
+      name: activity.name,
+      color: activity.color,
       sessionStatistics: {
         sessionsAmount: 0,
         spentTimeSeconds: 0,
@@ -123,33 +124,36 @@ function getActivityDistributions({
   let activitiesPaused: number = 0;
 
   // set sessionsAmount to activityDistributions
-  completedSessions.forEach((session) => {
-    if (session.activity) {
-      const adIndex: number = activityDistributions.findIndex(
-        (ad) => ad.activityName === session.activity.name,
-      );
-      activityDistributions[adIndex].sessionStatistics.sessionsAmount += 1;
-      activitiesSessions += 1;
-    }
-  });
+  for (const session of completedSessions) {
+    if (!session.activity) continue;
+
+    const adIndex = activityDistributions.findIndex(
+      (ad) => ad.id === session.activity.id.toString(),
+    );
+    if (adIndex === -1) continue;
+
+    activityDistributions[adIndex].sessionStatistics.sessionsAmount += 1;
+    activitiesSessions += 1;
+  }
 
   // set spentTimeSeconds and pausedAmount to activityDistributions
-  sessionParts.forEach((part) => {
-    if (part.session.activity) {
-      const adIndex: number = activityDistributions.findIndex(
-        (ad) => ad.activityName === part.session.activity.name,
-      );
+  for (const part of sessionParts) {
+    if (!part.session.activity) continue;
 
-      activityDistributions[adIndex].sessionStatistics.spentTimeSeconds +=
-        part.spentTimeSeconds;
-      activitiesSeconds += part.spentTimeSeconds;
+    const adIndex = activityDistributions.findIndex(
+      (ad) => ad.id === part.session.activity.id.toString(),
+    );
+    if (adIndex === -1) continue;
 
-      if (part.paused) {
-        activityDistributions[adIndex].sessionStatistics.pausedAmount += 1;
-        activitiesPaused += 1;
-      }
+    activityDistributions[adIndex].sessionStatistics.spentTimeSeconds +=
+      part.spentTimeSeconds;
+    activitiesSeconds += part.spentTimeSeconds;
+
+    if (part.paused) {
+      activityDistributions[adIndex].sessionStatistics.pausedAmount += 1;
+      activitiesPaused += 1;
     }
-  });
+  }
 
   // delete empty activity distributions
   activityDistributions = activityDistributions.filter(
@@ -165,8 +169,9 @@ function getActivityDistributions({
   const woActivityPaused = allPausedAmount - activitiesPaused;
   if (woActivitySeconds > 0) {
     activityDistributions.push({
-      activityName: 'Without activity',
-      activityColor: '#9CA3AF',
+      id: '0',
+      name: 'Without activity',
+      color: '#9CA3AF',
       sessionStatistics: {
         sessionsAmount: woActivitySessions,
         spentTimeSeconds: woActivitySeconds,
@@ -528,15 +533,14 @@ function mergeActivityDistributions({
   for (let i = 1; i < adsList.length; i++) {
     finalAd = finalAd.map((ad) => {
       for (let j = 0; j < adsList[i].length; j++) {
-        if (ad.activityName === adsList[i][j].activityName) {
-          const { activityName, sessionStatistics } = adsList[i][j];
-          adsList[i] = adsList[i].filter(
-            (ad) => ad.activityName !== activityName,
-          );
+        if (ad.id === adsList[i][j].id) {
+          const { id: activityId, sessionStatistics } = adsList[i][j];
+          adsList[i] = adsList[i].filter((ad) => ad.id !== activityId);
 
           return {
-            activityName: ad.activityName,
-            activityColor: ad.activityColor,
+            id: ad.id,
+            name: ad.name,
+            color: ad.color,
             sessionStatistics: analyticsService.mergeSessionStatistics([
               ad.sessionStatistics,
               sessionStatistics,
@@ -807,8 +811,7 @@ function mergeAnalytics({
   return finalObj;
 }
 
-// TODO: делать инвалидацию более эффективно. 1)надо использовать scan вместо keys,
-// 2)после изменения названия активности, достаточно просто везде поменять его название, удалять все ключи не надо. пока не знаю, является ли норм практикой модификация значения ключа
+// TODO: использовать scan вместо keys?
 async function invalidateCache(userId: string) {
   const userKeys = await redisClient.keys(`analytics:${userId}*`);
   if (userKeys.length > 0) {

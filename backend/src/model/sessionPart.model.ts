@@ -3,7 +3,7 @@ import { Schema, model, Types, InferSchemaType } from 'mongoose';
 export interface ISessionPart {
   _id: Types.ObjectId;
   spentTimeSeconds: number;
-  session: { activity: { name: string } };
+  session: { activity: { id: Types.ObjectId; name: string } };
   user: Types.ObjectId;
   paused: boolean;
   createdDate: Date;
