@@ -4,6 +4,7 @@ import { memoryUpload } from '../helpers/multer';
 import { sendErrorResponse } from '../helpers/sendErrorResponse';
 import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { isValidTimeZone } from '../helpers/isValidTimeZone';
+import { getMusicMetadata } from '../lib/musicMetadata';
 
 const router = Router();
 
@@ -48,7 +49,7 @@ router.get('/profile', async (req: Request, res: Response) => {
 
     const data = await userService.getProfileInfo(
       res.locals.userId,
-      tz as string
+      tz as string,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -60,7 +61,7 @@ router.put('/updateDailyGoal', async (req: Request, res: Response) => {
   try {
     const data = await userService.updateDailyGoal(
       req.body.newDailyGoal,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -72,7 +73,7 @@ router.put('/updateShowTimerInTitle', async (req: Request, res: Response) => {
   try {
     const data = await userService.updateShowTimerInTitle(
       convertParamToBoolean(req.body.showTimerInTitle),
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -117,7 +118,7 @@ router.post(
       return res
         .status(400)
         .send(
-          'sessionsDuration body param should be maximum 36000 seconds (10 hours)!'
+          'sessionsDuration body param should be maximum 36000 seconds (10 hours)!',
         );
     }
     if (sessionDuration <= 0) {
@@ -132,11 +133,11 @@ router.post(
     const responseMessage = await userService.importFile(
       fileContent,
       sessionDuration,
-      res.locals.userId
+      res.locals.userId,
     );
 
     res.status(200).send(responseMessage);
-  }
+  },
 );
 
 // TODO: обрабатывать ошибку, когда отправляем несколько файлов
@@ -154,7 +155,7 @@ router.post(
     // audio/mpeg - mp3
     if (
       !['application/octet-stream', 'audio/ogg', 'audio/mpeg'].includes(
-        file.mimetype
+        file.mimetype,
       )
     ) {
       return res
@@ -167,7 +168,7 @@ router.post(
       return res.status(400).send('audio file max size is 3 megabytes');
     }
 
-    const mm = await import('music-metadata');
+    const mm = await getMusicMetadata();
     const metadata = await mm.parseBuffer(file.buffer);
     if (metadata.format.duration && metadata.format.duration > 45) {
       return res.status(400).send('audio file max duration is 45 seconds');
@@ -177,21 +178,21 @@ router.post(
       const data = await userService.uploadAudio(
         file.originalname,
         file.buffer,
-        res.locals.userId
+        res.locals.userId,
       );
 
       res.status(200).json(data);
     } catch (e) {
       sendErrorResponse(e, res);
     }
-  }
+  },
 );
 
 router.get('/audio/:id', async (req: Request, res: Response) => {
   try {
     const { buffer, fileName } = await userService.getAudioFile(
       req.params.id,
-      res.locals.userId
+      res.locals.userId,
     );
 
     const fileNameArray = fileName.split('.');
@@ -216,7 +217,7 @@ router.put('/audio/:id', async (req: Request, res: Response) => {
     const responseMessage = await userService.updateAudioCurrent(
       req.params.id,
       res.locals.userId,
-      convertParamToBoolean(req.body.current)
+      convertParamToBoolean(req.body.current),
     );
 
     res.status(200).send(responseMessage);
@@ -229,7 +230,7 @@ router.delete('/audio/:id', async (req: Request, res: Response) => {
   try {
     const responseMessage = await userService.deleteAudio(
       req.params.id,
-      res.locals.userId
+      res.locals.userId,
     );
 
     res.status(200).send(responseMessage);
