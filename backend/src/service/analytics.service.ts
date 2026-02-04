@@ -60,6 +60,10 @@ interface MergeAnalyticsOptions {
   timezone: string;
 }
 
+type UpdateCacheOptions =
+  | { type: 'activityUpdated'; activity: IActivity }
+  | { type: 'activityDeleted'; activityId: string };
+
 const analyticsService = {
   getSessionsStatistics,
   getActivityDistributions,
@@ -71,6 +75,10 @@ const analyticsService = {
   mergeActivityDistributions,
   mergeAnalytics,
   invalidateCache,
+  updateActivityInAds,
+  removeActivityFromAds,
+  buildUpdatedCacheValues,
+  updateCache,
 };
 
 function getSessionsStatistics({
@@ -455,12 +463,14 @@ async function getAnalyticsForRangeWithCache({
           timezone,
         });
 
-      await redisClient.set(cacheKey, JSON.stringify(analyticsUntilToday), {
-        expiration: {
-          type: 'EXAT',
-          value: Math.trunc(startOfTomorrow.getTime() / 1000),
-        }, // start of tomorrow (unix timestamp)
-      });
+      if (analyticsUntilToday.sessionStatistics.spentTimeSeconds > 0) {
+        await redisClient.set(cacheKey, JSON.stringify(analyticsUntilToday), {
+          expiration: {
+            type: 'EXAT',
+            value: Math.trunc(startOfTomorrow.getTime() / 1000),
+          }, // start of tomorrow (unix timestamp)
+        });
+      }
 
       return analyticsService.mergeAnalytics({
         finalObjStartOfRange: startOfRange,
@@ -485,9 +495,11 @@ async function getAnalyticsForRangeWithCache({
           timezone,
         });
 
-      await redisClient.set(cacheKey, JSON.stringify(analyticsForRange), {
-        expiration: { type: 'EX', value: 604800 }, // 7 days
-      });
+      if (analyticsForRange.sessionStatistics.spentTimeSeconds > 0) {
+        await redisClient.set(cacheKey, JSON.stringify(analyticsForRange), {
+          expiration: { type: 'EX', value: 604800 }, // 7 days
+        });
+      }
 
       return analyticsForRange;
     }
@@ -811,11 +823,138 @@ function mergeAnalytics({
   return finalObj;
 }
 
-// TODO: использовать scan вместо keys?
 async function invalidateCache(userId: string) {
-  const userKeys = await redisClient.keys(`analytics:${userId}*`);
+  let cursor: string = '0';
+  const userKeys: string[] = [];
+  do {
+    const result = await redisClient.scan(cursor, {
+      MATCH: `analytics:${userId}*`,
+      COUNT: 200,
+    });
+
+    cursor = result.cursor;
+    userKeys.push(...result.keys);
+  } while (cursor !== '0');
+
   if (userKeys.length > 0) {
     await redisClient.del(userKeys);
+  }
+}
+
+function updateActivityInAds(
+  activityDistributions: ActivityDistribution[],
+  updatedActivity: IActivity,
+): boolean {
+  const adIndex = activityDistributions.findIndex(
+    (ad) => ad.id === updatedActivity._id.toString(),
+  );
+  if (adIndex === -1) return false;
+
+  activityDistributions[adIndex].name = updatedActivity.name;
+  activityDistributions[adIndex].color = updatedActivity.color;
+
+  return true;
+}
+
+function removeActivityFromAds(
+  analyticsObject: {
+    sessionStatistics: SessionStatistics;
+    activityDistribution: ActivityDistribution[];
+  },
+  deletedActivityId: string,
+): boolean {
+  const adIndex = analyticsObject.activityDistribution.findIndex(
+    (ad) => ad.id === deletedActivityId,
+  );
+  if (adIndex === -1) return false;
+
+  const deletedAd = analyticsObject.activityDistribution.splice(adIndex, 1)[0];
+  const { spentTimeSeconds, sessionsAmount, pausedAmount } =
+    deletedAd.sessionStatistics;
+  analyticsObject.sessionStatistics.spentTimeSeconds -= spentTimeSeconds;
+  analyticsObject.sessionStatistics.sessionsAmount -= sessionsAmount;
+  analyticsObject.sessionStatistics.pausedAmount -= pausedAmount;
+
+  return true;
+}
+
+function buildUpdatedCacheValues(
+  cacheKeys: string[],
+  cacheValues: (string | null)[],
+  options: UpdateCacheOptions,
+): Record<string, string> {
+  const updatedCacheValues: Record<string, string> = {};
+
+  for (let i = 0; i < cacheValues.length; i++) {
+    const cacheValueJson = cacheValues[i];
+    if (!cacheValueJson) continue;
+    let cacheValue = JSON.parse(cacheValueJson) as AnalyticsForRangeDTO;
+    if (typeof cacheValue !== 'object') continue;
+
+    if (options.type === 'activityUpdated') {
+      const updatedActivity = options.activity;
+      if (
+        !analyticsService.updateActivityInAds(
+          cacheValue.activityDistribution,
+          updatedActivity,
+        )
+      ) {
+        continue;
+      }
+
+      for (let i = 0; i < cacheValue.timeBars.length; i++) {
+        analyticsService.updateActivityInAds(
+          cacheValue.timeBars[i].activityDistribution,
+          updatedActivity,
+        );
+      }
+    } else if (options.type === 'activityDeleted') {
+      const deletedActivityId = options.activityId;
+      if (
+        !analyticsService.removeActivityFromAds(cacheValue, deletedActivityId)
+      ) {
+        continue;
+      }
+
+      for (let i = 0; i < cacheValue.timeBars.length; i++) {
+        analyticsService.removeActivityFromAds(
+          cacheValue.timeBars[i],
+          deletedActivityId,
+        );
+      }
+    }
+
+    updatedCacheValues[`${cacheKeys[i]}`] = JSON.stringify(cacheValue);
+  }
+
+  return updatedCacheValues;
+}
+
+async function updateCache(userId: string, options: UpdateCacheOptions) {
+  let cursor: string = '0';
+  const cacheKeys: string[] = [];
+  do {
+    const result = await redisClient.scan(cursor, {
+      MATCH: `analytics:${userId}*`,
+      COUNT: 200,
+    });
+
+    cursor = result.cursor;
+    cacheKeys.push(...result.keys);
+  } while (cursor !== '0');
+
+  const cacheValues = await redisClient.mGet(cacheKeys);
+  const updatedCacheValues = analyticsService.buildUpdatedCacheValues(
+    cacheKeys,
+    cacheValues,
+    options,
+  );
+
+  // TODO: чтобы снизить I/O overhead, вызывать redis.pipeline().execute() для pipeline/transaction (чтобы было одно обращение к redis)
+  for (const cacheKey in updatedCacheValues) {
+    await redisClient.set(cacheKey, updatedCacheValues[cacheKey], {
+      KEEPTTL: true,
+    });
   }
 }
 

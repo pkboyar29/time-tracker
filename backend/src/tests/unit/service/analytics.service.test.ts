@@ -1146,7 +1146,6 @@ describe('analyticsService.mergeAnalytics', () => {
     activityDistribution: [],
   }));
 
-  // FOCUS: добавить aMeta, bMeta, cMeta
   const aMeta = {
     id: new Types.ObjectId().toString(),
     name: 'A',
@@ -2973,5 +2972,493 @@ describe('analyticsService.mergeAnalytics', () => {
         ],
       },
     ]);
+  });
+});
+
+describe('analyticsService.buildUpdatedCacheValues', () => {
+  it('should update activity name and color in activityDistribution (only in analytics containing the activity)', () => {
+    const Aid = new Types.ObjectId();
+
+    const firstAnalytics: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        sessionsAmount: 0,
+        pausedAmount: 0,
+        spentTimeSeconds: 0,
+      },
+      activityDistribution: [
+        {
+          id: Aid.toString(),
+          name: 'A',
+          color: 'Acolor',
+          sessionStatistics: {
+            sessionsAmount: 2,
+            pausedAmount: 2,
+            spentTimeSeconds: 120,
+          },
+        },
+        {
+          id: 'Bid',
+          name: 'B',
+          color: 'Bcolor',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            pausedAmount: 0,
+            spentTimeSeconds: 60,
+          },
+        },
+      ],
+      timeBars: [],
+    };
+    const secondAnalytics: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        sessionsAmount: 3,
+        pausedAmount: 1,
+        spentTimeSeconds: 180,
+      },
+      activityDistribution: [
+        {
+          id: Aid.toString(),
+          name: 'A',
+          color: 'Acolor',
+          sessionStatistics: {
+            sessionsAmount: 5,
+            pausedAmount: 4,
+            spentTimeSeconds: 1000,
+          },
+        },
+        {
+          id: 'Cid',
+          name: 'C',
+          color: 'Ccolor',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            pausedAmount: 1,
+            spentTimeSeconds: 30,
+          },
+        },
+      ],
+      timeBars: [],
+    };
+    const thirdAnalytics: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        sessionsAmount: 0,
+        pausedAmount: 0,
+        spentTimeSeconds: 0,
+      },
+      activityDistribution: [
+        {
+          id: 'Bid',
+          name: 'B',
+          color: 'Bcolor',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            pausedAmount: 0,
+            spentTimeSeconds: 60,
+          },
+        },
+        {
+          id: 'Cid',
+          name: 'C',
+          color: 'Ccolor',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            pausedAmount: 1,
+            spentTimeSeconds: 30,
+          },
+        },
+      ],
+      timeBars: [],
+    };
+
+    const cacheKeys: string[] = ['cacheKey1', 'cacheKey2', 'cacheKey3'];
+    const cacheValues: string[] = [
+      JSON.stringify(firstAnalytics),
+      JSON.stringify(secondAnalytics),
+      JSON.stringify(thirdAnalytics),
+    ];
+    const updatedActivity: IActivity = {
+      _id: Aid,
+      name: 'Aupdated',
+      color: 'AcolorUpdated',
+
+      descr: 'activity description',
+      user: new Types.ObjectId('000000000000000000000001'),
+      activityGroup: {
+        _id: new Types.ObjectId('000000000000000000000010'),
+        name: 'Default group',
+      },
+      createdDate: new Date('2024-01-01'),
+      updatedDate: new Date('2024-02-01'),
+      archived: false,
+      deleted: false,
+      sessionsAmount: 2,
+      spentTimeSeconds: 120,
+    };
+
+    const result = analyticsService.buildUpdatedCacheValues(
+      cacheKeys,
+      cacheValues,
+      {
+        type: 'activityUpdated',
+        activity: updatedActivity,
+      },
+    );
+    expect(Object.keys(result).length).toBe(2);
+    expect(result).toEqual({
+      cacheKey1: JSON.stringify({
+        ...firstAnalytics,
+        activityDistribution: firstAnalytics.activityDistribution.map((ad) =>
+          ad.id === Aid.toString()
+            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
+            : ad,
+        ),
+      }),
+      cacheKey2: JSON.stringify({
+        ...secondAnalytics,
+        activityDistribution: secondAnalytics.activityDistribution.map((ad) =>
+          ad.id === Aid.toString()
+            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
+            : ad,
+        ),
+      }),
+    });
+  });
+
+  it('should update activity name and color in timeBars (and activityDistribution)', () => {
+    const Aid = new Types.ObjectId();
+
+    const firstAnalytics: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        sessionsAmount: 0,
+        pausedAmount: 0,
+        spentTimeSeconds: 0,
+      },
+      activityDistribution: [
+        {
+          id: Aid.toString(),
+          name: 'A',
+          color: 'Acolor',
+          sessionStatistics: {
+            sessionsAmount: 2,
+            pausedAmount: 2,
+            spentTimeSeconds: 120,
+          },
+        },
+        {
+          id: 'Bid',
+          name: 'B',
+          color: 'Bcolor',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            pausedAmount: 0,
+            spentTimeSeconds: 60,
+          },
+        },
+      ],
+      timeBars: [
+        {
+          startOfRange: new Date(),
+          endOfRange: new Date(),
+          sessionStatistics: {
+            sessionsAmount: 3,
+            pausedAmount: 2,
+            spentTimeSeconds: 180,
+          },
+          activityDistribution: [
+            {
+              id: Aid.toString(),
+              name: 'A',
+              color: 'Acolor',
+              sessionStatistics: {
+                sessionsAmount: 2,
+                pausedAmount: 2,
+                spentTimeSeconds: 120,
+              },
+            },
+            {
+              id: 'Bid',
+              name: 'B',
+              color: 'Bcolor',
+              sessionStatistics: {
+                sessionsAmount: 1,
+                pausedAmount: 0,
+                spentTimeSeconds: 60,
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const secondAnalytics: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        sessionsAmount: 3,
+        pausedAmount: 1,
+        spentTimeSeconds: 180,
+      },
+      activityDistribution: [
+        {
+          id: Aid.toString(),
+          name: 'A',
+          color: 'Acolor',
+          sessionStatistics: {
+            sessionsAmount: 5,
+            pausedAmount: 4,
+            spentTimeSeconds: 1000,
+          },
+        },
+        {
+          id: 'Cid',
+          name: 'C',
+          color: 'Ccolor',
+          sessionStatistics: {
+            sessionsAmount: 1,
+            pausedAmount: 1,
+            spentTimeSeconds: 30,
+          },
+        },
+      ],
+      timeBars: [
+        {
+          startOfRange: new Date(),
+          endOfRange: new Date(),
+          sessionStatistics: {
+            sessionsAmount: 5,
+            pausedAmount: 4,
+            spentTimeSeconds: 1000,
+          },
+          activityDistribution: [
+            {
+              id: Aid.toString(),
+              name: 'A',
+              color: 'Acolor',
+              sessionStatistics: {
+                sessionsAmount: 5,
+                pausedAmount: 4,
+                spentTimeSeconds: 1000,
+              },
+            },
+          ],
+        },
+        {
+          startOfRange: new Date(),
+          endOfRange: new Date(),
+          sessionStatistics: {
+            sessionsAmount: 1,
+            pausedAmount: 1,
+            spentTimeSeconds: 30,
+          },
+          activityDistribution: [
+            {
+              id: 'Cid',
+              name: 'C',
+              color: 'Ccolor',
+              sessionStatistics: {
+                sessionsAmount: 1,
+                pausedAmount: 1,
+                spentTimeSeconds: 30,
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const cacheKeys: string[] = ['cacheKey1', 'cacheKey2'];
+    const cacheValues: string[] = [
+      JSON.stringify(firstAnalytics),
+      JSON.stringify(secondAnalytics),
+    ];
+    const updatedActivity: IActivity = {
+      _id: Aid,
+      name: 'Aupdated',
+      color: 'AcolorUpdated',
+
+      descr: 'activity description',
+      user: new Types.ObjectId('000000000000000000000001'),
+      activityGroup: {
+        _id: new Types.ObjectId('000000000000000000000010'),
+        name: 'Default group',
+      },
+      createdDate: new Date('2024-01-01'),
+      updatedDate: new Date('2024-02-01'),
+      archived: false,
+      deleted: false,
+      sessionsAmount: 2,
+      spentTimeSeconds: 120,
+    };
+
+    const result = analyticsService.buildUpdatedCacheValues(
+      cacheKeys,
+      cacheValues,
+      {
+        type: 'activityUpdated',
+        activity: updatedActivity,
+      },
+    );
+    expect(Object.keys(result).length).toBe(2);
+    expect(result).toEqual({
+      cacheKey1: JSON.stringify({
+        ...firstAnalytics,
+        activityDistribution: firstAnalytics.activityDistribution.map((ad) =>
+          ad.id === Aid.toString()
+            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
+            : ad,
+        ),
+        timeBars: firstAnalytics.timeBars.map((bar) => ({
+          ...bar,
+          activityDistribution: bar.activityDistribution.map((ad) =>
+            ad.id === Aid.toString()
+              ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
+              : ad,
+          ),
+        })),
+      }),
+      cacheKey2: JSON.stringify({
+        ...secondAnalytics,
+        activityDistribution: secondAnalytics.activityDistribution.map((ad) =>
+          ad.id === Aid.toString()
+            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
+            : ad,
+        ),
+        timeBars: secondAnalytics.timeBars.map((bar) => ({
+          ...bar,
+          activityDistribution: bar.activityDistribution.map((ad) =>
+            ad.id === Aid.toString()
+              ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
+              : ad,
+          ),
+        })),
+      }),
+    });
+  });
+
+  it('should delete activity from activityDistribution and timeBars and reduce sessionStatistics overall and in timeBars (only in analytics containing the activity)', () => {
+    const Aid = new Types.ObjectId();
+
+    const firstAnalytics: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        sessionsAmount: 5,
+        pausedAmount: 4,
+        spentTimeSeconds: 240,
+      },
+      activityDistribution: [
+        {
+          id: Aid.toString(),
+          name: 'A',
+          color: 'Acolor',
+          sessionStatistics: {
+            sessionsAmount: 3,
+            pausedAmount: 1,
+            spentTimeSeconds: 180,
+          },
+        },
+        {
+          id: 'Bid',
+          name: 'B',
+          color: 'Bcolor',
+          sessionStatistics: {
+            sessionsAmount: 2,
+            pausedAmount: 3,
+            spentTimeSeconds: 60,
+          },
+        },
+      ],
+      timeBars: [
+        {
+          startOfRange: new Date(),
+          endOfRange: new Date(),
+          sessionStatistics: {
+            sessionsAmount: 4,
+            pausedAmount: 1,
+            spentTimeSeconds: 150,
+          },
+          activityDistribution: [
+            {
+              id: Aid.toString(),
+              name: 'A',
+              color: 'Acolor',
+              sessionStatistics: {
+                sessionsAmount: 3,
+                pausedAmount: 1,
+                spentTimeSeconds: 100,
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const secondAnalytics: AnalyticsForRangeDTO = {
+      sessionStatistics: {
+        sessionsAmount: 5,
+        pausedAmount: 4,
+        spentTimeSeconds: 240,
+      },
+      activityDistribution: [
+        {
+          id: 'Bid',
+          name: 'B',
+          color: 'Bcolor',
+          sessionStatistics: {
+            sessionsAmount: 2,
+            pausedAmount: 3,
+            spentTimeSeconds: 60,
+          },
+        },
+        {
+          id: 'Cid',
+          name: 'C',
+          color: 'Ccolor',
+          sessionStatistics: {
+            sessionsAmount: 3,
+            pausedAmount: 1,
+            spentTimeSeconds: 180,
+          },
+        },
+      ],
+      timeBars: [],
+    };
+    const cacheKeys: string[] = ['cacheKey1', 'cacheKey2'];
+    const cacheValues: string[] = [
+      JSON.stringify(firstAnalytics),
+      JSON.stringify(secondAnalytics),
+    ];
+
+    const result = analyticsService.buildUpdatedCacheValues(
+      cacheKeys,
+      cacheValues,
+      { type: 'activityDeleted', activityId: Aid.toString() },
+    );
+    expect(Object.keys(result).length).toBe(1);
+    expect(result).toEqual({
+      cacheKey1: JSON.stringify({
+        sessionStatistics: {
+          sessionsAmount: 2,
+          pausedAmount: 3,
+          spentTimeSeconds: 60,
+        },
+        activityDistribution: firstAnalytics.activityDistribution.filter(
+          (ad) => ad.id !== Aid.toString(),
+        ),
+        timeBars: firstAnalytics.timeBars.map((bar) => {
+          const adIndex = bar.activityDistribution.findIndex(
+            (ad) => ad.id === Aid.toString(),
+          );
+          if (adIndex === -1) {
+            return bar;
+          }
+
+          return {
+            ...bar,
+            sessionStatistics: {
+              sessionsAmount: 1,
+              pausedAmount: 0,
+              spentTimeSeconds: 50,
+            },
+            activityDistribution: bar.activityDistribution.filter(
+              (ad) => ad.id !== Aid.toString(),
+            ),
+          };
+        }),
+      } as AnalyticsForRangeDTO),
+    });
   });
 });
