@@ -180,9 +180,16 @@ const ActivityItem: FC<ActivityBoxProps> = ({
         >
           <p className="text-base/6 dark:text-textDark">
             {isActivity
-              ? t('deleteActivityModal.descr')
-              : t('deleteGroupModal.descr')}
+              ? t('deleteActivityModal.descrTitle')
+              : t('deleteGroupModal.descrTitle')}
           </p>
+
+          <p className="mt-4 text-sm font-medium text-red-600 dark:text-red-400">
+            {isActivity
+              ? t('deleteActivityModal.descrWarning')
+              : t('deleteGroupModal.descrWarning')}
+          </p>
+
           <div className="mt-10 ml-auto w-fit">
             <Button onClick={onDeleteActivityCommon}>
               {isActivity
