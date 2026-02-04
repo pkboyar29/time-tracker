@@ -234,6 +234,8 @@ h6 {
   /* Стандартные свойства для Firefox */
   scrollbar-width: thin;
   scrollbar-color: rgba(130, 130, 130, 0.4) transparent;
+
+  scrollbar-gutter: stable;
 }
 /* Для Chrome, Safari и Edge */
 .scroll-overlay::-webkit-scrollbar {
