@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../redux/store';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
+import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -37,12 +38,14 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
 
 interface ActivityDistributionBoxProps {
   adItems: IActivityDistribution[];
+  sessionStatistics: ISessionStatistics;
   adBoxMode: 'table' | 'chart';
   setAdBoxMode: (newAdMode: 'table' | 'chart') => void;
 }
 
 const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   adItems,
+  sessionStatistics,
   adBoxMode,
   setAdBoxMode,
 }) => {
@@ -86,10 +89,12 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         othersSpentTimeSeconds += deletedLastItem
           ? deletedLastItem.sessionStatistics.spentTimeSeconds
           : 0;
-        othersSpentTimePercentage += deletedLastItem
-          ? deletedLastItem.spentTimePercentage
-          : 0;
       }
+      othersSpentTimePercentage = parseFloat(
+        (othersSpentTimeSeconds / sessionStatistics.spentTimeSeconds).toFixed(
+          2,
+        ),
+      );
 
       pieItems = [
         ...pieItems,

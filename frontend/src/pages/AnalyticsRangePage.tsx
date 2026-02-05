@@ -179,6 +179,7 @@ const AnalyticsRangePage: FC = () => {
               <div className="overflow-y-auto max-h-[550px] lg:h-auto lg:basis-3/5">
                 <ActivityDistributionBox
                   adItems={rangeAnalytics.adItems}
+                  sessionStatistics={rangeAnalytics.sessionStatistics}
                   adBoxMode={adBoxMode}
                   setAdBoxMode={setAdBoxMode}
                 />
