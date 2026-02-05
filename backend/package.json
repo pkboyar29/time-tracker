@@ -8,7 +8,7 @@
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest",
     "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --testPathPatterns=unit",
     "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest --testPathPatterns=integration",
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "start": "npm run build && pm2 start ./build/index.js --name api --no-daemon",
     "types": "tsc --noEmit --project ./tsconfig.json && tsc --noEmit --project ./tsconfig.node.json"
   },

@@ -25,6 +25,7 @@ import PauseIcon from '../icons/PauseIcon';
 import StopIcon from '../icons/StopIcon';
 import TimerIcon from '../icons/TimerIcon';
 import CustomCircularProgress from '../components/common/CustomCircularProgress';
+import Tooltip from '../components/common/Tooltip';
 import SessionsList from '../components/SessionsList';
 import Button from '../components/common/Button';
 import RangeSlider from '../components/common/RangeSlider';
@@ -258,31 +259,49 @@ const TimerPage: FC = () => {
               ) : (
                 <>
                   <div className="flex mt-2 gap-7">
-                    <button
-                      tabIndex={-1}
-                      className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5 flex"
-                      onClick={(e) => {
-                        e.currentTarget.blur();
-                        handleToggleButtonClick();
-                      }}
+                    <Tooltip<HTMLButtonElement>
+                      tooltipText={
+                        timerState.status === 'running'
+                          ? t('timerPage.pauseTooltip')
+                          : t('timerPage.resumeTooltip')
+                      }
                     >
-                      {timerState.status == 'running' ? (
-                        <PauseIcon />
-                      ) : (
-                        <PlayIcon />
+                      {(ref) => (
+                        <button
+                          ref={ref}
+                          tabIndex={-1}
+                          className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5 flex"
+                          onClick={(e) => {
+                            e.currentTarget.blur();
+                            handleToggleButtonClick();
+                          }}
+                        >
+                          {timerState.status === 'running' ? (
+                            <PauseIcon />
+                          ) : (
+                            <PlayIcon />
+                          )}
+                        </button>
                       )}
-                    </button>
+                    </Tooltip>
 
-                    <button
-                      tabIndex={-1}
-                      className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5"
-                      onClick={(e) => {
-                        e.currentTarget.blur();
-                        handleStopButtonClick();
-                      }}
+                    <Tooltip<HTMLButtonElement>
+                      tooltipText={t('timerPage.stopTooltip')}
                     >
-                      <StopIcon />
-                    </button>
+                      {(ref) => (
+                        <button
+                          ref={ref}
+                          tabIndex={-1}
+                          className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5"
+                          onClick={(e) => {
+                            e.currentTarget.blur();
+                            handleStopButtonClick();
+                          }}
+                        >
+                          <StopIcon />
+                        </button>
+                      )}
+                    </Tooltip>
                   </div>
 
                   <div className="h-6 dark:text-textDark">
@@ -293,7 +312,7 @@ const TimerPage: FC = () => {
             </div>
 
             {/* Right part of timer */}
-            <div className="min-h-[450px] flex flex-col flex-1 w-full p-6 sm:overflow-y-hidden rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
+            <div className="min-h-[575px] flex flex-col flex-1 w-full p-6 sm:overflow-y-hidden rounded-lg shadow-md lg:flex-none lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto">
               <div className="flex flex-col flex-grow gap-5">
                 {isTimerStarted && (
                   <>

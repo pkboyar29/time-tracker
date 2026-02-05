@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../redux/store';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
+import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -25,7 +26,7 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
     >
       {isVisible && (
         <div>
-          {adItem.activityName}{' '}
+          {adItem.name}{' '}
           <span className="text-gray-500 dark:text-gray-400">
             ({Math.trunc(adItem.spentTimePercentage * 100)}%)
           </span>
@@ -37,12 +38,14 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
 
 interface ActivityDistributionBoxProps {
   adItems: IActivityDistribution[];
+  sessionStatistics: ISessionStatistics;
   adBoxMode: 'table' | 'chart';
   setAdBoxMode: (newAdMode: 'table' | 'chart') => void;
 }
 
 const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   adItems,
+  sessionStatistics,
   adBoxMode,
   setAdBoxMode,
 }) => {
@@ -86,22 +89,25 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         othersSpentTimeSeconds += deletedLastItem
           ? deletedLastItem.sessionStatistics.spentTimeSeconds
           : 0;
-        othersSpentTimePercentage += deletedLastItem
-          ? deletedLastItem.spentTimePercentage
-          : 0;
       }
+      othersSpentTimePercentage = parseFloat(
+        (othersSpentTimeSeconds / sessionStatistics.spentTimeSeconds).toFixed(
+          2,
+        ),
+      );
 
       pieItems = [
         ...pieItems,
         {
-          activityName: t('adBox.others'),
+          id: 'others',
+          name: t('adBox.others'),
+          fill: '#4287f5',
           sessionStatistics: {
             sessionsAmount: othersSessionsAmount,
             pausedAmount: othersPausedAmount,
             spentTimeSeconds: othersSpentTimeSeconds,
           },
           spentTimePercentage: othersSpentTimePercentage,
-          fill: '#4287f5',
         },
       ];
     }
@@ -181,10 +187,10 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
             </div>
 
             <div className="flex flex-col gap-3 dark:text-textDark">
-              {sortedItems.map((item, index) => (
-                <div className="flex items-center text-base" key={index}>
+              {sortedItems.map((item) => (
+                <div className="flex items-center text-base" key={item.id}>
                   <div className="w-1/2 text-lg font-bold truncate">
-                    {item.activityName}
+                    {item.name}
                   </div>
                   <div className="w-1/5">
                     {item.sessionStatistics.sessionsAmount}
@@ -220,7 +226,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   animationDuration={750}
                   data={pieItems}
                   dataKey="sessionStatistics.spentTimeSeconds"
-                  nameKey="activityName"
+                  nameKey="name"
                   cx="50%"
                   cy="50%"
                   outerRadius="80%"
@@ -235,8 +241,8 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           </div>
 
           <div className="w-full sm:w-1/2 flex flex-col gap-2.5">
-            {pieItems.map((item, index) => (
-              <div className="flex items-center gap-2.5" key={index}>
+            {pieItems.map((item) => (
+              <div className="flex items-center gap-2.5" key={item.id}>
                 <div
                   style={{ backgroundColor: item.fill }}
                   className="w-12 h-3 rounded-lg shrink-0"
@@ -244,7 +250,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
 
                 <div className="flex flex-col min-w-0">
                   <div className="text-lg truncate dark:text-textDark">
-                    {item.activityName}
+                    {item.name}
                   </div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
                     (

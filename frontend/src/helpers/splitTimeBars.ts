@@ -7,19 +7,19 @@ import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatisti
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
 export const mergeSessionStatistics = (
-  statisticsList: ISessionStatistics[]
+  statisticsList: ISessionStatistics[],
 ): ISessionStatistics => {
   const sessionsAmount = statisticsList.reduce(
     (amount, statistics) => amount + statistics.sessionsAmount,
-    0
+    0,
   );
   const spentTimeSeconds = statisticsList.reduce(
     (seconds, statistics) => seconds + statistics.spentTimeSeconds,
-    0
+    0,
   );
   const pausedAmount = statisticsList.reduce(
     (amount, statistics) => amount + statistics.pausedAmount,
-    0
+    0,
   );
 
   return {
@@ -30,7 +30,7 @@ export const mergeSessionStatistics = (
 };
 
 export const mergeActivityDistributions = (
-  adsList: IActivityDistribution[][]
+  adsList: IActivityDistribution[][],
 ): IActivityDistribution[] => {
   if (adsList.length == 0) {
     return [];
@@ -44,14 +44,13 @@ export const mergeActivityDistributions = (
   for (let i = 1; i < adsList.length; i++) {
     finalAd = finalAd.map((ad) => {
       for (let j = 0; j < adsList[i].length; j++) {
-        if (ad.activityName === adsList[i][j].activityName) {
-          const { activityName, sessionStatistics, fill } = adsList[i][j];
-          adsList[i] = adsList[i].filter(
-            (ad) => ad.activityName !== activityName
-          );
+        if (ad.name === adsList[i][j].name) {
+          const { id: activityId, sessionStatistics, fill } = adsList[i][j];
+          adsList[i] = adsList[i].filter((ad) => ad.id !== activityId);
 
           return {
-            activityName: ad.activityName,
+            id: ad.id,
+            name: ad.name,
             sessionStatistics: mergeSessionStatistics([
               ad.sessionStatistics,
               sessionStatistics,
@@ -70,12 +69,14 @@ export const mergeActivityDistributions = (
 
   const totalSpentTimeSeconds = finalAd.reduce(
     (seconds, ad) => seconds + ad.sessionStatistics.spentTimeSeconds,
-    0
+    0,
   );
   finalAd = finalAd.map((ad) => ({
     ...ad,
     spentTimePercentage: parseFloat(
-      (ad.sessionStatistics.spentTimeSeconds / totalSpentTimeSeconds).toFixed(2)
+      (ad.sessionStatistics.spentTimeSeconds / totalSpentTimeSeconds).toFixed(
+        2,
+      ),
     ),
   }));
 
@@ -85,7 +86,7 @@ export const mergeActivityDistributions = (
 export const splitTimeBars = (
   timeBars: ITimeBar[],
   parts: number,
-  t: TFunction
+  t: TFunction,
 ): ITimeBar[] => {
   if (!Number.isInteger(parts) || parts < 1) {
     throw new Error(`parts must be a positive integer, got ${parts}`);
@@ -115,7 +116,7 @@ export const splitTimeBars = (
         startOfRange,
         endOfRange,
         t,
-        i18n.language
+        i18n.language,
       ),
       sessionStatistics: mergeSessionStatistics([
         ...timeBarsPart.map((bar) => bar.sessionStatistics),

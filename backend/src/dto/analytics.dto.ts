@@ -5,8 +5,9 @@ export interface SessionStatistics {
 }
 
 export interface ActivityDistribution {
-  activityName: string;
-  activityColor: string;
+  id: string;
+  name: string;
+  color: string;
   sessionStatistics: SessionStatistics;
 }
 

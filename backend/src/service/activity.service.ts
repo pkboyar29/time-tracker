@@ -207,7 +207,10 @@ async function updateActivity(
 
     await activity.save();
 
-    await analyticsService.invalidateCache(userId);
+    await analyticsService.updateCache(userId, {
+      type: 'activityUpdated',
+      activity: activity,
+    });
 
     return activity;
   } catch (e) {
@@ -234,7 +237,10 @@ async function updateActivityColor(
 
   await activity.save();
 
-  await analyticsService.invalidateCache(userId);
+  await analyticsService.updateCache(userId, {
+    type: 'activityUpdated',
+    activity: activity,
+  });
 
   return activity;
 }
@@ -280,7 +286,10 @@ async function deleteActivity(
       deleted: true,
     });
 
-    await analyticsService.invalidateCache(userId);
+    await analyticsService.updateCache(userId, {
+      type: 'activityDeleted',
+      activityId: activity.id,
+    });
 
     return {
       message: 'Deleted successfuly',
