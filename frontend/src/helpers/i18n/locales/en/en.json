@@ -134,7 +134,10 @@
     "notesPlaceholder": "Enter your thoughts during this session...",
     "paused": "Paused",
     "startSessionButton": "Start new session",
-    "uncompletedSessions": "Uncompleted sessions"
+    "uncompletedSessions": "Uncompleted sessions",
+    "stopTooltip": "Stop the session",
+    "pauseTooltip": "Pause the session",
+    "resumeTooltip": "Resume the session"
   },
   "sessionItem": {
     "duration": "Duration",

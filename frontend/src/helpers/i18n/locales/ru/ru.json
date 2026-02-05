@@ -134,7 +134,10 @@
     "notesPlaceholder": "Заметки по текущей сессии…",
     "paused": "На паузе",
     "startSessionButton": "Начать новую сессию",
-    "uncompletedSessions": "Незавершенные сессии"
+    "uncompletedSessions": "Незавершенные сессии",
+    "stopTooltip": "Сбросить сессию",
+    "pauseTooltip": "Поставить на паузу",
+    "resumeTooltip": "Возобновить сессию"
   },
   "sessionItem": {
     "duration": "Длительность",

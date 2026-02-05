@@ -25,6 +25,7 @@ import PauseIcon from '../icons/PauseIcon';
 import StopIcon from '../icons/StopIcon';
 import TimerIcon from '../icons/TimerIcon';
 import CustomCircularProgress from '../components/common/CustomCircularProgress';
+import Tooltip from '../components/common/Tooltip';
 import SessionsList from '../components/SessionsList';
 import Button from '../components/common/Button';
 import RangeSlider from '../components/common/RangeSlider';
@@ -258,31 +259,49 @@ const TimerPage: FC = () => {
               ) : (
                 <>
                   <div className="flex mt-2 gap-7">
-                    <button
-                      tabIndex={-1}
-                      className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5 flex"
-                      onClick={(e) => {
-                        e.currentTarget.blur();
-                        handleToggleButtonClick();
-                      }}
+                    <Tooltip<HTMLButtonElement>
+                      tooltipText={
+                        timerState.status === 'running'
+                          ? t('timerPage.pauseTooltip')
+                          : t('timerPage.resumeTooltip')
+                      }
                     >
-                      {timerState.status == 'running' ? (
-                        <PauseIcon />
-                      ) : (
-                        <PlayIcon />
+                      {(ref) => (
+                        <button
+                          ref={ref}
+                          tabIndex={-1}
+                          className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5 flex"
+                          onClick={(e) => {
+                            e.currentTarget.blur();
+                            handleToggleButtonClick();
+                          }}
+                        >
+                          {timerState.status === 'running' ? (
+                            <PauseIcon />
+                          ) : (
+                            <PlayIcon />
+                          )}
+                        </button>
                       )}
-                    </button>
+                    </Tooltip>
 
-                    <button
-                      tabIndex={-1}
-                      className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5"
-                      onClick={(e) => {
-                        e.currentTarget.blur();
-                        handleStopButtonClick();
-                      }}
+                    <Tooltip<HTMLButtonElement>
+                      tooltipText={t('timerPage.stopTooltip')}
                     >
-                      <StopIcon />
-                    </button>
+                      {(ref) => (
+                        <button
+                          ref={ref}
+                          tabIndex={-1}
+                          className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5"
+                          onClick={(e) => {
+                            e.currentTarget.blur();
+                            handleStopButtonClick();
+                          }}
+                        >
+                          <StopIcon />
+                        </button>
+                      )}
+                    </Tooltip>
                   </div>
 
                   <div className="h-6 dark:text-textDark">
