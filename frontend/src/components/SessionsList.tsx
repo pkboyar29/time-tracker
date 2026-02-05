@@ -35,7 +35,8 @@ const SessionsList: FC<SessionsListProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { timerState, startTimer, stopTimer } = useTimerWithSeconds();
+  const { timerState, startTimer, finalSpentSeconds, finalSessionId } =
+    useTimerWithSeconds();
   const sessionFromLS = getSessionFromLS('session');
 
   // removing current session from the list
@@ -48,38 +49,48 @@ const SessionsList: FC<SessionsListProps> = ({
     selectedItemId: null,
   });
 
-  const [less, setLess] = useState<boolean>(false); // less - true, more - false
+  const [less, setLess] = useState<boolean>(false); // less - true, more - false\
 
+  // эффект, добавляющий текущую сессию в список, если ее нет
   useEffect(() => {
-    if (!timerState.session) {
-      return;
-    }
+    if (!timerState.session) return;
     const currentSession = timerState.session;
 
     updateSessionsListHandler((prev) => {
-      const currentSessionIndex = prev.findIndex(
+      const currentSessionIdx = prev.findIndex(
         (s) => s.id === currentSession.id,
       );
 
-      if (currentSessionIndex !== -1) {
-        if (
-          currentSession.spentTimeSeconds >= currentSession.totalTimeSeconds
-        ) {
-          return prev.filter((s) => s.id !== currentSession.id);
-        } else {
-          return prev.map((s) => {
-            if (s.id === currentSession.id) {
-              return currentSession;
-            } else {
-              return s;
-            }
-          });
-        }
+      if (currentSessionIdx === -1) {
+        return [...prev, currentSession];
+      } else {
+        return prev;
       }
-
-      return [...prev, currentSession];
     });
-  }, [timerState.session?.id, timerState.session?.spentTimeSeconds]);
+  }, [timerState.session?.id]);
+
+  // эффект, изменяющий секунды у текущей сессии в списке и удаляющий текущую сессию из списка, если она завершилась
+  useEffect(() => {
+    if (finalSessionId === '') return;
+
+    updateSessionsListHandler((prev) => {
+      const currentSession = prev.find((s) => s.id === finalSessionId);
+
+      if (currentSession) {
+        if (finalSpentSeconds >= currentSession.totalTimeSeconds) {
+          return prev.filter((s) => s.id !== finalSessionId);
+        } else {
+          return prev.map((s) =>
+            s.id === finalSessionId
+              ? { ...currentSession, spentTimeSeconds: finalSpentSeconds }
+              : s,
+          );
+        }
+      } else {
+        return prev;
+      }
+    });
+  }, [finalSpentSeconds, finalSessionId]);
 
   const handleSessionClick = async (session: ISession) => {
     startTimer(session);
