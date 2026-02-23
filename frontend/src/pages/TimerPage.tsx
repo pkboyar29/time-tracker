@@ -1,6 +1,7 @@
 import { FC, useEffect, useState, useRef } from 'react';
 import { fetchSessions, createSession } from '../api/sessionApi';
 import { useQueryCustom } from '../hooks/useQueryCustom';
+import { useMutation } from '@tanstack/react-query';
 import { fetchActivities } from '../api/activityApi';
 import {
   getSessionFromLS,
@@ -55,6 +56,7 @@ const TimerPage: FC = () => {
       queryKey: ['activitiesToChoose'],
       queryFn: () => fetchActivities(),
     });
+  const { mutateAsync, isPending } = useMutation({ mutationFn: createSession });
 
   const [durationMode, setDurationMode] = useState<'rangeSlider' | 'inputs'>(
     'rangeSlider',
@@ -105,7 +107,6 @@ const TimerPage: FC = () => {
         setSpentMs(newSpentMs);
       }, 100);
     } else if (timerState.status == 'paused') {
-      // TODO: проверить работоспособность
       setSpentMs(timerState.session.spentTimeSeconds * 1000); // set milliseconds rounded to full seconds
     } else {
       setSpentMs(0);
@@ -175,7 +176,7 @@ const TimerPage: FC = () => {
 
   const handleStartSessionClick = async () => {
     try {
-      const newSession = await createSession({
+      const newSession = await mutateAsync({
         totalTimeSeconds: selectedSeconds,
         spentTimeSeconds: 0,
         activity: selectedActivityId !== '' ? selectedActivityId : undefined,
@@ -247,6 +248,7 @@ const TimerPage: FC = () => {
                 <div className="mt-2">
                   <Button
                     tabIndex={-1}
+                    disabled={isPending}
                     onClick={(e) => {
                       e.currentTarget.blur();
                       handleStartSessionClick();
