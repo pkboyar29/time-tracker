@@ -1,4 +1,4 @@
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, act } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueryCustom } from '../hooks/useQueryCustom';
@@ -160,7 +160,7 @@ const ActivityGroupPage: FC = () => {
 
             <div className="flex items-end gap-7 mt-7">
               <div className="text-xl font-bold dark:text-textDark">
-                {t('groupPage.activities')}
+                {t('groupPage.activities')} ({activities.length})
               </div>
 
               {activities.length > 0 && (
