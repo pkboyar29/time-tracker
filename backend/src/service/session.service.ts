@@ -194,10 +194,20 @@ async function updateSession(
     }
 
     if (session.spentTimeSeconds === sessionDTO.spentTimeSeconds) {
+      session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
       session.note = sessionDTO.note;
+      session.updatedDate = new Date();
+
       const validationError = session.validateSync();
-      if (validationError && validationError.errors['note']) {
-        throw new HttpError(400, validationError.errors['note'].toString());
+      if (validationError) {
+        const fields = ['totalTimeSeconds', 'note'] as const;
+
+        for (const field of fields) {
+          const err = validationError.errors[field];
+          if (err) {
+            throw new HttpError(400, err.toString());
+          }
+        }
       }
       await session.save();
 
