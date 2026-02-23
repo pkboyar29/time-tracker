@@ -4,7 +4,7 @@ import activityService from './activity.service';
 import Activity from '../model/activity.model';
 import ActivityGroup from '../model/activityGroup.model';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
-import mongoose, { set } from 'mongoose';
+import mongoose from 'mongoose';
 
 import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { HttpError } from '../helpers/HttpError';

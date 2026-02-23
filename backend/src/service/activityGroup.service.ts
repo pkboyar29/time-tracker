@@ -4,6 +4,7 @@ import Activity from '../model/activity.model';
 import { ActivityGroupDTO } from '../dto/activityGroup.dto';
 import activityService from './activity.service';
 import { HttpError } from '../helpers/HttpError';
+import UserTopActivity from '../model/userTopActivity.model';
 
 interface GetActivityGroupsOptions {
   userId: string;
@@ -143,6 +144,18 @@ async function archiveGroupActivities(
     { activityGroup: activityGroupId },
     { archived: true },
   );
+
+  const activities = await activityService.getActivities({
+    activityGroupId,
+    userId,
+  });
+  const activityIds = activities.map((a) => a._id.toString());
+  const userLastActivities = await UserTopActivity.find({ userId });
+  for (let i = 0; i < userLastActivities.length; i++) {
+    if (activityIds.includes(userLastActivities[i].activityId.toString())) {
+      await userLastActivities[i].deleteOne();
+    }
+  }
 
   return { message: 'Archived all activities successful' };
 }
