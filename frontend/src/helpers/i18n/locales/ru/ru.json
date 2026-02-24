@@ -137,7 +137,9 @@
     "uncompletedSessions": "Незавершенные сессии",
     "stopTooltip": "Сбросить сессию",
     "pauseTooltip": "Поставить на паузу",
-    "resumeTooltip": "Возобновить сессию"
+    "resumeTooltip": "Возобновить сессию",
+    "plus5Tooltip": "продлить на 5 минут",
+    "minus5Tooltip": "сократить на 5 минут"
   },
   "sessionItem": {
     "duration": "Длительность",

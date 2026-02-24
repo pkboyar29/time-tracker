@@ -69,7 +69,23 @@ const SessionsList: FC<SessionsListProps> = ({
     });
   }, [timerState.session?.id]);
 
-  // эффект, изменяющий секунды у текущей сессии в списке и удаляющий текущую сессию из списка, если она завершилась
+  // эффект, изменяющий totalTimeSeconds у текущей сессии
+  useEffect(() => {
+    if (!timerState.session) return;
+    const currentSession = timerState.session;
+
+    updateSessionsListHandler((prev) => {
+      return prev.map((s) => {
+        if (s.id === currentSession.id) {
+          return currentSession;
+        } else {
+          return s;
+        }
+      });
+    });
+  }, [timerState.session?.totalTimeSeconds]);
+
+  // эффект, изменяющий spentTimeSeconds у текущей сессии в списке и удаляющий текущую сессию из списка, если она завершилась
   useEffect(() => {
     if (finalSessionId === '') return;
 

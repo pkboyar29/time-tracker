@@ -71,7 +71,7 @@ const TimerPage: FC = () => {
     <div className="h-full bg-surfaceLight dark:bg-backgroundDark">
       <div className="container flex items-stretch justify-between w-full h-full gap-10 py-5">
         {sessionFromLS && !isTimerStarted ? null : (
-          <div className="sticky top-0 flex flex-col w-full gap-8 text-lg sm:flex-row md:gap-16 lg:w-auto xl:gap-28">
+          <div className="sticky top-0 flex flex-col w-full text-lg gap-14 md:flex-row lg:w-auto xl:gap-28">
             <TimerLeftPart
               selectedSeconds={selectedSeconds}
               selectedActivityId={selectedActivityId}

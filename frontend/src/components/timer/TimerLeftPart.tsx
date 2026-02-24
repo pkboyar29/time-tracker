@@ -29,6 +29,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
   const {
     startTimer,
     toggleTimer,
+    changeTotalTimeSeconds,
     stopTimer,
     timerState,
     startTimestamp,
@@ -70,20 +71,25 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
         return;
       }
 
-      if (event.code == 'Space') {
+      if (event.code === 'Space') {
+        // исключаем стандартное поведение, например срабатывание событий с фокусированных кнопок
+        event.preventDefault();
+
         if (isTimerStarted) {
           handleToggleButtonClick();
         } else {
           handleStartSessionClick();
         }
-      } else if (event.code == 'Escape') {
+      } else if (event.code === 'Escape') {
+        event.preventDefault();
+
         handleStopButtonClick();
       }
     };
 
-    window.addEventListener('keyup', handleKeyClick);
+    window.addEventListener('keydown', handleKeyClick);
     return () => {
-      window.removeEventListener('keyup', handleKeyClick);
+      window.removeEventListener('keydown', handleKeyClick);
     };
   }, [timerState, selectedSeconds, selectedActivityId]);
 
@@ -111,8 +117,20 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
     stopTimer(true);
   };
 
+  const handleMinus5ButtonClick = () => {
+    if (!timerState.session) return;
+
+    changeTotalTimeSeconds(timerState.session.totalTimeSeconds - 5 * 60);
+  };
+
+  const handlePlus5ButtonClick = () => {
+    if (!timerState.session) return;
+
+    changeTotalTimeSeconds(timerState.session.totalTimeSeconds + 5 * 60);
+  };
+
   return (
-    <div className="flex flex-col items-center gap-2 sm:flex-1 basis-1/3 sm:basis-auto">
+    <div className="flex flex-col items-center gap-2 sm:flex-1 basis-1/3 sm:basis-auto min-w-[300px]">
       {!isTimerStarted ? (
         <CustomCircularProgress
           valuePercent={0}
@@ -120,16 +138,55 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
           size="verybig"
         />
       ) : (
-        <CustomCircularProgress
-          valuePercent={
-            (spentMs / (timerState.session.totalTimeSeconds * 1000)) * 100
-          }
-          label={`${getRemainingTimeHoursMinutesSeconds(
-            timerState.session.totalTimeSeconds,
-            timerState.session.spentTimeSeconds,
-          )}`}
-          size="verybig"
-        />
+        <div className="relative inline-flex items-center justify-center">
+          <Tooltip<HTMLButtonElement>
+            tooltipText={t('timerPage.minus5Tooltip')}
+          >
+            {(ref) => (
+              <button
+                disabled={
+                  timerState.session.totalTimeSeconds - 5 * 60 <=
+                  timerState.session.spentTimeSeconds
+                }
+                ref={ref}
+                tabIndex={-1}
+                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[116%] sm:-translate-x-[130%] bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover
+      w-[31.5px] h-[31.5px] transition duration-300 rounded-full p-1.5 flex justify-center items-center dark:text-textDark 
+      opacity-70 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleMinus5ButtonClick}
+              >
+                -5
+              </button>
+            )}
+          </Tooltip>
+
+          <CustomCircularProgress
+            valuePercent={
+              (spentMs / (timerState.session.totalTimeSeconds * 1000)) * 100
+            }
+            label={`${getRemainingTimeHoursMinutesSeconds(
+              timerState.session.totalTimeSeconds,
+              timerState.session.spentTimeSeconds,
+            )}`}
+            size="verybig"
+          />
+
+          <Tooltip<HTMLButtonElement> tooltipText={t('timerPage.plus5Tooltip')}>
+            {(ref) => (
+              <button
+                ref={ref}
+                tabIndex={-1}
+                disabled={timerState.session.totalTimeSeconds + 5 * 60 > 36_000} // 10 hours
+                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[116%] sm:translate-x-[130%] bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover
+      w-[31.5px] h-[31.5px] transition duration-300 rounded-full p-1.5 flex justify-center items-center dark:text-textDark 
+      opacity-70 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handlePlus5ButtonClick}
+              >
+                +5
+              </button>
+            )}
+          </Tooltip>
+        </div>
       )}
 
       {!isTimerStarted ? (
@@ -160,7 +217,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
                 <button
                   ref={ref}
                   tabIndex={-1}
-                  className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5 flex"
+                  className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover transition duration-300 rounded-full p-1.5"
                   onClick={(e) => {
                     e.currentTarget.blur();
                     handleToggleButtonClick();
