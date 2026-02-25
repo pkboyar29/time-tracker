@@ -90,6 +90,7 @@ async function getSplitActivities({
   ).sort({
     createdDate: -1,
   });
+
   const topActivityIds = userTopActivities.map((a) => a.activityId.toString());
   const topActivityIdsSet = new Set(topActivityIds);
 
@@ -256,7 +257,17 @@ async function archiveActivity(
   });
   activity.archived = archived;
   await activity.save();
+  if (!archived) {
+    return activity;
+  }
 
+  const userLastActivities = await UserTopActivity.find({ userId });
+  const foundLastActivity = userLastActivities.find((lastActivity) =>
+    lastActivity.activityId.equals(activityId),
+  );
+  if (foundLastActivity) {
+    await foundLastActivity.deleteOne();
+  }
   return activity;
 }
 

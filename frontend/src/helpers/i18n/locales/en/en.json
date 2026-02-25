@@ -137,7 +137,9 @@
     "uncompletedSessions": "Uncompleted sessions",
     "stopTooltip": "Stop the session",
     "pauseTooltip": "Pause the session",
-    "resumeTooltip": "Resume the session"
+    "resumeTooltip": "Resume the session",
+    "plus5Tooltip": "extend by 5 minutes",
+    "minus5Tooltip": "reduce by 5 minutes"
   },
   "sessionItem": {
     "duration": "Duration",

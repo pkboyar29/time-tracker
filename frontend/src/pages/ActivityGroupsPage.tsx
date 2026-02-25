@@ -63,7 +63,9 @@ const ActivityGroupsPage: FC = () => {
 
       <div className="container my-[65px] xl:my-5">
         <div className="flex items-center justify-between">
-          <Title>{t('groupsPage.title')}</Title>
+          <Title>
+            {t('groupsPage.title')} ({activityGroups?.length})
+          </Title>
 
           <div className="flex h-full gap-5">
             <SearchBar
