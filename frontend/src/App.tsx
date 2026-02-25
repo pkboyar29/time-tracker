@@ -41,18 +41,25 @@ const App: FC = () => {
   }, []);
 
   useEffect(() => {
-    const updateSessionInCaseOfError = async () => {
+    const updateUnsyncedSession = async () => {
       const unsyncedSessionFromLS = getSessionFromLS('unsyncedSession');
 
       if (requiredAuth && unsyncedSessionFromLS) {
         try {
           await updateSession(unsyncedSessionFromLS);
           removeSessionFromLS('unsyncedSession');
-        } catch (e) {}
+        } catch (e) {
+          if (
+            e instanceof AxiosError &&
+            (e.response?.status === 400 || e.response?.status === 404)
+          ) {
+            removeSessionFromLS('unsyncedSession');
+          }
+        }
       }
     };
 
-    updateSessionInCaseOfError();
+    updateUnsyncedSession();
   }, []);
 
   useEffect(() => {
@@ -67,15 +74,11 @@ const App: FC = () => {
             return;
           }
 
+          startTimer(sessionFromLS, true);
           if (
             sessionFromLS.spentTimeSeconds > sessionFromServer.spentTimeSeconds
           ) {
-            startTimer(sessionFromLS, true);
-
-            // TODO: отображать серверные ошибки?
-            updateSession(sessionFromLS, true);
-          } else {
-            startTimer(sessionFromServer, true);
+            updateSession(sessionFromLS, true); // TODO: отображать серверные ошибки?
           }
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
