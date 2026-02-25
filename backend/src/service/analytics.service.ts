@@ -197,7 +197,7 @@ function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
   );
   if (daysInRange == 1) {
     return 'hour';
-  } else if (daysInRange <= 31) {
+  } else if (daysInRange <= 40) {
     return 'day';
   } else if (daysInRange <= 732) {
     return 'month';
