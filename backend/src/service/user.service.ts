@@ -46,7 +46,7 @@ const userService = {
 };
 
 async function signUp(
-  userSignUpDTO: UserSignUpDTO
+  userSignUpDTO: UserSignUpDTO,
 ): Promise<AuthorizeResponse> {
   const users = await User.find({});
   users.forEach((user) => {
@@ -66,7 +66,7 @@ async function signUp(
   if (!isValidFormat) {
     throw new HttpError(
       400,
-      'password - must have one uppercase, one lowercase letters, one number and one special symbol (!@#$%^&*)'
+      'password - must have one uppercase, one lowercase letters, one number and one special symbol (!@#$%^&*)',
     );
   }
 
@@ -98,7 +98,7 @@ async function signUp(
 }
 
 async function signIn(
-  userSignInDTO: UserSignInDTO
+  userSignInDTO: UserSignInDTO,
 ): Promise<AuthorizeResponse> {
   const user = await User.find({ email: userSignInDTO.email });
   if (!user[0]) {
@@ -122,7 +122,7 @@ function createTokens(userId: string): AuthorizeResponse {
 function createToken(
   userId: string,
   tokenType: 'access' | 'refresh',
-  secretKey: string
+  secretKey: string,
 ): string {
   let token: string = '';
 
@@ -134,8 +134,8 @@ function createToken(
   token = jsonwebtoken.sign(payload, secretKey, {
     expiresIn:
       tokenType === 'access'
-        ? process.env.ACCESS_TOKEN_DURATION ?? '1800s'
-        : process.env.REFRESH_TOKEN_DURATION ?? '40d',
+        ? (process.env.ACCESS_TOKEN_DURATION ?? '1800s')
+        : (process.env.REFRESH_TOKEN_DURATION ?? '40d'),
   });
   return token;
 }
@@ -173,7 +173,7 @@ function createAccessToken(userId: string): string {
     'access',
     process.env.ACCESS_TOKEN_SECRET
       ? process.env.ACCESS_TOKEN_SECRET
-      : 'default-access-secret'
+      : 'default-access-secret',
   );
 
   return accessToken;
@@ -185,7 +185,7 @@ function createRefreshToken(userId: string): string {
     'refresh',
     process.env.REFRESH_TOKEN_SECRET
       ? process.env.REFRESH_TOKEN_SECRET
-      : 'default-refresh-secret'
+      : 'default-refresh-secret',
   );
 
   return refreshToken;
@@ -214,10 +214,10 @@ function refreshAccessToken(refreshToken: string): string | undefined {
 
 async function getProfileInfo(
   userId: string,
-  timezone: string
+  timezone: string,
 ): Promise<UserResponseDTO> {
   const profileInfo = await User.findById(userId).select(
-    'email dailyGoal showTimerInTitle createdDate'
+    'email dailyGoal showTimerInTitle createdDate',
   ); // firstName lastName
 
   const startOfToday = DateTime.fromJSDate(new Date(), { zone: timezone })
@@ -274,7 +274,7 @@ async function updateDailyGoal(newDailyGoal: number, userId: string) {
 
 async function updateShowTimerInTitle(
   showTimerInTitle: boolean,
-  userId: string
+  userId: string,
 ) {
   try {
     const user = await User.findById(userId);
@@ -304,7 +304,7 @@ async function exportUserData(userId: string): Promise<Buffer> {
     spentTimeSeconds: number;
   }) => {
     return ` (${info.sessionsAmount} sessions, ${Math.floor(
-      info.spentTimeSeconds / 60
+      info.spentTimeSeconds / 60,
     )} minutes, ${Math.floor(info.spentTimeSeconds / 3600)} hours)`;
   };
 
@@ -319,7 +319,7 @@ async function exportUserData(userId: string): Promise<Buffer> {
         sessionsAmount: group.sessionsAmount,
         spentTimeSeconds: group.spentTimeSeconds,
       }),
-      '\n'
+      '\n',
     );
 
     const activities = await activityService.getActivities({
@@ -335,7 +335,7 @@ async function exportUserData(userId: string): Promise<Buffer> {
           sessionsAmount: activity.sessionsAmount,
           spentTimeSeconds: activity.spentTimeSeconds,
         }),
-        '\n'
+        '\n',
       );
     });
 
@@ -357,7 +357,7 @@ async function exportUserData(userId: string): Promise<Buffer> {
     {
       sessionsAmount: sessionsWithoutActivityAmount,
       spentTimeSeconds: sessionsWithoutActivitySpentTimeSeconds,
-    }
+    },
   )}`;
   fileContent = fileContent.concat(withoutActivityLine);
 
@@ -368,7 +368,7 @@ async function exportUserData(userId: string): Promise<Buffer> {
 async function importFile(
   fileContent: string,
   sessionDuration: number,
-  userId: string
+  userId: string,
 ): Promise<string> {
   const fileLines = fileContent.split('\n');
 
@@ -409,7 +409,7 @@ async function importFile(
     const activityName = cleanedActivityLine.slice(0, lastSpaceIndex);
     const activitySessionCount = parseInt(
       cleanedActivityLine.slice(lastSpaceIndex + 1),
-      10
+      10,
     );
 
     const activity = await new Activity({
@@ -453,7 +453,7 @@ async function importFile(
 async function uploadAudio(
   originalName: string,
   fileBuffer: Buffer,
-  userId: string
+  userId: string,
 ): Promise<IUserAudio> {
   try {
     const userAudios = await UserAudio.find({ userId });
@@ -467,7 +467,7 @@ async function uploadAudio(
     const UPLOADS_ROOT = path.resolve(process.env.UPLOADS_ROOT ?? '');
     const relativeAudioPath = path.join(
       userId,
-      `${crypto.randomUUID()}.${fileExtension}`
+      `${crypto.randomUUID()}.${fileExtension}`,
     );
 
     const absoluteAudioPath = path.join(UPLOADS_ROOT, relativeAudioPath);
@@ -495,7 +495,7 @@ async function uploadAudio(
 
 async function getAudioObject(
   audioId: string,
-  userId: string
+  userId: string,
 ): Promise<mongoose.HydratedDocument<IUserAudio>> {
   const notFoundError = new HttpError(404, 'Audio Not Found');
   try {
@@ -518,7 +518,7 @@ async function getAudioObject(
 
 async function getAudioFile(
   audioId: string,
-  userId: string
+  userId: string,
 ): Promise<{
   fileName: string;
   buffer: Buffer;
@@ -542,7 +542,7 @@ async function getAudioFile(
 async function updateAudioCurrent(
   audioId: string,
   userId: string,
-  current: boolean
+  current: boolean,
 ): Promise<{ message: string }> {
   try {
     const userAudio = await userService.getAudioObject(audioId, userId);
@@ -550,7 +550,7 @@ async function updateAudioCurrent(
     if (current) {
       await UserAudio.findOneAndUpdate(
         { userId, current: true },
-        { current: false }
+        { current: false },
       );
     }
 
@@ -567,7 +567,7 @@ async function updateAudioCurrent(
 
 async function deleteAudio(
   audioId: string,
-  userId: string
+  userId: string,
 ): Promise<{ message: string }> {
   const userAudio = await userService.getAudioObject(audioId, userId);
   const UPLOADS_ROOT = path.resolve(process.env.UPLOADS_ROOT ?? '');
