@@ -18,41 +18,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-// logging middleware
-app.use(
-  expressWinston.logger({
-    format: winston.format.combine(
-      winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-      winston.format.json()
-    ),
-    transports: [
-      new winston.transports.Console(),
-      new DailyRotateFile({
-        filename: 'logs/%DATE%.log',
-        datePattern: 'YYYY-MM-DD',
-        zippedArchive: false,
-        maxSize: '20m',
-        maxFiles: '14d', // store 14 days
-      }),
-      // new winston.transports.File({
-      //   filename: new Date().toISOString().split('T')[0] + '.log',
-      // }),
-    ],
-    level: (req, res) => {
-      if (res.statusCode >= 500) {
-        return 'error';
-      }
-      if (res.statusCode >= 400) {
-        return 'warn';
-      }
-      return 'info';
-    },
-    meta: true,
-    msg: 'User {{res.locals.userId}}: HTTP {{req.method}} {{res.statusCode}} {{res.responseTime}}ms {{req.url}}',
-    colorize: false,
-  })
-);
-
 // authorization middleware
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (
@@ -81,6 +46,70 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     }
   }
 });
+
+// adding body for logs into response object
+app.use((req, res, next) => {
+  const oldSend = res.send;
+
+  res.send = function (body) {
+    if (res.statusCode >= 400) {
+      (res as any)._bodyForLog = body;
+    }
+    return oldSend.call(this, body);
+  };
+
+  next();
+});
+
+// logging middleware
+app.use(
+  expressWinston.logger({
+    format: winston.format.combine(
+      winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+      winston.format.json(),
+    ),
+    transports: [
+      new winston.transports.Console(),
+      new DailyRotateFile({
+        filename: 'logs/%DATE%.log',
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: false,
+        maxSize: '20m',
+        maxFiles: '14d', // store 14 days
+      }),
+      // new winston.transports.File({
+      //   filename: new Date().toISOString().split('T')[0] + '.log',
+      // }),
+    ],
+    level: (req, res) => {
+      if (res.statusCode >= 500) {
+        return 'error';
+      }
+      if (res.statusCode >= 400) {
+        return 'warn';
+      }
+      return 'info';
+    },
+    meta: true,
+    dynamicMeta: (req, res) => {
+      if (res.statusCode >= 400) {
+        const safeBody = { ...req.body };
+        delete safeBody.email;
+        delete safeBody.password;
+        return {
+          requestBody: safeBody,
+          responseBody: (res as any)._bodyForLog
+            ? (res as any)._bodyForLog
+            : {},
+        };
+      }
+
+      return {};
+    },
+    msg: 'User {{res.locals.userId}}: HTTP {{req.method}} {{res.statusCode}} {{res.responseTime}}ms {{req.url}}',
+    colorize: false,
+  }),
+);
 
 app.use('/sessions', sessionRouter.default);
 app.use('/activities', activityRouter.default);
