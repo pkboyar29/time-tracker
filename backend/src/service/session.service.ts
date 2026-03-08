@@ -173,60 +173,31 @@ async function updateSession(
     }
 
     const session = await sessionService.getSession(sessionId, userId);
-
     if (session.completed) {
       throw new HttpError(
         400,
         'You cannot update an already completed session',
       );
     }
-
-    if (session.spentTimeSeconds > sessionDTO.spentTimeSeconds) {
+    if (sessionDTO.spentTimeSeconds < session.spentTimeSeconds) {
       throw new HttpError(
         400,
         "You cannot reduce a session's spentTimeSeconds",
       );
     }
 
-    if (session.spentTimeSeconds === sessionDTO.spentTimeSeconds) {
-      session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
-      session.note = sessionDTO.note;
-      session.updatedDate = new Date();
-
-      const validationError = session.validateSync();
-      if (validationError) {
-        const fields = ['totalTimeSeconds', 'note'] as const;
-
-        for (const field of fields) {
-          const err = validationError.errors[field];
-          if (err) {
-            throw new HttpError(400, err.toString());
-          }
-        }
-      }
-
-      if (session.totalTimeSeconds === session.spentTimeSeconds) {
-        session.completed = true;
-        if (session.activity) {
-          await activityService.updateActivityAndGroupStats(session, userId);
-        }
-      }
-
-      await session.save();
-
-      return session;
+    if (sessionDTO.spentTimeSeconds > session.spentTimeSeconds) {
+      let partSpentTimeSeconds: number =
+        sessionDTO.spentTimeSeconds - session!.spentTimeSeconds;
+      const newSessionPart = new SessionPart({
+        spentTimeSeconds: partSpentTimeSeconds,
+        session: sessionId,
+        user: userId,
+        paused: sessionDTO.isPaused,
+        createdDate: Date.now(),
+      });
+      await newSessionPart.save();
     }
-
-    let partSpentTimeSeconds: number =
-      sessionDTO.spentTimeSeconds - session!.spentTimeSeconds;
-    const newSessionPart = new SessionPart({
-      spentTimeSeconds: partSpentTimeSeconds,
-      session: sessionId,
-      user: userId,
-      paused: sessionDTO.isPaused,
-      createdDate: Date.now(),
-    });
-    await newSessionPart.save();
 
     session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
     session.spentTimeSeconds = sessionDTO.spentTimeSeconds;
