@@ -1,12 +1,9 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
-import Activity from '../model/activity.model';
-import ActivityGroup from '../model/activityGroup.model';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
-import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { HttpError } from '../helpers/HttpError';
 
 interface PopulatedActivity {
@@ -168,9 +165,7 @@ async function updateSession(
   userId: string,
 ): Promise<ISession> {
   try {
-    if (
-      Number(sessionDTO.spentTimeSeconds) > Number(sessionDTO.totalTimeSeconds)
-    ) {
+    if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
       throw new HttpError(
         400,
         'Total time must be greater or equal spent time',
@@ -209,6 +204,14 @@ async function updateSession(
           }
         }
       }
+
+      if (session.totalTimeSeconds === session.spentTimeSeconds) {
+        session.completed = true;
+        if (session.activity) {
+          await activityService.updateActivityAndGroupStats(session, userId);
+        }
+      }
+
       await session.save();
 
       return session;
@@ -220,11 +223,7 @@ async function updateSession(
       spentTimeSeconds: partSpentTimeSeconds,
       session: sessionId,
       user: userId,
-      paused: convertParamToBoolean(
-        sessionDTO.isPaused !== undefined
-          ? sessionDTO.isPaused.toString()
-          : undefined,
-      ),
+      paused: sessionDTO.isPaused,
       createdDate: Date.now(),
     });
     await newSessionPart.save();
@@ -246,21 +245,10 @@ async function updateSession(
       }
     }
 
-    if (sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds) {
+    if (sessionDTO.spentTimeSeconds === sessionDTO.totalTimeSeconds) {
       session.completed = true;
       if (session.activity) {
-        const activity = await Activity.findById(session.activity.id);
-        const activityGroup = await ActivityGroup.findById(
-          activity!.activityGroup._id,
-        );
-
-        activity!.sessionsAmount += 1;
-        activity!.spentTimeSeconds += session.totalTimeSeconds;
-        activityGroup!.sessionsAmount += 1;
-        activityGroup!.spentTimeSeconds += session.totalTimeSeconds;
-
-        await activity!.save();
-        await activityGroup!.save();
+        await activityService.updateActivityAndGroupStats(session, userId);
       }
     }
 
