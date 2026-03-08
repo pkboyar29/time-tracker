@@ -218,10 +218,11 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const finishTimer = async () => {
     if (timerState.status === 'idle') return;
+    if (!sessionRef.current) return;
 
     const completedSession: ISession = {
-      ...timerState.session,
-      spentTimeSeconds: timerState.session.totalTimeSeconds,
+      ...sessionRef.current,
+      spentTimeSeconds: sessionRef.current.totalTimeSeconds,
     };
     stopTimer();
 
