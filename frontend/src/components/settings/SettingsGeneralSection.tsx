@@ -21,6 +21,15 @@ const SettingsGeneralSection: FC = () => {
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((state) => state.users.user);
 
+  const { t, i18n } = useTranslation();
+
+  const { timerState, stopTimer } = useTimer();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const [dailyGoalInput, setDailyGoalInput] = useState<number>(
+    Math.trunc(userInfo ? userInfo.dailyGoal : 0 / 60),
+  ); // minutes
+
   if (!userInfo) {
     return (
       <div className="pb-5 text-center">
@@ -29,17 +38,8 @@ const SettingsGeneralSection: FC = () => {
     );
   }
 
-  const { t, i18n } = useTranslation();
-
-  const { timerState, stopTimer } = useTimer();
-
-  const [dailyGoalInput, setDailyGoalInput] = useState<number>(
-    Math.trunc(userInfo.dailyGoal / 60),
-  ); // minutes
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
-
   const logOutHandler = async () => {
-    if (timerState.status != 'idle') {
+    if (timerState.status !== 'idle') {
       await stopTimer(true);
     }
     dispatch(logOutUser());
