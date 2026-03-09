@@ -2,6 +2,7 @@ import SessionPart, { ISessionPart } from '../model/sessionPart.model';
 import mongoose from 'mongoose';
 
 interface PopulatedSession {
+  _id: mongoose.Types.ObjectId;
   deleted: boolean;
   activity: {
     id: mongoose.Types.ObjectId;
@@ -11,7 +12,7 @@ interface PopulatedSession {
 
 const sessionPopulateConfig = {
   path: 'session',
-  select: 'deleted activity',
+  select: '_id deleted activity',
   populate: {
     path: 'activity',
     select: 'name id',
@@ -34,6 +35,7 @@ async function getSessionPartsInDateRange({
   userId,
 }: GetSessionPartsInDateRangeOptions): Promise<ISessionPart[]> {
   try {
+    // TODO: можно не загружать из БД все parts с deleted сессиями, а потом фильтровать. Можно сразу загрузить что нужно
     const sessionParts = await SessionPart.find({
       createdDate: { $gte: startRange, $lte: endRange },
       user: userId,

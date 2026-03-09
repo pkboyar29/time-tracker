@@ -27,7 +27,7 @@ describe('Session controller endpoints', () => {
       .send({ totalTimeSeconds: 1000 });
 
     await authorizedRequest(getAccessToken())
-      .put(`/sessions/${response.body._id}`)
+      .put(`/sessions/${response.body._id}?tz=Europe/Moscow`)
       .send({
         totalTimeSeconds: 1000,
         spentTimeSeconds: 200,

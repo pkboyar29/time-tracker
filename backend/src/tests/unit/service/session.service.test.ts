@@ -36,7 +36,7 @@ describe('sessionService.getSession', () => {
     try {
       await sessionService.getSession(
         new Types.ObjectId().toString(),
-        'user123'
+        'user123',
       );
     } catch (e) {
       expect(e).toBeInstanceOf(HttpError);
@@ -56,7 +56,7 @@ describe('sessionService.getSession', () => {
     try {
       await sessionService.getSession(
         new Types.ObjectId().toString(),
-        'user123'
+        'user123',
       );
     } catch (e) {
       expect(e).toBeInstanceOf(HttpError);
@@ -72,7 +72,7 @@ describe('sessionService.getSession', () => {
     try {
       await sessionService.getSession(
         new Types.ObjectId().toString(),
-        'user123'
+        'user123',
       );
     } catch (e) {
       expect(e).toBeInstanceOf(HttpError);
@@ -87,7 +87,7 @@ describe('sessionService.getSession', () => {
 
     const session = await sessionService.getSession(
       new Types.ObjectId().toString(),
-      mockSession.user
+      mockSession.user,
     );
 
     expect(session).toBe(mockSession);
@@ -107,7 +107,7 @@ describe('sessionService.createSession', () => {
       .mockRejectedValue(new HttpError(404, 'Activity Not Found'));
 
     await expect(
-      sessionService.createSession(mockSessionDTO, userId)
+      sessionService.createSession(mockSessionDTO, userId),
     ).rejects.toThrow('Activity Not Found');
   });
 });
@@ -146,7 +146,8 @@ describe('sessionService.updateSession', () => {
           note: 'note',
           isPaused: false,
         },
-        'userId'
+        'userId',
+        'Europe/Moscow',
       );
     } catch (e) {
       if (e instanceof HttpError) {
@@ -167,13 +168,14 @@ describe('sessionService.updateSession', () => {
           note: 'note',
           isPaused: false,
         },
-        'userId'
+        'userId',
+        'Europe/Moscow',
       );
     } catch (e) {
       if (e instanceof HttpError) {
         expect(e.status).toBe(400);
         expect(e.message).toBe(
-          'Total time must be greater or equal spent time'
+          'Total time must be greater or equal spent time',
         );
       }
     }
@@ -194,13 +196,14 @@ describe('sessionService.updateSession', () => {
           note: 'note',
           isPaused: false,
         },
-        'userId'
+        'userId',
+        'Europe/Moscow',
       );
     } catch (e) {
       if (e instanceof HttpError) {
         expect(e.status).toBe(400);
         expect(e.message).toBe(
-          'You cannot update an already completed session'
+          'You cannot update an already completed session',
         );
       }
     }
@@ -222,13 +225,14 @@ describe('sessionService.updateSession', () => {
           note: 'note',
           isPaused: false,
         },
-        'userId'
+        'userId',
+        'Europe/Moscow',
       );
     } catch (e) {
       if (e instanceof HttpError) {
         expect(e.status).toBe(400);
         expect(e.message).toBe(
-          "You cannot reduce a session's spentTimeSeconds"
+          "You cannot reduce a session's spentTimeSeconds",
         );
       }
     }
@@ -260,7 +264,8 @@ describe('sessionService.updateSession', () => {
         note: 'new note',
         isPaused: false,
       },
-      'userId'
+      'userId',
+      'Europe/Moscow',
     );
 
     expect(saveSpy).toHaveBeenCalled();

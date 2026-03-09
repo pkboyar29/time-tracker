@@ -17,7 +17,7 @@ const mapUserAudio = (unmappedUserAudio: any, blob: Blob): IUserAudio => {
 };
 
 export const signIn = async (
-  payload: ISignIn
+  payload: ISignIn,
 ): Promise<{ access: string; refresh: string }> => {
   const { data } = await axios.post('/users/sign-in', payload);
 
@@ -25,7 +25,7 @@ export const signIn = async (
 };
 
 export const signUp = async (
-  payload: ISignUp
+  payload: ISignUp,
 ): Promise<{ access: string; refresh: string }> => {
   const { data } = await axios.post('/users/sign-up', payload);
 
@@ -33,9 +33,7 @@ export const signUp = async (
 };
 
 export const fetchProfileInfo = async (): Promise<IUser> => {
-  const { data } = await axios.get(
-    `/users/profile?tz=${Intl.DateTimeFormat().resolvedOptions().timeZone}`
-  );
+  const { data } = await axios.get('/users/profile');
 
   const audios: IUserAudio[] = await Promise.all(
     data.audios.map(async (a: any) => {
@@ -44,21 +42,18 @@ export const fetchProfileInfo = async (): Promise<IUser> => {
       });
 
       return mapUserAudio(a, blob);
-    })
+    }),
   );
 
   return {
     ...data,
     createdDate: new Date(data.createdDate),
-    todaySpentTimeSeconds: data.todayAnalytics.spentTimeSeconds,
-    dailyGoalCompletionNotified:
-      data.todayAnalytics.spentTimeSeconds >= data.dailyGoal,
     audios,
   };
 };
 
 export const updateDailyGoal = async (
-  newDailyGoal: number
+  newDailyGoal: number,
 ): Promise<string> => {
   const { data } = await axios.put('/users/updateDailyGoal', { newDailyGoal });
 
@@ -66,7 +61,7 @@ export const updateDailyGoal = async (
 };
 
 export const updateShowTimerInTitle = async (
-  showTimerInTitle: boolean
+  showTimerInTitle: boolean,
 ): Promise<string> => {
   const { data } = await axios.put('/users/updateShowTimerInTitle', {
     showTimerInTitle,
@@ -81,7 +76,7 @@ export const uploadAudio = async (audioFile: Blob): Promise<IUserAudio> => {
 
   const { data: unmappedUserAudio } = await axios.post(
     'users/audio/uploadAudio',
-    formData
+    formData,
   );
 
   return mapUserAudio(unmappedUserAudio, audioFile);
@@ -95,7 +90,7 @@ export const deleteAudio = async (audioId: string): Promise<string> => {
 
 export const updateAudio = async (
   audioId: string,
-  current: boolean
+  current: boolean,
 ): Promise<string> => {
   const { data } = await axios.put(`users/audio/${audioId}`, { current });
 

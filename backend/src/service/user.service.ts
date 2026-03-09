@@ -1,16 +1,16 @@
 import { genSaltSync, hashSync, compareSync } from 'bcrypt';
 import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
-import { DateTime } from 'luxon';
 import fs from 'fs';
 import path from 'path';
 
 import { HttpError } from '../helpers/HttpError';
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
+import { getTodayRange } from '../helpers/getTodayRange';
 import activityGroupService from './activityGroup.service';
 import activityService from './activity.service';
 import sessionService from './session.service';
-import analyticsService from './analytics.service';
+import sessionPartService from './sessionPart.service';
 import User from '../model/user.model';
 import UserAudio, { IUserAudio } from '../model/userAudio.model';
 import ActivityGroup from '../model/activityGroup.model';
@@ -34,6 +34,7 @@ const userService = {
   decodeAccessToken,
   refreshAccessToken,
   getProfileInfo,
+  isDailyGoalCompletedNow,
   updateDailyGoal,
   updateShowTimerInTitle,
   exportUserData,
@@ -212,30 +213,11 @@ function refreshAccessToken(refreshToken: string): string | undefined {
   }
 }
 
-async function getProfileInfo(
-  userId: string,
-  timezone: string,
-): Promise<UserResponseDTO> {
+// TODO: убрать timezone
+async function getProfileInfo(userId: string): Promise<UserResponseDTO> {
   const profileInfo = await User.findById(userId).select(
     'email dailyGoal showTimerInTitle createdDate',
   ); // firstName lastName
-
-  const startOfToday = DateTime.fromJSDate(new Date(), { zone: timezone })
-    .set({
-      hour: 0,
-      minute: 0,
-      millisecond: 0,
-    })
-    .toJSDate();
-  const endOfToday = new Date(startOfToday);
-  endOfToday.setDate(endOfToday.getDate() + 1);
-
-  const todayAnalytics = await analyticsService.getAnalyticsForRangeWithCache({
-    startOfRange: startOfToday,
-    endOfRange: endOfToday,
-    userId,
-    timezone,
-  });
 
   const userAudios = await UserAudio.find({ userId });
 
@@ -244,9 +226,56 @@ async function getProfileInfo(
     dailyGoal: profileInfo!.dailyGoal,
     showTimerInTitle: profileInfo!.showTimerInTitle,
     createdDate: profileInfo!.createdDate,
-    todayAnalytics: todayAnalytics.sessionStatistics,
     audios: userAudios,
   };
+}
+
+// TODO: временный вариант, удалить
+async function isDailyGoalCompletedNow(
+  completedSessionId: string,
+  userId: string,
+  timezone: string,
+): Promise<boolean> {
+  const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
+
+  const partsForToday = await sessionPartService.getSessionPartsInDateRange({
+    startRange: startOfToday,
+    endRange: startOfTomorrow,
+    userId,
+  });
+
+  const partsOfCompletedSession = partsForToday.filter(
+    (part: any) => part.session._id.toString() === completedSessionId,
+  );
+  const completedSessionSeconds = partsOfCompletedSession.reduce(
+    (seconds, part) => seconds + part.spentTimeSeconds,
+    0,
+  );
+
+  let todaySpentTimeSeconds =
+    partsForToday.reduce(
+      (seconds, part) => seconds + part.spentTimeSeconds,
+      0,
+    ) - completedSessionSeconds;
+
+  const dailyGoalInfo = await User.findById(userId).select('dailyGoal');
+  if (!dailyGoalInfo) {
+    return false;
+  }
+
+  // if goal has reached before
+  if (todaySpentTimeSeconds >= dailyGoalInfo.dailyGoal) {
+    return false;
+  }
+  // if goal has reached now
+  if (
+    todaySpentTimeSeconds + completedSessionSeconds >=
+    dailyGoalInfo.dailyGoal
+  ) {
+    return true;
+  }
+  // if goal hasn't reached yet
+  return false;
 }
 
 async function updateDailyGoal(newDailyGoal: number, userId: string) {

@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import sessionService from '../service/session.service';
 import { sendErrorResponse } from '../helpers/sendErrorResponse';
 import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
+import { isValidTimeZone } from '../helpers/isValidTimeZone';
 
 const router = Router();
 
@@ -73,11 +74,21 @@ router.put('/:id', async (req: Request, res: Response) => {
       res.status(400).send('totalTimeSeconds - should be number');
       return;
     }
+    const { tz } = req.query;
+    if (!tz) {
+      res.status(400).send('tz query param is required');
+      return;
+    }
+    if (!isValidTimeZone(tz as string)) {
+      res.status(400).send('timezone format is invalid');
+      return;
+    }
 
     const data = await sessionService.updateSession(
       req.params.id,
       { ...req.body, isPaused: convertParamToBoolean(req.body.isPaused) },
       res.locals.userId,
+      tz as string,
     );
     res.status(200).json(data);
   } catch (e) {

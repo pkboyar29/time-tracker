@@ -1,6 +1,7 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
+import userService from './user.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
@@ -30,6 +31,11 @@ interface GetSessionsForActivityOptions {
   userId: string;
   completed?: boolean;
 }
+
+type UpdateSessionResult = {
+  session: ISession;
+  dailyGoalCompletedNow?: boolean; // появится только если сессия завершена
+};
 
 const sessionService = {
   getSessions,
@@ -163,7 +169,8 @@ async function updateSession(
   sessionId: string,
   sessionDTO: SessionUpdateDTO,
   userId: string,
-): Promise<ISession> {
+  timezone: string,
+): Promise<UpdateSessionResult> {
   try {
     if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
       throw new HttpError(
@@ -186,9 +193,10 @@ async function updateSession(
       );
     }
 
+    let partSpentTimeSeconds = 0;
     if (sessionDTO.spentTimeSeconds > session.spentTimeSeconds) {
-      let partSpentTimeSeconds: number =
-        sessionDTO.spentTimeSeconds - session!.spentTimeSeconds;
+      partSpentTimeSeconds =
+        sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
       const newSessionPart = new SessionPart({
         spentTimeSeconds: partSpentTimeSeconds,
         session: sessionId,
@@ -216,16 +224,24 @@ async function updateSession(
       }
     }
 
-    if (sessionDTO.spentTimeSeconds === sessionDTO.totalTimeSeconds) {
+    let dailyGoalCompletedNow: boolean | undefined = undefined;
+
+    if (session.spentTimeSeconds === session.totalTimeSeconds) {
       session.completed = true;
       if (session.activity) {
         await activityService.updateActivityAndGroupStats(session, userId);
       }
+      const isDailyGoalCompletedNow = await userService.isDailyGoalCompletedNow(
+        session.id,
+        userId,
+        timezone,
+      );
+      dailyGoalCompletedNow = isDailyGoalCompletedNow;
     }
 
     await session.save();
 
-    return session;
+    return { session, dailyGoalCompletedNow };
   } catch (e) {
     throw e;
   }

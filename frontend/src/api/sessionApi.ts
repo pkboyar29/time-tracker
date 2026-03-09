@@ -48,7 +48,7 @@ export const createSession = async (
 export const updateSession = async (
   payload: ISession,
   isPaused?: boolean,
-): Promise<ISession> => {
+): Promise<{ session: ISession; dailyGoalCompletedNow: boolean }> => {
   const noteFromLS = getNoteFromLS(payload.id);
 
   const body = {
@@ -57,9 +57,15 @@ export const updateSession = async (
     isPaused: isPaused !== undefined ? isPaused : false,
   };
 
-  const { data } = await axios.put(`/sessions/${payload.id}`, body);
+  const { data } = await axios.put(
+    `/sessions/${payload.id}?tz=${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
+    body,
+  );
 
-  return mapResponseData(data);
+  return {
+    session: mapResponseData(data.session),
+    dailyGoalCompletedNow: data.dailyGoalCompletedNow,
+  };
 };
 
 export const updateSessionNote = async (sessionId: string) => {

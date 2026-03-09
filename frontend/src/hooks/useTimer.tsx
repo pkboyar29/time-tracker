@@ -9,7 +9,6 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { useAppSelector, useAppDispatch } from '../redux/store';
-import { setUser } from '../redux/slices/userSlice';
 import { updateSession } from '../api/sessionApi';
 import {
   saveSessionToLS,
@@ -226,8 +225,10 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     };
     stopTimer();
 
+    let isDailyGoalCompleted = true;
     try {
-      await updateSession(completedSession);
+      const { dailyGoalCompletedNow } = await updateSession(completedSession);
+      isDailyGoalCompleted = dailyGoalCompletedNow;
     } catch (e) {
       toast(t('serverErrors.updateSessionButSaved'), {
         type: 'error',
@@ -237,37 +238,11 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
     playAudio();
 
-    if (!currentUser) {
-      showSessionCompletedNotification({
-        session: completedSession,
-        onClose: stopAudio,
-      });
-      return;
-    }
-
-    let updatedUser = {
-      ...currentUser,
-      // TODO: вот мы завершили сессию на половину, обновили страницу, в todaySpentTimeSeconds времени уже больше, и мы к этому значению прибавляем totalTimeSeconds? вообще не та цифра будет
-      todaySpentTimeSeconds:
-        currentUser.todaySpentTimeSeconds + completedSession.totalTimeSeconds,
-    };
-    const isDailyGoalCompleted =
-      updatedUser.todaySpentTimeSeconds >= updatedUser.dailyGoal;
-
     showSessionCompletedNotification({
       session: completedSession,
-      dailyGoalCompleted:
-        isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified,
+      dailyGoalCompleted: isDailyGoalCompleted,
       onClose: stopAudio,
     });
-
-    if (isDailyGoalCompleted) {
-      updatedUser = {
-        ...updatedUser,
-        dailyGoalCompletionNotified: true,
-      };
-    }
-    dispatch(setUser(updatedUser));
   };
 
   useEffect(() => {
