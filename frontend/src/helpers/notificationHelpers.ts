@@ -2,25 +2,31 @@ import { getReadableTime } from './timeHelpers';
 import { ISession } from '../ts/interfaces/Session/ISession';
 import { t } from 'i18next';
 
-export const showSessionCompletedNotification = (
-  currentSession: ISession,
-  dailyGoalCompleted: boolean,
-  onClose?: () => void
-) => {
+interface ShowSessionCompletedNotificationParams {
+  session: ISession;
+  dailyGoalCompleted?: boolean;
+  onClose?: () => void;
+}
+
+export const showSessionCompletedNotification = ({
+  session,
+  dailyGoalCompleted,
+  onClose,
+}: ShowSessionCompletedNotificationParams) => {
   if (typeof window.Notification === 'undefined') return;
 
   try {
     if (Notification.permission === 'granted') {
-      const activityName = currentSession.activity
-        ? currentSession.activity.name
+      const activityName = session.activity
+        ? session.activity.name
         : t('withoutActivity');
 
       let notificationBody = `${activityName} - ${getReadableTime(
-        currentSession.totalTimeSeconds,
+        session.totalTimeSeconds,
         t,
         {
           short: false,
-        }
+        },
       )}`;
       if (dailyGoalCompleted) {
         notificationBody += `\n${t('notifications.dailyGoalCompleted')}`;
@@ -30,7 +36,7 @@ export const showSessionCompletedNotification = (
         t('notifications.sessionCompleted'),
         {
           body: notificationBody,
-        }
+        },
       );
       if (onClose) {
         notification.addEventListener('close', () => {

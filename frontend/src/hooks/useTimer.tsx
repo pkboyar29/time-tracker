@@ -226,29 +226,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     };
     stopTimer();
 
-    let updatedUser = {
-      ...currentUser!,
-      // TODO: вот мы завершили сессию на половину, обновили страницу, в todaySpentTimeSeconds времени уже больше, и мы к этому значению прибавляем totalTimeSeconds? вообще не та цифра будет
-      todaySpentTimeSeconds:
-        currentUser!.todaySpentTimeSeconds + completedSession.totalTimeSeconds,
-    };
-    const isDailyGoalCompleted =
-      updatedUser.todaySpentTimeSeconds >= updatedUser.dailyGoal;
-
-    playAudio();
-    showSessionCompletedNotification(
-      completedSession,
-      isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified,
-      () => stopAudio(),
-    );
-    if (isDailyGoalCompleted) {
-      updatedUser = {
-        ...updatedUser,
-        dailyGoalCompletionNotified: true,
-      };
-    }
-    dispatch(setUser(updatedUser));
-
     try {
       await updateSession(completedSession);
     } catch (e) {
@@ -257,6 +234,40 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       });
       saveSessionToLS(completedSession, 'unsyncedSession');
     }
+
+    playAudio();
+
+    if (!currentUser) {
+      showSessionCompletedNotification({
+        session: completedSession,
+        onClose: stopAudio,
+      });
+      return;
+    }
+
+    let updatedUser = {
+      ...currentUser,
+      // TODO: вот мы завершили сессию на половину, обновили страницу, в todaySpentTimeSeconds времени уже больше, и мы к этому значению прибавляем totalTimeSeconds? вообще не та цифра будет
+      todaySpentTimeSeconds:
+        currentUser.todaySpentTimeSeconds + completedSession.totalTimeSeconds,
+    };
+    const isDailyGoalCompleted =
+      updatedUser.todaySpentTimeSeconds >= updatedUser.dailyGoal;
+
+    showSessionCompletedNotification({
+      session: completedSession,
+      dailyGoalCompleted:
+        isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified,
+      onClose: stopAudio,
+    });
+
+    if (isDailyGoalCompleted) {
+      updatedUser = {
+        ...updatedUser,
+        dailyGoalCompletionNotified: true,
+      };
+    }
+    dispatch(setUser(updatedUser));
   };
 
   useEffect(() => {
