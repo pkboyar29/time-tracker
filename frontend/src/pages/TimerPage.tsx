@@ -13,6 +13,8 @@ import SessionsList from '../components/SessionsList';
 
 import TimerLeftPart from '../components/timer/TimerLeftPart';
 import TimerRightPart from '../components/timer/TimerRightPart';
+import LoadingTimerLeftPart from '../components/timer/LoadingTimerLeftPart';
+import LoadingTimerRightPart from '../components/timer/LoadingTimerRightPart';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
 
@@ -70,21 +72,34 @@ const TimerPage: FC = () => {
   return (
     <div className="h-full bg-surfaceLight dark:bg-backgroundDark">
       <div className="container flex items-stretch justify-between w-full h-full gap-10 py-5">
-        {sessionFromLS && !isTimerStarted ? null : (
-          <div className="sticky top-0 flex flex-col w-full text-lg gap-14 md:flex-row lg:w-auto xl:gap-28">
-            <TimerLeftPart
-              selectedSeconds={selectedSeconds}
-              selectedActivityId={selectedActivityId}
-            />
-
-            <TimerRightPart
-              selectedSeconds={selectedSeconds}
-              selectedActivityId={selectedActivityId}
-              setSelectedSeconds={setSelectedSeconds}
-              setSelectedActivityId={setSelectedActivityId}
-            />
+        <div className="sticky top-0 flex flex-col w-full text-lg gap-14 md:flex-row lg:w-auto xl:gap-28">
+          <div className="flex flex-col items-center gap-2 sm:flex-1 basis-1/3 sm:basis-auto min-w-[300px]">
+            {sessionFromLS && !isTimerStarted ? (
+              <LoadingTimerLeftPart />
+            ) : (
+              <TimerLeftPart
+                selectedSeconds={selectedSeconds}
+                selectedActivityId={selectedActivityId}
+              />
+            )}
           </div>
-        )}
+
+          <div
+            className="min-h-[575px] flex flex-col flex-1 w-full p-6 sm:overflow-y-hidden rounded-lg shadow-md lg:flex-none 
+    lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto"
+          >
+            {sessionFromLS && !isTimerStarted ? (
+              <LoadingTimerRightPart />
+            ) : (
+              <TimerRightPart
+                selectedSeconds={selectedSeconds}
+                selectedActivityId={selectedActivityId}
+                setSelectedSeconds={setSelectedSeconds}
+                setSelectedActivityId={setSelectedActivityId}
+              />
+            )}
+          </div>
+        </div>
 
         {/* Uncompleted sessions block */}
         <button
