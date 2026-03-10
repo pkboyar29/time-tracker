@@ -18,6 +18,5 @@ export interface UserResponseDTO {
   email: string;
   createdDate: Date;
   dailyGoal: number;
-  todayAnalytics: SessionStatistics;
   audios: IUserAudio[];
 }

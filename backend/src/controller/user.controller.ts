@@ -3,7 +3,6 @@ import userService from '../service/user.service';
 import { memoryUpload } from '../helpers/multer';
 import { sendErrorResponse } from '../helpers/sendErrorResponse';
 import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
-import { isValidTimeZone } from '../helpers/isValidTimeZone';
 import { getMusicMetadata } from '../lib/musicMetadata';
 
 const router = Router();
@@ -37,20 +36,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
 
 router.get('/profile', async (req: Request, res: Response) => {
   try {
-    const { tz } = req.query;
-    if (!tz) {
-      res.status(400).send('tz query param is required');
-      return;
-    }
-    if (!isValidTimeZone(tz as string)) {
-      res.status(400).send('timezone format is invalid');
-      return;
-    }
-
-    const data = await userService.getProfileInfo(
-      res.locals.userId,
-      tz as string,
-    );
+    const data = await userService.getProfileInfo(res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);

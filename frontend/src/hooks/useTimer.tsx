@@ -9,7 +9,6 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { useAppSelector, useAppDispatch } from '../redux/store';
-import { setUser } from '../redux/slices/userSlice';
 import { updateSession } from '../api/sessionApi';
 import {
   saveSessionToLS,
@@ -218,44 +217,32 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const finishTimer = async () => {
     if (timerState.status === 'idle') return;
+    if (!sessionRef.current) return;
 
     const completedSession: ISession = {
-      ...timerState.session,
-      spentTimeSeconds: timerState.session.totalTimeSeconds,
+      ...sessionRef.current,
+      spentTimeSeconds: sessionRef.current.totalTimeSeconds,
     };
     stopTimer();
 
-    let updatedUser = {
-      ...currentUser!,
-      // TODO: вот мы завершили сессию на половину, обновили страницу, в todaySpentTimeSeconds времени уже больше, и мы к этому значению прибавляем totalTimeSeconds? вообще не та цифра будет
-      todaySpentTimeSeconds:
-        currentUser!.todaySpentTimeSeconds + completedSession.totalTimeSeconds,
-    };
-    const isDailyGoalCompleted =
-      updatedUser.todaySpentTimeSeconds >= updatedUser.dailyGoal;
-
-    playAudio();
-    showSessionCompletedNotification(
-      completedSession,
-      isDailyGoalCompleted && !updatedUser.dailyGoalCompletionNotified,
-      () => stopAudio(),
-    );
-    if (isDailyGoalCompleted) {
-      updatedUser = {
-        ...updatedUser,
-        dailyGoalCompletionNotified: true,
-      };
-    }
-    dispatch(setUser(updatedUser));
-
+    let isDailyGoalCompleted = true;
     try {
-      await updateSession(completedSession);
+      const { dailyGoalCompletedNow } = await updateSession(completedSession);
+      isDailyGoalCompleted = dailyGoalCompletedNow;
     } catch (e) {
       toast(t('serverErrors.updateSessionButSaved'), {
         type: 'error',
       });
       saveSessionToLS(completedSession, 'unsyncedSession');
     }
+
+    playAudio();
+
+    showSessionCompletedNotification({
+      session: completedSession,
+      dailyGoalCompleted: isDailyGoalCompleted,
+      onClose: stopAudio,
+    });
   };
 
   useEffect(() => {

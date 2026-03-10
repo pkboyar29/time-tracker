@@ -1,4 +1,4 @@
-import { FC, useState, useRef } from 'react';
+import { FC, useState, useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../../redux/store';
 import { logOutUser, setUser } from '../../redux/slices/userSlice';
 import { updateDailyGoal, updateShowTimerInTitle } from '../../api/userApi';
@@ -21,6 +21,19 @@ const SettingsGeneralSection: FC = () => {
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector((state) => state.users.user);
 
+  const { t, i18n } = useTranslation();
+
+  const { timerState, stopTimer } = useTimer();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const [dailyGoalInput, setDailyGoalInput] = useState<number>(0); // minutes
+
+  useEffect(() => {
+    if (!userInfo) return;
+
+    setDailyGoalInput(Math.trunc(userInfo.dailyGoal / 60));
+  }, [userInfo]);
+
   if (!userInfo) {
     return (
       <div className="pb-5 text-center">
@@ -29,17 +42,8 @@ const SettingsGeneralSection: FC = () => {
     );
   }
 
-  const { t, i18n } = useTranslation();
-
-  const { timerState, stopTimer } = useTimer();
-
-  const [dailyGoalInput, setDailyGoalInput] = useState<number>(
-    Math.trunc(userInfo.dailyGoal / 60),
-  ); // minutes
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
-
   const logOutHandler = async () => {
-    if (timerState.status != 'idle') {
+    if (timerState.status !== 'idle') {
       await stopTimer(true);
     }
     dispatch(logOutUser());

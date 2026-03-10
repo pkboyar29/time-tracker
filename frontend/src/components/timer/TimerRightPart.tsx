@@ -83,10 +83,7 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
   };
 
   return (
-    <div
-      className="min-h-[575px] flex flex-col flex-1 w-full p-6 sm:overflow-y-hidden rounded-lg shadow-md lg:flex-none 
-    lg:w-96 bg-surfaceLightHover dark:bg-surfaceDark basis-1/3 sm:basis-auto"
-    >
+    <>
       <div className="flex flex-col flex-grow gap-5">
         {isTimerStarted && (
           <>
@@ -229,7 +226,7 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 };
 

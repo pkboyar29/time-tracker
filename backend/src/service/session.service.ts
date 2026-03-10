@@ -1,12 +1,10 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
-import Activity from '../model/activity.model';
-import ActivityGroup from '../model/activityGroup.model';
+import userService from './user.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 
-import { convertParamToBoolean } from '../helpers/convertParamToBoolean';
 import { HttpError } from '../helpers/HttpError';
 
 interface PopulatedActivity {
@@ -33,6 +31,11 @@ interface GetSessionsForActivityOptions {
   userId: string;
   completed?: boolean;
 }
+
+type UpdateSessionResult = {
+  session: ISession;
+  dailyGoalCompletedNow?: boolean; // появится только если сессия завершена
+};
 
 const sessionService = {
   getSessions,
@@ -166,11 +169,10 @@ async function updateSession(
   sessionId: string,
   sessionDTO: SessionUpdateDTO,
   userId: string,
-): Promise<ISession> {
+  timezone: string,
+): Promise<UpdateSessionResult> {
   try {
-    if (
-      Number(sessionDTO.spentTimeSeconds) > Number(sessionDTO.totalTimeSeconds)
-    ) {
+    if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
       throw new HttpError(
         400,
         'Total time must be greater or equal spent time',
@@ -178,56 +180,32 @@ async function updateSession(
     }
 
     const session = await sessionService.getSession(sessionId, userId);
-
     if (session.completed) {
       throw new HttpError(
         400,
         'You cannot update an already completed session',
       );
     }
-
-    if (session.spentTimeSeconds > sessionDTO.spentTimeSeconds) {
+    if (sessionDTO.spentTimeSeconds < session.spentTimeSeconds) {
       throw new HttpError(
         400,
         "You cannot reduce a session's spentTimeSeconds",
       );
     }
 
-    if (session.spentTimeSeconds === sessionDTO.spentTimeSeconds) {
-      session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
-      session.note = sessionDTO.note;
-      session.updatedDate = new Date();
-
-      const validationError = session.validateSync();
-      if (validationError) {
-        const fields = ['totalTimeSeconds', 'note'] as const;
-
-        for (const field of fields) {
-          const err = validationError.errors[field];
-          if (err) {
-            throw new HttpError(400, err.toString());
-          }
-        }
-      }
-      await session.save();
-
-      return session;
+    let partSpentTimeSeconds = 0;
+    if (sessionDTO.spentTimeSeconds > session.spentTimeSeconds) {
+      partSpentTimeSeconds =
+        sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
+      const newSessionPart = new SessionPart({
+        spentTimeSeconds: partSpentTimeSeconds,
+        session: sessionId,
+        user: userId,
+        paused: sessionDTO.isPaused,
+        createdDate: Date.now(),
+      });
+      await newSessionPart.save();
     }
-
-    let partSpentTimeSeconds: number =
-      sessionDTO.spentTimeSeconds - session!.spentTimeSeconds;
-    const newSessionPart = new SessionPart({
-      spentTimeSeconds: partSpentTimeSeconds,
-      session: sessionId,
-      user: userId,
-      paused: convertParamToBoolean(
-        sessionDTO.isPaused !== undefined
-          ? sessionDTO.isPaused.toString()
-          : undefined,
-      ),
-      createdDate: Date.now(),
-    });
-    await newSessionPart.save();
 
     session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
     session.spentTimeSeconds = sessionDTO.spentTimeSeconds;
@@ -246,27 +224,24 @@ async function updateSession(
       }
     }
 
-    if (sessionDTO.totalTimeSeconds === sessionDTO.spentTimeSeconds) {
+    let dailyGoalCompletedNow: boolean | undefined = undefined;
+
+    if (session.spentTimeSeconds === session.totalTimeSeconds) {
       session.completed = true;
       if (session.activity) {
-        const activity = await Activity.findById(session.activity.id);
-        const activityGroup = await ActivityGroup.findById(
-          activity!.activityGroup._id,
-        );
-
-        activity!.sessionsAmount += 1;
-        activity!.spentTimeSeconds += session.totalTimeSeconds;
-        activityGroup!.sessionsAmount += 1;
-        activityGroup!.spentTimeSeconds += session.totalTimeSeconds;
-
-        await activity!.save();
-        await activityGroup!.save();
+        await activityService.updateActivityAndGroupStats(session, userId);
       }
+      const isDailyGoalCompletedNow = await userService.isDailyGoalCompletedNow(
+        session.id,
+        userId,
+        timezone,
+      );
+      dailyGoalCompletedNow = isDailyGoalCompletedNow;
     }
 
     await session.save();
 
-    return session;
+    return { session, dailyGoalCompletedNow };
   } catch (e) {
     throw e;
   }

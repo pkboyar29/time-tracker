@@ -130,7 +130,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-2 sm:flex-1 basis-1/3 sm:basis-auto min-w-[300px]">
+    <>
       {!isTimerStarted ? (
         <CustomCircularProgress
           valuePercent={0}
@@ -256,7 +256,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
           </div>
         </>
       )}
-    </div>
+    </>
   );
 };
 
