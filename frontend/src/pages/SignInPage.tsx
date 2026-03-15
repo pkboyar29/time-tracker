@@ -40,7 +40,7 @@ const SignInPage: FC = () => {
     try {
       const { access, refresh } = await signIn(signInData);
       Cookies.set('access', access);
-      Cookies.set('refresh', refresh, { expires: 5 });
+      Cookies.set('refresh', refresh, { expires: 90 });
 
       const userInfo = await fetchProfileInfo();
       dispatch(setUser(userInfo));

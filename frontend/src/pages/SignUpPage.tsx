@@ -44,7 +44,7 @@ const SignUpPage: FC = () => {
     try {
       const { access, refresh } = await signUp(signUpData);
       Cookies.set('access', access);
-      Cookies.set('refresh', refresh, { expires: 5 });
+      Cookies.set('refresh', refresh, { expires: 90 });
 
       const userInfo = await fetchProfileInfo();
       dispatch(setUser(userInfo));
