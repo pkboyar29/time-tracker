@@ -11,8 +11,12 @@ import {
   getSessionFromLS,
   removeSessionFromLS,
 } from './helpers/localstorageHelpers';
-import { AxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
+import { AxiosError } from 'axios';
+import { API_URL } from './api/axios';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+import Cookies from 'js-cookie';
+import { refreshAccessToken } from './helpers/authHelpers';
 
 import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
@@ -99,6 +103,50 @@ const App: FC = () => {
     if (Notification.permission == 'default') {
       Notification.requestPermission();
     }
+  }, []);
+
+  // TODO: когда мы находились на странице авторизации и после авторизовались, то запроса не произойдет, в эффектах ничего нету
+  useEffect(() => {
+    const subscribeToServerEvents = async () => {
+      if (requiredAuth) {
+        await fetchEventSource(`${API_URL}/events`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('access')}`,
+          },
+          async onopen(response) {
+            if (response.ok) {
+              return;
+            } else if (response.status === 403) {
+              throw new Error('REFRESH_REQUIRED');
+            } else {
+              throw new Error(`SERVER_ERROR_${response.status}`);
+            }
+          },
+          onmessage: (event) => {
+            try {
+              if (event.event === 'daily_goal_completed') {
+                console.log(event.event);
+                console.log(event.data);
+                console.log('Daily goal completed!');
+
+                // TODO: показывать модалку
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          },
+          onerror: (error) => {
+            if (error.message === 'REFRESH_REQUIRED') {
+              refreshAccessToken();
+
+              throw error;
+            }
+          },
+        });
+      }
+    };
+
+    subscribeToServerEvents();
   }, []);
 
   return (

@@ -225,10 +225,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     };
     stopTimer();
 
-    let isDailyGoalCompleted = true;
     try {
-      const { dailyGoalCompletedNow } = await updateSession(completedSession);
-      isDailyGoalCompleted = dailyGoalCompletedNow;
+      await updateSession(completedSession);
     } catch (e) {
       toast(t('serverErrors.updateSessionButSaved'), {
         type: 'error',
@@ -240,7 +238,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
     showSessionCompletedNotification({
       session: completedSession,
-      dailyGoalCompleted: isDailyGoalCompleted,
       onClose: stopAudio,
     });
   };

@@ -64,9 +64,7 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
 
 export const fetchRangeAnalytics = async (fromDate: Date, toDate: Date) => {
   const { data } = await axios.get(
-    `/analytics/?from=${fromDate.toISOString()}&to=${toDate.toISOString()}&tz=${
-      Intl.DateTimeFormat().resolvedOptions().timeZone
-    }`,
+    `/analytics/?from=${fromDate.toISOString()}&to=${toDate.toISOString()}`,
   );
 
   return mapResponseData(data);

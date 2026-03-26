@@ -1,5 +1,4 @@
 import { IUserAudio } from '../model/userAudio.model';
-import { SessionStatistics } from './analytics.dto';
 
 export interface UserSignUpDTO {
   email: string;

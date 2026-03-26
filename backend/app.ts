@@ -10,6 +10,7 @@ import * as activityRouter from './src/controller/activity.controller';
 import * as activityGroupRouter from './src/controller/activityGroup.controller';
 import * as analyticsRouter from './src/controller/analytics.controller';
 import * as userRouter from './src/controller/user.controller';
+import * as eventsRouter from './src/controller/events.controller';
 import userService from './src/service/user.service';
 
 const app: Express = express();
@@ -116,5 +117,6 @@ app.use('/activities', activityRouter.default);
 app.use('/activity-groups/', activityGroupRouter.default);
 app.use('/analytics/', analyticsRouter.default);
 app.use('/users/', userRouter.default);
+app.use('/events/', eventsRouter.default);
 
 export { app };
