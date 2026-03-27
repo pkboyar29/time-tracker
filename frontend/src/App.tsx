@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import routeConfig from './router/routeConfig';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './router/ProtectedRoute';
@@ -22,11 +22,15 @@ import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
 import BurgerButton from './components/BurgerButton';
 import TimerTitleUpdater from './components/TimerTitleUpdater';
+import DailyGoalCompletedModal from './components/modals/DailyGoalCompletedModal';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const { startTimer } = useTimer();
+
+  const [dailyGoalCompletedModal, setDailyGoalCompletedGoal] =
+    useState<boolean>(false);
 
   const location = useLocation();
   const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
@@ -125,11 +129,7 @@ const App: FC = () => {
           onmessage: (event) => {
             try {
               if (event.event === 'daily_goal_completed') {
-                console.log(event.event);
-                console.log(event.data);
-                console.log('Daily goal completed!');
-
-                // TODO: показывать модалку
+                setDailyGoalCompletedGoal(true);
               }
             } catch (e) {
               console.error(e);
@@ -159,6 +159,12 @@ const App: FC = () => {
       />
 
       <TimerTitleUpdater />
+
+      {dailyGoalCompletedModal && (
+        <DailyGoalCompletedModal
+          onCloseModal={() => setDailyGoalCompletedGoal(false)}
+        />
+      )}
 
       <div
         id="app"

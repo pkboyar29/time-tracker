@@ -31,6 +31,22 @@ interface PeriodDistributionBoxProps {
 
 type SplitMode = 'default' | '4' | '3' | '2';
 
+const CustomBar = (props: any) => {
+  const { x, y, width, height, fill, payload, background, ...rest } = props;
+
+  return (
+    <rect
+      {...rest}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      fill={fill}
+      className="transition-all duration-300 ease-in-out hover:stroke-black/60 dark:hover:stroke-white hover:stroke-1"
+    />
+  );
+};
+
 const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   analytics,
   setAdBoxMode,
@@ -190,6 +206,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                 isAnimationActive={true}
                 cursor="pointer"
                 dataKey="sessionStatistics.spentTimeSeconds"
+                shape={<CustomBar />}
               >
                 {displayTimeBars.map((bar, index) => {
                   const color =
@@ -220,6 +237,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                     fill={ad.fill}
                     stackId="a"
                     isAnimationActive={false}
+                    shape={<CustomBar />}
                   />
                 );
               })

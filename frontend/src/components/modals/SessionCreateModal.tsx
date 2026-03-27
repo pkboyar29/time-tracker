@@ -32,7 +32,6 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
     try {
       const newSession = await createSession({
         totalTimeSeconds: selectedMinutes * 60,
-        spentTimeSeconds: 0,
         activity: defaultActivity,
       });
       startTimer(newSession);
