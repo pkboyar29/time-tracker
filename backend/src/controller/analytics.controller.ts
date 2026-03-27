@@ -1,23 +1,19 @@
 import { Router, Request, Response } from 'express';
 import analyticsService from '../service/analytics.service';
-import { isValidTimeZone } from '../helpers/isValidTimeZone';
 import { sendErrorResponse } from '../helpers/sendErrorResponse';
+import User from '../model/user.model';
 
 const router = Router();
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const { from, to, tz } = req.query;
+    const { from, to } = req.query;
     if (!from) {
       res.status(400).send('from query param is required');
       return;
     }
     if (!to) {
       res.status(400).send('to query param is required');
-      return;
-    }
-    if (!tz) {
-      res.status(400).send('tz query param is required');
       return;
     }
 
@@ -37,22 +33,19 @@ router.get('/', async (req: Request, res: Response) => {
       return;
     }
 
-    if (!isValidTimeZone(tz as string)) {
-      res.status(400).send('timezone format is invalid');
-      return;
-    }
+    const tzInfo = await User.findById(res.locals.userId).select('timezone');
 
     const data = await analyticsService.getAnalyticsForRangeWithCache({
       startOfRange: fromDate,
       endOfRange: toDate,
       userId: res.locals.userId,
-      timezone: tz as string,
+      timezone: tzInfo!.timezone,
     });
     // const data = await analyticsService.getAnalyticsForRangeInternal({
     //   startOfRange: fromDate,
     //   endOfRange: toDate,
     //   userId: res.locals.userId,
-    //   timezone: tz as string,
+    //   timezone: tzInfo!.timezone,
     // });
     res.status(200).send(data);
   } catch (e) {

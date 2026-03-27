@@ -7,6 +7,8 @@ import path from 'path';
 import { HttpError } from '../helpers/HttpError';
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
 import { getTodayRange } from '../helpers/getTodayRange';
+import { sseConnections } from '../controller/events.controller';
+import { sendServerEvent } from '../helpers/sendServerEvent';
 import activityGroupService from './activityGroup.service';
 import activityService from './activity.service';
 import sessionService from './session.service';
@@ -34,7 +36,13 @@ const userService = {
   decodeAccessToken,
   refreshAccessToken,
   getProfileInfo,
+  isDailyGoalCompleted,
   isDailyGoalCompletedNow,
+  isDailyGoalCompletedMarkedToday,
+  isDailyGoalNotifiedMarkedToday,
+  markDailyGoalCompleted,
+  markDailyGoalNotified,
+  notifyDailyGoalCompleted,
   updateDailyGoal,
   updateShowTimerInTitle,
   exportUserData,
@@ -83,7 +91,7 @@ async function signUp(
 
   const validationError = newUser.validateSync();
   if (validationError) {
-    const fields = ['email'] as const;
+    const fields = ['email', 'timezone'] as const;
 
     for (const field of fields) {
       const err = validationError.errors[field];
@@ -213,82 +221,185 @@ function refreshAccessToken(refreshToken: string): string | undefined {
   }
 }
 
-// TODO: убрать timezone
 async function getProfileInfo(userId: string): Promise<UserResponseDTO> {
-  const profileInfo = await User.findById(userId).select(
-    'email dailyGoal showTimerInTitle createdDate',
-  ); // firstName lastName
+  try {
+    const profileInfo = await User.findById(userId).select(
+      'email dailyGoal showTimerInTitle createdDate',
+    ); // firstName lastName
+    if (!profileInfo) {
+      throw new HttpError(400, 'No user');
+    }
 
-  const userAudios = await UserAudio.find({ userId });
+    const userAudios = await UserAudio.find({ userId });
 
-  return {
-    email: profileInfo!.email,
-    dailyGoal: profileInfo!.dailyGoal,
-    showTimerInTitle: profileInfo!.showTimerInTitle,
-    createdDate: profileInfo!.createdDate,
-    audios: userAudios,
-  };
+    return {
+      email: profileInfo.email,
+      dailyGoal: profileInfo.dailyGoal,
+      showTimerInTitle: profileInfo.showTimerInTitle,
+      createdDate: profileInfo.createdDate,
+      audios: userAudios,
+    };
+  } catch (e) {
+    throw e;
+  }
 }
 
-// TODO: временный вариант, удалить
-async function isDailyGoalCompletedNow(
-  completedSessionId: string,
+// TODO: как появятся агрегаты, то смотреть сегодняшние секунды в сегодняшнем агрегате
+async function isDailyGoalCompleted(
+  dailyGoalSeconds: number,
   userId: string,
   timezone: string,
 ): Promise<boolean> {
   const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
 
-  const partsForToday = await sessionPartService.getSessionPartsInDateRange({
-    startRange: startOfToday,
-    endRange: startOfTomorrow,
-    userId,
-  });
+  const todaySpentTimeSeconds =
+    await sessionPartService.getSpentTimeSecondsInDateRange({
+      startRange: startOfToday,
+      endRange: startOfTomorrow,
+      userId,
+    });
 
-  const partsOfCompletedSession = partsForToday.filter(
-    (part: any) => part.session._id.toString() === completedSessionId,
-  );
-  const completedSessionSeconds = partsOfCompletedSession.reduce(
-    (seconds, part) => seconds + part.spentTimeSeconds,
-    0,
-  );
-
-  let todaySpentTimeSeconds =
-    partsForToday.reduce(
-      (seconds, part) => seconds + part.spentTimeSeconds,
-      0,
-    ) - completedSessionSeconds;
-
-  const dailyGoalInfo = await User.findById(userId).select('dailyGoal');
-  if (!dailyGoalInfo) {
-    return false;
+  if (todaySpentTimeSeconds >= dailyGoalSeconds) {
+    return true;
   }
 
+  return false;
+}
+
+// TODO: как появятся агрегаты, то смотреть сегодняшние секунды в сегодняшнем агрегате
+async function isDailyGoalCompletedNow(
+  newSpentTimeSeconds: number,
+  dailyGoalSeconds: number,
+  userId: string,
+  timezone: string,
+): Promise<boolean> {
+  const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
+
+  let secondsBeforeNewUpdate =
+    await sessionPartService.getSpentTimeSecondsInDateRange({
+      startRange: startOfToday,
+      endRange: startOfTomorrow,
+      userId,
+    });
+  secondsBeforeNewUpdate -= newSpentTimeSeconds;
+
   // if goal has reached before
-  if (todaySpentTimeSeconds >= dailyGoalInfo.dailyGoal) {
+  if (secondsBeforeNewUpdate >= dailyGoalSeconds) {
     return false;
   }
   // if goal has reached now
-  if (
-    todaySpentTimeSeconds + completedSessionSeconds >=
-    dailyGoalInfo.dailyGoal
-  ) {
+  if (secondsBeforeNewUpdate + newSpentTimeSeconds >= dailyGoalSeconds) {
     return true;
   }
   // if goal hasn't reached yet
   return false;
 }
 
+async function isDailyGoalCompletedMarkedToday(
+  userId: string,
+  timezone: string,
+) {
+  const user = await User.findById(userId).select('daily_goal_completed_at');
+  const daily_goal_completed_at = user!.daily_goal_completed_at;
+
+  const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
+
+  const isDailyGoalCompletedToday =
+    daily_goal_completed_at &&
+    daily_goal_completed_at >= startOfToday &&
+    daily_goal_completed_at <= startOfTomorrow;
+
+  return isDailyGoalCompletedToday;
+}
+
+async function isDailyGoalNotifiedMarkedToday(
+  userId: string,
+  timezone: string,
+) {
+  const user = await User.findById(userId).select('daily_goal_notified_at');
+  const daily_goal_notified_at = user!.daily_goal_notified_at;
+
+  const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
+
+  const isDailyGoalNotifiedToday =
+    daily_goal_notified_at &&
+    daily_goal_notified_at >= startOfToday &&
+    daily_goal_notified_at <= startOfTomorrow;
+
+  return isDailyGoalNotifiedToday;
+}
+
+async function markDailyGoalCompleted(userId: string) {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new HttpError(400, 'No user');
+    }
+
+    user.daily_goal_completed_at = new Date();
+    await user.save();
+  } catch (e) {
+    if (e instanceof Error || e instanceof HttpError) {
+      throw e;
+    }
+  }
+}
+
+async function markDailyGoalNotified(userId: string) {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new HttpError(400, 'No user');
+    }
+
+    user.daily_goal_notified_at = new Date();
+    await user.save();
+  } catch (e) {
+    if (e instanceof Error || e instanceof HttpError) {
+      throw e;
+    }
+  }
+}
+
+async function notifyDailyGoalCompleted(userId: string) {
+  const userConnections = sseConnections.get(userId);
+  if (userConnections && userConnections.length > 0) {
+    for (const res of userConnections) {
+      sendServerEvent(res, 'daily_goal_completed', {});
+    }
+
+    await userService.markDailyGoalNotified(userId);
+  }
+}
+
 async function updateDailyGoal(newDailyGoal: number, userId: string) {
   try {
     const user = await User.findById(userId);
+    if (!user) {
+      throw new HttpError(400, 'No user');
+    }
 
-    user!.dailyGoal = newDailyGoal;
-    const validationError = user!.validateSync();
+    const oldDailyGoal = user.dailyGoal;
+    user.dailyGoal = newDailyGoal;
+    const validationError = user.validateSync();
     if (validationError) {
       throw new HttpError(400, validationError.message);
     }
 
-    user!.save();
+    if (newDailyGoal > oldDailyGoal) {
+      const isDailyGoalCompleted = await userService.isDailyGoalCompleted(
+        newDailyGoal,
+        userId,
+        user.timezone,
+      );
+
+      if (!isDailyGoalCompleted) {
+        user.daily_goal_completed_at = null;
+        user.daily_goal_notified_at = null;
+      }
+    }
+
+    await user.save();
 
     const message = {
       message: 'Updated successfully',
@@ -307,12 +418,16 @@ async function updateShowTimerInTitle(
 ) {
   try {
     const user = await User.findById(userId);
-    user!.showTimerInTitle = showTimerInTitle;
-    const validationError = user!.validateSync();
+    if (!user) {
+      throw new HttpError(400, 'No user');
+    }
+
+    user.showTimerInTitle = showTimerInTitle;
+    const validationError = user.validateSync();
     if (validationError) {
       throw new HttpError(400, validationError.message);
     }
-    user!.save();
+    await user.save();
 
     const message = {
       message: 'Updated successfully',

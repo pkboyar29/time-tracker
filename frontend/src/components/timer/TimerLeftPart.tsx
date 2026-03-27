@@ -97,7 +97,6 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
     try {
       const newSession = await mutateAsync({
         totalTimeSeconds: selectedSeconds,
-        spentTimeSeconds: 0,
         activity: selectedActivityId !== '' ? selectedActivityId : undefined,
       });
 

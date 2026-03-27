@@ -231,8 +231,8 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   cy="50%"
                   outerRadius="80%"
                   activeShape={{
-                    stroke: themeState === 'dark' ? '#fff' : '#111',
-                    strokeWidth: 2,
+                    stroke: themeState === 'dark' ? '#fff' : '#00000099',
+                    strokeWidth: 1,
                   }}
                   stroke={themeState === 'dark' ? colors.surfaceDark : '#fff'}
                 />

@@ -1,4 +1,4 @@
-import { FC, useEffect } from 'react';
+import { FC, useEffect, useState } from 'react';
 import routeConfig from './router/routeConfig';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './router/ProtectedRoute';
@@ -11,18 +11,26 @@ import {
   getSessionFromLS,
   removeSessionFromLS,
 } from './helpers/localstorageHelpers';
-import { AxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
+import { AxiosError } from 'axios';
+import { API_URL } from './api/axios';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+import Cookies from 'js-cookie';
+import { refreshAccessToken } from './helpers/authHelpers';
 
 import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
 import BurgerButton from './components/BurgerButton';
 import TimerTitleUpdater from './components/TimerTitleUpdater';
+import DailyGoalCompletedModal from './components/modals/DailyGoalCompletedModal';
 
 const App: FC = () => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const { startTimer } = useTimer();
+
+  const [dailyGoalCompletedModal, setDailyGoalCompletedGoal] =
+    useState<boolean>(false);
 
   const location = useLocation();
   const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
@@ -101,6 +109,46 @@ const App: FC = () => {
     }
   }, []);
 
+  // TODO: когда мы находились на странице авторизации и после авторизовались, то запроса не произойдет, в эффектах ничего нету
+  useEffect(() => {
+    const subscribeToServerEvents = async () => {
+      if (requiredAuth) {
+        await fetchEventSource(`${API_URL}/events`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get('access')}`,
+          },
+          async onopen(response) {
+            if (response.ok) {
+              return;
+            } else if (response.status === 403) {
+              throw new Error('REFRESH_REQUIRED');
+            } else {
+              throw new Error(`SERVER_ERROR_${response.status}`);
+            }
+          },
+          onmessage: (event) => {
+            try {
+              if (event.event === 'daily_goal_completed') {
+                setDailyGoalCompletedGoal(true);
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          },
+          onerror: (error) => {
+            if (error.message === 'REFRESH_REQUIRED') {
+              refreshAccessToken();
+
+              throw error;
+            }
+          },
+        });
+      }
+    };
+
+    subscribeToServerEvents();
+  }, []);
+
   return (
     <>
       <ToastContainer
@@ -111,6 +159,12 @@ const App: FC = () => {
       />
 
       <TimerTitleUpdater />
+
+      {dailyGoalCompletedModal && (
+        <DailyGoalCompletedModal
+          onCloseModal={() => setDailyGoalCompletedGoal(false)}
+        />
+      )}
 
       <div
         id="app"

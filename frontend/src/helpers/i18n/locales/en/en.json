@@ -229,6 +229,11 @@
     "apply": "Apply",
     "error": "to date should be later than from date"
   },
+  "dailyGoalCompletedModal": {
+    "title": "Daily goal completed!",
+    "message": "You completed your daily goal. 🎯 Good work!",
+    "button": "Close"
+  },
   "months": {
     "short": [
       "Jan",

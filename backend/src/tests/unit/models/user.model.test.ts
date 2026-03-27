@@ -6,6 +6,7 @@ describe('User model validation', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
+      timezone: 'Europe/Moscow',
       password: 'secret',
       dailyGoal: 3600,
     });
@@ -19,6 +20,7 @@ describe('User model validation', () => {
       firstName: 'A',
       lastName: 'Doe',
       email: 'john.doe@example.com',
+      timezone: 'Europe/Moscow',
       password: 'secret',
       dailyGoal: 3600,
     });
@@ -29,6 +31,7 @@ describe('User model validation', () => {
       firstName: 'A'.repeat(25),
       lastName: 'Doe',
       email: 'john.doe@example.com',
+      timezone: 'Europe/Moscow',
       password: 'secret',
       dailyGoal: 3600,
     });
@@ -41,6 +44,7 @@ describe('User model validation', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'invalid-email',
+      timezone: 'Europe/Moscow',
       password: 'secret',
       dailyGoal: 3600,
     });
@@ -53,6 +57,7 @@ describe('User model validation', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
+      timezone: 'Europe/Moscow',
       password: 'secret',
       dailyGoal: 30,
     });
@@ -63,6 +68,7 @@ describe('User model validation', () => {
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
+      timezone: 'Europe/Moscow',
       password: 'secret',
       dailyGoal: 90000,
     });
@@ -70,11 +76,26 @@ describe('User model validation', () => {
     expect(bigErr?.errors.dailyGoal.message).toContain('maximum 86400');
   });
 
+  it('should validate timezone', () => {
+    const user = new User({
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      timezone: 'random',
+      password: 'secret',
+      dailyGoal: 3600,
+    });
+
+    const error = user.validateSync();
+    expect(error?.errors.timezone).toBeDefined();
+  });
+
   it('should set default values for showTimerInTitle and deleted', () => {
     const user = new User({
       firstName: 'John',
       lastName: 'Doe',
       email: 'john.doe@example.com',
+      timezone: 'Europe/Moscow',
       password: 'secret',
       dailyGoal: 3600,
     });

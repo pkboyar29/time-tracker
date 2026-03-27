@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { isValidTimeZone } from '../helpers/isValidTimeZone';
 
 const userSchema = new mongoose.Schema({
   firstName: {
@@ -27,11 +28,27 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  timezone: {
+    type: String,
+    required: true,
+    validate: {
+      validator: isValidTimeZone,
+      message: 'Invalid timezone',
+    },
+  },
   dailyGoal: {
     type: Number,
     required: true,
     min: [60, 'Daily goal should be minimum 60 seconds'],
     max: [86400, 'Daily goal should be maximum 86400 seconds (24 hours)'],
+  },
+  daily_goal_completed_at: {
+    type: Date,
+    required: false,
+  },
+  daily_goal_notified_at: {
+    type: Date,
+    required: false,
   },
   showTimerInTitle: {
     type: Boolean,

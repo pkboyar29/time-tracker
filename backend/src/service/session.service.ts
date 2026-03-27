@@ -1,9 +1,10 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
-import userService from './user.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
+import userService from './user.service';
+import User from '../model/user.model';
 
 import { HttpError } from '../helpers/HttpError';
 
@@ -31,11 +32,6 @@ interface GetSessionsForActivityOptions {
   userId: string;
   completed?: boolean;
 }
-
-type UpdateSessionResult = {
-  session: ISession;
-  dailyGoalCompletedNow?: boolean; // появится только если сессия завершена
-};
 
 const sessionService = {
   getSessions,
@@ -170,7 +166,7 @@ async function updateSession(
   sessionDTO: SessionUpdateDTO,
   userId: string,
   timezone: string,
-): Promise<UpdateSessionResult> {
+): Promise<ISession> {
   try {
     if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
       throw new HttpError(
@@ -224,24 +220,35 @@ async function updateSession(
       }
     }
 
-    let dailyGoalCompletedNow: boolean | undefined = undefined;
-
     if (session.spentTimeSeconds === session.totalTimeSeconds) {
       session.completed = true;
       if (session.activity) {
         await activityService.updateActivityAndGroupStats(session, userId);
       }
-      const isDailyGoalCompletedNow = await userService.isDailyGoalCompletedNow(
-        session.id,
-        userId,
-        timezone,
-      );
-      dailyGoalCompletedNow = isDailyGoalCompletedNow;
     }
 
     await session.save();
 
-    return { session, dailyGoalCompletedNow };
+    const isDailyGoalCompletedMarkedToday =
+      await userService.isDailyGoalCompletedMarkedToday(userId, timezone);
+
+    if (!isDailyGoalCompletedMarkedToday) {
+      const dailyGoalInfo = await User.findById(userId).select('dailyGoal');
+
+      const isDailyGoalCompletedNow = await userService.isDailyGoalCompletedNow(
+        partSpentTimeSeconds,
+        dailyGoalInfo!.dailyGoal,
+        userId,
+        timezone,
+      );
+      if (isDailyGoalCompletedNow) {
+        await userService.markDailyGoalCompleted(userId);
+
+        await userService.notifyDailyGoalCompleted(userId);
+      }
+    }
+
+    return session;
   } catch (e) {
     throw e;
   }

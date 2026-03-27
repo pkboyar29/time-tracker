@@ -1,5 +1,6 @@
 import sessionService from '../../../service/session.service';
 import activityService from '../../../service/activity.service';
+import userService from '../../../service/user.service';
 import { Types, HydratedDocument } from 'mongoose';
 import Session, { ISession } from '../../../model/session.model';
 import SessionPart from '../../../model/sessionPart.model';
@@ -254,6 +255,10 @@ describe('sessionService.updateSession', () => {
 
     const saveSpy = jest
       .spyOn(SessionPart.prototype, 'save')
+      .mockResolvedValue(true);
+
+    jest
+      .spyOn(userService, 'isDailyGoalCompletedMarkedToday')
       .mockResolvedValue(true);
 
     await sessionService.updateSession(

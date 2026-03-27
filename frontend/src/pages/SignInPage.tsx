@@ -1,14 +1,14 @@
 import { FC } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import Cookies from 'js-cookie';
-import { useAppDispatch } from '../redux/store';
-import { fetchProfileInfo } from '../api/userApi';
-import { setUser } from '../redux/slices/userSlice';
-import { isAuth } from '../helpers/authHelpers';
-import { signIn } from '../api/userApi';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
+import Cookies from 'js-cookie';
+import { fetchProfileInfo, signIn } from '../api/userApi';
+import { useMutation } from '@tanstack/react-query';
+import { useAppDispatch } from '../redux/store';
+import { setUser } from '../redux/slices/userSlice';
+import { isAuth } from '../helpers/authHelpers';
 
 import Input from '../components/common/Input';
 import Button from '../components/common/Button';
@@ -32,15 +32,17 @@ const SignInPage: FC = () => {
     mode: 'onBlur',
   });
 
+  const { mutateAsync, isPending } = useMutation({ mutationFn: signIn });
+
   if (isAuth()) {
     return <Navigate to="/timer" />;
   }
 
   const onSubmit = async (signInData: SignInFields) => {
     try {
-      const { access, refresh } = await signIn(signInData);
+      const { access, refresh } = await mutateAsync(signInData);
       Cookies.set('access', access);
-      Cookies.set('refresh', refresh, { expires: 5 });
+      Cookies.set('refresh', refresh, { expires: 90 });
 
       const userInfo = await fetchProfileInfo();
       dispatch(setUser(userInfo));
@@ -117,7 +119,11 @@ const SignInPage: FC = () => {
             enlarged={true}
           />
 
-          <Button className="text-[18px] py-3" type="submit">
+          <Button
+            disabled={isPending}
+            className="text-[18px] py-3"
+            type="submit"
+          >
             {t('signin.button')}
           </Button>
 

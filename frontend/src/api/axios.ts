@@ -2,8 +2,10 @@ import axios, { AxiosError } from 'axios';
 import Cookies from 'js-cookie';
 import { refreshAccessToken } from '../helpers/authHelpers';
 
+export const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  baseURL: API_URL,
 });
 
 instance.interceptors.request.use(
@@ -14,7 +16,7 @@ instance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 instance.interceptors.response.use(
@@ -37,7 +39,7 @@ instance.interceptors.response.use(
 
       return Promise.reject(error);
     }
-  }
+  },
 );
 
 export default instance;

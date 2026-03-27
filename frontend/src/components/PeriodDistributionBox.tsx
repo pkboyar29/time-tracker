@@ -22,136 +22,7 @@ import {
 } from 'recharts';
 import ToggleButton from './common/ToggleButton';
 import SegmentedControl from './common/SegmentedControl';
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: any[];
-  label?: number;
-  adMode: boolean;
-}
-const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, adMode }) => {
-  const { t } = useTranslation();
-
-  const isVisible = active && payload && payload.length;
-
-  const timeBar: ITimeBar = payload[0]?.payload;
-
-  const userInfo = useAppSelector((state) => state.users.user);
-  const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 1_000_000;
-
-  return (
-    <div
-      className="p-2.5 bg-surfaceLight dark:bg-surfaceDark rounded-sm border border-gray-300/80 dark:border-white/10 border-solid w-[210px]"
-      style={{ visibility: isVisible ? 'visible' : 'hidden' }}
-    >
-      {isVisible && (
-        <div className="flex flex-col gap-2.5">
-          <p className="text-primary text-[15px]">{`${timeBar.barDetailedName}`}</p>
-          {timeBar.sessionStatistics.spentTimeSeconds == 0 ? (
-            <p className="text-gray-800 dark:text-textDark">
-              {t('pdBox.noActivity')}
-            </p>
-          ) : (
-            <>
-              {!adMode ? (
-                <>
-                  {getRangeType(timeBar.startOfRange, timeBar.endOfRange) ==
-                    'days' && (
-                    <p className="text-gray-800 dark:text-textDark">
-                      {`${t('pdBox.dailyGoal')} ${
-                        timeBar.sessionStatistics.spentTimeSeconds >=
-                        dailyGoalSeconds
-                          ? '✅'
-                          : '❌'
-                      }`}
-                    </p>
-                  )}
-
-                  <p className="text-gray-800 dark:text-textDark">
-                    {getReadableTime(
-                      timeBar.sessionStatistics.spentTimeSeconds,
-                      t,
-                      {
-                        short: false,
-                      },
-                    )}
-                  </p>
-
-                  <p className="text-gray-800 dark:text-textDark">
-                    {t('plural.sessions', {
-                      count: timeBar.sessionStatistics.sessionsAmount,
-                    })}
-                  </p>
-
-                  <p className="text-gray-800 dark:text-textDark">
-                    {t('plural.pauses', {
-                      count: timeBar.sessionStatistics.pausedAmount,
-                    })}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-gray-800 dark:text-textDark">
-                    {getReadableTime(
-                      timeBar.sessionStatistics.spentTimeSeconds,
-                      t,
-                      {
-                        short: false,
-                      },
-                    )}
-                  </p>
-
-                  <p className="text-gray-800 dark:text-textDark">
-                    {t('plural.sessions', {
-                      count: timeBar.sessionStatistics.sessionsAmount,
-                    })}
-                  </p>
-                </>
-              )}
-
-              {adMode && (
-                <>
-                  {timeBar.adItems.map(
-                    (item: IActivityDistribution, index: number) => (
-                      <div className="flex items-center gap-2.5" key={index}>
-                        <div
-                          style={{ backgroundColor: item.fill }}
-                          className="w-10 h-3 rounded-lg shrink-0"
-                        />
-
-                        <div className="flex flex-col min-w-0">
-                          <div className="text-[15px] truncate dark:text-textDark">
-                            {item.name}
-                          </div>
-
-                          <div className="text-[13px] mt-1 text-gray-600 dark:text-textDarkSecondary">
-                            (
-                            {getReadableTime(
-                              item.sessionStatistics.spentTimeSeconds,
-                              t,
-                              {
-                                short: true,
-                              },
-                            )}
-                            ,{' '}
-                            {t('plural.sessions', {
-                              count: item.sessionStatistics.sessionsAmount,
-                            })}
-                            )
-                          </div>
-                        </div>
-                      </div>
-                    ),
-                  )}
-                </>
-              )}
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
+import PeriodTooltip from './PeriodTooltip';
 
 interface PeriodDistributionBoxProps {
   analytics: IAnalytics;
@@ -159,6 +30,22 @@ interface PeriodDistributionBoxProps {
 }
 
 type SplitMode = 'default' | '4' | '3' | '2';
+
+const CustomBar = (props: any) => {
+  const { x, y, width, height, fill, payload, background, ...rest } = props;
+
+  return (
+    <rect
+      {...rest}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      fill={fill}
+      className="transition-all duration-300 ease-in-out hover:stroke-black/60 dark:hover:stroke-white hover:stroke-1"
+    />
+  );
+};
 
 const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   analytics,
@@ -284,7 +171,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
         </div>
       )}
 
-      <div className="pb-5 overflow-x-auto scroll-overlay">
+      <div className="pb-5 overflow-x-auto overflow-y-hidden scroll-overlay">
         <ResponsiveContainer
           minWidth={575}
           width="100%"
@@ -296,6 +183,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
             className="dark:[&>svg>path]:fill-[#5c5c5c]"
           >
             <CartesianGrid strokeDasharray="3 3" />
+
             <XAxis
               dataKey="barName"
               // tick={{
@@ -305,12 +193,20 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
               //       : '#000',
               // }}
             />
+
             <YAxis dataKey="sessionStatistics.spentTimeSeconds" />
-            <Tooltip content={<CustomTooltip adMode={adMode} />} />
+
+            <Tooltip
+              trigger="click"
+              content={<PeriodTooltip adMode={adMode} />}
+            />
+
             {!adMode ? (
               <Bar
                 isAnimationActive={true}
+                cursor="pointer"
                 dataKey="sessionStatistics.spentTimeSeconds"
+                shape={<CustomBar />}
               >
                 {displayTimeBars.map((bar, index) => {
                   const color =
@@ -329,6 +225,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                 return (
                   <Bar
                     key={index}
+                    cursor="pointer"
                     dataKey={(bar) => {
                       const barActivityItem = bar.adItems.find(
                         (item: IActivityDistribution) => item.id === ad.id,
@@ -340,6 +237,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                     fill={ad.fill}
                     stackId="a"
                     isAnimationActive={false}
+                    shape={<CustomBar />}
                   />
                 );
               })

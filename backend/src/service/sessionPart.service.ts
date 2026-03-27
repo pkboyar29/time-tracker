@@ -25,8 +25,15 @@ interface GetSessionPartsInDateRangeOptions {
   userId: string;
 }
 
+interface GetSpentTimeSecondsInDateRange {
+  startRange: Date;
+  endRange: Date;
+  userId: string;
+}
+
 const sessionPartService = {
   getSessionPartsInDateRange,
+  getSpentTimeSecondsInDateRange,
 };
 
 async function getSessionPartsInDateRange({
@@ -35,19 +42,42 @@ async function getSessionPartsInDateRange({
   userId,
 }: GetSessionPartsInDateRangeOptions): Promise<ISessionPart[]> {
   try {
-    // TODO: можно не загружать из БД все parts с deleted сессиями, а потом фильтровать. Можно сразу загрузить что нужно
+    // TODO: все равно запрашиваем все session parts, даже удаленных сессий. Можно делать напрямую Aggregation $lookup + $match.
+    // Либо можно начать хранить sessionDeleted в самом session part (то есть будем хранить дополнительный флаг, с которым запрос станет простым)
     const sessionParts = await SessionPart.find({
       createdDate: { $gte: startRange, $lte: endRange },
       user: userId,
     }).populate<{
       session: PopulatedSession;
-    }>(sessionPopulateConfig);
-
+    }>({ ...sessionPopulateConfig, match: { deleted: false } });
     const filteredSessionsParts = sessionParts.filter(
-      (sessionPart) => !sessionPart.session.deleted,
+      (sessionPart) => sessionPart.session !== null,
     );
 
     return filteredSessionsParts;
+  } catch (e) {
+    throw e;
+  }
+}
+
+async function getSpentTimeSecondsInDateRange({
+  startRange,
+  endRange,
+  userId,
+}: GetSpentTimeSecondsInDateRange): Promise<number> {
+  try {
+    const sessionParts = await sessionPartService.getSessionPartsInDateRange({
+      startRange,
+      endRange,
+      userId,
+    });
+
+    const spentTimeSeconds = sessionParts.reduce(
+      (seconds, part) => seconds + part.spentTimeSeconds,
+      0,
+    );
+
+    return spentTimeSeconds;
   } catch (e) {
     throw e;
   }

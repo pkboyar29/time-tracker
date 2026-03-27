@@ -27,7 +27,10 @@ export const signIn = async (
 export const signUp = async (
   payload: ISignUp,
 ): Promise<{ access: string; refresh: string }> => {
-  const { data } = await axios.post('/users/sign-up', payload);
+  const { data } = await axios.post('/users/sign-up', {
+    ...payload,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  });
 
   return data;
 };
