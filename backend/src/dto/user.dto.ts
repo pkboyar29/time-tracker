@@ -3,6 +3,7 @@ import { IUserAudio } from '../model/userAudio.model';
 export interface UserSignUpDTO {
   email: string;
   password: string;
+  timezone: string;
 }
 
 export interface UserSignInDTO {

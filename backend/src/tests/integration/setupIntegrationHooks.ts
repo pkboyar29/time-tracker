@@ -27,6 +27,7 @@ export const setupIntegrationHooks = () => {
     const { access } = await userService.signUp({
       email: 'email@email.com',
       password: 'passwordA1!',
+      timezone: 'Europe/Moscow',
     });
 
     accessToken = access;
