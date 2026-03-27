@@ -8,7 +8,6 @@ import {
   useContext,
   useSyncExternalStore,
 } from 'react';
-import { useAppSelector, useAppDispatch } from '../redux/store';
 import { updateSession } from '../api/sessionApi';
 import {
   saveSessionToLS,
@@ -81,8 +80,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
   const timerEndDate = useRef<Date>(new Date()); // here we store date when timer is going to end
 
-  const currentUser = useAppSelector((state) => state.users.user);
-  const dispatch = useAppDispatch();
   const { t } = useTranslation();
   const { playAudio, stopAudio } = useAudioPlayer();
 
@@ -163,19 +160,28 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const changeTotalTimeSeconds = async (newTotalTimeSeconds: number) => {
     if (timerState.status === 'idle') return;
 
-    const oldTotalTimeSeconds = timerState.session.totalTimeSeconds;
+    const oldTotalTimeSeconds = timerState.session.totalTimeSeconds; // TODO: если мы к старому состоянию при ошибке возвращаться не будем, то delete
     const sessionToUpdate: ISession = {
       ...timerState.session,
       totalTimeSeconds: newTotalTimeSeconds,
       spentTimeSeconds: timerTickStore.getSnapshot().seconds,
     };
+
+    timerEndDate.current = getTimerEndDate(
+      Date.now(),
+      timerTickStore.getSnapshot().seconds,
+      newTotalTimeSeconds,
+    );
+
     setTimerState({ session: sessionToUpdate, status: timerState.status });
 
     try {
       await updateSession(sessionToUpdate, false);
 
+      // TODO: если произошла ошибка, то в LS мы ничего не сохраняем?
       saveSessionToLS(sessionToUpdate, 'session');
     } catch (e) {
+      // TODO: показывать serverErrors.updateSessionButSavedLocally и не возвращать состояние обратно
       toast(t('serverErrors.updateSession'), {
         type: 'error',
       });
