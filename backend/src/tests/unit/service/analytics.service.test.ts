@@ -11,6 +11,12 @@ import {
 } from '../../../dto/analytics.dto';
 import * as dateUtils from '../../../helpers/getTodayRange';
 
+const mockActivityGroup = {
+  _id: new Types.ObjectId(),
+  id: new Types.ObjectId(),
+  name: '',
+};
+
 describe('analyticsService.getSessionStatistics', () => {
   it('should sum correctly', () => {
     const sessionParts: ISessionPart[] = [
@@ -47,7 +53,11 @@ describe('analyticsService.getSessionStatistics', () => {
         spentTimeSeconds: 300,
         note: 'Morning session',
         completed: true,
-        activity: { id: new Types.ObjectId(), name: 'Reading' },
+        activity: {
+          id: new Types.ObjectId(),
+          name: 'Reading',
+          activityGroup: mockActivityGroup,
+        },
         user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T08:00:00Z'),
         updatedDate: new Date('2025-09-20T08:30:00Z'),
@@ -59,7 +69,11 @@ describe('analyticsService.getSessionStatistics', () => {
         spentTimeSeconds: 180,
         note: 'Afternoon session',
         completed: true,
-        activity: { id: new Types.ObjectId(), name: 'Coding' },
+        activity: {
+          id: new Types.ObjectId(),
+          name: 'Coding',
+          activityGroup: mockActivityGroup,
+        },
         user: new Types.ObjectId(),
         createdDate: new Date('2025-09-20T14:00:00Z'),
         updatedDate: new Date('2025-09-20T14:30:00Z'),
@@ -143,10 +157,7 @@ describe('analyticsService.getTimeBars', () => {
       name: 'Reading',
       color: '#fff000',
       user: new Types.ObjectId(),
-      activityGroup: {
-        _id: new Types.ObjectId(),
-        name: 'activity group name',
-      },
+      activityGroup: mockActivityGroup,
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
@@ -159,10 +170,7 @@ describe('analyticsService.getTimeBars', () => {
       name: 'Coding',
       color: '#000fff',
       user: new Types.ObjectId(),
-      activityGroup: {
-        _id: new Types.ObjectId(),
-        name: 'activity group name',
-      },
+      activityGroup: mockActivityGroup,
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
@@ -202,7 +210,11 @@ describe('analyticsService.getTimeBars', () => {
   const completedSessions: ISession[] = [
     {
       _id: new Types.ObjectId(),
-      activity: { id: readingObjectId, name: 'Reading' },
+      activity: {
+        id: readingObjectId,
+        name: 'Reading',
+        activityGroup: mockActivityGroup,
+      },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
@@ -213,7 +225,11 @@ describe('analyticsService.getTimeBars', () => {
     },
     {
       _id: new Types.ObjectId(),
-      activity: { id: readingObjectId, name: 'Reading' },
+      activity: {
+        id: readingObjectId,
+        name: 'Reading',
+        activityGroup: mockActivityGroup,
+      },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
@@ -224,7 +240,11 @@ describe('analyticsService.getTimeBars', () => {
     },
     {
       _id: new Types.ObjectId(),
-      activity: { id: codingObjectId, name: 'Coding' },
+      activity: {
+        id: codingObjectId,
+        name: 'Coding',
+        activityGroup: mockActivityGroup,
+      },
       totalTimeSeconds: 0,
       spentTimeSeconds: 0,
       completed: false,
@@ -650,10 +670,7 @@ describe('analyticsService.getActivityDistributions', () => {
     {
       ...readingMeta,
       user: new Types.ObjectId(),
-      activityGroup: {
-        _id: new Types.ObjectId(),
-        name: 'activity group name',
-      },
+      activityGroup: mockActivityGroup,
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
@@ -664,10 +681,7 @@ describe('analyticsService.getActivityDistributions', () => {
     {
       ...codingMeta,
       user: new Types.ObjectId(),
-      activityGroup: {
-        _id: new Types.ObjectId(),
-        name: 'activity group name',
-      },
+      activityGroup: mockActivityGroup,
       createdDate: new Date(),
       updatedDate: new Date(),
       deleted: false,
@@ -681,7 +695,11 @@ describe('analyticsService.getActivityDistributions', () => {
     const completedSessions: ISession[] = [
       {
         _id: new Types.ObjectId(),
-        activity: { id: readingMeta._id, name: readingMeta.name },
+        activity: {
+          id: readingMeta._id,
+          name: readingMeta.name,
+          activityGroup: mockActivityGroup,
+        },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
@@ -692,7 +710,11 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         _id: new Types.ObjectId(),
-        activity: { id: readingMeta._id, name: readingMeta.name },
+        activity: {
+          id: readingMeta._id,
+          name: readingMeta.name,
+          activityGroup: mockActivityGroup,
+        },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
@@ -703,7 +725,11 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         _id: new Types.ObjectId(),
-        activity: { id: codingMeta._id, name: codingMeta.name },
+        activity: {
+          id: codingMeta._id,
+          name: codingMeta.name,
+          activityGroup: mockActivityGroup,
+        },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,
@@ -786,7 +812,11 @@ describe('analyticsService.getActivityDistributions', () => {
     const completedSessions: ISession[] = [
       {
         _id: new Types.ObjectId(),
-        activity: { id: readingMeta._id, name: readingMeta.name },
+        activity: {
+          id: readingMeta._id,
+          name: readingMeta.name,
+          activityGroup: mockActivityGroup,
+        },
         totalTimeSeconds: 0,
         spentTimeSeconds: 0,
         completed: false,

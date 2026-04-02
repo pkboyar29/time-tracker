@@ -6,19 +6,18 @@ import User from '../model/user.model';
 
 const router = Router();
 
+// TODO: в эндпоинте можно разом получить все completed sessions (если передать completed = true), либо можем вообще не указывать completed (чтобы он был undefined).
+// Из-за чего мы получим долгий запрос
 router.get('/', async (req: Request, res: Response) => {
   try {
     let data;
 
-    // TODO: вызывать convertParamToBoolean
     const completedParam = req.query.completed;
     let completed: boolean | undefined;
     if (typeof completedParam === 'string') {
-      if (completedParam.toLowerCase() === 'true') {
-        completed = true;
-      } else if (completedParam.toLowerCase() === 'false') {
-        completed = false;
-      }
+      completed = convertParamToBoolean(completedParam as string);
+    } else {
+      completed = undefined;
     }
 
     if (req.query.activityId) {

@@ -47,11 +47,13 @@ const activityGroupSchema = new Schema({
   },
   sessionsAmount: {
     type: Number,
+    min: 0,
     default: 0,
     required: true,
   },
   spentTimeSeconds: {
     type: Number,
+    min: 0,
     default: 0,
     required: true,
   },
@@ -60,7 +62,7 @@ const activityGroupSchema = new Schema({
 const ActivityGroup = model(
   'ActivityGroup',
   activityGroupSchema,
-  'activity_groups'
+  'activity_groups',
 );
 
 export default ActivityGroup;

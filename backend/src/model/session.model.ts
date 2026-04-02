@@ -6,7 +6,11 @@ export interface ISession {
   spentTimeSeconds: number;
   note?: string | null;
   completed: boolean;
-  activity: { id: Types.ObjectId; name: string };
+  activity: {
+    id: Types.ObjectId;
+    name: string;
+    activityGroup: { id: Types.ObjectId; name: string };
+  };
   user: Types.ObjectId;
   createdDate: Date;
   updatedDate: Date;
