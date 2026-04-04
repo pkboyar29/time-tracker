@@ -13,7 +13,11 @@ import {
   saveSessionToLS,
   removeSessionFromLS,
 } from '../helpers/localstorageHelpers';
-import { getTimerEndDate } from '../helpers/timeHelpers';
+import {
+  secondsToMs,
+  msToSeconds,
+  getTimerEndDate,
+} from '../helpers/timeHelpers';
 import { showSessionCompletedNotification } from '../helpers/notificationHelpers';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -28,11 +32,6 @@ type TimerState =
   | { status: 'idle'; session: null }
   | { status: 'running' | 'paused'; session: ISession };
 
-export type TimerTick = {
-  sessionId: string;
-  seconds: number;
-};
-
 interface TimerContextType {
   startTimer: (session: ISession, paused?: boolean) => Promise<void>;
   toggleTimer: () => Promise<void>;
@@ -40,8 +39,6 @@ interface TimerContextType {
   changeTotalTimeSeconds: (newTotalTimeSeconds: number) => Promise<void>;
   timerState: TimerState;
   timerEndDate: Date;
-  startTimestamp: number;
-  startSpentSeconds: number;
   finalSpentSeconds: number;
   finalSessionId: string;
 }
@@ -53,8 +50,6 @@ const defaultContext: TimerContextType = {
   changeTotalTimeSeconds: async () => {},
   timerState: { status: 'idle', session: null },
   timerEndDate: new Date(),
-  startTimestamp: 0,
-  startSpentSeconds: 0,
   finalSpentSeconds: 0,
   finalSessionId: '',
 };
@@ -66,7 +61,7 @@ interface TimerProviderProps {
 }
 
 const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
-  // spentTimeSeconds does change every second only when using useTimerWithSeconds
+  // spentTimeSeconds does not change in this state. You can use milliseconds using hook useTimerWithMs
   const [timerState, setTimerState] = useState<TimerState>({
     status: 'idle',
     session: null,
@@ -75,21 +70,26 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const [finalSpentSeconds, setFinalSpentSeconds] = useState<number>(0);
   const [finalSessionId, setFinalSessionId] = useState<string>('');
 
-  const startTimestamp = useRef<number>(0); // here we store timestamp
-  const startSpentSeconds = useRef<number>(0); // here we store seconds
+  const startTimestampRef = useRef<number>(0);
+  const startSpentMsRef = useRef<number>(0);
 
-  const timerEndDate = useRef<Date>(new Date()); // here we store date when timer is going to end
+  const lastSavedToLSMsRef = useRef<number>(0);
+  const lastSavedToServerMsRef = useRef<number>(0);
+
+  const syncIntervalMsRef = useRef<number>(1);
+
+  const [timerEndDate, setTimerEndDate] = useState<Date>(new Date()); // here we store date when timer is going to end
 
   const { t } = useTranslation();
   const { playAudio, stopAudio } = useAudioPlayer();
 
   const startTimer = async (session: ISession, paused?: boolean) => {
-    if (timerState.status == 'running') {
+    if (timerState.status === 'running') {
       try {
         await updateSession(
           {
             ...timerState.session,
-            spentTimeSeconds: timerTickStore.getSnapshot().seconds,
+            spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
           },
           true,
         );
@@ -105,32 +105,31 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     if (paused) {
       setTimerState({ status: 'paused', session });
     } else {
-      const newStartTimestamp = Date.now();
-      startTimestamp.current = newStartTimestamp;
-      startSpentSeconds.current = session.spentTimeSeconds;
+      startTimestampRef.current = Date.now();
+      startSpentMsRef.current = secondsToMs(session.spentTimeSeconds);
 
-      timerEndDate.current = getTimerEndDate(
-        newStartTimestamp,
-        session.spentTimeSeconds,
-        session.totalTimeSeconds,
-      );
+      lastSavedToLSMsRef.current = 0;
+      lastSavedToServerMsRef.current = 0;
 
       setTimerState({ status: 'running', session });
     }
 
-    timerTickStore.setTick(session.id, session.spentTimeSeconds);
+    timerTickStore.setTick(session.id, secondsToMs(session.spentTimeSeconds));
   };
 
   const toggleTimer = async () => {
     if (timerState.status == 'running') {
-      startTimestamp.current = 0;
-      startSpentSeconds.current = 0;
+      startTimestampRef.current = 0;
+      startSpentMsRef.current = 0;
+
+      lastSavedToLSMsRef.current = 0;
+      lastSavedToServerMsRef.current = 0;
 
       setTimerState({ session: timerState.session, status: 'paused' });
 
       const sessionToUpdate: ISession = {
         ...timerState.session,
-        spentTimeSeconds: timerTickStore.getSnapshot().seconds,
+        spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
       };
       setFinalSpentSeconds(sessionToUpdate.spentTimeSeconds);
       setFinalSessionId(sessionToUpdate.id);
@@ -143,15 +142,11 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         });
       }
     } else if (timerState.status == 'paused') {
-      const newStartTimestamp = Date.now();
-      startTimestamp.current = newStartTimestamp;
-      startSpentSeconds.current = timerTickStore.getSnapshot().seconds;
+      startTimestampRef.current = Date.now();
+      startSpentMsRef.current = timerTickStore.getSnapshot().ms;
 
-      timerEndDate.current = getTimerEndDate(
-        newStartTimestamp,
-        timerTickStore.getSnapshot().seconds,
-        timerState.session.totalTimeSeconds,
-      );
+      lastSavedToLSMsRef.current = 0;
+      lastSavedToServerMsRef.current = 0;
 
       setTimerState({ session: timerState.session, status: 'running' });
     }
@@ -164,14 +159,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     const sessionToUpdate: ISession = {
       ...timerState.session,
       totalTimeSeconds: newTotalTimeSeconds,
-      spentTimeSeconds: timerTickStore.getSnapshot().seconds,
+      spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
     };
-
-    timerEndDate.current = getTimerEndDate(
-      Date.now(),
-      timerTickStore.getSnapshot().seconds,
-      newTotalTimeSeconds,
-    );
 
     setTimerState({ session: sessionToUpdate, status: timerState.status });
 
@@ -181,7 +170,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       // TODO: если произошла ошибка, то в LS мы ничего не сохраняем?
       saveSessionToLS(sessionToUpdate, 'session');
     } catch (e) {
-      // TODO: показывать serverErrors.updateSessionButSavedLocally и не возвращать состояние обратно
+      // TODO: показывать serverErrors.updateSessionButSaved и не возвращать состояние обратно
       toast(t('serverErrors.updateSession'), {
         type: 'error',
       });
@@ -198,15 +187,17 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
     const sessionToUpdate: ISession = {
       ...timerState.session,
-      spentTimeSeconds: timerTickStore.getSnapshot().seconds,
+      spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
     };
     setFinalSpentSeconds(sessionToUpdate.spentTimeSeconds);
     setFinalSessionId(sessionToUpdate.id);
 
     setTimerState({ status: 'idle', session: null });
     timerTickStore.setTick('', 0);
-    startTimestamp.current = 0;
-    startSpentSeconds.current = 0;
+    startTimestampRef.current = 0;
+    startSpentMsRef.current = 0;
+    lastSavedToLSMsRef.current = 0;
+    lastSavedToServerMsRef.current = 0;
     removeSessionFromLS('session');
 
     if (timerState.status == 'running' && shouldUpdateSession) {
@@ -253,10 +244,35 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   }, [timerState]);
 
   useEffect(() => {
+    if (timerState.status === 'running') {
+      let intervalMs = secondsToMs(300); // 5 min
+      if (timerState.session.totalTimeSeconds <= 300) {
+        intervalMs = 0.2 * secondsToMs(timerState.session.totalTimeSeconds);
+      }
+
+      syncIntervalMsRef.current = intervalMs;
+    } else {
+      syncIntervalMsRef.current = 0;
+    }
+  }, [timerState.status, timerState.session?.totalTimeSeconds]);
+
+  useEffect(() => {
+    if (timerState.status === 'running') {
+      setTimerEndDate(
+        getTimerEndDate(
+          Date.now(),
+          msToSeconds(timerTickStore.getSnapshot().ms),
+          timerState.session.totalTimeSeconds,
+        ),
+      );
+    }
+  }, [timerState.status, timerState.session?.totalTimeSeconds]);
+
+  useEffect(() => {
     if (timerState.status == 'running') {
       timerWorker.postMessage({
-        startTimestamp: startTimestamp.current,
-        startSpentSeconds: startSpentSeconds.current,
+        startTimestamp: startTimestampRef.current,
+        startSpentMs: startSpentMsRef.current,
         action: 'run',
       });
 
@@ -265,32 +281,35 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
         timerTickStore.setTick(sessionRef.current.id, ev.data);
 
-        if (ev.data >= sessionRef.current.totalTimeSeconds) {
+        // TODO: в объекте session можно хранить totalTimeMs для того, чтобы было меньше вычислений. Также это надо будет изменять в changeTotalTimeSeconds
+        if (ev.data >= secondsToMs(sessionRef.current.totalTimeSeconds)) {
           finishTimer();
           timerWorker.postMessage({ action: 'pause' });
           return;
         }
 
+        const diff = ev.data - startSpentMsRef.current;
+
         // automatic timer update in local storage every 2 seconds
-        if ((ev.data - startSpentSeconds.current) % 2 == 0) {
+        if (diff - lastSavedToLSMsRef.current >= 2000) {
+          lastSavedToLSMsRef.current += 2000;
+
           saveSessionToLS(
-            {
-              ...sessionRef.current,
-              spentTimeSeconds: ev.data,
-            },
+            { ...sessionRef.current, spentTimeSeconds: msToSeconds(ev.data) },
             'session',
           );
         }
 
         // automatic timer update on server
-        let syncIntervalSeconds = 300;
-        if (sessionRef.current.totalTimeSeconds <= 300) {
-          syncIntervalSeconds = 0.2 * sessionRef.current.totalTimeSeconds;
-        }
-        if ((ev.data - startSpentSeconds.current) % syncIntervalSeconds == 0) {
+        if (
+          diff - lastSavedToServerMsRef.current >=
+          syncIntervalMsRef.current
+        ) {
+          lastSavedToServerMsRef.current += syncIntervalMsRef.current;
+
           updateSession({
             ...sessionRef.current,
-            spentTimeSeconds: ev.data,
+            spentTimeSeconds: msToSeconds(ev.data),
           });
         }
       };
@@ -308,9 +327,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         changeTotalTimeSeconds,
         stopTimer,
         timerState,
-        timerEndDate: timerEndDate.current,
-        startTimestamp: startTimestamp.current,
-        startSpentSeconds: startSpentSeconds.current,
+        timerEndDate,
         finalSpentSeconds,
         finalSessionId,
       }}
@@ -326,7 +343,15 @@ export const useTimer = (): TimerContextType => {
   return useContext(TimerContext);
 };
 
-export const useTimerWithSeconds = (): TimerContextType => {
+type TimerStateWithMs = TimerContextType['timerState'] & {
+  ms: number;
+};
+
+type TimerContextWithMs = Omit<TimerContextType, 'timerState'> & {
+  timerState: TimerStateWithMs;
+};
+
+export const useTimerWithMs = (): TimerContextWithMs => {
   const context = useContext(TimerContext);
   const session = context.timerState.session;
 
@@ -335,19 +360,12 @@ export const useTimerWithSeconds = (): TimerContextType => {
     timerTickStore.getSnapshot,
   );
 
-  // TODO: второе условие странное, так как возвращая context, мы возвращаем старые данные, потому что в context секунды не обновляются
-  if (!session || currentTick.sessionId !== session.id) {
-    return context;
-  }
-
+  // TODO: если currentTick.sessionId !== session.id, то мы просто вернем 0. Это неправильно
   return {
     ...context,
     timerState: {
       ...context.timerState,
-      session: {
-        ...session,
-        spentTimeSeconds: currentTick.seconds,
-      },
+      ms: currentTick.sessionId === session?.id ? currentTick.ms : 0,
     },
   };
 };

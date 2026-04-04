@@ -7,14 +7,12 @@ onmessage = (ev) => {
     clearInterval(intervalId);
 
     intervalId = setInterval(() => {
-      const startTimestampSeconds = Math.floor(data.startTimestamp / 1000);
-      const nowTimestampSeconds = Math.floor(Date.now() / 1000);
+      const startTimestamp = data.startTimestamp;
+      const nowTimestamp = Date.now();
+      const newSpentMs = data.startSpentMs + (nowTimestamp - startTimestamp);
 
-      const newSpentSeconds =
-        data.startSpentSeconds + (nowTimestampSeconds - startTimestampSeconds);
-
-      postMessage(newSpentSeconds);
-    }, 1000);
+      postMessage(newSpentMs);
+    }, 100);
   }
 
   if (data.action == 'pause') {

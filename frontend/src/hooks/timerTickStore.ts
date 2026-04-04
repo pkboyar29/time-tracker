@@ -1,8 +1,11 @@
-import { TimerTick } from './useTimer';
+type TimerTick = {
+  sessionId: string;
+  ms: number;
+};
 
 let state: TimerTick = {
   sessionId: '',
-  seconds: 0,
+  ms: 0,
 };
 const listeners = new Set<() => void>();
 
@@ -12,8 +15,8 @@ export const timerTickStore = {
     listeners.add(listener);
     return () => listeners.delete(listener);
   },
-  setTick: (sessionId: string, seconds: number) => {
-    state = { sessionId, seconds };
+  setTick: (sessionId: string, ms: number) => {
+    state = { sessionId, ms };
     listeners.forEach((l) => l());
   },
 };

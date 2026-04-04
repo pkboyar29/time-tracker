@@ -82,11 +82,13 @@ const App: FC = () => {
             return;
           }
 
-          startTimer(sessionFromLS, true);
           if (
             sessionFromLS.spentTimeSeconds > sessionFromServer.spentTimeSeconds
           ) {
+            startTimer(sessionFromLS, true);
             updateSession(sessionFromLS, true); // TODO: отображать серверные ошибки?
+          } else {
+            startTimer(sessionFromServer, true);
           }
         } catch (e) {
           if (e instanceof AxiosError && e.response?.status === 404) {
