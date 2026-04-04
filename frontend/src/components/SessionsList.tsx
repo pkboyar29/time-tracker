@@ -1,5 +1,5 @@
 import { FC, useState, useEffect } from 'react';
-import { useTimerWithSeconds } from '../hooks/useTimer';
+import { useTimerWithMs } from '../hooks/useTimer';
 import { deleteSession } from '../api/sessionApi';
 import { getSessionFromLS } from '../helpers/localstorageHelpers';
 import { toast } from 'react-toastify';
@@ -36,7 +36,7 @@ const SessionsList: FC<SessionsListProps> = ({
   const { t } = useTranslation();
 
   const { timerState, startTimer, finalSpentSeconds, finalSessionId } =
-    useTimerWithSeconds();
+    useTimerWithMs();
   const sessionFromLS = getSessionFromLS('session');
 
   // removing current session from the list

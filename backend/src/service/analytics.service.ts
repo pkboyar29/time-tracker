@@ -943,6 +943,10 @@ async function updateCache(userId: string, options: UpdateCacheOptions) {
     cacheKeys.push(...result.keys);
   } while (cursor !== '0');
 
+  if (cacheKeys.length === 0) {
+    return;
+  }
+
   const cacheValues = await redisClient.mGet(cacheKeys);
   const updatedCacheValues = analyticsService.buildUpdatedCacheValues(
     cacheKeys,

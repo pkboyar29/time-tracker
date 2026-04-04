@@ -1,10 +1,13 @@
 import { FC, useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useTimerWithSeconds } from '../hooks/useTimer';
+import { useTimerWithMs } from '../hooks/useTimer';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import { setIsSidebarOpen } from '../redux/slices/windowSlice';
 import { setTheme } from '../redux/slices/themeSlice';
-import { getRemainingTimeHoursMinutesSeconds } from '../helpers/timeHelpers';
+import {
+  getRemainingTimeHoursMinutesSeconds,
+  msToSeconds,
+} from '../helpers/timeHelpers';
 import { toggleThemeInLS } from '../helpers/localstorageHelpers';
 import { getWeekRange } from '../helpers/dateHelpers';
 import { useTranslation } from 'react-i18next';
@@ -24,7 +27,7 @@ const Sidebar: FC = () => {
   const [settingsModal, setSettingsModal] = useState<boolean>(false);
   const [startOfWeek, endOfWeek] = getWeekRange(new Date());
 
-  const { timerState } = useTimerWithSeconds();
+  const { timerState } = useTimerWithMs();
 
   const isSidebarOpen = useAppSelector((state) => state.window.isSidebarOpen);
   const theme = useAppSelector((state) => state.theme.theme);
@@ -102,7 +105,7 @@ const Sidebar: FC = () => {
                 <div className="px-4 py-2 text-sm shadow-sm rounded-xl bg-primary/10 text-primary dark:bg-surfaceDark dark:text-textDark">
                   {getRemainingTimeHoursMinutesSeconds(
                     timerState.session.totalTimeSeconds,
-                    timerState.session.spentTimeSeconds,
+                    msToSeconds(timerState.ms),
                   )}
                 </div>
               )}

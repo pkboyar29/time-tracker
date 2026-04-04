@@ -3,7 +3,7 @@ import { TFunction } from 'i18next';
 export const getRemainingTimeHoursMinutesSeconds = (
   totalTimeSeconds: number,
   spentTimeSeconds: number,
-  short: boolean = false
+  short: boolean = false,
 ): string => {
   const remainingSeconds = totalTimeSeconds - spentTimeSeconds;
 
@@ -54,7 +54,7 @@ export const getTimeParts = (seconds: number) => {
 export const getReadableTime = (
   seconds: number,
   t: TFunction,
-  options: { short: boolean; zeroUnits?: boolean }
+  options: { short: boolean; zeroUnits?: boolean },
 ): string => {
   const { short, zeroUnits = false } = options;
   const { hours, minutes, seconds: secs } = getTimeParts(seconds);
@@ -65,7 +65,7 @@ export const getReadableTime = (
     parts.push(
       short
         ? t('time.hoursShort', { count: hours })
-        : t('time.hours', { count: hours })
+        : t('time.hours', { count: hours }),
     );
   }
 
@@ -73,7 +73,7 @@ export const getReadableTime = (
     parts.push(
       short
         ? t('time.minutesShort', { count: minutes })
-        : t('time.minutes', { count: minutes })
+        : t('time.minutes', { count: minutes }),
     );
   }
 
@@ -81,7 +81,7 @@ export const getReadableTime = (
     parts.push(
       short
         ? t('time.secondsShort', { count: secs })
-        : t('time.seconds', { count: secs })
+        : t('time.seconds', { count: secs }),
     );
   }
 
@@ -100,9 +100,17 @@ export const getTimeHHmmFromDate = (date: Date) => {
 export const getTimerEndDate = (
   startTimerTimestamp: number,
   startTimerSpentSeconds: number,
-  sessionTotalSeconds: number
+  sessionTotalSeconds: number,
 ): Date => {
   return new Date(
-    startTimerTimestamp + (sessionTotalSeconds - startTimerSpentSeconds) * 1000
+    startTimerTimestamp + (sessionTotalSeconds - startTimerSpentSeconds) * 1000,
   );
+};
+
+export const secondsToMs = (seconds: number): number => {
+  return seconds * 1000;
+};
+
+export const msToSeconds = (ms: number): number => {
+  return Math.floor(ms / 1000);
 };

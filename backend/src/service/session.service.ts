@@ -1,6 +1,7 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
 import activityService from './activity.service';
+import activityGroupService from './activityGroup.service';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import mongoose from 'mongoose';
 import userService from './user.service';
@@ -11,6 +12,10 @@ import { HttpError } from '../helpers/HttpError';
 interface PopulatedActivity {
   id: mongoose.Types.ObjectId;
   name: string;
+  activityGroup: {
+    id: mongoose.Types.ObjectId;
+    name: string;
+  };
 }
 
 const activityPopulateConfig = {
@@ -97,6 +102,7 @@ async function getSession(
         activity: PopulatedActivity;
       }>(activityPopulateConfig)
       .exec();
+
     if (!session) {
       throw notFoundError;
     }
@@ -222,8 +228,21 @@ async function updateSession(
 
     if (session.spentTimeSeconds === session.totalTimeSeconds) {
       session.completed = true;
+
       if (session.activity) {
-        await activityService.updateActivityAndGroupStats(session, userId);
+        await activityService.updateActivityStats(
+          session.activity.id.toString(),
+          1,
+          session.totalTimeSeconds,
+          userId,
+        );
+
+        await activityGroupService.updateActivityGroupStats(
+          session.activity.activityGroup.id.toString(),
+          1,
+          session.totalTimeSeconds,
+          userId,
+        );
       }
     }
 

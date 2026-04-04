@@ -56,7 +56,8 @@ export const updateSession = async (
   const noteFromLS = getNoteFromLS(payload.id);
 
   const body = {
-    ...payload,
+    spentTimeSeconds: payload.spentTimeSeconds,
+    totalTimeSeconds: payload.totalTimeSeconds,
     note: noteFromLS,
     isPaused: isPaused !== undefined ? isPaused : false,
   };

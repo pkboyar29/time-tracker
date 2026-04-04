@@ -70,11 +70,13 @@ const activitySchema = new Schema<IActivity>({
   },
   sessionsAmount: {
     type: Number,
+    min: 0,
     default: 0,
     required: true,
   },
   spentTimeSeconds: {
     type: Number,
+    min: 0,
     default: 0,
     required: true,
   },

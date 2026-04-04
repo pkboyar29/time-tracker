@@ -27,7 +27,7 @@ export const fetchActivityGroups = async (): Promise<IActivityGroup[]> => {
 };
 
 export const fetchActivityGroup = async (
-  activityGroupId: string
+  activityGroupId: string,
 ): Promise<IActivityGroup> => {
   const { data } = await axios.get(`/activity-groups/${activityGroupId}`);
 
@@ -35,7 +35,7 @@ export const fetchActivityGroup = async (
 };
 
 export const createActivityGroup = async (
-  payload: IActivityGroupCreate
+  payload: IActivityGroupCreate,
 ): Promise<IActivityGroup> => {
   const { data } = await axios.post('/activity-groups', payload);
 
@@ -43,7 +43,7 @@ export const createActivityGroup = async (
 };
 
 export const updateActivityGroup = async (
-  payload: IActivityGroupUpdate
+  payload: IActivityGroupUpdate,
 ): Promise<IActivityGroup> => {
   const { data } = await axios.put(`/activity-groups/${payload.id}`, payload);
 
@@ -51,17 +51,17 @@ export const updateActivityGroup = async (
 };
 
 export const archiveAllActivities = async (
-  activityGroupId: string
+  activityGroupId: string,
 ): Promise<string> => {
   const { data } = await axios.put(
-    `/activity-groups/${activityGroupId}/activities/archive`
+    `/activity-groups/${activityGroupId}/activities/archive`,
   );
 
   return data;
 };
 
 export const deleteActivityGroup = async (
-  activityGroupId: string
+  activityGroupId: string,
 ): Promise<string> => {
   const { data } = await axios.delete(`activity-groups/${activityGroupId}`);
 

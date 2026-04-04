@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { sendServerEvent } from '../helpers/sendServerEvent';
+import { logger } from '../../logger';
 import userService from '../service/user.service';
 import User from '../model/user.model';
 
@@ -49,6 +50,7 @@ router.get('/', async (req: Request, res: Response) => {
     );
 
   if (isDailyGoalCompletedMarkedToday && !isDailyGoalNotifiedMarkedToday) {
+    logger.info('trying to send notification in events.controller.ts ...');
     sendServerEvent(res, 'daily_goal_completed', {});
 
     await userService.markDailyGoalNotified(userId);

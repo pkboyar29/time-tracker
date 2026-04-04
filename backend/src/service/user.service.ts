@@ -3,6 +3,7 @@ import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
+import { logger } from '../../logger';
 
 import { HttpError } from '../helpers/HttpError';
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
@@ -365,6 +366,7 @@ async function notifyDailyGoalCompleted(userId: string) {
   const userConnections = sseConnections.get(userId);
   if (userConnections && userConnections.length > 0) {
     for (const res of userConnections) {
+      logger.info('trying to send notification in user.service.ts ...');
       sendServerEvent(res, 'daily_goal_completed', {});
     }
 

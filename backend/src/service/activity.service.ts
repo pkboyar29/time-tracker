@@ -7,7 +7,6 @@ import analyticsService from './analytics.service';
 import { HttpError } from '../helpers/HttpError';
 
 import mongoose from 'mongoose';
-import { ISession } from '../model/session.model';
 
 interface PopulatedActivityGroup {
   _id: mongoose.Types.ObjectId;
@@ -37,7 +36,7 @@ const activityService = {
   createActivity,
   updateActivity,
   updateActivityColor,
-  updateActivityAndGroupStats,
+  updateActivityStats,
   archiveActivity,
   deleteActivity,
   addActivityToLastActivities,
@@ -248,30 +247,23 @@ async function updateActivityColor(
   return activity;
 }
 
-async function updateActivityAndGroupStats(
-  session: ISession,
+// newSessionsAmount and newSpentTimeSeconds could be negative
+async function updateActivityStats(
+  activityId: string,
+  newSessionsAmount: number,
+  newSpentTimeSeconds: number,
   userId: string,
 ): Promise<void> {
-  if (!session.activity) {
-    return;
+  const activity = await activityService.getActivity({ activityId, userId });
+  activity.sessionsAmount += newSessionsAmount;
+  activity.spentTimeSeconds += newSpentTimeSeconds;
+
+  const validationError = activity.validateSync();
+  if (validationError) {
+    throw new HttpError(400, validationError.message);
   }
 
-  const activity = await activityService.getActivity({
-    activityId: session.activity.id.toString(),
-    userId,
-  });
-  const activityGroup = await activityGroupService.getActivityGroup({
-    activityGroupId: activity.activityGroup._id.toString(),
-    userId,
-  });
-
-  activity.sessionsAmount += 1;
-  activity.spentTimeSeconds += session.spentTimeSeconds;
-  activityGroup.sessionsAmount += 1;
-  activityGroup.spentTimeSeconds += session.spentTimeSeconds;
-
   await activity.save();
-  await activityGroup.save();
 }
 
 async function archiveActivity(
@@ -324,6 +316,13 @@ async function deleteActivity(
     await activity.updateOne({
       deleted: true,
     });
+
+    await activityGroupService.updateActivityGroupStats(
+      activity.activityGroup._id.toString(),
+      -activity.sessionsAmount,
+      -activity.spentTimeSeconds,
+      userId,
+    );
 
     await analyticsService.updateCache(userId, {
       type: 'activityDeleted',

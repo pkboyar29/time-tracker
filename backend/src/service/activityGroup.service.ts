@@ -20,6 +20,7 @@ const activityGroupService = {
   getActivityGroup,
   createActivityGroup,
   updateActivityGroup,
+  updateActivityGroupStats,
   archiveGroupActivities,
   deleteActivityGroup,
 };
@@ -132,6 +133,29 @@ async function updateActivityGroup(
   } catch (e) {
     throw e;
   }
+}
+
+// newSessionsAmount and newSpentTimeSeconds could be negative
+async function updateActivityGroupStats(
+  activityGroupId: string,
+  newSessionsAmount: number,
+  newSpentTimeSeconds: number,
+  userId: string,
+): Promise<void> {
+  const activityGroup = await activityGroupService.getActivityGroup({
+    activityGroupId,
+    userId,
+  });
+
+  activityGroup.sessionsAmount += newSessionsAmount;
+  activityGroup.spentTimeSeconds += newSpentTimeSeconds;
+
+  const validationError = activityGroup.validateSync();
+  if (validationError) {
+    throw new HttpError(400, validationError.message);
+  }
+
+  await activityGroup.save();
 }
 
 async function archiveGroupActivities(

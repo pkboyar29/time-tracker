@@ -28,7 +28,7 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
   return (
     <div
       className="p-2.5 bg-surfaceLight dark:bg-surfaceDark rounded-sm border border-gray-300/80 dark:border-white/10 
-        border-solid max-h-[280px] overflow-y-auto w-[210px] pointer-events-auto"
+        border-solid max-h-[280px] overflow-y-auto w-[220px] pointer-events-auto"
       style={{
         visibility: isVisible ? 'visible' : 'hidden',
       }}
