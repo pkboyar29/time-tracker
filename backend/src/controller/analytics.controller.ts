@@ -35,18 +35,19 @@ router.get('/', async (req: Request, res: Response) => {
 
     const tzInfo = await User.findById(res.locals.userId).select('timezone');
 
-    const data = await analyticsService.getAnalyticsForRangeWithCache({
-      startOfRange: fromDate,
-      endOfRange: toDate,
-      userId: res.locals.userId,
-      timezone: tzInfo!.timezone,
-    });
-    // const data = await analyticsService.getAnalyticsForRangeInternal({
+    // const data = await analyticsService.getAnalyticsForRangeWithCache({
     //   startOfRange: fromDate,
     //   endOfRange: toDate,
     //   userId: res.locals.userId,
     //   timezone: tzInfo!.timezone,
     // });
+    // TODO: вернуть
+    const data = await analyticsService.getAnalyticsForRangeInternal({
+      startOfRange: fromDate,
+      endOfRange: toDate,
+      userId: res.locals.userId,
+      timezone: tzInfo!.timezone,
+    });
     res.status(200).send(data);
   } catch (e) {
     sendErrorResponse(e, res);

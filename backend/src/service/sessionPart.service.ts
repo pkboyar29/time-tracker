@@ -1,3 +1,4 @@
+import '../model/activity.model';
 import SessionPart, { ISessionPart } from '../model/sessionPart.model';
 import mongoose from 'mongoose';
 

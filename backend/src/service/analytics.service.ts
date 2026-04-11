@@ -270,8 +270,8 @@ function getTimeBars({
   }
 
   while (true) {
-    const filteredSessionParts = sessionParts.filter((sessionPart) => {
-      const createdDate = sessionPart.createdDate.getTime();
+    const filteredParts = sessionParts.filter((part) => {
+      const createdDate = part.createdDate.getTime();
 
       return (
         createdDate >= prevPeriod.getTime() &&
@@ -287,14 +287,12 @@ function getTimeBars({
       );
     });
 
-    const barSpentTimeSeconds = filteredSessionParts.reduce(
-      (total: number, sessionPart) => total + sessionPart.spentTimeSeconds,
+    const barSpentTimeSeconds = filteredParts.reduce(
+      (total: number, part) => total + part.spentTimeSeconds,
       0,
     );
     const barSessionsAmount = filteredSessions.length;
-    const barPausedAmount = filteredSessionParts.filter(
-      (part) => part.paused,
-    ).length;
+    const barPausedAmount = filteredParts.filter((part) => part.paused).length;
 
     if (nextPeriod.getTime() > endOfRange.getTime()) {
       nextPeriod = new Date(endOfRange);
@@ -312,7 +310,7 @@ function getTimeBars({
         allSessionsAmount: barSessionsAmount,
         allSpentTimeSeconds: barSpentTimeSeconds,
         allPausedAmount: barPausedAmount,
-        sessionParts: filteredSessionParts,
+        sessionParts: filteredParts,
         completedSessions: filteredSessions,
         userActivities,
       }),
