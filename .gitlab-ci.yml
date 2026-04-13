@@ -62,7 +62,7 @@ frontend_deploy:
     - echo "HOST *" > ~/.ssh/config
     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
   script:
-    - rsync -avz frontend/dist/ root@185.23.34.22:/var/www/185.23.34.22/
+    - rsync -avz frontend/dist/ root@$VPS_IP:/var/www/$VPS_IP/
 
 backend_build_and_deploy:
   image: alpine:3.21
@@ -75,4 +75,4 @@ backend_build_and_deploy:
     - echo "HOST *" > ~/.ssh/config
     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
   script:
-    - ssh root@185.23.34.22 "cd ~/time-tracker/ && git pull --no-rebase && cd backend/ && docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d"
+    - ssh root@$VPS_IP "cd ~/time-tracker/ && git pull --no-rebase && cd backend/ && docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d"
