@@ -10,6 +10,10 @@ import {
 import { ISessionPart } from '../model/sessionPart.model';
 import { ISession } from '../model/session.model';
 import { IActivity } from '../model/activity.model';
+import DailyAggregate, { IDailyAggregate } from '../model/dailyAggregate.model';
+import DailyActivityDistribution, {
+  IDailyAD,
+} from '../model/dailyActivityDistribution.model';
 import { getTodayRange } from '../helpers/getTodayRange';
 
 import { redisClient } from '../../redisClient';
@@ -17,29 +21,59 @@ import { DateTime } from 'luxon';
 
 type TimeBarType = 'hour' | 'day' | 'month' | 'year';
 
-interface GetSessionsStatistics {
+interface GetSessionsStatisticsOptions {
   sessionParts: ISessionPart[];
   completedSessions: ISession[];
 }
 
-interface GetActivityDistributionsOptions {
-  allSessionsAmount: number;
-  allSpentTimeSeconds: number;
-  allPausedAmount: number;
+interface GetSessionsStatisticsAggregatesOptions {
+  aggregates: IDailyAggregate[];
+}
+
+interface BuildADsOptions {
+  totalStat: SessionStatistics;
+  allActivitiesStat: SessionStatistics;
+  userActivities: IActivity[];
+  activitiesStatMap: Map<string, SessionStatistics>;
+}
+
+interface GetADsOptions {
+  totalStat: SessionStatistics;
   sessionParts: ISessionPart[];
   completedSessions: ISession[];
+  userActivities: IActivity[];
+}
+
+interface GetADsAggregatesOptions {
+  totalStat: SessionStatistics;
+  dailyAds: IDailyAD[];
+  userActivities: IActivity[];
+}
+
+interface getBarStatAndAdsOptions {
+  dataSource: DataSource;
+  startOfPeriod: Date;
+  endOfPeriod: Date;
   userActivities: IActivity[];
 }
 
 interface GetTimeBarsOptions {
   startOfRange: Date;
   endOfRange: Date;
-  sessionParts: ISessionPart[];
-  completedSessions: ISession[];
   barType: TimeBarType;
   timezone: string;
   userActivities: IActivity[];
+  dataSource: DataSource;
 }
+
+type DataSource =
+  | { type: 'raw'; sessionParts: ISessionPart[]; completedSessions: ISession[] }
+  | {
+      type: 'aggregates';
+      dailyAggregates: IDailyAggregate[];
+      dailyAds: IDailyAD[];
+      timezone: string;
+    };
 
 interface GetAnalyticsForRangeOptions {
   startOfRange: Date;
@@ -60,16 +94,35 @@ interface MergeAnalyticsOptions {
   timezone: string;
 }
 
+interface ApplySessionUpdateToAggregatesOptions {
+  userId: string;
+  timezone: string;
+
+  // event params
+  date: Date;
+  addedSpentTimeSeconds: number;
+  isPaused: boolean;
+  isCompleted: boolean;
+
+  activityId?: string;
+}
+
 type UpdateCacheOptions =
   | { type: 'activityUpdated'; activity: IActivity }
   | { type: 'activityDeleted'; activityId: string };
 
 const analyticsService = {
   getSessionsStatistics,
+  buildActivityDistributions,
   getActivityDistributions,
   getTimeBarType,
+  getBarStatAndAds,
   getTimeBars,
+  getSessionsStatisticsAggregates,
+  getActivityDistributionsAggregates,
+  applySessionUpdateToAggregates,
   getAnalyticsForRangeInternal,
+  getAnalyticsForRangeAggregates,
   getAnalyticsForRangeWithCache,
   mergeSessionStatistics,
   mergeActivityDistributions,
@@ -84,7 +137,7 @@ const analyticsService = {
 function getSessionsStatistics({
   sessionParts,
   completedSessions,
-}: GetSessionsStatistics): SessionStatistics {
+}: GetSessionsStatisticsOptions): SessionStatistics {
   const sessionsAmount = completedSessions.length;
 
   const spentTimeSeconds = sessionParts.reduce(
@@ -103,92 +156,113 @@ function getSessionsStatistics({
   };
 }
 
-function getActivityDistributions({
-  allSessionsAmount,
-  allSpentTimeSeconds,
-  allPausedAmount,
-  sessionParts,
-  completedSessions,
+function buildActivityDistributions({
+  totalStat,
+  allActivitiesStat,
+  activitiesStatMap,
   userActivities,
-}: GetActivityDistributionsOptions): ActivityDistribution[] {
-  let activityDistributions: ActivityDistribution[] = [];
+}: BuildADsOptions): ActivityDistribution[] {
+  const ads: ActivityDistribution[] = [];
 
-  activityDistributions = userActivities.map((activity) => {
-    const activityDistribution: ActivityDistribution = {
+  for (const [activityId, stat] of activitiesStatMap) {
+    const activity = userActivities.find((activity) =>
+      activity._id.equals(activityId),
+    );
+    if (!activity) {
+      continue;
+    }
+
+    ads.push({
       id: activity._id.toString(),
       name: activity.name,
       color: activity.color,
-      sessionStatistics: {
-        sessionsAmount: 0,
-        spentTimeSeconds: 0,
-        pausedAmount: 0,
-      },
-    };
-    return activityDistribution;
-  });
+      sessionStatistics: stat,
+    });
+  }
 
-  let activitiesSeconds: number = 0;
-  let activitiesSessions: number = 0;
-  let activitiesPaused: number = 0;
+  // set without activity to activityDistributions
+  const woStat: SessionStatistics = {
+    sessionsAmount: totalStat.sessionsAmount - allActivitiesStat.sessionsAmount,
+    spentTimeSeconds:
+      totalStat.spentTimeSeconds - allActivitiesStat.spentTimeSeconds,
+    pausedAmount: totalStat.pausedAmount - allActivitiesStat.pausedAmount,
+  };
+  if (woStat.spentTimeSeconds > 0) {
+    ads.push({
+      id: '0',
+      name: 'Without activity',
+      color: '#9CA3AF',
+      sessionStatistics: woStat,
+    });
+  }
+
+  return ads;
+}
+
+function getActivityDistributions({
+  totalStat,
+  sessionParts,
+  completedSessions,
+  userActivities,
+}: GetADsOptions): ActivityDistribution[] {
+  const activitiesStatMap = new Map<string, SessionStatistics>();
+
+  const allActivitiesStat: SessionStatistics = {
+    spentTimeSeconds: 0,
+    sessionsAmount: 0,
+    pausedAmount: 0,
+  };
 
   // set sessionsAmount to activityDistributions
   for (const session of completedSessions) {
     if (!session.activity) continue;
+    const activityId = session.activity.id.toString();
 
-    const adIndex = activityDistributions.findIndex(
-      (ad) => ad.id === session.activity.id.toString(),
-    );
-    if (adIndex === -1) continue;
+    let activityStat = activitiesStatMap.get(activityId);
+    if (!activityStat) {
+      activityStat = {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      };
+    }
 
-    activityDistributions[adIndex].sessionStatistics.sessionsAmount += 1;
-    activitiesSessions += 1;
+    activityStat.sessionsAmount += 1;
+    allActivitiesStat.sessionsAmount += 1;
+
+    activitiesStatMap.set(activityId, activityStat);
   }
 
   // set spentTimeSeconds and pausedAmount to activityDistributions
   for (const part of sessionParts) {
     if (!part.session.activity) continue;
+    const activityId = part.session.activity.id.toString();
 
-    const adIndex = activityDistributions.findIndex(
-      (ad) => ad.id === part.session.activity.id.toString(),
-    );
-    if (adIndex === -1) continue;
-
-    activityDistributions[adIndex].sessionStatistics.spentTimeSeconds +=
-      part.spentTimeSeconds;
-    activitiesSeconds += part.spentTimeSeconds;
-
-    if (part.paused) {
-      activityDistributions[adIndex].sessionStatistics.pausedAmount += 1;
-      activitiesPaused += 1;
+    let activityStat = activitiesStatMap.get(activityId);
+    if (!activityStat) {
+      activityStat = {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      };
     }
+
+    activityStat.spentTimeSeconds += part.spentTimeSeconds;
+    allActivitiesStat.spentTimeSeconds += part.spentTimeSeconds;
+    if (part.paused) {
+      activityStat.pausedAmount += 1;
+      allActivitiesStat.pausedAmount += 1;
+    }
+
+    activitiesStatMap.set(activityId, activityStat);
   }
 
-  // delete empty activity distributions
-  activityDistributions = activityDistributions.filter(
-    (ad) =>
-      ad.sessionStatistics.sessionsAmount > 0 ||
-      ad.sessionStatistics.spentTimeSeconds > 0 ||
-      ad.sessionStatistics.pausedAmount > 0,
-  );
-
-  // set without activity to activityDistributions
-  const woActivitySessions = allSessionsAmount - activitiesSessions;
-  const woActivitySeconds = allSpentTimeSeconds - activitiesSeconds;
-  const woActivityPaused = allPausedAmount - activitiesPaused;
-  if (woActivitySeconds > 0) {
-    activityDistributions.push({
-      id: '0',
-      name: 'Without activity',
-      color: '#9CA3AF',
-      sessionStatistics: {
-        sessionsAmount: woActivitySessions,
-        spentTimeSeconds: woActivitySeconds,
-        pausedAmount: woActivityPaused,
-      },
-    });
-  }
-
-  return activityDistributions;
+  return analyticsService.buildActivityDistributions({
+    totalStat,
+    allActivitiesStat,
+    activitiesStatMap,
+    userActivities,
+  });
 }
 
 function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
@@ -206,15 +280,96 @@ function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
   }
 }
 
+function getBarStatAndAds({
+  startOfPeriod,
+  endOfPeriod,
+  dataSource,
+  userActivities,
+}: getBarStatAndAdsOptions): {
+  barStat: SessionStatistics;
+  barAds: ActivityDistribution[];
+} {
+  if (dataSource.type === 'raw') {
+    const filteredParts = dataSource.sessionParts.filter((part) => {
+      const createdDate = part.createdDate.getTime();
+
+      return (
+        createdDate >= startOfPeriod.getTime() &&
+        createdDate < endOfPeriod.getTime()
+      );
+    });
+
+    const filteredSessions = dataSource.completedSessions.filter((session) => {
+      const completedDate = session.updatedDate.getTime();
+
+      return (
+        completedDate >= startOfPeriod.getTime() &&
+        completedDate < endOfPeriod.getTime()
+      );
+    });
+
+    const barStat = analyticsService.getSessionsStatistics({
+      sessionParts: filteredParts,
+      completedSessions: filteredSessions,
+    });
+
+    const barAds = analyticsService.getActivityDistributions({
+      totalStat: barStat,
+      sessionParts: filteredParts,
+      completedSessions: filteredSessions,
+      userActivities,
+    });
+
+    return { barStat, barAds };
+  } else {
+    const startOfPeriodISO = DateTime.fromJSDate(startOfPeriod, {
+      zone: dataSource.timezone,
+    }).toISODate();
+    const endOfPeriodISO = DateTime.fromJSDate(endOfPeriod, {
+      zone: dataSource.timezone,
+    }).toISODate();
+
+    if (!startOfPeriodISO || !endOfPeriodISO) {
+      throw new Error('Failed to convert DateTime to ISO Date');
+    }
+
+    const filteredAggregates = dataSource.dailyAggregates.filter((aggr) => {
+      const aggrDate = aggr.date;
+
+      return aggrDate >= startOfPeriodISO && aggrDate < endOfPeriodISO;
+    });
+
+    const filteredDailyAds = dataSource.dailyAds.filter((dailyAd) => {
+      const adDate = dailyAd.date;
+
+      return adDate >= startOfPeriodISO && adDate < endOfPeriodISO;
+    });
+
+    const barStat = analyticsService.getSessionsStatisticsAggregates({
+      aggregates: filteredAggregates,
+    });
+    const barAds = analyticsService.getActivityDistributionsAggregates({
+      totalStat: barStat,
+      userActivities,
+      dailyAds: filteredDailyAds,
+    });
+
+    return {
+      barStat,
+      barAds,
+    };
+  }
+}
+
+// TODO: передавая сюда bar type hour и агрегаты, можно автоматически возвращать пустой массив или типо ошибки
 // TODO: Так как bar type можно передавать сюда, то надо добавить какие-то проверки?
 function getTimeBars({
   startOfRange,
   endOfRange,
   barType,
   timezone,
-  sessionParts,
-  completedSessions,
   userActivities,
+  dataSource,
 }: GetTimeBarsOptions): TimeBar[] {
   if (endOfRange.getTime() <= startOfRange.getTime()) {
     return [];
@@ -234,13 +389,8 @@ function getTimeBars({
     }
   } else if (barType == 'day') {
     const dt = DateTime.fromJSDate(nextPeriod, { zone: timezone });
-    // if date is exact start of day in given time zone
-    if (
-      dt.hour === 0 &&
-      dt.minute === 0 &&
-      dt.second === 0 &&
-      dt.millisecond === 0
-    ) {
+    // if date is exact start of day in user timezone
+    if (dt.hour === 0 && dt.minute === 0 && dt.second === 0) {
       nextPeriod.setDate(nextPeriod.getDate() + 1);
     } else {
       const startOfNextDay = dt.plus({ days: 1 }).startOf('day');
@@ -248,14 +398,8 @@ function getTimeBars({
     }
   } else if (barType == 'month') {
     const dt = DateTime.fromJSDate(nextPeriod, { zone: timezone });
-    // if date is exact start of month in given time zone
-    if (
-      dt.day === 1 &&
-      dt.hour === 0 &&
-      dt.minute === 0 &&
-      dt.second === 0 &&
-      dt.millisecond === 0
-    ) {
+    // if date is exact start of month in user timezone
+    if (dt.day === 1 && dt.hour === 0 && dt.minute === 0 && dt.second === 0) {
       const nextPeriodLuxon = DateTime.fromJSDate(nextPeriod, {
         zone: timezone,
       }).plus({ months: 1 });
@@ -270,29 +414,25 @@ function getTimeBars({
   }
 
   while (true) {
-    const filteredParts = sessionParts.filter((part) => {
-      const createdDate = part.createdDate.getTime();
+    let barStat: SessionStatistics = {
+      spentTimeSeconds: 0,
+      sessionsAmount: 0,
+      pausedAmount: 0,
+    };
+    let barAds: ActivityDistribution[] = [];
 
-      return (
-        createdDate >= prevPeriod.getTime() &&
-        createdDate < nextPeriod.getTime()
-      );
-    });
-    const filteredSessions = completedSessions.filter((session) => {
-      const completedDate = session.updatedDate.getTime();
+    if (prevPeriod.getTime() < new Date().getTime()) {
+      const { barStat: computedStat, barAds: computedAds } =
+        analyticsService.getBarStatAndAds({
+          startOfPeriod: prevPeriod,
+          endOfPeriod: nextPeriod,
+          dataSource,
+          userActivities,
+        });
 
-      return (
-        completedDate >= prevPeriod.getTime() &&
-        completedDate < nextPeriod.getTime()
-      );
-    });
-
-    const barSpentTimeSeconds = filteredParts.reduce(
-      (total: number, part) => total + part.spentTimeSeconds,
-      0,
-    );
-    const barSessionsAmount = filteredSessions.length;
-    const barPausedAmount = filteredParts.filter((part) => part.paused).length;
+      barStat = computedStat;
+      barAds = computedAds;
+    }
 
     if (nextPeriod.getTime() > endOfRange.getTime()) {
       nextPeriod = new Date(endOfRange);
@@ -301,32 +441,21 @@ function getTimeBars({
     timeBars.push({
       startOfRange: new Date(prevPeriod),
       endOfRange: new Date(nextPeriod),
-      sessionStatistics: {
-        spentTimeSeconds: barSpentTimeSeconds,
-        sessionsAmount: barSessionsAmount,
-        pausedAmount: barPausedAmount,
-      },
-      activityDistribution: analyticsService.getActivityDistributions({
-        allSessionsAmount: barSessionsAmount,
-        allSpentTimeSeconds: barSpentTimeSeconds,
-        allPausedAmount: barPausedAmount,
-        sessionParts: filteredParts,
-        completedSessions: filteredSessions,
-        userActivities,
-      }),
+      sessionStatistics: barStat,
+      activityDistribution: barAds,
     });
 
-    if (nextPeriod.getTime() == endOfRange.getTime()) {
+    if (nextPeriod.getTime() === endOfRange.getTime()) {
       break;
     }
 
     // change periods
     prevPeriod = new Date(nextPeriod);
-    if (barType == 'hour') {
+    if (barType === 'hour') {
       nextPeriod.setHours(nextPeriod.getHours() + 1);
-    } else if (barType == 'day') {
+    } else if (barType === 'day') {
       nextPeriod.setDate(nextPeriod.getDate() + 1);
-    } else if (barType == 'month') {
+    } else if (barType === 'month') {
       const nextPeriodLuxon = DateTime.fromJSDate(nextPeriod, {
         zone: timezone,
       }).plus({ months: 1 });
@@ -335,6 +464,139 @@ function getTimeBars({
   }
 
   return timeBars;
+}
+
+function getSessionsStatisticsAggregates({
+  aggregates,
+}: GetSessionsStatisticsAggregatesOptions): SessionStatistics {
+  const sessionStatistics: SessionStatistics = {
+    spentTimeSeconds: 0,
+    sessionsAmount: 0,
+    pausedAmount: 0,
+  };
+  for (let i = 0; i < aggregates.length; i++) {
+    const aggregate = aggregates[i];
+
+    sessionStatistics.spentTimeSeconds += aggregate.spentTimeSeconds;
+    sessionStatistics.sessionsAmount += aggregate.sessionsAmount;
+    sessionStatistics.pausedAmount += aggregate.pausedAmount;
+  }
+
+  return sessionStatistics;
+}
+
+function getActivityDistributionsAggregates({
+  totalStat,
+  userActivities,
+  dailyAds,
+}: GetADsAggregatesOptions): ActivityDistribution[] {
+  const activitiesStatMap = new Map<string, SessionStatistics>();
+
+  const allActivitiesStat: SessionStatistics = {
+    spentTimeSeconds: 0,
+    sessionsAmount: 0,
+    pausedAmount: 0,
+  };
+
+  for (const dailyAd of dailyAds) {
+    const activityId = dailyAd.activity.toString();
+    let activityStat = activitiesStatMap.get(activityId);
+    if (!activityStat) {
+      activityStat = {
+        sessionsAmount: 0,
+        spentTimeSeconds: 0,
+        pausedAmount: 0,
+      };
+    }
+
+    activityStat.spentTimeSeconds += dailyAd.spentTimeSeconds;
+    activityStat.sessionsAmount += dailyAd.sessionsAmount;
+    activityStat.pausedAmount += dailyAd.pausedAmount;
+
+    activitiesStatMap.set(activityId, activityStat);
+
+    allActivitiesStat.spentTimeSeconds += dailyAd.spentTimeSeconds;
+    allActivitiesStat.sessionsAmount += dailyAd.sessionsAmount;
+    allActivitiesStat.pausedAmount += dailyAd.pausedAmount;
+  }
+
+  return analyticsService.buildActivityDistributions({
+    totalStat,
+    allActivitiesStat,
+    activitiesStatMap,
+    userActivities,
+  });
+}
+
+async function applySessionUpdateToAggregates({
+  userId,
+  timezone,
+  date,
+  addedSpentTimeSeconds,
+  isPaused,
+  isCompleted,
+  activityId,
+}: ApplySessionUpdateToAggregatesOptions) {
+  const dt = DateTime.fromJSDate(date, { zone: timezone });
+  const dateISO = dt.toISODate();
+
+  // TODO: можно использовать updateOne, будет оптимизированней
+  let todayAggregate = await DailyAggregate.findOne({
+    date: dateISO,
+    user: userId,
+  });
+  if (!todayAggregate) {
+    todayAggregate = new DailyAggregate({
+      date: dateISO,
+      user: userId,
+      spentTimeSeconds: 0,
+      sessionsAmount: 0,
+      pausedAmount: 0,
+    });
+  }
+
+  todayAggregate.spentTimeSeconds += addedSpentTimeSeconds;
+  if (isPaused) {
+    todayAggregate.pausedAmount += 1;
+  }
+  if (isCompleted) {
+    todayAggregate.sessionsAmount += 1;
+  }
+
+  await todayAggregate.save();
+
+  if (!activityId) {
+    return;
+  }
+
+  // TODO: можно использовать updateOne, будет оптимизированней
+  let todayActivityAggregate = await DailyActivityDistribution.findOne({
+    date: dateISO,
+    user: userId,
+    activity: activityId,
+  });
+  if (!todayActivityAggregate) {
+    todayActivityAggregate = new DailyActivityDistribution({
+      date: dateISO,
+      user: userId,
+      activity: activityId,
+      spentTimeSeconds: 0,
+      sessionsAmount: 0,
+      pausedAmount: 0,
+    });
+  }
+
+  todayActivityAggregate.spentTimeSeconds += addedSpentTimeSeconds;
+  if (isPaused) {
+    todayActivityAggregate.pausedAmount += 1;
+  }
+  if (isCompleted) {
+    todayActivityAggregate.sessionsAmount += 1;
+  }
+
+  await todayActivityAggregate.save();
+
+  // TODO: todayAggregate.save() и todayActivityAggregate.save() должны происходить атомарно
 }
 
 async function getAnalyticsForRangeInternal({
@@ -377,9 +639,7 @@ async function getAnalyticsForRangeInternal({
   const userActivities = await activityService.getActivities({ userId });
 
   const activityDistribution = analyticsService.getActivityDistributions({
-    allSessionsAmount: sessionStatistics.sessionsAmount,
-    allSpentTimeSeconds: sessionStatistics.spentTimeSeconds,
-    allPausedAmount: sessionStatistics.pausedAmount,
+    totalStat: sessionStatistics,
     sessionParts: sessionPartsForRange,
     completedSessions: completedSessionsForRange,
     userActivities,
@@ -388,9 +648,12 @@ async function getAnalyticsForRangeInternal({
   const timeBars = analyticsService.getTimeBars({
     startOfRange,
     endOfRange,
-    sessionParts: sessionPartsForRange,
-    completedSessions: completedSessionsForRange,
     barType: analyticsService.getTimeBarType(startOfRange, endOfRange),
+    dataSource: {
+      type: 'raw',
+      sessionParts: sessionPartsForRange,
+      completedSessions: completedSessionsForRange,
+    },
     timezone,
     userActivities,
   });
@@ -402,6 +665,152 @@ async function getAnalyticsForRangeInternal({
   };
 
   return analyticsForRange;
+}
+
+async function getAnalyticsForRangeAggregates({
+  startOfRange,
+  endOfRange,
+  userId,
+  timezone,
+}: GetAnalyticsForRangeOptions): Promise<AnalyticsForRangeDTO> {
+  try {
+    if (analyticsService.getTimeBarType(startOfRange, endOfRange) === 'hour') {
+      return analyticsService.getAnalyticsForRangeInternal({
+        startOfRange,
+        endOfRange,
+        userId,
+        timezone,
+      });
+    }
+
+    const startOfRangeDt = DateTime.fromJSDate(startOfRange, {
+      zone: timezone,
+    });
+    const endOfRangeDt = DateTime.fromJSDate(endOfRange, { zone: timezone });
+    let startOfRangeAggr = startOfRangeDt;
+    let endOfRangeAggr = endOfRangeDt;
+
+    let leadingAnalytics: AnalyticsForRangeDTO | null = null;
+    let trailingAnalytics: AnalyticsForRangeDTO | null = null;
+
+    // if it's not exact start of day in user timezone
+    if (
+      startOfRangeDt.hour !== 0 ||
+      startOfRangeDt.minute !== 0 ||
+      startOfRangeDt.second !== 0
+    ) {
+      startOfRangeAggr = startOfRangeDt.plus({ days: 1 }).startOf('day');
+
+      leadingAnalytics = await analyticsService.getAnalyticsForRangeInternal({
+        startOfRange,
+        endOfRange: startOfRangeAggr.toJSDate(),
+        userId,
+        timezone,
+      });
+    }
+
+    // if it's not exact start of day in user timezone
+    if (
+      endOfRangeDt.hour !== 0 ||
+      endOfRangeDt.minute !== 0 ||
+      endOfRangeDt.second !== 0
+    ) {
+      endOfRangeAggr = endOfRangeDt.startOf('day');
+
+      trailingAnalytics = await analyticsService.getAnalyticsForRangeInternal({
+        startOfRange: endOfRangeAggr.toJSDate(),
+        endOfRange,
+        userId,
+        timezone,
+      });
+    }
+
+    // console.log(startOfRangeAggr.toISODate());
+    // console.log(endOfRangeAggr.toISODate());
+
+    // TODO: а если аналитика начнется в одну часть дня, а закончится в другую часть дня? Получается мы к агрегатам вообще обращаться не будем.
+    // В таком случае в идеале надо один раз вызвать getAnalyticsForRangeInternal для изначальных дат
+    // ПРИМЕР: 19.04.2026 05:00 - 20.04.2026 19:00
+    // startOfRangeAggr станет 2026-04-20, а endOfRangeAggr станет 2026-04-20, от чего мы получим агрегатную аналитику за все 20 число, хотя мы не должны его получать
+    // ВОТ В ТАКИХ СЛУЧАЯХ НАДО КАК-ТО ПРОСТО ВЫЗЫВАТЬ getAnalyticsForRangeInternal ДЛЯ ИЗНАЧАЛЬНЫХ ДАТ
+    // НО КСТАТИ НА УДИВЛЕНИЕ НА ДАННЫЙ МОМЕНТ МЫ НЕ ПОЛУЧАЕМ АНАЛИТИКУ ЗА ВСЕ 20 ЧИСЛО (dailyAggregates и dailyAds оказываются пустые), однако с формированием таймбаров все равно беда, опять проблема в mergeAnalytics
+
+    const dailyAggregates = await DailyAggregate.find({
+      user: userId,
+      date: {
+        $gte: startOfRangeAggr.toISODate(),
+        $lt: endOfRangeAggr.toISODate(),
+      },
+    });
+    const dailyAds = await DailyActivityDistribution.find({
+      user: userId,
+      date: {
+        $gte: startOfRangeAggr.toISODate(),
+        $lt: endOfRangeAggr.toISODate(),
+      },
+    });
+    // console.log(dailyAggregates.length);
+    // console.log(dailyAds.length);
+
+    const sessionStatistics = analyticsService.getSessionsStatisticsAggregates({
+      aggregates: dailyAggregates,
+    });
+
+    const userActivities = await activityService.getActivities({ userId });
+    const ads = analyticsService.getActivityDistributionsAggregates({
+      totalStat: sessionStatistics,
+      userActivities,
+      dailyAds,
+    });
+
+    const startOfRangeAggrDate = startOfRangeAggr.toJSDate();
+    const endOfRangeAggrDate = endOfRangeAggr.toJSDate();
+    const timeBars = analyticsService.getTimeBars({
+      startOfRange: startOfRangeAggrDate,
+      endOfRange: endOfRangeAggrDate,
+      barType: analyticsService.getTimeBarType(
+        startOfRangeAggrDate,
+        endOfRangeAggrDate,
+      ),
+      timezone,
+      userActivities,
+      dataSource: { type: 'aggregates', dailyAggregates, dailyAds, timezone },
+    });
+
+    let aggrAnalytics: AnalyticsForRangeDTO = {
+      sessionStatistics,
+      activityDistribution: ads,
+      timeBars,
+    };
+
+    // TODO: тут тоже проблемы с mergeAnalytics. так как в leadingAnalytics есть часовые time bars, они почему-то добавляются в финальный объект, хотя этого быть не должно
+    // пример кейса: from=2026-04-20T12:00:00.000Z&to=2026-04-26T21:00:00.000Z. часовые тайм бары от leadingAnalytics (за 20 число) будут в финальном объекте
+    if (leadingAnalytics) {
+      aggrAnalytics = analyticsService.mergeAnalytics({
+        finalObjStartOfRange: startOfRange,
+        finalObjEndOfRange: endOfRangeAggrDate,
+        untilTodayObj: leadingAnalytics,
+        todayObj: aggrAnalytics,
+        timezone,
+      });
+    }
+
+    // TODO: баг в mergeAnalytics ломает у последнего тайм бара отображение startOfRange / endOfRange
+    // пример кейса: from=2026-04-15T21:00:00.000Z&to=2026-04-20T19:00:00.000Z. у последнего тайм бара будет такие периоды: 2026-04-20T21:00:00 - 2026-04-20T19:00:00
+    if (trailingAnalytics) {
+      aggrAnalytics = analyticsService.mergeAnalytics({
+        finalObjStartOfRange: startOfRange,
+        finalObjEndOfRange: endOfRange,
+        untilTodayObj: aggrAnalytics,
+        todayObj: trailingAnalytics,
+        timezone,
+      });
+    }
+
+    return aggrAnalytics;
+  } catch (e) {
+    throw e;
+  }
 }
 
 async function getAnalyticsForRangeWithCache({
@@ -632,8 +1041,11 @@ function mergeAnalytics({
       startOfRange: startOfTomorrow,
       endOfRange: finalObjEndOfRange,
       barType: 'day',
-      sessionParts: [],
-      completedSessions: [],
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone,
       userActivities: [],
     });
@@ -654,8 +1066,11 @@ function mergeAnalytics({
       startOfRange: startOfNextMonth,
       endOfRange: finalObjEndOfRange,
       barType: 'month',
-      sessionParts: [],
-      completedSessions: [],
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone,
       userActivities: [],
     });

@@ -1,12 +1,12 @@
 import Session, { ISession } from '../model/session.model';
 import SessionPart from '../model/sessionPart.model';
+import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import activityService from './activity.service';
 import activityGroupService from './activityGroup.service';
-import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
-import mongoose from 'mongoose';
 import userService from './user.service';
+import analyticsService from './analytics.service';
+import mongoose from 'mongoose';
 import User from '../model/user.model';
-
 import { HttpError } from '../helpers/HttpError';
 
 interface PopulatedActivity {
@@ -195,6 +195,8 @@ async function updateSession(
       );
     }
 
+    const now = new Date();
+
     let partSpentTimeSeconds = 0;
     if (sessionDTO.spentTimeSeconds > session.spentTimeSeconds) {
       partSpentTimeSeconds =
@@ -204,7 +206,7 @@ async function updateSession(
         session: sessionId,
         user: userId,
         paused: sessionDTO.isPaused,
-        createdDate: Date.now(),
+        createdDate: now,
       });
       await newSessionPart.save();
     }
@@ -212,7 +214,7 @@ async function updateSession(
     session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
     session.spentTimeSeconds = sessionDTO.spentTimeSeconds;
     session.note = sessionDTO.note;
-    session.updatedDate = new Date();
+    session.updatedDate = now;
 
     const validationError = session.validateSync();
     if (validationError) {
@@ -226,8 +228,11 @@ async function updateSession(
       }
     }
 
+    let isCompleted = false;
     if (session.spentTimeSeconds === session.totalTimeSeconds) {
       session.completed = true;
+
+      isCompleted = true;
 
       if (session.activity) {
         await activityService.updateActivityStats(
@@ -247,6 +252,16 @@ async function updateSession(
     }
 
     await session.save();
+
+    await analyticsService.applySessionUpdateToAggregates({
+      userId,
+      timezone,
+      date: now,
+      addedSpentTimeSeconds: partSpentTimeSeconds,
+      isPaused: sessionDTO.isPaused,
+      isCompleted,
+      activityId: session.activity ? session.activity.id.toString() : undefined,
+    });
 
     const isDailyGoalCompletedMarkedToday =
       await userService.isDailyGoalCompletedMarkedToday(userId, timezone);

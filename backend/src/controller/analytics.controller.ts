@@ -33,7 +33,31 @@ router.get('/', async (req: Request, res: Response) => {
       return;
     }
 
-    const tzInfo = await User.findById(res.locals.userId).select('timezone');
+    // TODO: удалить aggr
+    const { aggr } = req.query;
+    if (aggr) {
+      console.log('AGGR');
+
+      const tzInfo = await User.findById(res.locals.userId).select('timezone');
+
+      const data = await analyticsService.getAnalyticsForRangeAggregates({
+        startOfRange: fromDate,
+        endOfRange: toDate,
+        userId: res.locals.userId,
+        timezone: tzInfo!.timezone,
+      });
+      res.status(200).send(data);
+    } else {
+      const tzInfo = await User.findById(res.locals.userId).select('timezone');
+
+      const data = await analyticsService.getAnalyticsForRangeInternal({
+        startOfRange: fromDate,
+        endOfRange: toDate,
+        userId: res.locals.userId,
+        timezone: tzInfo!.timezone,
+      });
+      res.status(200).send(data);
+    }
 
     // const data = await analyticsService.getAnalyticsForRangeWithCache({
     //   startOfRange: fromDate,
@@ -42,13 +66,13 @@ router.get('/', async (req: Request, res: Response) => {
     //   timezone: tzInfo!.timezone,
     // });
     // TODO: вернуть
-    const data = await analyticsService.getAnalyticsForRangeInternal({
-      startOfRange: fromDate,
-      endOfRange: toDate,
-      userId: res.locals.userId,
-      timezone: tzInfo!.timezone,
-    });
-    res.status(200).send(data);
+    // const data = await analyticsService.getAnalyticsForRangeInternal({
+    //   startOfRange: fromDate,
+    //   endOfRange: toDate,
+    //   userId: res.locals.userId,
+    //   timezone: tzInfo!.timezone,
+    // });
+    // res.status(200).send(data);
   } catch (e) {
     sendErrorResponse(e, res);
   }
