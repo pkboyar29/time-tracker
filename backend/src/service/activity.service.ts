@@ -309,7 +309,11 @@ async function deleteActivity(
     });
     await Promise.all(
       sessions.map(async (session) => {
-        await sessionService.deleteSession(session._id.toString(), userId);
+        await sessionService.deleteSession(
+          session._id.toString(),
+          userId,
+          false,
+        );
       }),
     );
 

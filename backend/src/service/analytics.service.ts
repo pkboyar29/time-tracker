@@ -103,8 +103,17 @@ interface ApplySessionUpdateToAggregatesOptions {
   addedSpentTimeSeconds: number;
   isPaused: boolean;
   isCompleted: boolean;
-
   activityId?: string;
+}
+
+interface ApplySessionDeleteToAggregatesOptions {
+  userId: string;
+  timezone: string;
+
+  // event params
+  deletedParts: ISessionPart[];
+  activityId?: string;
+  completedDate?: Date;
 }
 
 type UpdateCacheOptions =
@@ -121,6 +130,7 @@ const analyticsService = {
   getSessionsStatisticsAggregates,
   getActivityDistributionsAggregates,
   applySessionUpdateToAggregates,
+  applySessionDeleteToAggregates,
   getAnalyticsForRangeInternal,
   getAnalyticsForRangeAggregates,
   getAnalyticsForRangeWithCache,
@@ -599,6 +609,112 @@ async function applySessionUpdateToAggregates({
   // TODO: todayAggregate.save() и todayActivityAggregate.save() должны происходить атомарно
 }
 
+async function applySessionDeleteToAggregates({
+  userId,
+  timezone,
+  deletedParts,
+  activityId,
+  completedDate,
+}: ApplySessionDeleteToAggregatesOptions) {
+  let completedDateISO: string | null = null;
+  if (completedDate) {
+    completedDateISO = DateTime.fromJSDate(completedDate, {
+      zone: timezone,
+    }).toISODate();
+
+    if (!completedDateISO) {
+      return;
+    }
+  }
+
+  const deletedStatMap = new Map<
+    string,
+    { spentTimeSeconds: number; pausedAmount: number }
+  >(); // dateISO / object
+  for (let i = 0; i < deletedParts.length; i++) {
+    const dateISO = DateTime.fromJSDate(deletedParts[i].createdDate, {
+      zone: timezone,
+    }).toISODate();
+    if (!dateISO) {
+      continue;
+    }
+
+    let dailyStat = deletedStatMap.get(dateISO);
+    if (!dailyStat) {
+      dailyStat = { spentTimeSeconds: 0, pausedAmount: 0 };
+    }
+    dailyStat.spentTimeSeconds += deletedParts[i].spentTimeSeconds;
+    if (deletedParts[i].paused) {
+      dailyStat.pausedAmount += 1;
+    }
+
+    deletedStatMap.set(dateISO, dailyStat);
+  }
+
+  const dates = [...deletedStatMap.keys()];
+  if (dates.length === 0) {
+    return;
+  }
+
+  const dailyAggregatesToUpdate = await DailyAggregate.find({
+    user: userId,
+    date: { $in: dates },
+  });
+  for (let i = 0; i < dailyAggregatesToUpdate.length; i++) {
+    const aggregate = dailyAggregatesToUpdate[i];
+
+    const statToDelete = deletedStatMap.get(aggregate.date);
+    if (!statToDelete) {
+      continue;
+    }
+
+    aggregate.spentTimeSeconds -= statToDelete.spentTimeSeconds;
+    aggregate.pausedAmount -= statToDelete.pausedAmount;
+
+    if (completedDateISO && aggregate.date === completedDateISO) {
+      aggregate.sessionsAmount -= 1;
+    }
+  }
+
+  await DailyAggregate.bulkSave(dailyAggregatesToUpdate);
+
+  if (!activityId) {
+    return;
+  }
+
+  const dailyAdsToUpdate = await DailyActivityDistribution.find({
+    user: userId,
+    date: { $in: dates },
+    activity: activityId,
+  });
+  const dailyAdsToDelete = [];
+  for (let i = 0; i < dailyAdsToUpdate.length; i++) {
+    const dailyAd = dailyAdsToUpdate[i];
+
+    const statToDelete = deletedStatMap.get(dailyAd.date);
+    if (!statToDelete) {
+      continue;
+    }
+
+    dailyAd.spentTimeSeconds -= statToDelete.spentTimeSeconds;
+    dailyAd.pausedAmount -= statToDelete.pausedAmount;
+
+    if (completedDateISO && dailyAd.date === completedDateISO) {
+      dailyAd.sessionsAmount -= 1;
+    }
+
+    if (dailyAd.spentTimeSeconds === 0) {
+      dailyAdsToDelete.push(dailyAd);
+    }
+  }
+
+  await DailyActivityDistribution.bulkSave(dailyAdsToUpdate);
+  if (dailyAdsToDelete.length > 0) {
+    const ids = dailyAdsToDelete.map((ad) => ad._id);
+    await DailyActivityDistribution.deleteMany({ _id: { $in: ids } });
+  }
+}
+
 async function getAnalyticsForRangeInternal({
   startOfRange,
   endOfRange,
@@ -837,6 +953,10 @@ async function getAnalyticsForRangeWithCache({
 
     // if the date range includes any parts of today
     if (endOfRange > startOfToday) {
+      // TODO: даже при вызове getAnalyticsForRangeAggregates все равно будет вызываться внутри getAnalyticsForRangeInternal, из-за того, что период меньше дня.
+      // Хотя было бы неплохо брать инфу сегодняшнего дня из сегодняшнего агрегата
+      // Но это мы сможем сделать только в том случае, если startOfRange - это ровно startOfToday, и endOfRange позже сейчашнего момента,
+      // вот тогда точно можно обратиться к агрегату сегодняшнего дня
       const analyticsForToday =
         await analyticsService.getAnalyticsForRangeInternal({
           startOfRange:
@@ -863,7 +983,7 @@ async function getAnalyticsForRangeWithCache({
       }
 
       const analyticsUntilToday =
-        await analyticsService.getAnalyticsForRangeInternal({
+        await analyticsService.getAnalyticsForRangeAggregates({
           startOfRange,
           endOfRange: startOfToday,
           userId,
@@ -895,7 +1015,7 @@ async function getAnalyticsForRangeWithCache({
       }
 
       const analyticsForRange =
-        await analyticsService.getAnalyticsForRangeInternal({
+        await analyticsService.getAnalyticsForRangeAggregates({
           startOfRange,
           endOfRange,
           userId,
@@ -918,24 +1038,19 @@ async function getAnalyticsForRangeWithCache({
 function mergeSessionStatistics(
   statisticsList: SessionStatistics[],
 ): SessionStatistics {
-  const sessionsAmount = statisticsList.reduce(
-    (amount, statistics) => amount + statistics.sessionsAmount,
-    0,
-  );
-  const spentTimeSeconds = statisticsList.reduce(
-    (seconds, statistics) => seconds + statistics.spentTimeSeconds,
-    0,
-  );
-  const pausedAmount = statisticsList.reduce(
-    (amount, statistics) => amount + statistics.pausedAmount,
-    0,
-  );
-
-  return {
-    sessionsAmount,
-    spentTimeSeconds,
-    pausedAmount,
+  const mergedStat: SessionStatistics = {
+    sessionsAmount: 0,
+    spentTimeSeconds: 0,
+    pausedAmount: 0,
   };
+
+  statisticsList.forEach((stat) => {
+    mergedStat.sessionsAmount += stat.sessionsAmount;
+    mergedStat.spentTimeSeconds += stat.spentTimeSeconds;
+    mergedStat.pausedAmount += stat.pausedAmount;
+  });
+
+  return mergedStat;
 }
 
 function mergeActivityDistributions({
