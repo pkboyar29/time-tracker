@@ -15,6 +15,7 @@ import DailyActivityDistribution, {
   IDailyAD,
 } from '../model/dailyActivityDistribution.model';
 import { getTodayRange } from '../helpers/getTodayRange';
+import { getProducerChannel } from '../../rabbitMQ';
 
 import { redisClient } from '../../redisClient';
 import { DateTime } from 'luxon';
@@ -936,6 +937,10 @@ async function getAnalyticsForRangeWithCache({
   timezone,
 }: GetAnalyticsForRangeOptions): Promise<AnalyticsForRangeDTO> {
   try {
+    const channel = await getProducerChannel();
+    await channel.assertQueue('test_queue');
+    channel.sendToQueue('test_queue', Buffer.from('Hello RabbitMQ'));
+
     const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
 
     // if it's today analytics

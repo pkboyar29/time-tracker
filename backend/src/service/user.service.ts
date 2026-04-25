@@ -146,7 +146,7 @@ function createToken(
       tokenType === 'access'
         ? (process.env.ACCESS_TOKEN_DURATION ?? '1800s')
         : (process.env.REFRESH_TOKEN_DURATION ?? '40d'),
-  });
+  } as jsonwebtoken.SignOptions);
   return token;
 }
 
