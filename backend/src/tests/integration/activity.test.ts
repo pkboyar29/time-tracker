@@ -2,6 +2,7 @@ import { setupIntegrationHooks } from './setupIntegrationHooks';
 import { authorizedRequest } from './authorizedRequest';
 
 import analyticsService from '../../service/analytics.service';
+import * as rabbitMQ from '../../../rabbitMQ';
 
 describe('Activity controller endpoints', () => {
   const { getAccessToken } = setupIntegrationHooks();
@@ -40,6 +41,10 @@ describe('Activity controller endpoints', () => {
 
   test('delete activity endpoint returns ok', async () => {
     jest.spyOn(analyticsService, 'updateCache').mockResolvedValue(undefined);
+    jest.spyOn(rabbitMQ, 'getProducerChannel').mockResolvedValue({
+      assertQueue: jest.fn(),
+      sendToQueue: jest.fn(),
+    } as any);
 
     const {
       body: { _id },

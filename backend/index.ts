@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { logger } from './logger';
 import { app } from './app';
 import { redisClient } from './redisClient';
+import { getRabbitConnection } from './rabbitMQ';
 
 dotenv.config();
 
@@ -17,6 +18,8 @@ redisClient.on('error', (err) => logger.error('Redis Client Error', err));
 redisClient.connect().then(() => {
   logger.info('connection with redis is successful');
 });
+
+getRabbitConnection();
 
 function startServer() {
   app.listen(PORT, () => {

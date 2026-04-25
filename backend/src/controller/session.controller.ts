@@ -106,6 +106,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     const data = await sessionService.deleteSession(
       req.params.id,
       res.locals.userId,
+      true,
     );
     res.status(200).json(data);
   } catch (e) {

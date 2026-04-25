@@ -48,7 +48,7 @@ describe('getDayRange', () => {
 });
 
 describe('getWeekRange', () => {
-  it('should return correct Monday and Sunday for a weekday (Wednesday)', () => {
+  it('should return correct Monday and next Monday for a weekday (Wednesday)', () => {
     const date = new Date('2025-08-06T15:00:00'); // Wednesday
     const [monday, sunday] = getWeekRange(date);
 
@@ -58,33 +58,33 @@ describe('getWeekRange', () => {
     expect(monday.getSeconds()).toBe(0);
     expect(monday.getMilliseconds()).toBe(0);
 
-    expect(sunday.getDay()).toBe(0); // Sunday
-    expect(sunday.getHours()).toBe(23);
-    expect(sunday.getMinutes()).toBe(59);
-    expect(sunday.getSeconds()).toBe(59);
-    expect(sunday.getMilliseconds()).toBe(999);
+    expect(sunday.getDay()).toBe(1); // next Monday
+    expect(sunday.getHours()).toBe(0);
+    expect(sunday.getMinutes()).toBe(0);
+    expect(sunday.getSeconds()).toBe(0);
+    expect(sunday.getMilliseconds()).toBe(0);
 
     expect(monday <= date && date <= sunday).toBe(true);
   });
 
   it('should handle Sunday properly', () => {
     const sundayDate = new Date('2025-08-10T10:00:00'); // Sunday
-    const [monday, sunday] = getWeekRange(sundayDate);
+    const [monday, nextMonday] = getWeekRange(sundayDate);
 
     expect(monday.getDay()).toBe(1); // Monday
     expect(monday.getDate()).toBe(4); // 4th Aug
 
-    expect(sunday.getDay()).toBe(0);
-    expect(sunday.getDate()).toBe(monday.getDate() + 6);
+    expect(nextMonday.getDay()).toBe(1);
+    expect(nextMonday.getDate()).toBe(monday.getDate() + 7);
   });
 
-  it('should return a 7-day range from Monday to Sunday', () => {
+  it('should return a 7-day range from Monday to next Monday', () => {
     const date = new Date('2023-11-15'); // Wednesday
-    const [monday, sunday] = getWeekRange(date);
-    const diff = sunday.getTime() - monday.getTime();
+    const [monday, nextMonday] = getWeekRange(date);
+    const diff = nextMonday.getTime() - monday.getTime();
 
-    // Exactly 7 days minus 1 ms
-    expect(diff).toBe(7 * 24 * 60 * 60 * 1000 - 1);
+    // Exactly 7 days
+    expect(diff).toBe(7 * 24 * 60 * 60 * 1000);
   });
 });
 
@@ -171,10 +171,10 @@ describe('getWeekDays', () => {
     expect(result).toHaveLength(7);
     expect(result[0][0].getDay()).toBe(1); // Monday
     expect(result[0][0].toDateString()).toBe(
-      new Date('2023-08-07').toDateString()
+      new Date('2023-08-07').toDateString(),
     );
     expect(result[6][0].toDateString()).toBe(
-      new Date('2023-08-13').toDateString()
+      new Date('2023-08-13').toDateString(),
     );
   });
 
@@ -194,7 +194,7 @@ describe('getWeekDays', () => {
     expect(result).toHaveLength(7);
     expect(result[0][0].getDay()).toBe(1); // Monday
     expect(result[0][0].toDateString()).toBe(
-      new Date('2025-08-11').toDateString()
+      new Date('2025-08-11').toDateString(),
     );
     expect(result[6][0].getDay()).toBe(0); // Sunday
   });
@@ -515,22 +515,22 @@ describe('shiftTwoDates', () => {
 
   it('should shift both dates by +7 days when right is true for weekly range', () => {
     const from = new Date(2023, 7, 7, 0, 0, 0, 0); // Monday
-    const to = new Date(2023, 7, 13, 23, 59, 59, 999); // Sunday end
+    const to = new Date(2023, 7, 14, 0, 0, 0, 0); // Monday next week
 
     const [newFrom, newTo] = shiftTwoDates(from, to, true);
 
     expect(newFrom).toEqual(new Date(2023, 7, 14, 0, 0, 0, 0));
-    expect(newTo).toEqual(new Date(2023, 7, 20, 23, 59, 59, 999));
+    expect(newTo).toEqual(new Date(2023, 7, 21, 0, 0, 0, 0));
   });
 
   it('should shift both dates by -7 days when right is false for weekly range', () => {
     const from = new Date(2023, 7, 7, 0, 0, 0, 0);
-    const to = new Date(2023, 7, 13, 23, 59, 59, 999);
+    const to = new Date(2023, 7, 14, 0, 0, 0, 0);
 
     const [newFrom, newTo] = shiftTwoDates(from, to, false);
 
     expect(newFrom).toEqual(new Date(2023, 6, 31, 0, 0, 0, 0));
-    expect(newTo).toEqual(new Date(2023, 7, 6, 23, 59, 59, 999));
+    expect(newTo).toEqual(new Date(2023, 7, 7, 0, 0, 0, 0));
   });
 
   it('should shift both dates by +1 month when right is true for monthly range', () => {

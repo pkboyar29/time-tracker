@@ -5,6 +5,7 @@ import { Types, HydratedDocument } from 'mongoose';
 import Session, { ISession } from '../../../model/session.model';
 import SessionPart from '../../../model/sessionPart.model';
 import { HttpError } from '../../../helpers/HttpError';
+import analyticsService from '../../../service/analytics.service';
 
 describe('sessionService.getSession', () => {
   const mockSession = {
@@ -260,6 +261,10 @@ describe('sessionService.updateSession', () => {
     jest
       .spyOn(userService, 'isDailyGoalCompletedMarkedToday')
       .mockResolvedValue(true);
+
+    jest
+      .spyOn(analyticsService, 'applySessionUpdateToAggregates')
+      .mockResolvedValue(undefined);
 
     await sessionService.updateSession(
       'sessionId',

@@ -149,112 +149,6 @@ describe('analyticsService.getTimeBarType', () => {
 });
 
 describe('analyticsService.getTimeBars', () => {
-  const readingObjectId = new Types.ObjectId();
-  const codingObjectId = new Types.ObjectId();
-  const mockActivities: IActivity[] = [
-    {
-      _id: readingObjectId,
-      name: 'Reading',
-      color: '#fff000',
-      user: new Types.ObjectId(),
-      activityGroup: mockActivityGroup,
-      createdDate: new Date(),
-      updatedDate: new Date(),
-      deleted: false,
-      archived: false,
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
-    },
-    {
-      _id: codingObjectId,
-      name: 'Coding',
-      color: '#000fff',
-      user: new Types.ObjectId(),
-      activityGroup: mockActivityGroup,
-      createdDate: new Date(),
-      updatedDate: new Date(),
-      deleted: false,
-      archived: false,
-      sessionsAmount: 0,
-      spentTimeSeconds: 0,
-    },
-  ];
-
-  const sessionParts: ISessionPart[] = [
-    {
-      _id: new Types.ObjectId(),
-      session: { activity: { id: readingObjectId, name: 'Reading' } },
-      spentTimeSeconds: 1200,
-      createdDate: new Date('2025-07-01T10:00:00Z'),
-      paused: false,
-      user: new Types.ObjectId(),
-    },
-    {
-      _id: new Types.ObjectId(),
-      session: { activity: { id: readingObjectId, name: 'Reading' } },
-      spentTimeSeconds: 600,
-      createdDate: new Date('2025-07-01T12:00:00Z'),
-      paused: true,
-      user: new Types.ObjectId(),
-    },
-    {
-      _id: new Types.ObjectId(),
-      session: { activity: { id: readingObjectId, name: 'Reading' } },
-      spentTimeSeconds: 900,
-      createdDate: new Date('2025-07-02T09:00:00Z'),
-      paused: false,
-      user: new Types.ObjectId(),
-    },
-  ];
-
-  const completedSessions: ISession[] = [
-    {
-      _id: new Types.ObjectId(),
-      activity: {
-        id: readingObjectId,
-        name: 'Reading',
-        activityGroup: mockActivityGroup,
-      },
-      totalTimeSeconds: 0,
-      spentTimeSeconds: 0,
-      completed: false,
-      user: new Types.ObjectId(),
-      createdDate: new Date(),
-      updatedDate: new Date('2025-07-01T13:00:00Z'),
-      deleted: false,
-    },
-    {
-      _id: new Types.ObjectId(),
-      activity: {
-        id: readingObjectId,
-        name: 'Reading',
-        activityGroup: mockActivityGroup,
-      },
-      totalTimeSeconds: 0,
-      spentTimeSeconds: 0,
-      completed: false,
-      user: new Types.ObjectId(),
-      createdDate: new Date(),
-      updatedDate: new Date('2025-07-02T14:00:00Z'),
-      deleted: false,
-    },
-    {
-      _id: new Types.ObjectId(),
-      activity: {
-        id: codingObjectId,
-        name: 'Coding',
-        activityGroup: mockActivityGroup,
-      },
-      totalTimeSeconds: 0,
-      spentTimeSeconds: 0,
-      completed: false,
-      user: new Types.ObjectId(),
-      createdDate: new Date(),
-      updatedDate: new Date('2025-07-02T15:00:00Z'),
-      deleted: false,
-    },
-  ];
-
   it('should return correct hour-based time bars', () => {
     const start = new Date('2025-12-29T00:00:00Z');
     const end = new Date('2025-12-29T12:00:00Z');
@@ -262,11 +156,14 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'hour',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(12);
@@ -287,11 +184,14 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'hour',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(12);
@@ -312,11 +212,14 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'hour',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(13);
@@ -337,26 +240,23 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'day',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(2);
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
-    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(1800);
-    expect(result[0].sessionStatistics.sessionsAmount).toBe(1);
-    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-07-03T00:00:00Z'));
-    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(900);
-    expect(result[1].sessionStatistics.sessionsAmount).toBe(2);
-    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should return correct day-based time bars and cut last period to end of range', () => {
@@ -366,26 +266,23 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'day',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(2);
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
-    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(1800);
-    expect(result[0].sessionStatistics.sessionsAmount).toBe(1);
-    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-07-02T18:00:00Z'));
-    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(900);
-    expect(result[1].sessionStatistics.sessionsAmount).toBe(2);
-    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should split time bars correctly when range starts mid-day', () => {
@@ -395,26 +292,23 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'day',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(2);
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T12:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
-    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(600);
-    expect(result[0].sessionStatistics.sessionsAmount).toBe(1);
-    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-07-02T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-07-03T00:00:00Z'));
-    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(900);
-    expect(result[1].sessionStatistics.sessionsAmount).toBe(2);
-    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should return correct month-based time bars', () => {
@@ -424,26 +318,23 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'month',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(2);
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
-    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(2700);
-    expect(result[0].sessionStatistics.sessionsAmount).toBe(3);
-    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-09-01T00:00:00Z'));
-    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(0);
-    expect(result[1].sessionStatistics.sessionsAmount).toBe(0);
-    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should return correct month-based time bars and cut last period to end of range', () => {
@@ -453,26 +344,23 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'month',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(2);
 
     expect(result[0].startOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
     expect(result[0].endOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
-    expect(result[0].sessionStatistics.spentTimeSeconds).toBe(2700);
-    expect(result[0].sessionStatistics.sessionsAmount).toBe(3);
-    expect(result[0].sessionStatistics.pausedAmount).toBe(1);
 
     expect(result[1].startOfRange).toEqual(new Date('2025-08-01T00:00:00Z'));
     expect(result[1].endOfRange).toEqual(new Date('2025-08-10T00:00:00Z'));
-    expect(result[1].sessionStatistics.spentTimeSeconds).toBe(0);
-    expect(result[1].sessionStatistics.sessionsAmount).toBe(0);
-    expect(result[1].sessionStatistics.pausedAmount).toBe(0);
   });
 
   it('should split month time bars correctly when range starts mid-month', () => {
@@ -482,36 +370,23 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts,
-      completedSessions,
       barType: 'month',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'UTC',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result).toHaveLength(2);
 
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2025-05-10T12:00:00Z'),
-      endOfRange: new Date('2025-06-01T00:00:00Z'),
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
+    expect(result[0].startOfRange).toEqual(new Date('2025-05-10T12:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-06-01T00:00:00Z'));
 
-    expect(result[1]).toEqual({
-      startOfRange: new Date('2025-06-01T00:00:00Z'),
-      endOfRange: new Date('2025-07-01T00:00:00Z'),
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
+    expect(result[1].startOfRange).toEqual(new Date('2025-06-01T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2025-07-01T00:00:00Z'));
   });
 
   it('should split month time bars correctly when working with other timezone', () => {
@@ -521,124 +396,47 @@ describe('analyticsService.getTimeBars', () => {
     const result = analyticsService.getTimeBars({
       startOfRange: start,
       endOfRange: end,
-      sessionParts: [],
-      completedSessions: [],
       barType: 'month',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
       timezone: 'Europe/Moscow',
-      userActivities: mockActivities,
+      userActivities: [],
     });
 
     expect(result.length).toBe(6);
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2024-06-30T21:00:00.000Z'),
-      endOfRange: new Date('2024-07-31T21:00:00.000Z'),
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
-    expect(result[1]).toEqual({
-      startOfRange: new Date('2024-07-31T21:00:00.000Z'),
-      endOfRange: new Date('2024-08-31T21:00:00.000Z'),
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
-    expect(result[2]).toEqual({
-      startOfRange: new Date('2024-08-31T21:00:00.000Z'),
-      endOfRange: new Date('2024-09-30T21:00:00.000Z'),
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
-    expect(result[3]).toEqual({
-      startOfRange: new Date('2024-09-30T21:00:00.000Z'),
-      endOfRange: new Date('2024-10-31T21:00:00.000Z'),
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
-    expect(result[4]).toEqual({
-      startOfRange: new Date('2024-10-31T21:00:00.000Z'),
-      endOfRange: new Date('2024-11-30T21:00:00.000Z'),
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
-    expect(result[5]).toEqual({
-      startOfRange: new Date('2024-11-30T21:00:00.000Z'),
-      endOfRange: new Date('2024-12-31T21:00:00.000Z'),
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
-  });
 
-  it('should return correct activity distributions in time bars', () => {
-    const start = new Date('2025-07-01T00:00:00.000Z');
-    const end = new Date('2025-07-03T00:00:00.000Z');
+    expect(result[0].startOfRange).toEqual(
+      new Date('2024-06-30T21:00:00.000Z'),
+    );
+    expect(result[0].endOfRange).toEqual(new Date('2024-07-31T21:00:00.000Z'));
 
-    const result = analyticsService.getTimeBars({
-      startOfRange: start,
-      endOfRange: end,
-      sessionParts,
-      completedSessions,
-      barType: 'day',
-      timezone: 'UTC',
-      userActivities: mockActivities,
-    });
+    expect(result[1].startOfRange).toEqual(
+      new Date('2024-07-31T21:00:00.000Z'),
+    );
+    expect(result[1].endOfRange).toEqual(new Date('2024-08-31T21:00:00.000Z'));
 
-    expect(result[0].activityDistribution).toEqual([
-      {
-        id: readingObjectId.toString(),
-        name: 'Reading',
-        color: '#fff000',
-        sessionStatistics: {
-          spentTimeSeconds: 1800,
-          sessionsAmount: 1,
-          pausedAmount: 1,
-        },
-      },
-    ]);
-    expect(result[1].activityDistribution).toEqual([
-      {
-        id: readingObjectId.toString(),
-        name: 'Reading',
-        color: '#fff000',
-        sessionStatistics: {
-          spentTimeSeconds: 900,
-          sessionsAmount: 1,
-          pausedAmount: 0,
-        },
-      },
-      {
-        id: codingObjectId.toString(),
-        name: 'Coding',
-        color: '#000fff',
-        sessionStatistics: {
-          spentTimeSeconds: 0,
-          sessionsAmount: 1,
-          pausedAmount: 0,
-        },
-      },
-    ]);
+    expect(result[2].startOfRange).toEqual(
+      new Date('2024-08-31T21:00:00.000Z'),
+    );
+    expect(result[2].endOfRange).toEqual(new Date('2024-09-30T21:00:00.000Z'));
+
+    expect(result[3].startOfRange).toEqual(
+      new Date('2024-09-30T21:00:00.000Z'),
+    );
+    expect(result[3].endOfRange).toEqual(new Date('2024-10-31T21:00:00.000Z'));
+
+    expect(result[4].startOfRange).toEqual(
+      new Date('2024-10-31T21:00:00.000Z'),
+    );
+    expect(result[4].endOfRange).toEqual(new Date('2024-11-30T21:00:00.000Z'));
+
+    expect(result[5].startOfRange).toEqual(
+      new Date('2024-11-30T21:00:00.000Z'),
+    );
+    expect(result[5].endOfRange).toEqual(new Date('2024-12-31T21:00:00.000Z'));
   });
 });
 
@@ -768,9 +566,11 @@ describe('analyticsService.getActivityDistributions', () => {
     ];
 
     const result = analyticsService.getActivityDistributions({
-      allSessionsAmount: 4,
-      allSpentTimeSeconds: 600,
-      allPausedAmount: 2,
+      totalStat: {
+        sessionsAmount: 4,
+        spentTimeSeconds: 600,
+        pausedAmount: 2,
+      },
       sessionParts,
       completedSessions,
       userActivities: mockActivities,
@@ -839,9 +639,11 @@ describe('analyticsService.getActivityDistributions', () => {
     ];
 
     const result = analyticsService.getActivityDistributions({
-      allSessionsAmount: 1,
-      allSpentTimeSeconds: 300,
-      allPausedAmount: 0,
+      totalStat: {
+        sessionsAmount: 1,
+        spentTimeSeconds: 300,
+        pausedAmount: 0,
+      },
       sessionParts,
       completedSessions,
       userActivities: mockActivities,

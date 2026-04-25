@@ -122,6 +122,9 @@ const renderDateLabel = (
       </>
     );
   } else if (rangeType == 'weeks') {
+    const endDisplayDate = new Date(toDate);
+    endDisplayDate.setDate(endDisplayDate.getDate() - 1);
+
     return (
       <>
         {isCurrentWeek([fromDate, toDate]) ? (
@@ -133,7 +136,8 @@ const renderDateLabel = (
             </time>
             <span>-</span>
             <time>
-              {getMonthName(toDate.getMonth(), t)} {toDate.getDate()}
+              {getMonthName(endDisplayDate.getMonth(), t)}{' '}
+              {endDisplayDate.getDate()}
             </time>
           </div>
         )}
@@ -320,6 +324,8 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   }
 
   function rangeItemClickHandler(rangeItem: [Date, Date]) {
+    console.log(rangeItem);
+
     navigate(
       `/analytics/range?from=${rangeItem[0].toISOString()}&to=${rangeItem[1].toISOString()}`,
       { replace: true },
@@ -362,75 +368,83 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
           rangeType === 'days' ? 'gap-1' : 'gap-3'
         }`}
       >
-        {rangeItems.map((rangeItem, index) => (
-          <div
-            key={index}
-            onClick={() => rangeItemClickHandler(rangeItem)}
-            className={`${rangeItemClassNames} ${
-              isRangeItemSelected(rangeType, range.fromDate, rangeItem) &&
-              'bg-gray-300 dark:bg-surfaceDarkHover'
-            } ${isCurrentRangeItem(rangeType, rangeItem) && 'red-dot'}`}
-          >
-            {rangeType == 'days' && (
-              <>
-                <div className="text-[13px] font-medium text-gray-500 dark:text-textDarkSecondary">
-                  {getDayOfWeekName(rangeItem[0].getDay(), t)}
-                </div>
+        {rangeItems.map((rangeItem, index) => {
+          // it's used only for weeks
+          const endDisplayDate = new Date(rangeItem[1]);
+          endDisplayDate.setDate(endDisplayDate.getDate() - 1);
 
-                <div className="text-lg font-semibold dark:text-textDark">
-                  {rangeItem[0].getDate().toString().length === 2
-                    ? rangeItem[0].getDate()
-                    : `0${rangeItem[0].getDate()}`}
-                </div>
-              </>
-            )}
+          return (
+            <div
+              key={index}
+              onClick={() => rangeItemClickHandler(rangeItem)}
+              className={`${rangeItemClassNames} ${
+                isRangeItemSelected(rangeType, range.fromDate, rangeItem) &&
+                'bg-gray-300 dark:bg-surfaceDarkHover'
+              } ${isCurrentRangeItem(rangeType, rangeItem) && 'red-dot'}`}
+            >
+              {rangeType == 'days' && (
+                <>
+                  <div className="text-[13px] font-medium text-gray-500 dark:text-textDarkSecondary">
+                    {getDayOfWeekName(rangeItem[0].getDay(), t)}
+                  </div>
 
-            {rangeType == 'weeks' && (
-              <>
-                <div className="text-base text-left text-slate-600 dark:text-textDarkSecondary">
-                  {rangeItem[0].getFullYear() == rangeItem[1].getFullYear() ? (
-                    <>{rangeItem[0].getFullYear()}</>
-                  ) : (
-                    <>
-                      {rangeItem[0].getFullYear()}/{rangeItem[1].getFullYear()}
-                    </>
-                  )}
-                </div>
+                  <div className="text-lg font-semibold dark:text-textDark">
+                    {rangeItem[0].getDate().toString().length === 2
+                      ? rangeItem[0].getDate()
+                      : `0${rangeItem[0].getDate()}`}
+                  </div>
+                </>
+              )}
 
-                <div className="flex gap-1.5 text-base lg:text-lg dark:text-textDark">
-                  <time>
-                    {getMonthName(rangeItem[0].getMonth(), t)}{' '}
-                    {rangeItem[0].getDate()}
-                  </time>
-                  <span>-</span>
-                  <time>
-                    {getMonthName(rangeItem[1].getMonth(), t)}{' '}
-                    {rangeItem[1].getDate()}
-                  </time>
-                </div>
-              </>
-            )}
+              {rangeType == 'weeks' && (
+                <>
+                  <div className="text-base text-left text-slate-600 dark:text-textDarkSecondary">
+                    {rangeItem[0].getFullYear() ==
+                    endDisplayDate.getFullYear() ? (
+                      <>{rangeItem[0].getFullYear()}</>
+                    ) : (
+                      <>
+                        {rangeItem[0].getFullYear()}/
+                        {endDisplayDate.getFullYear()}
+                      </>
+                    )}
+                  </div>
 
-            {rangeType == 'months' && (
-              <>
-                <div className="text-base text-slate-600 dark:text-textDarkSecondary">
-                  {rangeItem[0].getFullYear()}
-                </div>
-                <div className="text-lg lg:text-xl dark:text-textDark">
-                  {getMonthDetailedName(rangeItem[0].getMonth(), t)}
-                </div>
-              </>
-            )}
+                  <div className="flex gap-1.5 text-base lg:text-lg dark:text-textDark">
+                    <time>
+                      {getMonthName(rangeItem[0].getMonth(), t)}{' '}
+                      {rangeItem[0].getDate()}
+                    </time>
+                    <span>-</span>
+                    <time>
+                      {getMonthName(endDisplayDate.getMonth(), t)}{' '}
+                      {endDisplayDate.getDate()}
+                    </time>
+                  </div>
+                </>
+              )}
 
-            {rangeType == 'years' && (
-              <>
-                <div className="text-xl text-center dark:text-textDark">
-                  {rangeItem[0].getFullYear()}
-                </div>
-              </>
-            )}
-          </div>
-        ))}
+              {rangeType == 'months' && (
+                <>
+                  <div className="text-base text-slate-600 dark:text-textDarkSecondary">
+                    {rangeItem[0].getFullYear()}
+                  </div>
+                  <div className="text-lg lg:text-xl dark:text-textDark">
+                    {getMonthDetailedName(rangeItem[0].getMonth(), t)}
+                  </div>
+                </>
+              )}
+
+              {rangeType == 'years' && (
+                <>
+                  <div className="text-xl text-center dark:text-textDark">
+                    {rangeItem[0].getFullYear()}
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

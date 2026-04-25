@@ -14,6 +14,19 @@ services:
     ports:
       - 127.0.0.1:6379:6379
 
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    restart: unless-stopped
+    ports:
+      - '5672:5672' # AMQP
+      - '15672:15672' # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: admin123
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_VHOST: /
+    volumes:
+      - ./run/rabbitmq_data:/var/lib/rabbitmq
+
   node_app:
     build: .
     ports:
@@ -21,16 +34,22 @@ services:
       - '9229:9229'
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - /usr/src/app/node_modules # чтобы локальный node_moduls не был связан с node_modules в контейнере
       - uploads:/usr/uploads
-    environment:
-      - PORT=8000
-      - MONGO_URL=mongodb://mongo_db:27017/time_tracker
-      - ACCESS_TOKEN_SECRET=asdaksldj23123
-      - REFRESH_TOKEN_SECRET=zc,43sdszxckl;;
     depends_on:
+      - rabbitmq
       - mongo_db
     command: npm run dev
+
+  worker:
+    build: .
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules # чтобы локальный node_moduls не был связан с node_modules в контейнере
+    depends_on:
+      - rabbitmq
+    command: npm run startWorker
+    # command: tail -f /dev/null
 
 volumes:
   mongo_db: {}
