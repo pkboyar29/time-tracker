@@ -9,7 +9,7 @@ export const getDayRange = (date: Date): [Date, Date] => {
     0,
     0,
     0,
-    0
+    0,
   );
 
   const endOfDay = new Date(startOfDay);
@@ -34,14 +34,10 @@ export const getWeekRange = (date: Date): [Date, Date] => {
   mondayDate.setSeconds(0);
   mondayDate.setMilliseconds(0);
 
-  const sundayDate = new Date(mondayDate);
-  sundayDate.setDate(sundayDate.getDate() + 6);
-  sundayDate.setHours(23);
-  sundayDate.setMinutes(59);
-  sundayDate.setSeconds(59);
-  sundayDate.setMilliseconds(999);
+  const nextMondayDate = new Date(mondayDate);
+  nextMondayDate.setDate(nextMondayDate.getDate() + 7);
 
-  return [mondayDate, sundayDate];
+  return [mondayDate, nextMondayDate];
 };
 
 export const getMonthRange = (date: Date): [Date, Date] => {
@@ -100,7 +96,7 @@ export const getDayOfWeekName = (dayNumber: number, t: TFunction): string => {
 
 export const shiftWeekDays = (
   days: [Date, Date][],
-  right: boolean
+  right: boolean,
 ): [Date, Date][] => {
   let newDays: [Date, Date][] = [];
   for (let i = 0; i < 7; i++) {
@@ -126,7 +122,7 @@ export const getMonthDetailedName = (monthNumber: number, t: TFunction) => {
 
 export const getWeeks = (
   date: Date,
-  full: boolean = true // true - all month weeks, false - 2 weeks
+  full: boolean = true, // true - all month weeks, false - 2 weeks
 ): [Date, Date][] => {
   date = new Date(date);
 
@@ -181,14 +177,14 @@ export const getWeeks = (
   // определяем четыре недели
   let weeks: [Date, Date][] = [];
   let monday: Date = new Date(firstWeekMonday);
-  let sunday: Date = new Date(firstWeekMonday);
-  sunday.setDate(sunday.getDate() + 7);
-  sunday.setMilliseconds(sunday.getMilliseconds() - 1);
+  let nextMonday: Date = new Date(firstWeekMonday);
+  nextMonday.setDate(nextMonday.getDate() + 7);
+
   while (weeks.length < 4) {
-    weeks.push([new Date(monday), new Date(sunday)]);
+    weeks.push([new Date(monday), new Date(nextMonday)]);
 
     monday.setDate(monday.getDate() + 7);
-    sunday.setDate(sunday.getDate() + 7);
+    nextMonday.setDate(nextMonday.getDate() + 7);
   }
 
   // берем пятую неделю в случае, если в ней больше дней месяца, чем в следующем месяце
@@ -199,14 +195,14 @@ export const getWeeks = (
     if (day.getMonth() == monday.getMonth()) {
       prevMonthDaysCount++;
     }
-    if (day.getMonth() == sunday.getMonth()) {
+    if (day.getMonth() == nextMonday.getMonth()) {
       nextMonthDaysCount++;
     }
 
     day.setDate(day.getDate() + 1);
   }
   if (prevMonthDaysCount > nextMonthDaysCount) {
-    weeks.push([new Date(monday), new Date(sunday)]);
+    weeks.push([new Date(monday), new Date(nextMonday)]);
   }
 
   return weeks;
@@ -214,7 +210,7 @@ export const getWeeks = (
 
 export const getMonths = (
   middleDate: Date,
-  full: boolean = true // true - 5 months, false - 2 months
+  full: boolean = true, // true - 5 months, false - 2 months
 ): [Date, Date][] => {
   const months: [Date, Date][] = [];
 
@@ -237,7 +233,7 @@ export const getMonths = (
 
 export const shiftMonths = (
   months: [Date, Date][],
-  right: boolean
+  right: boolean,
 ): [Date, Date][] => {
   const monthsCount = months.length;
   let newMonths: [Date, Date][] = [];
@@ -267,7 +263,7 @@ export const getYears = (yearDate: Date): [Date, Date][] => {
 
 export const shiftYears = (
   twoYears: [Date, Date][],
-  right: boolean
+  right: boolean,
 ): [Date, Date][] => {
   let newTwoYears: [Date, Date][] = [];
   for (let i = 0; i < 2; i++) {
@@ -329,12 +325,12 @@ export const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
   ) {
     return 'days';
   } else if (
-    // если fromDate - понедельник и начало дня, а toDate - воскресенье и конец дня, а также разница между ними - ровно одна неделя
-    toDate.getTime() - fromDate.getTime() == 86400000 * 7 - 1 &&
+    // если fromDate - понедельник и начало дня, а toDate - понедельник следующей недели и начало дня, а также разница между ними - ровно одна неделя
+    toDate.getTime() - fromDate.getTime() == 86400000 * 7 &&
     fromDate.getDay() == 1 &&
-    toDate.getDay() == 0 &&
+    toDate.getDay() == 1 &&
     isStartOfDay(fromDate) &&
-    isEndOfDay(toDate)
+    isStartOfDay(toDate)
   ) {
     return 'weeks';
   } else if (
@@ -421,7 +417,7 @@ export const isCurrentYear = (yearDate: Date): boolean => {
 export const shiftTwoDates = (
   fromDate: Date,
   toDate: Date,
-  right: boolean
+  right: boolean,
 ): [Date, Date] => {
   const rangeType = getRangeType(fromDate, toDate);
 
@@ -464,7 +460,7 @@ export const shiftTwoDates = (
 export const formatDate = (
   date: Date,
   i18nLang: string,
-  options?: { withWeekDay?: boolean }
+  options?: { withWeekDay?: boolean },
 ) =>
   date.toLocaleDateString(getLocaleFromLanguage(i18nLang), {
     weekday: options?.withWeekDay ? 'short' : undefined,

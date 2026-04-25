@@ -10,7 +10,7 @@ describe('getRangeType', () => {
 
   it('should return "weeks" for full week (Mon to Sun, full day)', () => {
     const fromDate = new Date(2023, 6, 3, 0, 0, 0, 0); // Monday, July 3, 2023
-    const toDate = new Date(2023, 6, 9, 23, 59, 59, 999); // Sunday, July 9, 2023
+    const toDate = new Date(2023, 6, 10, 0, 0, 0, 0); // Next monday, July 10, 2023
 
     expect(getRangeType(fromDate, toDate)).toBe('weeks');
   });
