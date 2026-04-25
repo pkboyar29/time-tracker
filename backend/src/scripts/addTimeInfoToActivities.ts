@@ -3,7 +3,8 @@ import Activity from '../model/activity.model';
 import ActivityGroup from '../model/activityGroup.model';
 import Session from '../model/session.model';
 
-const MONGO_URL = process.env.MONGO_URL || '';
+const MONGO_URL =
+  process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
 mongoose.connect(MONGO_URL).then(() => {
   console.log('connection with database is successful');
@@ -25,7 +26,7 @@ async function addTimeInfoToActivities() {
         (seconds, session) => {
           return seconds + session.totalTimeSeconds;
         },
-        0
+        0,
       );
     }
   }
@@ -40,19 +41,19 @@ async function addTimeInfoToActivities() {
       allActivityGroups[i].sessionsAmount = 0;
     } else {
       const groupActivities = allActivities.filter((activity) =>
-        activity.activityGroup._id.equals(allActivityGroups[i]._id)
+        activity.activityGroup._id.equals(allActivityGroups[i]._id),
       );
       allActivityGroups[i].sessionsAmount = groupActivities.reduce(
         (sessions, activity) => {
           return sessions + activity.sessionsAmount;
         },
-        0
+        0,
       );
       allActivityGroups[i].spentTimeSeconds = groupActivities.reduce(
         (seconds, activity) => {
           return seconds + activity.spentTimeSeconds;
         },
-        0
+        0,
       );
     }
   }
