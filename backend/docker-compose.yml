@@ -34,7 +34,7 @@ services:
       - '9229:9229'
     volumes:
       - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - /usr/src/app/node_modules # чтобы локальный node_moduls не был связан с node_modules в контейнере
       - uploads:/usr/uploads
     depends_on:
       - rabbitmq
@@ -45,9 +45,11 @@ services:
     build: .
     volumes:
       - .:/usr/src/app
+      - /usr/src/app/node_modules # чтобы локальный node_moduls не был связан с node_modules в контейнере
     depends_on:
       - rabbitmq
     command: npm run startWorker
+    # command: tail -f /dev/null
 
 volumes:
   mongo_db: {}

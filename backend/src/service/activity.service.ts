@@ -5,6 +5,7 @@ import sessionService from './session.service';
 import activityGroupService from './activityGroup.service';
 import analyticsService from './analytics.service';
 import { HttpError } from '../helpers/HttpError';
+import { getProducerChannel } from '../../rabbitMQ';
 
 import mongoose from 'mongoose';
 
@@ -326,6 +327,24 @@ async function deleteActivity(
       -activity.sessionsAmount,
       -activity.spentTimeSeconds,
       userId,
+    );
+
+    const channel = await getProducerChannel();
+    await channel.assertQueue('aggregates');
+    channel.sendToQueue(
+      'aggregates',
+      Buffer.from(
+        JSON.stringify({
+          type: 'activity.deleted',
+          payload: {
+            userId: userId,
+            activityId: activityId,
+          },
+        }),
+      ),
+      {
+        contentType: 'application/json',
+      },
     );
 
     await analyticsService.updateCache(userId, {

@@ -15,7 +15,6 @@ import DailyActivityDistribution, {
   IDailyAD,
 } from '../model/dailyActivityDistribution.model';
 import { getTodayRange } from '../helpers/getTodayRange';
-import { getProducerChannel } from '../../rabbitMQ';
 
 import { redisClient } from '../../redisClient';
 import { DateTime } from 'luxon';
@@ -117,6 +116,13 @@ interface ApplySessionDeleteToAggregatesOptions {
   completedDate?: Date;
 }
 
+interface ApplyActivityDeleteToAggregatesOptions {
+  userId: string;
+
+  // event params
+  activityId: string;
+}
+
 type UpdateCacheOptions =
   | { type: 'activityUpdated'; activity: IActivity }
   | { type: 'activityDeleted'; activityId: string };
@@ -132,6 +138,7 @@ const analyticsService = {
   getActivityDistributionsAggregates,
   applySessionUpdateToAggregates,
   applySessionDeleteToAggregates,
+  applyActivityDeleteToAggregates,
   getAnalyticsForRangeInternal,
   getAnalyticsForRangeAggregates,
   getAnalyticsForRangeWithCache,
@@ -716,6 +723,50 @@ async function applySessionDeleteToAggregates({
   }
 }
 
+async function applyActivityDeleteToAggregates({
+  userId,
+  activityId,
+}: ApplyActivityDeleteToAggregatesOptions) {
+  const dailyAdsToDelete = await DailyActivityDistribution.find({
+    activity: activityId,
+    user: userId,
+  });
+
+  const dailyAdsMap = new Map<string, SessionStatistics>();
+  for (let i = 0; i < dailyAdsToDelete.length; i++) {
+    const ad = dailyAdsToDelete[i];
+
+    dailyAdsMap.set(ad.date, {
+      spentTimeSeconds: ad.spentTimeSeconds,
+      sessionsAmount: ad.sessionsAmount,
+      pausedAmount: ad.pausedAmount,
+    });
+  }
+
+  const dates = [...dailyAdsMap.keys()];
+  const dailyAggrsToUpdate = await DailyAggregate.find({
+    user: userId,
+    date: { $in: dates },
+  });
+  for (let i = 0; i < dailyAggrsToUpdate.length; i++) {
+    const aggr = dailyAggrsToUpdate[i];
+
+    const adStat = dailyAdsMap.get(aggr.date);
+    if (!adStat) {
+      continue;
+    }
+
+    aggr.sessionsAmount -= adStat.sessionsAmount;
+    aggr.spentTimeSeconds -= adStat.spentTimeSeconds;
+    aggr.pausedAmount -= adStat.pausedAmount;
+  }
+
+  await DailyAggregate.bulkSave(dailyAggrsToUpdate);
+
+  const ids = dailyAdsToDelete.map((ad) => ad._id);
+  await DailyActivityDistribution.deleteMany({ _id: { $in: ids } });
+}
+
 async function getAnalyticsForRangeInternal({
   startOfRange,
   endOfRange,
@@ -937,10 +988,6 @@ async function getAnalyticsForRangeWithCache({
   timezone,
 }: GetAnalyticsForRangeOptions): Promise<AnalyticsForRangeDTO> {
   try {
-    const channel = await getProducerChannel();
-    await channel.assertQueue('test_queue');
-    channel.sendToQueue('test_queue', Buffer.from('Hello RabbitMQ'));
-
     const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
 
     // if it's today analytics

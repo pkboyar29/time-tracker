@@ -339,7 +339,7 @@ async function deleteSession(
         userId,
         timezone: tzInfo!.timezone,
         deletedParts: partsToDelete,
-        activityId: session.activity.id
+        activityId: session.activity
           ? session.activity.id.toString()
           : undefined,
         completedDate: session.completed ? session.updatedDate : undefined,
@@ -354,6 +354,8 @@ async function deleteSession(
       message: 'Deleted successfuly',
     };
   } catch (e) {
+    console.error(e);
+
     throw e;
   }
 }

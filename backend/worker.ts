@@ -1,10 +1,19 @@
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 import { getRabbitConnection } from './rabbitMQ';
+import analyticsService from './src/service/analytics.service';
+
+dotenv.config();
+const MONGO_URL = process.env.MONGO_URL || '';
+mongoose.connect(MONGO_URL).then(() => {
+  console.log('connection with database is successful');
+});
 
 async function startWorker() {
   const conn = await getRabbitConnection();
   const channel = await conn.createChannel();
 
-  const QUEUE = 'test_queue'; // TODO: другое название у очереди
+  const QUEUE = 'aggregates';
   await channel.assertQueue(QUEUE, {
     durable: true,
   });
@@ -19,10 +28,16 @@ async function startWorker() {
     }
 
     try {
-      const content = msg.content.toString();
-      console.log('Received: ', content);
+      const contentJSON = JSON.parse(msg.content.toString());
 
-      // TODO: метод бизнес логики
+      if (contentJSON.type === 'activity.deleted') {
+        await analyticsService.applyActivityDeleteToAggregates({
+          userId: contentJSON.payload.userId,
+          activityId: contentJSON.payload.activityId,
+        });
+      } else {
+        throw new Error('Unknown message type');
+      }
 
       channel.ack(msg);
     } catch (e) {

@@ -1,5 +1,6 @@
 import { setupIntegrationHooks } from './setupIntegrationHooks';
 import { authorizedRequest } from './authorizedRequest';
+import analyticsService from '../../service/analytics.service';
 
 describe('Session controller endpoints', () => {
   const { getAccessToken } = setupIntegrationHooks();
@@ -38,6 +39,13 @@ describe('Session controller endpoints', () => {
   });
 
   test('delete session endpoint returns ok', async () => {
+    jest
+      .spyOn(analyticsService, 'applySessionDeleteToAggregates')
+      .mockResolvedValue(undefined);
+    jest
+      .spyOn(analyticsService, 'invalidateCache')
+      .mockResolvedValue(undefined);
+
     const response = await authorizedRequest(getAccessToken())
       .post('/sessions/')
       .send({ totalTimeSeconds: 1000 });
