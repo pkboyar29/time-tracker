@@ -48,11 +48,10 @@ async function createDailyAggregates() {
       const part = allParts[i];
 
       const dt = DateTime.fromJSDate(part.createdDate, { zone: userTimezone });
-      console.log(dt);
       const dateISO = dt.toISODate(); // YYYY-MM-DD
 
       if (!dateISO) {
-        console.error(`Error while converting dt to ISO Date: ${dt}`); // TODO: убедиться, что при выводе в консоль объекта DateTime выводится что-то адекватное, а не строкое представление объекта
+        console.error(`Error while converting dt to ISO Date: ${dt}`);
         continue;
       }
 
