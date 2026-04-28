@@ -43,18 +43,25 @@ async function createDailyAggregates() {
 
     // <string, ISessionPart[]>
     const datesMap = new Map<string, any[]>(); // TODO: если использовать ISessionPart[], то появится пара ts предупреждений
+    for (let i = 0; i < allParts.length; i++) {
+      const part = allParts[i];
 
-    allParts.forEach((part) => {
       const dt = DateTime.fromJSDate(part.createdDate, { zone: userTimezone });
+      console.log(dt);
       const dateISO = dt.toISODate(); // YYYY-MM-DD
 
-      if (datesMap.has(dateISO!)) {
-        const parts = datesMap.get(dateISO!);
+      if (!dateISO) {
+        console.error(`Error while converting dt to ISO Date: ${dt}`); // TODO: убедиться, что при выводе в консоль объекта DateTime выводится что-то адекватное, а не строкое представление объекта
+        continue;
+      }
+
+      if (datesMap.has(dateISO)) {
+        const parts = datesMap.get(dateISO);
         parts?.push(part);
       } else {
-        datesMap.set(dateISO!, [part]);
+        datesMap.set(dateISO, [part]);
       }
-    });
+    }
 
     const dailyAggregates: IDailyAggregate[] = [];
     const dailyAds: IDailyAD[] = [];
