@@ -8,7 +8,8 @@ import sessionPartService from '../service/sessionPart.service';
 import User from '../model/user.model';
 import { DateTime } from 'luxon';
 
-const MONGO_URL = process.env.MONGO_URL || '';
+const MONGO_URL =
+  process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
 mongoose.connect(MONGO_URL).then(async () => {
   console.log('connection with database is successful');

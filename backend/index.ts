@@ -14,7 +14,7 @@ mongoose.connect(MONGO_URL).then(() => {
   logger.info('connection with database is successful');
 });
 
-redisClient.on('error', (err) => logger.error('Redis Client Error', err));
+redisClient.on('error', (err: any) => logger.error('Redis Client Error', err));
 redisClient.connect().then(() => {
   logger.info('connection with redis is successful');
 });
