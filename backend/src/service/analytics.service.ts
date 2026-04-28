@@ -141,7 +141,7 @@ const analyticsService = {
   applyActivityDeleteToAggregates,
   getAnalyticsForRangeInternal,
   getAnalyticsForRangeAggregates,
-  getAnalyticsForRangeWithCache,
+  getAnalyticsForRangeCache,
   mergeSessionStatistics,
   mergeActivityDistributions,
   mergeAnalytics,
@@ -773,18 +773,6 @@ async function getAnalyticsForRangeInternal({
   userId,
   timezone,
 }: GetAnalyticsForRangeOptions): Promise<AnalyticsForRangeDTO> {
-  if (startOfRange > new Date()) {
-    return {
-      sessionStatistics: {
-        spentTimeSeconds: 0,
-        sessionsAmount: 0,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-      timeBars: [],
-    };
-  }
-
   const sessionPartsForRange =
     await sessionPartService.getSessionPartsInDateRange({
       startRange: startOfRange,
@@ -981,13 +969,25 @@ async function getAnalyticsForRangeAggregates({
   }
 }
 
-async function getAnalyticsForRangeWithCache({
+async function getAnalyticsForRangeCache({
   startOfRange,
   endOfRange,
   userId,
   timezone,
 }: GetAnalyticsForRangeOptions): Promise<AnalyticsForRangeDTO> {
   try {
+    if (startOfRange > new Date()) {
+      return {
+        sessionStatistics: {
+          spentTimeSeconds: 0,
+          sessionsAmount: 0,
+          pausedAmount: 0,
+        },
+        activityDistribution: [],
+        timeBars: [],
+      };
+    }
+
     const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
 
     // if it's today analytics

@@ -324,8 +324,6 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   }
 
   function rangeItemClickHandler(rangeItem: [Date, Date]) {
-    console.log(rangeItem);
-
     navigate(
       `/analytics/range?from=${rangeItem[0].toISOString()}&to=${rangeItem[1].toISOString()}`,
       { replace: true },
