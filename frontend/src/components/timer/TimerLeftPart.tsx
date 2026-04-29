@@ -110,14 +110,8 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
 
   return (
     <>
-      {!isTimerStarted ? (
-        <CustomCircularProgress
-          valuePercent={0}
-          label={`${getRemainingTimeHoursMinutesSeconds(selectedSeconds, 0)}`}
-          size="verybig"
-        />
-      ) : (
-        <div className="relative inline-flex items-center justify-center">
+      <div className="relative inline-flex items-center justify-center">
+        {isTimerStarted && (
           <Tooltip<HTMLButtonElement>
             tooltipText={t('timerPage.minus5Tooltip')}
           >
@@ -138,20 +132,28 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
               </button>
             )}
           </Tooltip>
+        )}
 
-          <CustomCircularProgress
-            valuePercent={
-              (timerState.ms /
-                secondsToMs(timerState.session.totalTimeSeconds)) *
-              100
-            }
-            label={`${getRemainingTimeHoursMinutesSeconds(
-              timerState.session.totalTimeSeconds,
-              msToSeconds(timerState.ms),
-            )}`}
-            size="verybig"
-          />
+        <CustomCircularProgress
+          valuePercent={
+            isTimerStarted
+              ? (timerState.ms /
+                  secondsToMs(timerState.session.totalTimeSeconds)) *
+                100
+              : 0
+          }
+          label={
+            isTimerStarted
+              ? getRemainingTimeHoursMinutesSeconds(
+                  timerState.session.totalTimeSeconds,
+                  msToSeconds(timerState.ms),
+                )
+              : getRemainingTimeHoursMinutesSeconds(selectedSeconds, 0)
+          }
+          size="verybig"
+        />
 
+        {isTimerStarted && (
           <Tooltip<HTMLButtonElement> tooltipText={t('timerPage.plus5Tooltip')}>
             {(ref) => (
               <button
@@ -167,8 +169,8 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
               </button>
             )}
           </Tooltip>
-        </div>
-      )}
+        )}
+      </div>
 
       {!isTimerStarted ? (
         <div className="mt-2">
