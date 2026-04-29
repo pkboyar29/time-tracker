@@ -125,7 +125,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
               <button
                 disabled={
                   timerState.session.totalTimeSeconds - 5 * 60 <=
-                  timerState.session.spentTimeSeconds
+                  msToSeconds(timerState.ms)
                 }
                 ref={ref}
                 tabIndex={-1}
