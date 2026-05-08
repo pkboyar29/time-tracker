@@ -50,7 +50,7 @@ interface GetADsAggregatesOptions {
   userActivities: IActivity[];
 }
 
-interface getBarStatAndAdsOptions {
+interface GetBarStatAndAdsOptions {
   dataSource: DataSource;
   startOfPeriod: Date;
   endOfPeriod: Date;
@@ -74,6 +74,11 @@ type DataSource =
       dailyAds: IDailyAD[];
       timezone: string;
     };
+
+interface GetTodayAggregateOptions {
+  userId: string;
+  timezone: string;
+}
 
 interface GetAnalyticsForRangeOptions {
   startOfRange: Date;
@@ -136,6 +141,7 @@ const analyticsService = {
   getTimeBars,
   getSessionsStatisticsAggregates,
   getActivityDistributionsAggregates,
+  getTodayAggregate,
   applySessionUpdateToAggregates,
   applySessionDeleteToAggregates,
   applyActivityDeleteToAggregates,
@@ -303,7 +309,7 @@ function getBarStatAndAds({
   endOfPeriod,
   dataSource,
   userActivities,
-}: getBarStatAndAdsOptions): {
+}: GetBarStatAndAdsOptions): {
   barStat: SessionStatistics;
   barAds: ActivityDistribution[];
 } {
@@ -544,6 +550,31 @@ function getActivityDistributionsAggregates({
     activitiesStatMap,
     userActivities,
   });
+}
+
+async function getTodayAggregate({
+  userId,
+  timezone,
+}: GetTodayAggregateOptions): Promise<IDailyAggregate> {
+  const { startOfToday } = getTodayRange(timezone);
+  const dt = DateTime.fromJSDate(startOfToday, { zone: timezone });
+  const dateISO = dt.toISODate();
+
+  let todayAggregate = await DailyAggregate.findOne({
+    date: dateISO,
+    user: userId,
+  });
+  if (!todayAggregate) {
+    todayAggregate = new DailyAggregate({
+      date: dateISO,
+      user: userId,
+      spentTimeSeconds: 0,
+      sessionsAmount: 0,
+      pausedAmount: 0,
+    });
+  }
+
+  return todayAggregate;
 }
 
 async function applySessionUpdateToAggregates({
