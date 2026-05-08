@@ -114,8 +114,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       setTimerState({ status: 'running', session });
     }
 
-    console.log(session.spentTimeSeconds);
-    console.log(secondsToMs(session.spentTimeSeconds));
     timerTickStore.setTick(session.id, secondsToMs(session.spentTimeSeconds));
   };
 
