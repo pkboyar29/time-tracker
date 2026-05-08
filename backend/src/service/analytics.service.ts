@@ -586,6 +586,10 @@ async function applySessionUpdateToAggregates({
   isCompleted,
   activityId,
 }: ApplySessionUpdateToAggregatesOptions) {
+  if (addedSpentTimeSeconds <= 0) {
+    return;
+  }
+
   const dt = DateTime.fromJSDate(date, { zone: timezone });
   const dateISO = dt.toISODate();
 
