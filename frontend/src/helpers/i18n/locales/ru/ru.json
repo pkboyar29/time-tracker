@@ -232,7 +232,9 @@
   "dailyGoalCompletedModal": {
     "title": "Ежедневная цель выполнена!",
     "message": "Вы выполнили ежедневную цель. 🎯 Отличная работа!",
-    "button": "Закрыть"
+    "button": "Продолжить",
+    "streakStarted": "🔥 Вы начали свой стрик!",
+    "streakMessage": "🔥 Стрик: {{streak}} дней подряд!"
   },
   "months": {
     "short": [

@@ -13,7 +13,7 @@ import { sendServerEvent } from '../helpers/sendServerEvent';
 import activityGroupService from './activityGroup.service';
 import activityService from './activity.service';
 import sessionService from './session.service';
-import sessionPartService from './sessionPart.service';
+import analyticsService from './analytics.service';
 import User from '../model/user.model';
 import UserAudio, { IUserAudio } from '../model/userAudio.model';
 import ActivityGroup from '../model/activityGroup.model';
@@ -245,51 +245,43 @@ async function getProfileInfo(userId: string): Promise<UserResponseDTO> {
   }
 }
 
-// TODO: как появятся агрегаты, то смотреть сегодняшние секунды в сегодняшнем агрегате
 async function isDailyGoalCompleted(
   dailyGoalSeconds: number,
   userId: string,
   timezone: string,
 ): Promise<boolean> {
-  const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
+  const todayAggregate = await analyticsService.getTodayAggregate({
+    userId,
+    timezone,
+  });
 
-  const todaySpentTimeSeconds =
-    await sessionPartService.getSpentTimeSecondsInDateRange({
-      startRange: startOfToday,
-      endRange: startOfTomorrow,
-      userId,
-    });
-
-  if (todaySpentTimeSeconds >= dailyGoalSeconds) {
+  if (todayAggregate.spentTimeSeconds >= dailyGoalSeconds) {
     return true;
   }
 
   return false;
 }
 
-// TODO: как появятся агрегаты, то смотреть сегодняшние секунды в сегодняшнем агрегате
 async function isDailyGoalCompletedNow(
   newSpentTimeSeconds: number,
   dailyGoalSeconds: number,
   userId: string,
   timezone: string,
 ): Promise<boolean> {
-  const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
+  const todayAggregate = await analyticsService.getTodayAggregate({
+    userId,
+    timezone,
+  });
 
-  let secondsBeforeNewUpdate =
-    await sessionPartService.getSpentTimeSecondsInDateRange({
-      startRange: startOfToday,
-      endRange: startOfTomorrow,
-      userId,
-    });
-  secondsBeforeNewUpdate -= newSpentTimeSeconds;
+  let secondsBeforeUpdate = todayAggregate.spentTimeSeconds;
+  secondsBeforeUpdate -= newSpentTimeSeconds;
 
   // if goal has reached before
-  if (secondsBeforeNewUpdate >= dailyGoalSeconds) {
+  if (secondsBeforeUpdate >= dailyGoalSeconds) {
     return false;
   }
   // if goal has reached now
-  if (secondsBeforeNewUpdate + newSpentTimeSeconds >= dailyGoalSeconds) {
+  if (secondsBeforeUpdate + newSpentTimeSeconds >= dailyGoalSeconds) {
     return true;
   }
   // if goal hasn't reached yet
@@ -367,7 +359,13 @@ async function notifyDailyGoalCompleted(userId: string) {
   if (userConnections && userConnections.length > 0) {
     for (const res of userConnections) {
       logger.info('trying to send notification in user.service.ts ...');
-      sendServerEvent(res, 'daily_goal_completed', {});
+
+      const timezoneInfo = await User.findById(userId).select('timezone');
+      const timezone = timezoneInfo!.timezone;
+      const streak = await analyticsService.getStreak({ userId, timezone });
+      sendServerEvent(res, 'daily_goal_completed', {
+        streak,
+      });
     }
 
     await userService.markDailyGoalNotified(userId);

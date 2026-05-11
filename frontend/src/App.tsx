@@ -29,8 +29,10 @@ const App: FC = () => {
   const { t } = useTranslation();
   const { startTimer } = useTimer();
 
-  const [dailyGoalCompletedModal, setDailyGoalCompletedGoal] =
-    useState<boolean>(false);
+  const [dailyGoalComplModal, setDailyGoalComplModal] = useState<{
+    status: boolean;
+    streak: number;
+  }>({ status: false, streak: 0 });
 
   const location = useLocation();
   const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
@@ -131,7 +133,12 @@ const App: FC = () => {
           onmessage: (event) => {
             try {
               if (event.event === 'daily_goal_completed') {
-                setDailyGoalCompletedGoal(true);
+                const data = JSON.parse(event.data);
+
+                setDailyGoalComplModal({
+                  status: true,
+                  streak: data.streak,
+                });
               }
             } catch (e) {
               console.error(e);
@@ -162,9 +169,12 @@ const App: FC = () => {
 
       <TimerTitleUpdater />
 
-      {dailyGoalCompletedModal && (
+      {dailyGoalComplModal.status && (
         <DailyGoalCompletedModal
-          onCloseModal={() => setDailyGoalCompletedGoal(false)}
+          streak={dailyGoalComplModal.streak}
+          onCloseModal={() =>
+            setDailyGoalComplModal({ status: false, streak: 0 })
+          }
         />
       )}
 
