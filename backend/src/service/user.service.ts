@@ -13,7 +13,6 @@ import { sendServerEvent } from '../helpers/sendServerEvent';
 import activityGroupService from './activityGroup.service';
 import activityService from './activity.service';
 import sessionService from './session.service';
-import sessionPartService from './sessionPart.service';
 import analyticsService from './analytics.service';
 import User from '../model/user.model';
 import UserAudio, { IUserAudio } from '../model/userAudio.model';
@@ -360,7 +359,13 @@ async function notifyDailyGoalCompleted(userId: string) {
   if (userConnections && userConnections.length > 0) {
     for (const res of userConnections) {
       logger.info('trying to send notification in user.service.ts ...');
-      sendServerEvent(res, 'daily_goal_completed', {});
+
+      const timezoneInfo = await User.findById(userId).select('timezone');
+      const timezone = timezoneInfo!.timezone;
+      const streak = await analyticsService.getStreak({ userId, timezone });
+      sendServerEvent(res, 'daily_goal_completed', {
+        streak,
+      });
     }
 
     await userService.markDailyGoalNotified(userId);

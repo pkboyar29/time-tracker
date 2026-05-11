@@ -15,6 +15,7 @@ import DailyActivityDistribution, {
   IDailyAD,
 } from '../model/dailyActivityDistribution.model';
 import { getTodayRange } from '../helpers/getTodayRange';
+import User from '../model/user.model';
 
 import { redisClient } from '../../redisClient';
 import { DateTime } from 'luxon';
@@ -76,6 +77,11 @@ type DataSource =
     };
 
 interface GetTodayAggregateOptions {
+  userId: string;
+  timezone: string;
+}
+
+interface GetStreakOptions {
   userId: string;
   timezone: string;
 }
@@ -142,6 +148,7 @@ const analyticsService = {
   getSessionsStatisticsAggregates,
   getActivityDistributionsAggregates,
   getTodayAggregate,
+  getStreak,
   applySessionUpdateToAggregates,
   applySessionDeleteToAggregates,
   applyActivityDeleteToAggregates,
@@ -575,6 +582,80 @@ async function getTodayAggregate({
   }
 
   return todayAggregate;
+}
+
+async function getStreak({
+  userId,
+  timezone,
+}: GetStreakOptions): Promise<number> {
+  const { startOfToday } = getTodayRange(timezone);
+  const todayDt = DateTime.fromJSDate(startOfToday, {
+    zone: timezone,
+  });
+
+  const todayAggregate = await DailyAggregate.findOne({
+    date: todayDt.toISODate(),
+    user: userId,
+  });
+  if (!todayAggregate) {
+    return 0;
+  }
+
+  const dailyGoalInfo = await User.findById(userId).select('dailyGoal');
+  const dailyGoalSeconds = dailyGoalInfo!.dailyGoal;
+  if (todayAggregate.spentTimeSeconds < dailyGoalSeconds) {
+    return 0;
+  }
+
+  let streak = 1;
+  let prevDays: string[] = [];
+  let loopDt = todayDt;
+
+  while (true) {
+    prevDays = [];
+    for (let i = 0; i < 5; i++) {
+      loopDt = loopDt.minus({ days: 1 });
+      prevDays.push(loopDt.toISODate()!);
+    }
+
+    const prevAggrs = await DailyAggregate.find({
+      user: userId,
+      date: { $in: prevDays },
+    });
+    if (prevAggrs.length !== 5) {
+      for (let i = 0; i < 5; i++) {
+        const aggr = prevAggrs.find((aggr) => aggr.date === prevDays[i]);
+
+        if (!aggr) {
+          break;
+        }
+        if (aggr.spentTimeSeconds < dailyGoalSeconds) {
+          break;
+        }
+
+        streak++;
+      }
+
+      break;
+    } else {
+      // 5 агрегатов
+      for (let i = 0; i < 5; i++) {
+        const aggr = prevAggrs.find((aggr) => aggr.date === prevDays[i]);
+
+        if (!aggr) {
+          break;
+        }
+        if (aggr.spentTimeSeconds < dailyGoalSeconds) {
+          break;
+        }
+
+        streak++;
+      }
+    }
+  }
+  // TODO: повторение двух циклов
+
+  return streak;
 }
 
 async function applySessionUpdateToAggregates({

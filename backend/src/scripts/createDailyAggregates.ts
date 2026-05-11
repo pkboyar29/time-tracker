@@ -8,6 +8,8 @@ import sessionPartService from '../service/sessionPart.service';
 import User from '../model/user.model';
 import { DateTime } from 'luxon';
 
+// TODO: обязательно перед запуском скрипта надо удалить все агрегаты из БД, иначе будут созданы дубликаты (можно переписать код, чтобы такого не было)
+
 const MONGO_URL =
   process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
