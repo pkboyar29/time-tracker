@@ -73,3 +73,16 @@ export function animateCountUpWithInterval(
     }
   }, interval);
 }
+
+export function setFavicon(url: string) {
+  let favicon = document.getElementById('favicon');
+
+  if (!favicon) {
+    favicon = document.createElement('link');
+    favicon.id = 'favicon';
+    (favicon as HTMLLinkElement).rel = 'icon';
+    document.head.appendChild(favicon);
+  }
+
+  (favicon as HTMLLinkElement).href = url;
+}
