@@ -35,7 +35,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     const tzInfo = await User.findById(res.locals.userId).select('timezone');
 
-    const data = await analyticsService.getAnalyticsForRangeWithCache({
+    const data = await analyticsService.getAnalyticsForRangeCache({
       startOfRange: fromDate,
       endOfRange: toDate,
       userId: res.locals.userId,

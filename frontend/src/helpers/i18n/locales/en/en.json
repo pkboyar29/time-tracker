@@ -232,7 +232,9 @@
   "dailyGoalCompletedModal": {
     "title": "Daily goal completed!",
     "message": "You completed your daily goal. 🎯 Good work!",
-    "button": "Close"
+    "button": "Continue",
+    "streakStarted": "🔥 You've started your streak!",
+    "streakMessage": "🔥 {{streak}} day streak!"
   },
   "months": {
     "short": [

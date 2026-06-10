@@ -8,6 +8,8 @@ import sessionPartService from '../service/sessionPart.service';
 import User from '../model/user.model';
 import { DateTime } from 'luxon';
 
+// TODO: обязательно перед запуском скрипта надо удалить все агрегаты из БД, иначе будут созданы дубликаты (можно переписать код, чтобы такого не было)
+
 const MONGO_URL =
   process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
@@ -44,18 +46,24 @@ async function createDailyAggregates() {
 
     // <string, ISessionPart[]>
     const datesMap = new Map<string, any[]>(); // TODO: если использовать ISessionPart[], то появится пара ts предупреждений
+    for (let i = 0; i < allParts.length; i++) {
+      const part = allParts[i];
 
-    allParts.forEach((part) => {
       const dt = DateTime.fromJSDate(part.createdDate, { zone: userTimezone });
       const dateISO = dt.toISODate(); // YYYY-MM-DD
 
-      if (datesMap.has(dateISO!)) {
-        const parts = datesMap.get(dateISO!);
+      if (!dateISO) {
+        console.error(`Error while converting dt to ISO Date: ${dt}`);
+        continue;
+      }
+
+      if (datesMap.has(dateISO)) {
+        const parts = datesMap.get(dateISO);
         parts?.push(part);
       } else {
-        datesMap.set(dateISO!, [part]);
+        datesMap.set(dateISO, [part]);
       }
-    });
+    }
 
     const dailyAggregates: IDailyAggregate[] = [];
     const dailyAds: IDailyAD[] = [];

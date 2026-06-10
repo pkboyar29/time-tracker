@@ -6,10 +6,12 @@ import Button from '../common/Button';
 
 interface DailyGoalCompletedModalProps {
   onCloseModal: () => void;
+  streak: number;
 }
 
 const DailyGoalCompletedModal: FC<DailyGoalCompletedModalProps> = ({
   onCloseModal,
+  streak,
 }) => {
   const { t } = useTranslation();
 
@@ -23,9 +25,21 @@ const DailyGoalCompletedModal: FC<DailyGoalCompletedModalProps> = ({
           <span className="text-3xl">🎉</span>
         </div>
 
-        <p className="mb-6 text-lg text-gray-700 dark:text-textDark">
+        <p className="mb-3 text-lg text-gray-700 dark:text-textDark">
           {t('dailyGoalCompletedModal.message')}
         </p>
+
+        {streak === 1 ? (
+          <p className="mb-6 text-sm font-medium text-green-600 dark:text-green-400">
+            {t('dailyGoalCompletedModal.streakStarted')}
+          </p>
+        ) : streak > 1 ? (
+          <p className="mb-6 text-sm font-medium text-green-600 dark:text-green-400">
+            {t('dailyGoalCompletedModal.streakMessage', { streak })}
+          </p>
+        ) : (
+          <div className="mb-6" />
+        )}
 
         <Button onClick={onCloseModal}>
           {t('dailyGoalCompletedModal.button')}
