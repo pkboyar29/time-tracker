@@ -1,5 +1,9 @@
 import { genSaltSync, hashSync, compareSync } from 'bcrypt';
-import jsonwebtoken, { JwtPayload } from 'jsonwebtoken';
+import jsonwebtoken, {
+  JsonWebTokenError,
+  JwtPayload,
+  TokenExpiredError,
+} from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
@@ -154,26 +158,38 @@ function checkToken(jwt: string, checkingTokenType: 'access' | 'refresh') {
   const payload: JwtPayload | null = jsonwebtoken.decode(jwt, {
     json: true,
   });
-  if (payload) {
-    if (checkingTokenType === 'access') {
-      if (payload.tokenType === 'access') {
-        if (process.env.ACCESS_TOKEN_SECRET) {
-          jsonwebtoken.verify(jwt, process.env.ACCESS_TOKEN_SECRET);
-        }
-      } else {
-        throw new Error('jwt invalid format');
-      }
-    } else if (checkingTokenType === 'refresh') {
-      if (payload.tokenType === 'refresh') {
-        if (process.env.REFRESH_TOKEN_SECRET) {
-          jsonwebtoken.verify(jwt, process.env.REFRESH_TOKEN_SECRET);
-        }
-      } else {
-        throw new Error('jwt invalid format');
+  if (!payload) {
+    throw new Error('jwt invalid format');
+  }
+
+  if (checkingTokenType === 'access') {
+    if (payload.tokenType !== 'access') {
+      throw new Error('access token invalid format');
+    }
+
+    const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
+    if (!accessTokenSecret) {
+      return;
+    }
+    jsonwebtoken.verify(jwt, accessTokenSecret);
+  } else if (checkingTokenType === 'refresh') {
+    if (payload.tokenType !== 'refresh') {
+      throw new HttpError(401, 'refresh token invalid format');
+    }
+
+    const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+    if (!refreshTokenSecret) {
+      return;
+    }
+    try {
+      jsonwebtoken.verify(jwt, refreshTokenSecret);
+    } catch (e) {
+      if (e instanceof TokenExpiredError) {
+        throw new HttpError(401, 'refresh token expired');
+      } else if (e instanceof JsonWebTokenError) {
+        throw new HttpError(401, 'refresh token invalid format');
       }
     }
-  } else {
-    throw new Error('jwt invalid format');
   }
 }
 
@@ -190,12 +206,14 @@ function createAccessToken(userId: string): string {
 }
 
 function createRefreshToken(userId: string): string {
+  const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET
+    ? process.env.REFRESH_TOKEN_SECRET
+    : 'default-refresh-secret';
+
   let refreshToken = userService.createToken(
     userId,
     'refresh',
-    process.env.REFRESH_TOKEN_SECRET
-      ? process.env.REFRESH_TOKEN_SECRET
-      : 'default-refresh-secret',
+    refreshTokenSecret,
   );
 
   return refreshToken;

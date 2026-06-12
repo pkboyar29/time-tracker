@@ -22,23 +22,29 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (config) => config,
   async (error) => {
-    if (error instanceof AxiosError) {
-      // if access token is expired or smt wrong with him
-      if (error.response?.status === 403 || error.response?.status === 401) {
-        // refresh access token
-        await refreshAccessToken();
-
-        // run previous request
-        const accessToken = Cookies.get('access');
-        const originalRequest = error.config;
-        if (originalRequest) {
-          originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
-          return axios.request(originalRequest);
-        }
-      }
-
-      return Promise.reject(error);
+    if (!(error instanceof AxiosError)) {
+      return;
     }
+    const originalRequest = error.config;
+
+    // if access token is expired or smt wrong with him
+    if (
+      (error.response?.status === 403 || error.response?.status === 401) &&
+      !originalRequest?.url?.includes('/users/refresh')
+    ) {
+      // refresh access token
+      await refreshAccessToken();
+
+      // run previous request
+      const accessToken = Cookies.get('access');
+      const originalRequest = error.config;
+      if (originalRequest) {
+        originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
+        return axios.request(originalRequest);
+      }
+    }
+
+    return Promise.reject(error);
   },
 );
 
