@@ -56,6 +56,12 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
 
   const [adMode, setAdMode] = useState<boolean>(false);
 
+  // TODO: какой-то костыль, но работает
+  const [chartKey, setChartKey] = useState<number>(0);
+  const hideTooltip = () => {
+    setChartKey((prev) => prev + 1);
+  };
+
   const splitOptions = useMemo<{ value: string; label: string }[]>(() => {
     const options = [{ value: 'default', label: t('pdBox.default') }];
     if (analytics.timeBars.length >= 8) {
@@ -88,6 +94,11 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
     setSplitMode('default');
     setAdMode(false);
   }, [analytics]);
+
+  const changeSplitMode = (newMode: SplitMode) => {
+    setSplitMode(newMode);
+    hideTooltip();
+  };
 
   const displayTimeBars = useMemo<ITimeBar[]>(() => {
     if (splitMode == 'default') {
@@ -152,7 +163,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
           options={splitOptions}
           value={splitMode}
           onChange={(value) => {
-            setSplitMode(value as SplitMode);
+            changeSplitMode(value as SplitMode);
           }}
         />
       </div>
@@ -179,6 +190,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
           height={300}
         >
           <BarChart
+            key={chartKey}
             data={displayTimeBars}
             className="dark:[&>svg>path]:fill-[#5c5c5c]"
           >
