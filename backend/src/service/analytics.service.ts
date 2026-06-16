@@ -304,7 +304,8 @@ function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
     return 'hour';
   } else if (daysInRange <= 40) {
     return 'day';
-  } else if (daysInRange <= 732) {
+    // TODO: 365 или 366?
+  } else if (daysInRange <= 366) {
     return 'month';
   } else {
     return 'year';
@@ -407,7 +408,6 @@ function getTimeBars({
   }
 
   let timeBars: TimeBar[] = [];
-
   let prevPeriod = new Date(startOfRange);
   let nextPeriod = new Date(prevPeriod);
 
@@ -424,24 +424,31 @@ function getTimeBars({
     if (dt.hour === 0 && dt.minute === 0 && dt.second === 0) {
       nextPeriod.setDate(nextPeriod.getDate() + 1);
     } else {
-      const startOfNextDay = dt.plus({ days: 1 }).startOf('day');
-      nextPeriod = startOfNextDay.toJSDate();
+      nextPeriod = dt.plus({ days: 1 }).startOf('day').toJSDate();
     }
   } else if (barType == 'month') {
     const dt = DateTime.fromJSDate(nextPeriod, { zone: timezone });
     // if date is exact start of month in user timezone
     if (dt.day === 1 && dt.hour === 0 && dt.minute === 0 && dt.second === 0) {
-      const nextPeriodLuxon = DateTime.fromJSDate(nextPeriod, {
-        zone: timezone,
-      }).plus({ months: 1 });
-      nextPeriod = nextPeriodLuxon.toJSDate();
+      nextPeriod = dt.plus({ months: 1 }).toJSDate();
     } else {
-      const startOfNextMonth = dt.plus({ months: 1 }).startOf('month');
-      nextPeriod = startOfNextMonth.toJSDate();
+      nextPeriod = dt.plus({ months: 1 }).startOf('month').toJSDate();
     }
   } else {
-    // if bar type is year
-    return [];
+    // bar type is year
+    const dt = DateTime.fromJSDate(nextPeriod, { zone: timezone });
+    // if date is exact start of year in user timezone
+    if (
+      dt.month === 1 &&
+      dt.day === 1 &&
+      dt.hour === 0 &&
+      dt.minute === 0 &&
+      dt.second === 0
+    ) {
+      nextPeriod = dt.plus({ years: 1 }).toJSDate();
+    } else {
+      nextPeriod = dt.plus({ years: 1 }).startOf('year').toJSDate();
+    }
   }
 
   while (true) {
@@ -490,6 +497,12 @@ function getTimeBars({
       const nextPeriodLuxon = DateTime.fromJSDate(nextPeriod, {
         zone: timezone,
       }).plus({ months: 1 });
+      nextPeriod = nextPeriodLuxon.toJSDate();
+    } else {
+      // bar type is year
+      const nextPeriodLuxon = DateTime.fromJSDate(nextPeriod, {
+        zone: timezone,
+      }).plus({ years: 1 });
       nextPeriod = nextPeriodLuxon.toJSDate();
     }
   }
@@ -997,16 +1010,6 @@ async function getAnalyticsForRangeAggregates({
       });
     }
 
-    // console.log(startOfRangeAggr.toISODate());
-    // console.log(endOfRangeAggr.toISODate());
-
-    // TODO: а если аналитика начнется в одну часть дня, а закончится в другую часть дня? Получается мы к агрегатам вообще обращаться не будем.
-    // В таком случае в идеале надо один раз вызвать getAnalyticsForRangeInternal для изначальных дат
-    // ПРИМЕР: 19.04.2026 05:00 - 20.04.2026 19:00
-    // startOfRangeAggr станет 2026-04-20, а endOfRangeAggr станет 2026-04-20, от чего мы получим агрегатную аналитику за все 20 число, хотя мы не должны его получать
-    // ВОТ В ТАКИХ СЛУЧАЯХ НАДО КАК-ТО ПРОСТО ВЫЗЫВАТЬ getAnalyticsForRangeInternal ДЛЯ ИЗНАЧАЛЬНЫХ ДАТ
-    // НО КСТАТИ НА УДИВЛЕНИЕ НА ДАННЫЙ МОМЕНТ МЫ НЕ ПОЛУЧАЕМ АНАЛИТИКУ ЗА ВСЕ 20 ЧИСЛО (dailyAggregates и dailyAds оказываются пустые), однако с формированием таймбаров все равно беда, опять проблема в mergeAnalytics
-
     const dailyAggregates = await DailyAggregate.find({
       user: userId,
       date: {
@@ -1021,8 +1024,6 @@ async function getAnalyticsForRangeAggregates({
         $lt: endOfRangeAggr.toISODate(),
       },
     });
-    // console.log(dailyAggregates.length);
-    // console.log(dailyAds.length);
 
     const sessionStatistics = analyticsService.getSessionsStatisticsAggregates({
       aggregates: dailyAggregates,

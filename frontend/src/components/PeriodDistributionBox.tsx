@@ -27,6 +27,7 @@ import PeriodTooltip from './PeriodTooltip';
 interface PeriodDistributionBoxProps {
   analytics: IAnalytics;
   setAdBoxMode: (newAdMode: 'table' | 'chart') => void;
+  overallMode: boolean;
 }
 
 type SplitMode = 'default' | '4' | '3' | '2';
@@ -50,6 +51,7 @@ const CustomBar = (props: any) => {
 const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   analytics,
   setAdBoxMode,
+  overallMode,
 }) => {
   const { t } = useTranslation();
   const themeState = useAppSelector((state) => state.theme.theme);
@@ -159,13 +161,15 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
           <div>{t('adBox.title')}</div>
         </div>
 
-        <SegmentedControl
-          options={splitOptions}
-          value={splitMode}
-          onChange={(value) => {
-            changeSplitMode(value as SplitMode);
-          }}
-        />
+        {!overallMode && (
+          <SegmentedControl
+            options={splitOptions}
+            value={splitMode}
+            onChange={(value) => {
+              changeSplitMode(value as SplitMode);
+            }}
+          />
+        )}
       </div>
 
       {displayTimeBars.length > 1 && (

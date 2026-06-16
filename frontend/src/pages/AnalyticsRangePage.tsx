@@ -12,6 +12,7 @@ import {
   getYearRange,
 } from '../helpers/dateHelpers';
 import { useTranslation } from 'react-i18next';
+import { useAppSelector } from '../redux/store';
 
 import SessionStatisticsBox from '../components/SessionStatisticsBox';
 import ActivityDistributionBox from '../components/ActivityDistributionBox';
@@ -24,19 +25,25 @@ import RangeBox from '../components/analyticsRangeBoxes/RangeBox';
 import CustomRangeBox from '../components/analyticsRangeBoxes/CustomRangeBox';
 import OverallAnalyticsLabel from '../components/analyticsRangeBoxes/OverallAnalyticsLabel';
 
+type ViewOption = RangeType & 'overall';
+
 const AnalyticsRangePage: FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
+  const overallMode: boolean =
+    typeof searchParams.get('overall') === 'string' ? true : false;
+
+  const currentUser = useAppSelector((state) => state.users.user);
 
   const viewOptionsArr = useMemo(
     () =>
       ['days', 'weeks', 'months', 'years', 'overall', 'custom'].map(
-        (rangeType) => ({
-          id: rangeType,
-          name: t(`viewOptions.${rangeType}`),
+        (option) => ({
+          id: option,
+          name: t(`viewOptions.${option}`),
         }),
       ),
     [t],
@@ -65,6 +72,7 @@ const AnalyticsRangePage: FC = () => {
   const [rangeType, setRangeType] = useState<RangeType>(
     getRangeType(range.fromDate, range.toDate),
   );
+  const viewOption = overallMode ? 'overall' : rangeType;
 
   const {
     data: rangeAnalytics,
@@ -75,36 +83,36 @@ const AnalyticsRangePage: FC = () => {
     queryFn: () => fetchRangeAnalytics(range.fromDate, range.toDate),
   });
 
-  const onViewSelectChange = (newRangeType: RangeType) => {
-    if (newRangeType == rangeType) {
+  const onViewSelectChange = (selectedOption: ViewOption) => {
+    if (selectedOption === viewOption) {
       return;
     }
 
-    if (newRangeType == 'days') {
+    if (selectedOption === 'days') {
       const [startOfToday, endOfToday] = getDayRange(new Date());
       navigate(
         `/analytics/range?from=${startOfToday.toISOString()}&to=${endOfToday.toISOString()}`,
       );
-    } else if (newRangeType == 'weeks') {
+    } else if (selectedOption === 'weeks') {
       const [startOfWeek, endOfWeek] = getWeekRange(new Date());
       navigate(
         `/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`,
       );
-    } else if (newRangeType == 'months') {
+    } else if (selectedOption === 'months') {
       const [startOfMonth, endOfMonth] = getMonthRange(new Date());
       navigate(
         `/analytics/range?from=${startOfMonth.toISOString()}&to=${endOfMonth.toISOString()}`,
       );
-    } else if (newRangeType == 'years') {
+    } else if (selectedOption === 'years') {
       const [startOfYear, endOfYear] = getYearRange(new Date());
       navigate(
         `/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`,
       );
-    } else if (newRangeType == 'overall') {
+    } else if (selectedOption === 'overall' && currentUser) {
       navigate(
-        `/analytics/range?from=2000-01-01T00:00:00&to=${new Date().toISOString()}`,
+        `/analytics/range?from=${currentUser.createdDate.toISOString()}&to=${new Date().toISOString()}&overall`,
       );
-    } else if (newRangeType == 'custom') {
+    } else if (selectedOption === 'custom') {
       const [startOfToday, endOfToday] = getDayRange(new Date());
       const customFromDate = new Date(startOfToday);
       customFromDate.setDate(customFromDate.getDate() - 1);
@@ -133,10 +141,12 @@ const AnalyticsRangePage: FC = () => {
   return (
     <div className="flex flex-col h-full lg:overflow-y-hidden lg:h-screen dark:text-textDark">
       <div className="lg:max-h-[156px] lg:h-full relative flex flex-col justify-center pb-5 py-[65px] sm:py-5 border-b border-solid border-gray-400 dark:border-white/10">
-        {rangeType == 'custom' ? (
-          <CustomRangeBox fromDate={range.fromDate} toDate={range.toDate} />
-        ) : rangeType == 'overall' ? (
-          <OverallAnalyticsLabel />
+        {rangeType === 'custom' ? (
+          overallMode ? (
+            <OverallAnalyticsLabel />
+          ) : (
+            <CustomRangeBox fromDate={range.fromDate} toDate={range.toDate} />
+          )
         ) : (
           <RangeBox range={range} />
         )}
@@ -146,10 +156,8 @@ const AnalyticsRangePage: FC = () => {
             {t('analyticsPage.viewSelectTitle')}
           </div>
           <CustomSelect
-            currentId={rangeType}
-            onChange={(newRangeType) =>
-              onViewSelectChange(newRangeType as RangeType)
-            }
+            currentId={viewOption}
+            onChange={(option) => onViewSelectChange(option as ViewOption)}
             optionGroups={[
               {
                 optGroupName: '',
@@ -188,10 +196,11 @@ const AnalyticsRangePage: FC = () => {
           </div>
 
           <div className="flex flex-col h-full gap-5 px-4 pt-5 lg:w-1/2">
-            {rangeType != 'overall' && rangeAnalytics.timeBars.length > 0 && (
+            {rangeAnalytics.timeBars.length > 1 && (
               <PeriodDistributionBox
                 analytics={rangeAnalytics}
                 setAdBoxMode={setAdBoxMode}
+                overallMode={overallMode}
               />
             )}
 
