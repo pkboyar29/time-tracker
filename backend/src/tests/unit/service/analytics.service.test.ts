@@ -1473,8 +1473,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-19T22:00:00Z'),
       finalObjEndOfRange: new Date('2025-09-20T15:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -1539,8 +1539,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-18T00:00:00Z'),
       finalObjEndOfRange: new Date('2025-09-24T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -1753,8 +1753,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-01-01T00:00:00Z'),
       finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -1921,8 +1921,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-20T00:00:00Z'),
       finalObjEndOfRange: new Date('2025-09-23T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -1998,8 +1998,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-19T00:00:00Z'),
       finalObjEndOfRange: new Date('2025-09-23T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -2106,8 +2106,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-19T22:00:00Z'),
       finalObjEndOfRange: new Date('2025-09-23T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -2251,8 +2251,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-17T00:00:00Z'),
       finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -2338,8 +2338,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-19T00:00:00Z'),
       finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -2425,8 +2425,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-20T00:00:00Z'),
       finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -2594,8 +2594,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-09-28T00:00:00Z'),
       finalObjEndOfRange: new Date('2025-12-01T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
@@ -2760,8 +2760,8 @@ describe('analyticsService.mergeAnalytics', () => {
     const result = analyticsService.mergeAnalytics({
       finalObjStartOfRange: new Date('2025-08-01T00:00:00Z'),
       finalObjEndOfRange: new Date('2025-11-01T00:00:00Z'),
-      untilTodayObj,
-      todayObj,
+      leftObj: untilTodayObj,
+      rightObj: todayObj,
       timezone,
     });
 
