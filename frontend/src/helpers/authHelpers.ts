@@ -1,7 +1,8 @@
+import { AxiosError } from 'axios';
 import instance from '../api/axios';
 import Cookies from 'js-cookie';
 
-const clearSession = () => {
+const clearAuthSession = () => {
   Cookies.remove('access');
   Cookies.remove('refresh');
 
@@ -16,8 +17,14 @@ const refreshAccessToken = async () => {
     });
     Cookies.set('access', data.access);
   } catch (error) {
+    if (!(error instanceof AxiosError)) {
+      return;
+    }
+
     // if refresh token is malformed or expired
-    clearSession();
+    if (error.response?.status === 401) {
+      clearAuthSession();
+    }
   }
 };
 
@@ -29,4 +36,4 @@ const isAuth = () => {
   }
 };
 
-export { refreshAccessToken, clearSession, isAuth };
+export { refreshAccessToken, clearAuthSession, isAuth };

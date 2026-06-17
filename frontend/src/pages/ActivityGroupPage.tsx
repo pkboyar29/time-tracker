@@ -1,4 +1,4 @@
-import { FC, useState, useEffect, act } from 'react';
+import { FC, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueryCustom } from '../hooks/useQueryCustom';

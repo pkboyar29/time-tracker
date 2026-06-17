@@ -129,21 +129,15 @@ describe('analyticsService.getTimeBarType', () => {
     expect(analyticsService.getTimeBarType(start, end)).toBe('hour');
   });
 
-  it('returns "year" when range is more than 732 days (2 full years)', () => {
+  it('returns "month" when range is exactly 366 days', () => {
     const start = new Date(2020, 0, 1); // Jan 1, 2020
-    const end = new Date(2022, 1, 2); // Feb 2, 2022 (~763 days)
-    expect(analyticsService.getTimeBarType(start, end)).toBe('year');
-  });
-
-  it('returns "month" when range is exactly 732 days', () => {
-    const start = new Date(2020, 0, 1); // Jan 1, 2020
-    const end = new Date(2022, 0, 2); // Jan 2, 2022 (732 days incl. leap year)
+    const end = new Date(2021, 0, 1); // Jan 1, 2021
     expect(analyticsService.getTimeBarType(start, end)).toBe('month');
   });
 
-  it('returns "year" when range is far more than 2 years', () => {
-    const start = new Date(2019, 0, 1);
-    const end = new Date(2023, 0, 1); // 4 years = 1461 days (incl. 1 leap year)
+  it('returns "year" when range is more than 366 days', () => {
+    const start = new Date(2020, 0, 1); // Jan 1, 2020
+    const end = new Date(2022, 0, 1); // Feb 2, 2022 (~763 days)
     expect(analyticsService.getTimeBarType(start, end)).toBe('year');
   });
 });
@@ -437,6 +431,58 @@ describe('analyticsService.getTimeBars', () => {
       new Date('2024-11-30T21:00:00.000Z'),
     );
     expect(result[5].endOfRange).toEqual(new Date('2024-12-31T21:00:00.000Z'));
+  });
+
+  it('should return yearly time bars when the range starts at the beginning of a year', () => {
+    const start = new Date('2024-01-01T00:00:00.000Z');
+    const end = new Date('2026-01-01T00:00:00.000Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      barType: 'year',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
+      timezone: 'UTC',
+      userActivities: [],
+    });
+
+    expect(result).toHaveLength(2);
+
+    expect(result[0].startOfRange).toEqual(new Date('2024-01-01T00:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-01-01T00:00:00Z'));
+
+    expect(result[1].startOfRange).toEqual(new Date('2025-01-01T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2026-01-01T00:00:00Z'));
+  });
+
+  it('should return yearly time bars when the range starts after the beginning of a year', () => {
+    const start = new Date('2024-06-01T00:00:00.000Z');
+    const end = new Date('2026-01-01T00:00:00.000Z');
+
+    const result = analyticsService.getTimeBars({
+      startOfRange: start,
+      endOfRange: end,
+      barType: 'year',
+      dataSource: {
+        type: 'raw',
+        sessionParts: [],
+        completedSessions: [],
+      },
+      timezone: 'UTC',
+      userActivities: [],
+    });
+
+    expect(result).toHaveLength(2);
+
+    expect(result[0].startOfRange).toEqual(new Date('2024-06-01T00:00:00Z'));
+    expect(result[0].endOfRange).toEqual(new Date('2025-01-01T00:00:00Z'));
+
+    expect(result[1].startOfRange).toEqual(new Date('2025-01-01T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2026-01-01T00:00:00Z'));
   });
 });
 

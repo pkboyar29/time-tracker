@@ -23,14 +23,36 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
       };
     });
 
+  const overallParam = new URLSearchParams(window.location.search).get(
+    'overall',
+  );
+  const overallMode = typeof overallParam === 'string' ? true : false;
+
   const timeBars: ITimeBar[] = unmappedData.timeBars.map((bar: any) => {
     const startOfRange = new Date(bar.startOfRange);
     const endOfRange = new Date(bar.endOfRange);
 
+    const barAds = bar.activityDistribution.map((ad: any) => {
+      return {
+        id: ad.id,
+        name: ad.name,
+        fill: ad.color,
+        sessionStatistics: ad.sessionStatistics,
+        spentTimePercentage: parseFloat(
+          (
+            ad.sessionStatistics.spentTimeSeconds /
+            unmappedData.sessionStatistics.spentTimeSeconds
+          ).toFixed(2),
+        ),
+      };
+    });
+
     return {
       startOfRange,
       endOfRange,
-      barName: getBarName(startOfRange, endOfRange, i18n.t),
+      barName: overallMode
+        ? startOfRange.getFullYear().toString()
+        : getBarName(startOfRange, endOfRange, i18n.t),
       barDetailedName: getBarDetailedName(
         startOfRange,
         endOfRange,
@@ -38,20 +60,7 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
         i18n.language,
       ),
       sessionStatistics: bar.sessionStatistics,
-      adItems: bar.activityDistribution.map((ad: any) => {
-        return {
-          id: ad.id,
-          name: ad.name,
-          fill: ad.color,
-          sessionStatistics: ad.sessionStatistics,
-          spentTimePercentage: parseFloat(
-            (
-              ad.sessionStatistics.spentTimeSeconds /
-              unmappedData.sessionStatistics.spentTimeSeconds
-            ).toFixed(2),
-          ),
-        };
-      }),
+      adItems: barAds,
     };
   });
 

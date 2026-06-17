@@ -10,13 +10,16 @@ import { getTimeHHmmFromDate } from '../helpers/timeHelpers';
 export const getBarName = (
   startOfRange: Date,
   endOfRange: Date,
-  t: TFunction
+  t: TFunction,
 ): string => {
-  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
   const ONE_HOUR_MS = 60 * 60 * 1000;
+  const ONE_DAY_MS = 24 * ONE_HOUR_MS;
 
-  if (endOfRange.getTime() - startOfRange.getTime() < ONE_HOUR_MS) {
-    // if there is less than one hour in range
+  const rangeDurationMs = endOfRange.getTime() - startOfRange.getTime();
+  const rangeType = getRangeType(startOfRange, endOfRange);
+
+  if (rangeDurationMs < ONE_HOUR_MS) {
+    // if there's less than one hour
     return `${startOfRange.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
@@ -24,14 +27,14 @@ export const getBarName = (
       hour: '2-digit',
       minute: '2-digit',
     })}`;
-  } else if (endOfRange.getTime() - startOfRange.getTime() == ONE_HOUR_MS) {
+  } else if (rangeDurationMs === ONE_HOUR_MS) {
     // if it's exactly one hour
     return startOfRange.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
     });
-  } else if (endOfRange.getTime() - startOfRange.getTime() < ONE_DAY_MS - 1) {
-    // if there is less than one day in range
+  } else if (rangeDurationMs < ONE_DAY_MS - 1) {
+    // if there's less than one day
     return `${startOfRange.toLocaleTimeString([], {
       hour: '2-digit',
       minute: '2-digit',
@@ -39,22 +42,16 @@ export const getBarName = (
       hour: '2-digit',
       minute: '2-digit',
     })}`;
-  } else if (getRangeType(startOfRange, endOfRange) == 'days') {
+  } else if (rangeType === 'days') {
     // if it's exactly one day
     return startOfRange.getDate().toString();
-  } else if (
-    endOfRange.getTime() - startOfRange.getTime() > ONE_DAY_MS - 1 &&
-    getRangeType(startOfRange, endOfRange) != 'months'
-  ) {
-    // if there is more than one day in range but it's not exactly one month
-    return `${getMonthName(
-      startOfRange.getMonth(),
-      t
-    )} ${startOfRange.getDate()} - ${getMonthName(
-      endOfRange.getMonth(),
-      t
-    )} ${endOfRange.getDate()}`;
-  } else if (getRangeType(startOfRange, endOfRange) == 'months') {
+  } else if (rangeDurationMs > ONE_DAY_MS - 1 && rangeType !== 'months') {
+    // if there's more than one day and not exactly one month
+    const startMonthName = getMonthName(startOfRange.getMonth(), t);
+    const endMonthName = getMonthName(endOfRange.getMonth(), t);
+
+    return `${startMonthName} ${startOfRange.getDate()} - ${endMonthName} ${endOfRange.getDate()}`;
+  } else if (rangeType === 'months') {
     // if it's exactly one month
     return getMonthName(startOfRange.getMonth(), t);
   }
@@ -66,33 +63,34 @@ export const getBarDetailedName = (
   startOfRange: Date,
   endOfRange: Date,
   t: TFunction,
-  i18nLang: string
+  i18nLang: string,
 ) => {
-  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  const ONE_HOUR_MS = 60 * 60 * 1000;
+  const ONE_DAY_MS = 24 * ONE_HOUR_MS;
 
-  if (getRangeType(startOfRange, endOfRange) == 'days') {
+  const rangeDurationMs = endOfRange.getTime() - startOfRange.getTime();
+  const rangeType = getRangeType(startOfRange, endOfRange);
+
+  if (rangeType === 'days') {
     return formatDate(startOfRange, i18nLang, { withWeekDay: true });
     // if there is less than one day in range
-  } else if (endOfRange.getTime() - startOfRange.getTime() < ONE_DAY_MS - 1) {
+  } else if (rangeDurationMs < ONE_DAY_MS - 1) {
     return `${formatDate(startOfRange, i18nLang)} ${getTimeHHmmFromDate(
-      startOfRange
+      startOfRange,
     )} - ${getTimeHHmmFromDate(endOfRange)}`;
-  } else if (getRangeType(startOfRange, endOfRange) == 'months') {
+  } else if (rangeType === 'months') {
     return `${getMonthDetailedName(
       startOfRange.getMonth(),
-      t
+      t,
     )} ${startOfRange.getFullYear()}`;
     // if there is more than one day in range
-  } else if (endOfRange.getTime() - startOfRange.getTime() > ONE_DAY_MS - 1) {
-    return `${getMonthName(
-      startOfRange.getMonth(),
-      t
-    )} ${startOfRange.getDate()} ${getTimeHHmmFromDate(
-      startOfRange
-    )} - ${getMonthName(
-      endOfRange.getMonth(),
-      t
-    )} ${endOfRange.getDate()} ${getTimeHHmmFromDate(endOfRange)}`;
+  } else if (rangeDurationMs > ONE_DAY_MS - 1) {
+    const startMonthName = getMonthName(startOfRange.getMonth(), t);
+    const endMonthName = getMonthName(endOfRange.getMonth(), t);
+
+    return `${startMonthName} ${startOfRange.getDate()} ${getTimeHHmmFromDate(
+      startOfRange,
+    )} - ${endMonthName} ${endOfRange.getDate()} ${getTimeHHmmFromDate(endOfRange)}`;
   }
 
   return '';

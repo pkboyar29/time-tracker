@@ -27,6 +27,7 @@ import PeriodTooltip from './PeriodTooltip';
 interface PeriodDistributionBoxProps {
   analytics: IAnalytics;
   setAdBoxMode: (newAdMode: 'table' | 'chart') => void;
+  overallMode: boolean;
 }
 
 type SplitMode = 'default' | '4' | '3' | '2';
@@ -50,11 +51,18 @@ const CustomBar = (props: any) => {
 const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
   analytics,
   setAdBoxMode,
+  overallMode,
 }) => {
   const { t } = useTranslation();
   const themeState = useAppSelector((state) => state.theme.theme);
 
   const [adMode, setAdMode] = useState<boolean>(false);
+
+  // TODO: какой-то костыль, но работает
+  const [chartKey, setChartKey] = useState<number>(0);
+  const hideTooltip = () => {
+    setChartKey((prev) => prev + 1);
+  };
 
   const splitOptions = useMemo<{ value: string; label: string }[]>(() => {
     const options = [{ value: 'default', label: t('pdBox.default') }];
@@ -88,6 +96,11 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
     setSplitMode('default');
     setAdMode(false);
   }, [analytics]);
+
+  const changeSplitMode = (newMode: SplitMode) => {
+    setSplitMode(newMode);
+    hideTooltip();
+  };
 
   const displayTimeBars = useMemo<ITimeBar[]>(() => {
     if (splitMode == 'default') {
@@ -148,13 +161,15 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
           <div>{t('adBox.title')}</div>
         </div>
 
-        <SegmentedControl
-          options={splitOptions}
-          value={splitMode}
-          onChange={(value) => {
-            setSplitMode(value as SplitMode);
-          }}
-        />
+        {!overallMode && (
+          <SegmentedControl
+            options={splitOptions}
+            value={splitMode}
+            onChange={(value) => {
+              changeSplitMode(value as SplitMode);
+            }}
+          />
+        )}
       </div>
 
       {displayTimeBars.length > 1 && (
@@ -179,6 +194,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
           height={300}
         >
           <BarChart
+            key={chartKey}
             data={displayTimeBars}
             className="dark:[&>svg>path]:fill-[#5c5c5c]"
           >

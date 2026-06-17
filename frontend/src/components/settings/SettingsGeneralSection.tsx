@@ -5,7 +5,7 @@ import { updateDailyGoal, updateShowTimerInTitle } from '../../api/userApi';
 import { useTimer } from '../../hooks/useTimer';
 import axios from '../../api/axios';
 import { useTranslation } from 'react-i18next';
-import { clearSession } from '../../helpers/authHelpers';
+import { clearAuthSession } from '../../helpers/authHelpers';
 import { resolveAndDownloadBlob } from '../../helpers/fileHelpers';
 import { getReadableTime } from '../../helpers/timeHelpers';
 import { setLangInLS } from '../../helpers/localstorageHelpers';
@@ -47,7 +47,7 @@ const SettingsGeneralSection: FC = () => {
       await stopTimer(true);
     }
     dispatch(logOutUser());
-    clearSession();
+    clearAuthSession();
   };
 
   const dailyGoalInputChange = async (min: number) => {
