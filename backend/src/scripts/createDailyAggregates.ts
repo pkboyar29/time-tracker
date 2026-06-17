@@ -8,8 +8,6 @@ import sessionPartService from '../service/sessionPart.service';
 import User from '../model/user.model';
 import { DateTime } from 'luxon';
 
-// TODO: обязательно перед запуском скрипта надо удалить все агрегаты из БД, иначе будут созданы дубликаты (можно переписать код, чтобы такого не было)
-
 const MONGO_URL =
   process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
@@ -43,6 +41,10 @@ async function createDailyAggregates() {
     if (allParts.length === 0) {
       continue;
     }
+
+    // remove user aggregates
+    await DailyAggregate.deleteMany({ user: userId });
+    await DailyActivityDistribution.deleteMany({ user: userId });
 
     // <string, ISessionPart[]>
     const datesMap = new Map<string, any[]>(); // TODO: если использовать ISessionPart[], то появится пара ts предупреждений
