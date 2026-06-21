@@ -22,6 +22,9 @@ import { DateTime } from 'luxon';
 
 type TimeBarType = 'hour' | 'day' | 'month' | 'year';
 
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+
 interface GetSessionsStatisticsOptions {
   sessionParts: ISessionPart[];
   completedSessions: ISession[];
@@ -165,7 +168,9 @@ const analyticsService = {
   getAnalyticsForRangeCache,
   mergeSessionStatistics,
   mergeActivityDistributions,
-  mergeTimeBars,
+  mergeBarsWithDailyRangeOnLeft,
+  mergeBarsWithTodayRangeOnRight,
+  mergeAdjacentTimeBars,
   mergeAnalytics,
   invalidateCache,
   updateActivityInAds,
@@ -248,8 +253,8 @@ function getActivityDistributions({
   const activitiesStatMap = new Map<string, SessionStatistics>();
 
   const allActivitiesStat: SessionStatistics = {
-    spentTimeSeconds: 0,
     sessionsAmount: 0,
+    spentTimeSeconds: 0,
     pausedAmount: 0,
   };
 
@@ -306,10 +311,10 @@ function getActivityDistributions({
 }
 
 function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
-  let daysInRange = Math.ceil(
-    (endOfRange.getTime() - startOfRange.getTime()) / (1000 * 60 * 60 * 24), // ms in one day
+  const daysInRange = Math.ceil(
+    (endOfRange.getTime() - startOfRange.getTime()) / DAY_MS,
   );
-  if (daysInRange == 1) {
+  if (daysInRange === 1) {
     return 'hour';
   } else if (daysInRange <= 40) {
     return 'day';
@@ -462,8 +467,8 @@ function getTimeBars({
 
   while (true) {
     let barStat: SessionStatistics = {
-      spentTimeSeconds: 0,
       sessionsAmount: 0,
+      spentTimeSeconds: 0,
       pausedAmount: 0,
     };
     let barAds: ActivityDistribution[] = [];
@@ -546,8 +551,8 @@ function getActivityDistributionsAggregates({
   const activitiesStatMap = new Map<string, SessionStatistics>();
 
   const allActivitiesStat: SessionStatistics = {
-    spentTimeSeconds: 0,
     sessionsAmount: 0,
+    spentTimeSeconds: 0,
     pausedAmount: 0,
   };
 
@@ -1065,8 +1070,6 @@ async function getAnalyticsForRangeAggregates({
       timeBars,
     };
 
-    // TODO: тут тоже проблемы с mergeAnalytics. так как в leadingAnalytics есть часовые time bars, они почему-то добавляются в финальный объект, хотя этого быть не должно
-    // пример кейса: from=2026-04-20T12:00:00.000Z&to=2026-04-26T21:00:00.000Z. часовые тайм бары от leadingAnalytics (за 20 число) будут в финальном объекте
     if (leadingAnalytics) {
       aggrAnalytics = analyticsService.mergeAnalytics({
         finalObjStartOfRange: startOfRange,
@@ -1077,8 +1080,6 @@ async function getAnalyticsForRangeAggregates({
       });
     }
 
-    // TODO: баг в mergeAnalytics ломает у последнего тайм бара отображение startOfRange / endOfRange
-    // пример кейса: from=2026-04-15T21:00:00.000Z&to=2026-04-20T19:00:00.000Z. у последнего тайм бара будет такие периоды: 2026-04-20T21:00:00 - 2026-04-20T19:00:00
     if (trailingAnalytics) {
       aggrAnalytics = analyticsService.mergeAnalytics({
         finalObjStartOfRange: startOfRange,
@@ -1105,8 +1106,8 @@ async function getAnalyticsForRangeCache({
     if (startOfRange > new Date()) {
       return {
         sessionStatistics: {
-          spentTimeSeconds: 0,
           sessionsAmount: 0,
+          spentTimeSeconds: 0,
           pausedAmount: 0,
         },
         activityDistribution: [],
@@ -1149,8 +1150,16 @@ async function getAnalyticsForRangeCache({
 
       const cacheValue = await redisClient.get(cacheKey);
       if (cacheValue) {
-        const analyticsUntilToday: AnalyticsForRangeDTO =
-          JSON.parse(cacheValue);
+        const analyticsUntilToday: AnalyticsForRangeDTO = JSON.parse(
+          cacheValue,
+          (key, value) => {
+            if (key === 'startOfRange' || key === 'endOfRange') {
+              return new Date(value);
+            }
+            return value;
+          },
+        );
+
         return analyticsService.mergeAnalytics({
           finalObjStartOfRange: startOfRange,
           finalObjEndOfRange: endOfRange,
@@ -1270,27 +1279,111 @@ function mergeActivityDistributions({
   return finalAd;
 }
 
-// TODO: переименовать все переменные вида untilToday... и today...
-function mergeTimeBars({
+function mergeBarsWithDailyRangeOnLeft({
   leftObj,
   rightObj,
   finalObjStartOfRange,
   finalObjEndOfRange,
-  timezone,
 }: MergeTimeBarsOptions): TimeBar[] {
-  const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
-  const DAY_MS = 24 * 60 * 60 * 1000;
+  if (
+    leftObj.timeBars.length === 0 ||
+    leftObj.timeBars[0].endOfRange.getTime() -
+      leftObj.timeBars[0].startOfRange.getTime() >
+      DAY_MS
+  ) {
+    throw new Error('Left object must be day or shorter range');
+  }
 
   const finalObjTimeBarType = analyticsService.getTimeBarType(
     finalObjStartOfRange,
     finalObjEndOfRange,
   );
-
-  let finalTimeBars: TimeBar[] = [];
-
   if (finalObjTimeBarType === 'hour') {
     return [...leftObj.timeBars, ...rightObj.timeBars];
-  } else if (finalObjTimeBarType === 'day') {
+  }
+
+  let finalTimeBars: TimeBar[] = [];
+  if (finalObjTimeBarType === 'day') {
+    const firstRightBar = rightObj.timeBars[0];
+
+    const leftBar: TimeBar = {
+      startOfRange: finalObjStartOfRange,
+      endOfRange: firstRightBar.startOfRange,
+      sessionStatistics: leftObj.sessionStatistics,
+      activityDistribution: leftObj.activityDistribution,
+    };
+
+    if (
+      firstRightBar.endOfRange.getTime() -
+        firstRightBar.startOfRange.getTime() <=
+      HOUR_MS
+    ) {
+      const rightBar: TimeBar = {
+        startOfRange: firstRightBar.startOfRange,
+        endOfRange: finalObjEndOfRange,
+        sessionStatistics: rightObj.sessionStatistics,
+        activityDistribution: rightObj.activityDistribution,
+      };
+
+      finalTimeBars = [leftBar, rightBar];
+    } else {
+      finalTimeBars = [leftBar, ...rightObj.timeBars];
+    }
+  } else if (
+    finalObjTimeBarType === 'month' ||
+    finalObjTimeBarType === 'year'
+  ) {
+    // TODO: логика для случая, когда левый объект оканчивается в начале следующего месяца/года. В таком случае Надо просто сделать также как и сверху
+    // Но это вовсе не критично
+    finalTimeBars = rightObj.timeBars;
+
+    const mergedStat = analyticsService.mergeSessionStatistics([
+      leftObj.sessionStatistics,
+      finalTimeBars[0].sessionStatistics,
+    ]);
+    const mergedAds = analyticsService.mergeActivityDistributions({
+      adsList: [
+        leftObj.activityDistribution,
+        finalTimeBars[0].activityDistribution,
+      ],
+    });
+
+    finalTimeBars[0].startOfRange = finalObjStartOfRange;
+    finalTimeBars[0].sessionStatistics = mergedStat;
+    finalTimeBars[0].activityDistribution = mergedAds;
+  }
+
+  return finalTimeBars;
+}
+
+function mergeBarsWithTodayRangeOnRight({
+  leftObj,
+  rightObj,
+  timezone,
+  finalObjStartOfRange,
+  finalObjEndOfRange,
+}: MergeTimeBarsOptions): TimeBar[] {
+  if (
+    rightObj.timeBars.length === 0 ||
+    rightObj.timeBars[0].endOfRange.getTime() -
+      rightObj.timeBars[0].startOfRange.getTime() >
+      DAY_MS
+  ) {
+    throw new Error('Right object must be day or shorter range');
+  }
+
+  const finalObjTimeBarType = analyticsService.getTimeBarType(
+    finalObjStartOfRange,
+    finalObjEndOfRange,
+  );
+  if (finalObjTimeBarType === 'hour') {
+    return [...leftObj.timeBars, ...rightObj.timeBars];
+  }
+
+  const { startOfToday, startOfTomorrow } = getTodayRange(timezone);
+  let finalTimeBars: TimeBar[] = [];
+
+  if (finalObjTimeBarType === 'day') {
     let untilTodayObjTimeBars = leftObj.timeBars;
 
     if (
@@ -1385,15 +1478,16 @@ function mergeTimeBars({
 
       finalTimeBars = [currentMonthTimeBar, ...afterCurrentMonthTimeBars];
     } else if (
-      analyticsService.getTimeBarType(
-        new Date(untilTodayTimeBars[0].startOfRange),
-        new Date(untilTodayTimeBars[0].endOfRange),
-      ) === 'hour'
+      untilTodayTimeBars[0].endOfRange.getTime() -
+        untilTodayTimeBars[0].startOfRange.getTime() <
+      DAY_MS
     ) {
-      // TODO: странная проверка, надо ее сделать нормальной
+      // TODO: все еще странная проверка?
+      // TODO: может тут должно быть <= HOUR_MS?
+      // TODO: какое-то непонятное описание, не стыкуется с самой проверкой
       // if until today obj is month or less than month (timeBarType of range is day, timeBarType of bar is hour)
 
-      // TODO: переименовать
+      // TODO: переименовать?
       const untilTodayTimeBarsStat: SessionStatistics =
         untilTodayTimeBars.reduce<SessionStatistics>(
           (acc, bar) => {
@@ -1405,7 +1499,6 @@ function mergeTimeBars({
           },
           { sessionsAmount: 0, spentTimeSeconds: 0, pausedAmount: 0 },
         );
-      // TODO: переименовать?
       const untilTodayTimeBarsAd = analyticsService.mergeActivityDistributions({
         adsList: [...untilTodayTimeBars.map((bar) => bar.activityDistribution)],
       });
@@ -1497,9 +1590,71 @@ function mergeTimeBars({
         ];
       }
     }
+  } else if (finalObjTimeBarType === 'year') {
+    finalTimeBars = leftObj.timeBars;
+
+    const lastIdx = finalTimeBars.length - 1;
+    const mergedStat = analyticsService.mergeSessionStatistics([
+      finalTimeBars[lastIdx].sessionStatistics,
+      rightObj.sessionStatistics,
+    ]);
+    const mergedAds = analyticsService.mergeActivityDistributions({
+      adsList: [
+        finalTimeBars[lastIdx].activityDistribution,
+        rightObj.activityDistribution,
+      ],
+    });
+
+    finalTimeBars[lastIdx].endOfRange = finalObjEndOfRange;
+    finalTimeBars[lastIdx].sessionStatistics = mergedStat;
+    finalTimeBars[lastIdx].activityDistribution = mergedAds;
   }
 
   return finalTimeBars;
+}
+
+function mergeAdjacentTimeBars({
+  leftObj,
+  rightObj,
+  finalObjStartOfRange,
+  finalObjEndOfRange,
+  timezone,
+}: MergeTimeBarsOptions): TimeBar[] {
+  // TODO: если бы у AnalyticsForRangeDTO был бы просто startOfRange и endOfRange, эту проверку можно было бы написать куда проще и понятнее
+  if (
+    leftObj.timeBars.length > 0 &&
+    leftObj.timeBars[0].endOfRange.getTime() -
+      leftObj.timeBars[0].startOfRange.getTime() <=
+      HOUR_MS
+  ) {
+    return analyticsService.mergeBarsWithDailyRangeOnLeft({
+      leftObj,
+      rightObj,
+      timezone,
+      finalObjStartOfRange,
+      finalObjEndOfRange,
+    });
+  }
+
+  // TODO: если бы у AnalyticsForRangeDTO был бы просто startOfRange и endOfRange, эту проверку можно было бы написать куда проще и понятнее
+  if (
+    rightObj.timeBars.length > 0 &&
+    rightObj.timeBars[0].endOfRange.getTime() -
+      rightObj.timeBars[0].startOfRange.getTime() <=
+      HOUR_MS
+  ) {
+    return analyticsService.mergeBarsWithTodayRangeOnRight({
+      leftObj,
+      rightObj,
+      timezone,
+      finalObjStartOfRange,
+      finalObjEndOfRange,
+    });
+  }
+
+  throw new Error(
+    'Either left or right analytics object must be a day or shorter range',
+  );
 }
 
 function mergeAnalytics({
@@ -1510,19 +1665,23 @@ function mergeAnalytics({
   timezone,
 }: MergeAnalyticsOptions): AnalyticsForRangeDTO {
   const finalObj: AnalyticsForRangeDTO = {
-    sessionStatistics: analyticsService.mergeSessionStatistics([
-      leftObj.sessionStatistics,
-      rightObj.sessionStatistics,
-    ]),
+    sessionStatistics: {
+      sessionsAmount: 0,
+      spentTimeSeconds: 0,
+      pausedAmount: 0,
+    },
     activityDistribution: [],
     timeBars: [],
   };
 
+  finalObj.sessionStatistics = analyticsService.mergeSessionStatistics([
+    leftObj.sessionStatistics,
+    rightObj.sessionStatistics,
+  ]);
   finalObj.activityDistribution = analyticsService.mergeActivityDistributions({
     adsList: [leftObj.activityDistribution, rightObj.activityDistribution],
   });
-
-  finalObj.timeBars = analyticsService.mergeTimeBars({
+  finalObj.timeBars = analyticsService.mergeAdjacentTimeBars({
     leftObj,
     rightObj,
     finalObjStartOfRange,

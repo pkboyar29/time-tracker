@@ -3,6 +3,11 @@ export interface SessionStatistics {
   pausedAmount: number;
   spentTimeSeconds: number;
 }
+export const emptySessionStat: SessionStatistics = {
+  sessionsAmount: 0,
+  spentTimeSeconds: 0,
+  pausedAmount: 0,
+};
 
 export interface ActivityDistribution {
   id: string;

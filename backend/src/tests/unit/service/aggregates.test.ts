@@ -1,8 +1,6 @@
 import analyticsService from '../../../service/analytics.service';
 import { IDailyAggregate } from '../../../model/dailyAggregate.model';
 import { Types } from 'mongoose';
-import { ISessionPart } from '../../../model/sessionPart.model';
-import { ISession } from '../../../model/session.model';
 
 describe('analyticsService.getSessionsStatisticsAggregates', () => {
   it('should correctly sum all fields from multiple aggregates', () => {
