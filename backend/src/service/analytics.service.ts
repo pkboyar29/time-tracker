@@ -1199,7 +1199,6 @@ async function getAnalyticsForRangeCache({
         const analyticsUntilToday: AnalyticsForRangeDTO = JSON.parse(
           cacheValue,
           (key, value) => {
-            // TODO: проверить, преобразуются ли startOfRange и endOfRange самого объекта в даты
             if (key === 'startOfRange' || key === 'endOfRange') {
               return new Date(value);
             }
