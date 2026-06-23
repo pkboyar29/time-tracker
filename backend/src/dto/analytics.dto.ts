@@ -24,6 +24,8 @@ export interface TimeBar {
 }
 
 export interface AnalyticsForRangeDTO {
+  startOfRange: Date;
+  endOfRange: Date;
   sessionStatistics: SessionStatistics;
   activityDistribution: ActivityDistribution[];
   timeBars: TimeBar[];

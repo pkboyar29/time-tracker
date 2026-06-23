@@ -10,7 +10,6 @@ import {
   TimeBar,
   emptySessionStat,
 } from '../../../dto/analytics.dto';
-import * as dateUtils from '../../../helpers/getTodayRange';
 
 const mockActivityGroup = {
   _id: new Types.ObjectId(),
@@ -991,7 +990,6 @@ describe('analyticsService.mergeActivityDistributions', () => {
 });
 
 describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
-  const timezone = 'UTC';
   const aMeta = {
     id: new Types.ObjectId().toString(),
     name: 'A',
@@ -1028,6 +1026,8 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
   ];
 
   const leftObj: AnalyticsForRangeDTO = {
+    startOfRange: new Date('2025-09-20T21:00:00Z'),
+    endOfRange: new Date('2025-09-21T00:00:00Z'),
     sessionStatistics: leftObjStat,
     activityDistribution: leftObjAds,
     timeBars: [
@@ -1054,6 +1054,8 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
 
   it('should throw error if left object is longer than day', () => {
     const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-20T00:00:00Z'),
+      endOfRange: new Date('2025-11-01T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -1073,6 +1075,8 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
     };
 
     const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-11-01T00:00:00Z'),
+      endOfRange: new Date('2025-12-01T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -1084,16 +1088,11 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
         },
       ],
     };
-    const finalObjStartOfRange = new Date('2025-09-20T00:00:00Z');
-    const finalObjEndOfRange = new Date('2025-12-01T00:00:00Z');
 
     try {
       analyticsService.mergeBarsWithDailyRangeOnLeft({
         leftObj,
         rightObj,
-        finalObjStartOfRange,
-        finalObjEndOfRange,
-        timezone,
       });
     } catch (e) {
       expect(e).toBeInstanceOf(Error);
@@ -1102,6 +1101,8 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
 
   it('should merge all time bars if final range bar type is hour', () => {
     const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-20T22:00:00Z'),
+      endOfRange: new Date('2025-09-21T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -1120,6 +1121,8 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
       ],
     };
     const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-21T00:00:00Z'),
+      endOfRange: new Date('2025-09-21T03:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -1143,20 +1146,25 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
         },
       ],
     };
-    const finalObjStartOfRange = new Date('2025-09-20T22:00:00Z');
-    const finalObjEndOfRange = new Date('2025-09-21T03:00:00Z');
 
     const result = analyticsService.mergeBarsWithDailyRangeOnLeft({
       leftObj,
       rightObj,
-      finalObjStartOfRange,
-      finalObjEndOfRange,
-      timezone,
     });
     expect(result.length).toBe(5);
   });
 
   it('if bar type is hour on the right, should create proper left and right time bars and combine them', () => {
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-20T00:00:00Z'),
+      endOfRange: new Date('2025-09-21T00:00:00Z'),
+      sessionStatistics: leftObjStat,
+      activityDistribution: leftObjAds,
+      timeBars: [
+        // expecting that there are 24 bars until 2025-09-21T00:00:00Z
+      ],
+    };
+
     const rightObjStat: SessionStatistics = {
       sessionsAmount: 1,
       spentTimeSeconds: 65,
@@ -1172,8 +1180,9 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
         },
       },
     ];
-
     const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-21T00:00:00Z'),
+      endOfRange: new Date('2025-09-21T03:00:00Z'),
       sessionStatistics: rightObjStat,
       activityDistribution: rightObjAds,
       timeBars: [
@@ -1195,29 +1204,23 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
           sessionStatistics: emptySessionStat,
           activityDistribution: [],
         },
-        // expecting that there are 24 bars until 2025-09-22T00:00:00Z
       ],
     };
-    const finalObjStartOfRange = new Date('2025-09-20T21:00:00Z');
-    const finalObjEndOfRange = new Date('2025-09-22T00:00:00Z');
 
     const result = analyticsService.mergeBarsWithDailyRangeOnLeft({
       leftObj,
       rightObj,
-      finalObjStartOfRange,
-      finalObjEndOfRange,
-      timezone,
     });
     expect(result.length).toBe(2);
     expect(result[0]).toEqual({
-      startOfRange: new Date('2025-09-20T21:00:00Z'),
+      startOfRange: new Date('2025-09-20T00:00:00Z'),
       endOfRange: new Date('2025-09-21T00:00:00Z'),
       sessionStatistics: leftObjStat,
       activityDistribution: [...leftObjAds],
     });
     expect(result[1]).toEqual({
       startOfRange: new Date('2025-09-21T00:00:00Z'),
-      endOfRange: new Date('2025-09-22T00:00:00Z'),
+      endOfRange: new Date('2025-09-21T03:00:00Z'),
       sessionStatistics: rightObjStat,
       activityDistribution: [...rightObjAds],
     });
@@ -1225,6 +1228,8 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
 
   it('if bar type is day on the right, should create proper left time bar and merge it with right obj time bars', () => {
     const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-21T00:00:00Z'),
+      endOfRange: new Date('2025-09-24T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -1248,15 +1253,10 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
         },
       ],
     };
-    const finalObjStartOfRange = new Date('2025-09-20T21:00:00Z');
-    const finalObjEndOfRange = new Date('2025-09-24T00:00:00Z');
 
     const result = analyticsService.mergeBarsWithDailyRangeOnLeft({
       leftObj,
       rightObj,
-      finalObjStartOfRange,
-      finalObjEndOfRange,
-      timezone,
     });
     expect(result.length).toBe(4);
     expect(result[0]).toEqual({
@@ -1269,6 +1269,8 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
 
   it('if bar type is month or year on the right, should properly change first time bar on the right', () => {
     const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-21T00:00:00Z'),
+      endOfRange: new Date('2026-01-01T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -1311,15 +1313,10 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
         },
       ],
     };
-    const finalObjStartOfRange = new Date('2025-09-20T21:00:00Z');
-    const finalObjEndOfRange = new Date('2026-01-01T00:00:00Z');
 
     const result = analyticsService.mergeBarsWithDailyRangeOnLeft({
       leftObj,
       rightObj,
-      finalObjStartOfRange,
-      finalObjEndOfRange,
-      timezone,
     });
     expect(result.length).toBe(4);
     expect(result[0]).toEqual({
@@ -1352,243 +1349,37 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
   });
 });
 
-describe('analyticsService.mergeBarsWithTodayRangeOnRight', () => {
+describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
   const timezone = 'UTC';
-  const startOfToday = new Date('2025-09-20T00:00:00Z');
-  const startOfTomorrow = new Date('2025-09-21T00:00:00Z');
-
-  const dayTimeBars: TimeBar[] = Array.from({ length: 24 }, (_, h) => ({
-    startOfRange: new Date(`2025-09-19T${String(h).padStart(2, '0')}:00:00Z`),
-    endOfRange: new Date(`2025-09-19T${String(h + 1).padStart(2, '0')}:00:00Z`),
-    sessionStatistics: emptySessionStat,
-    activityDistribution: [],
-  }));
-
   const aMeta = {
     id: new Types.ObjectId().toString(),
     name: 'A',
     color: '#aaa000',
   };
-  const bMeta = {
-    id: new Types.ObjectId().toString(),
-    name: 'B',
-    color: '#bbb000',
-  };
-  const cMeta = {
-    id: new Types.ObjectId().toString(),
-    name: 'C',
-    color: '#ccc000',
-  };
 
-  const untilTodayObj: AnalyticsForRangeDTO = {
-    sessionStatistics: {
-      sessionsAmount: 2,
-      spentTimeSeconds: 300,
-      pausedAmount: 2,
-    },
-    activityDistribution: [
-      {
-        ...aMeta,
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 100,
-          pausedAmount: 1,
-        },
-      },
-      {
-        ...bMeta,
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 200,
-          pausedAmount: 1,
-        },
-      },
-    ],
-    timeBars: [
-      {
-        startOfRange: new Date('2025-09-18T00:00:00Z'),
-        endOfRange: new Date('2025-09-19T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 25,
-          pausedAmount: 2,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-09-19T00:00:00Z'),
-        endOfRange: new Date('2025-09-20T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
-          pausedAmount: 0,
-        },
-        activityDistribution: [],
-      },
-    ],
+  const rightObjBars: TimeBar[] = Array.from({ length: 24 }, (_, h) => ({
+    startOfRange: new Date(`2026-06-20T${String(h).padStart(2, '0')}:00:00Z`),
+    endOfRange: new Date(`2026-06-20T${String(h + 1).padStart(2, '0')}:00:00Z`),
+    sessionStatistics: emptySessionStat,
+    activityDistribution: [],
+  }));
+  const rightObjStat: SessionStatistics = {
+    sessionsAmount: 3,
+    spentTimeSeconds: 75,
+    pausedAmount: 2,
   };
-
-  const todayObj: AnalyticsForRangeDTO = {
-    sessionStatistics: {
-      sessionsAmount: 1,
-      spentTimeSeconds: 150,
-      pausedAmount: 1,
-    },
-    activityDistribution: [
-      {
-        ...aMeta,
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 50,
-          pausedAmount: 1,
-        },
-      },
-      {
-        ...cMeta,
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 100,
-          pausedAmount: 0,
-        },
-      },
-    ],
-    timeBars: [
-      // 00:00 – 01:00
-      {
-        startOfRange: new Date('2025-09-20T00:00:00Z'),
-        endOfRange: new Date('2025-09-20T01:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 01:00 – 02:00
-      {
-        startOfRange: new Date('2025-09-20T01:00:00Z'),
-        endOfRange: new Date('2025-09-20T02:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 02:00 – 03:00
-      {
-        startOfRange: new Date('2025-09-20T02:00:00Z'),
-        endOfRange: new Date('2025-09-20T03:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 03:00 – 04:00
-      {
-        startOfRange: new Date('2025-09-20T03:00:00Z'),
-        endOfRange: new Date('2025-09-20T04:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 04:00 – 05:00
-      {
-        startOfRange: new Date('2025-09-20T04:00:00Z'),
-        endOfRange: new Date('2025-09-20T05:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 05:00 – 06:00
-      {
-        startOfRange: new Date('2025-09-20T05:00:00Z'),
-        endOfRange: new Date('2025-09-20T06:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 06:00 – 07:00
-      {
-        startOfRange: new Date('2025-09-20T06:00:00Z'),
-        endOfRange: new Date('2025-09-20T07:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 07:00 – 08:00
-      {
-        startOfRange: new Date('2025-09-20T07:00:00Z'),
-        endOfRange: new Date('2025-09-20T08:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 08:00 – 09:00
-      {
-        startOfRange: new Date('2025-09-20T08:00:00Z'),
-        endOfRange: new Date('2025-09-20T09:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 09:00 – 10:00 (Activity A)
-      {
-        startOfRange: new Date('2025-09-20T09:00:00Z'),
-        endOfRange: new Date('2025-09-20T10:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 50,
-          pausedAmount: 1,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-        ],
-      },
-      // 10:00 – 11:00
-      {
-        startOfRange: new Date('2025-09-20T10:00:00Z'),
-        endOfRange: new Date('2025-09-20T11:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 11:00 – 12:00
-      {
-        startOfRange: new Date('2025-09-20T11:00:00Z'),
-        endOfRange: new Date('2025-09-20T12:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 12:00 – 13:00
-      {
-        startOfRange: new Date('2025-09-20T12:00:00Z'),
-        endOfRange: new Date('2025-09-20T13:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 13:00 – 14:00
-      {
-        startOfRange: new Date('2025-09-20T13:00:00Z'),
-        endOfRange: new Date('2025-09-20T14:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      // 14:00 – 15:00 (Activity C)
-      {
-        startOfRange: new Date('2025-09-20T14:00:00Z'),
-        endOfRange: new Date('2025-09-20T15:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 100,
-          pausedAmount: 0,
-        },
-        activityDistribution: [
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-    ],
+  const rightObj: AnalyticsForRangeDTO = {
+    startOfRange: new Date('2026-06-20T00:00:00Z'),
+    endOfRange: new Date('2026-06-21T00:00:00Z'),
+    sessionStatistics: rightObjStat,
+    activityDistribution: [{ ...aMeta, sessionStatistics: rightObjStat }],
+    timeBars: rightObjBars,
   };
 
   it('should throw error if right object is longer than day', () => {
     const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-20T00:00:00Z'),
+      endOfRange: new Date('2025-11-01T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -1608,6 +1399,8 @@ describe('analyticsService.mergeBarsWithTodayRangeOnRight', () => {
     };
 
     const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-11-01T00:00:00Z'),
+      endOfRange: new Date('2025-12-01T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -1619,14 +1412,12 @@ describe('analyticsService.mergeBarsWithTodayRangeOnRight', () => {
         },
       ],
     };
-    const finalObjStartOfRange = new Date('2025-09-20T00:00:00Z');
-    const finalObjEndOfRange = new Date('2025-12-01T00:00:00Z');
+    const finalObjEndOfRange = rightObj.endOfRange;
 
     try {
-      analyticsService.mergeBarsWithTodayRangeOnRight({
+      analyticsService.mergeBarsWithDailyRangeOnRight({
         leftObj,
         rightObj,
-        finalObjStartOfRange,
         finalObjEndOfRange,
         timezone,
       });
@@ -1635,43 +1426,256 @@ describe('analyticsService.mergeBarsWithTodayRangeOnRight', () => {
     }
   });
 
-  it('should create correct hour timeBars', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
+  it('if final bar type is hour, should combine left and right time bars', () => {
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-06-20T22:00:00Z'),
+      endOfRange: new Date('2026-06-21T00:00:00Z'),
+      sessionStatistics: emptySessionStat,
+      activityDistribution: [],
+      timeBars: [
+        {
+          startOfRange: new Date('2026-06-20T22:00:00Z'),
+          endOfRange: new Date('2026-06-20T23:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+        {
+          startOfRange: new Date('2026-06-20T23:00:00Z'),
+          endOfRange: new Date('2026-06-21T00:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+      ],
+    };
 
-    const untilTodayObj: AnalyticsForRangeDTO = {
+    const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-06-21T00:00:00Z'),
+      endOfRange: new Date('2026-06-21T02:00:00Z'),
+      sessionStatistics: emptySessionStat,
+      activityDistribution: [],
+      timeBars: [
+        {
+          startOfRange: new Date('2026-06-21T00:00:00Z'),
+          endOfRange: new Date('2026-06-21T01:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+        {
+          startOfRange: new Date('2026-06-21T01:00:00Z'),
+          endOfRange: new Date('2026-06-21T02:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      finalObjEndOfRange: rightObj.endOfRange,
+      timezone,
+    });
+    expect(result.length).toBe(4);
+  });
+
+  it('if final bar type is day and bar type is hour on the left, should create proper left time bar', () => {
+    const leftObjStat = {
+      sessionsAmount: 1,
+      spentTimeSeconds: 40,
+      pausedAmount: 2,
+    };
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-06-19T22:00:00Z'),
+      endOfRange: new Date('2026-06-20T00:00:00Z'),
+      sessionStatistics: leftObjStat,
+      activityDistribution: [{ ...aMeta, sessionStatistics: leftObjStat }],
+      timeBars: [
+        {
+          startOfRange: new Date('2026-06-19T22:00:00Z'),
+          endOfRange: new Date('2026-06-19T23:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+        {
+          startOfRange: new Date('2026-06-19T23:00:00Z'),
+          endOfRange: new Date('2026-06-20T00:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      finalObjEndOfRange: rightObj.endOfRange,
+      timezone,
+    });
+    expect(result.length).toBe(2);
+    expect(result[0]).toEqual({
+      startOfRange: leftObj.startOfRange,
+      endOfRange: leftObj.endOfRange,
+      sessionStatistics: leftObjStat,
+      activityDistribution: [{ ...aMeta, sessionStatistics: leftObjStat }],
+    });
+    expect(result[1]).toEqual({
+      startOfRange: rightObj.startOfRange,
+      endOfRange: rightObj.endOfRange,
+      sessionStatistics: rightObjStat,
+      activityDistribution: [{ ...aMeta, sessionStatistics: rightObjStat }],
+    });
+  });
+
+  it('if final bar type is day and bar type is day on the left, should properly combine left time bars with created right bar', () => {
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-06-18T00:00:00Z'),
+      endOfRange: new Date('2026-06-20T00:00:00Z'),
+      sessionStatistics: emptySessionStat,
+      activityDistribution: [],
+      timeBars: [
+        {
+          startOfRange: new Date('2026-06-18T00:00:00Z'),
+          endOfRange: new Date('2026-06-19T00:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+        {
+          startOfRange: new Date('2026-06-19T00:00:00Z'),
+          endOfRange: new Date('2026-06-20T00:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      finalObjEndOfRange: rightObj.endOfRange,
+      timezone,
+    });
+    expect(result.length).toBe(3);
+  });
+
+  it('if final bar type is day and finalObjEndOfRange is later than range end of right obj, should add empty day time bars', () => {
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-06-19T00:00:00Z'),
+      endOfRange: new Date('2026-06-20T00:00:00Z'),
+      sessionStatistics: emptySessionStat,
+      activityDistribution: [],
+      timeBars: [
+        {
+          startOfRange: new Date('2026-06-19T00:00:00Z'),
+          endOfRange: new Date('2026-06-20T00:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      finalObjEndOfRange: new Date('2026-06-30T00:00:00Z'),
+      timezone,
+    });
+    expect(result.length).toBe(11);
+  });
+
+  it('if final bar type is month and bar type is hour/day on the left, should properly create left bar and empty bars', () => {
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-06-19T22:00:00Z'),
+      endOfRange: new Date('2026-06-20T00:00:00Z'),
       sessionStatistics: {
-        spentTimeSeconds: 300,
-        sessionsAmount: 3,
-        pausedAmount: 0,
+        sessionsAmount: 5,
+        spentTimeSeconds: 30,
+        pausedAmount: 2,
       },
       activityDistribution: [
         {
           ...aMeta,
           sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 100,
-            pausedAmount: 0,
-          },
-        },
-        {
-          ...cMeta,
-          sessionStatistics: {
-            sessionsAmount: 2,
-            spentTimeSeconds: 200,
-            pausedAmount: 0,
+            sessionsAmount: 5,
+            spentTimeSeconds: 30,
+            pausedAmount: 2,
           },
         },
       ],
       timeBars: [
         {
-          startOfRange: new Date('2025-09-19T22:00:00Z'),
-          endOfRange: new Date('2025-09-19T23:00:00Z'),
+          startOfRange: new Date('2026-06-19T22:00:00Z'),
+          endOfRange: new Date('2026-06-19T23:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+        {
+          startOfRange: new Date('2026-06-19T23:00:00Z'),
+          endOfRange: new Date('2026-06-20T00:00:00Z'),
+          sessionStatistics: emptySessionStat,
+          activityDistribution: [],
+        },
+      ],
+    };
+
+    const result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      timezone,
+      finalObjEndOfRange: new Date('2026-08-01T00:00:00Z'),
+    });
+    expect(result.length).toBe(2);
+    expect(result[0]).toEqual({
+      startOfRange: leftObj.startOfRange,
+      endOfRange: new Date('2026-07-01T00:00:00Z'),
+      sessionStatistics: {
+        sessionsAmount: 8,
+        spentTimeSeconds: 105,
+        pausedAmount: 4,
+      },
+      activityDistribution: [
+        {
+          ...aMeta,
+          sessionStatistics: {
+            sessionsAmount: 8,
+            spentTimeSeconds: 105,
+            pausedAmount: 4,
+          },
+        },
+      ],
+    } as TimeBar);
+    expect(result[1].startOfRange).toEqual(new Date('2026-07-01T00:00:00Z'));
+    expect(result[1].endOfRange).toEqual(new Date('2026-08-01T00:00:00Z'));
+  });
+
+  it('if final bar type is month, bar type is month on the left, should properly combine left bars with right obj', () => {
+    const leftObjStat: SessionStatistics = {
+      sessionsAmount: 2,
+      spentTimeSeconds: 60,
+      pausedAmount: 2,
+    };
+    const leftBarStat: SessionStatistics = {
+      sessionsAmount: 1,
+      spentTimeSeconds: 40,
+      pausedAmount: 2,
+    };
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-05-01T00:00:00Z'),
+      endOfRange: new Date('2026-06-20T00:00:00Z'),
+      sessionStatistics: leftObjStat,
+      activityDistribution: [{ ...aMeta, sessionStatistics: leftObjStat }],
+      timeBars: [
+        {
+          startOfRange: new Date('2026-05-01T00:00:00Z'),
+          endOfRange: new Date('2026-06-01T00:00:00Z'),
+          sessionStatistics: leftBarStat,
+          activityDistribution: [{ ...aMeta, sessionStatistics: leftBarStat }],
+        },
+        {
+          startOfRange: new Date('2026-06-01T00:00:00Z'),
+          endOfRange: new Date('2026-06-20T00:00:00Z'),
           sessionStatistics: {
             sessionsAmount: 1,
-            spentTimeSeconds: 100,
+            spentTimeSeconds: 20,
             pausedAmount: 0,
           },
           activityDistribution: [
@@ -1679,26 +1683,7 @@ describe('analyticsService.mergeBarsWithTodayRangeOnRight', () => {
               ...aMeta,
               sessionStatistics: {
                 sessionsAmount: 1,
-                spentTimeSeconds: 100,
-                pausedAmount: 0,
-              },
-            },
-          ],
-        },
-        {
-          startOfRange: new Date('2025-09-19T23:00:00Z'),
-          endOfRange: new Date('2025-09-20T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 2,
-            spentTimeSeconds: 200,
-            pausedAmount: 0,
-          },
-          activityDistribution: [
-            {
-              ...cMeta,
-              sessionStatistics: {
-                sessionsAmount: 2,
-                spentTimeSeconds: 200,
+                spentTimeSeconds: 20,
                 pausedAmount: 0,
               },
             },
@@ -1707,1251 +1692,177 @@ describe('analyticsService.mergeBarsWithTodayRangeOnRight', () => {
       ],
     };
 
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-19T22:00:00Z'),
-      finalObjEndOfRange: new Date('2025-09-20T15:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
-      timezone,
-    });
+    const expectedResultStat: SessionStatistics = {
+      sessionsAmount: 4,
+      spentTimeSeconds: 95,
+      pausedAmount: 2,
+    };
 
-    expect(result.length).toBe(17);
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2025-09-19T22:00:00Z'),
-      endOfRange: new Date('2025-09-19T23:00:00Z'),
-      sessionStatistics: {
-        sessionsAmount: 1,
-        spentTimeSeconds: 100,
-        pausedAmount: 0,
-      },
+    // if finalObjEndOfRange is the same as rightObj.endOfRange
+    let result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      timezone,
+      finalObjEndOfRange: rightObj.endOfRange,
+    });
+    expect(result.length).toBe(2);
+    expect(result[1]).toEqual({
+      startOfRange: new Date('2026-06-01T00:00:00Z'),
+      endOfRange: rightObj.endOfRange,
+      sessionStatistics: expectedResultStat,
       activityDistribution: [
         {
           ...aMeta,
-          sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 100,
-            pausedAmount: 0,
-          },
+          sessionStatistics: expectedResultStat,
         },
       ],
+    } as TimeBar);
+
+    // if finalObjEndOfRange is later than rightObj.endOfRange but earlier than start of the next month
+    result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      timezone,
+      finalObjEndOfRange: new Date('2026-06-25T00:00:00Z'),
     });
+    expect(result.length).toBe(2);
     expect(result[1]).toEqual({
-      startOfRange: new Date('2025-09-19T23:00:00Z'),
-      endOfRange: new Date('2025-09-20T00:00:00Z'),
-      sessionStatistics: {
-        sessionsAmount: 2,
-        spentTimeSeconds: 200,
-        pausedAmount: 0,
-      },
+      startOfRange: new Date('2026-06-01T00:00:00Z'),
+      endOfRange: new Date('2026-06-25T00:00:00Z'),
+      sessionStatistics: expectedResultStat,
       activityDistribution: [
-        {
-          ...cMeta,
-          sessionStatistics: {
-            sessionsAmount: 2,
-            spentTimeSeconds: 200,
-            pausedAmount: 0,
-          },
-        },
+        { ...aMeta, sessionStatistics: expectedResultStat },
       ],
+    } as TimeBar);
+
+    // if finalObjEndOfRange is start of the next month
+    result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      timezone,
+      finalObjEndOfRange: new Date('2026-07-01T00:00:00Z'),
     });
-    expect(result[2]).toEqual({
-      startOfRange: new Date('2025-09-20T00:00:00Z'),
-      endOfRange: new Date('2025-09-20T01:00:00Z'),
-      sessionStatistics: emptySessionStat,
-      activityDistribution: [],
+    expect(result.length).toBe(2);
+    expect(result[1]).toEqual({
+      startOfRange: new Date('2026-06-01T00:00:00Z'),
+      endOfRange: new Date('2026-07-01T00:00:00Z'),
+      sessionStatistics: expectedResultStat,
+      activityDistribution: [
+        { ...aMeta, sessionStatistics: expectedResultStat },
+      ],
+    } as TimeBar);
+
+    // if finalObjEndOfRange is later than start of next month
+    result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      timezone,
+      finalObjEndOfRange: new Date('2026-08-01T00:00:00Z'),
     });
+    expect(result.length).toBe(3);
+    expect(result[1]).toEqual({
+      startOfRange: new Date('2026-06-01T00:00:00Z'),
+      endOfRange: new Date('2026-07-01T00:00:00Z'),
+      sessionStatistics: expectedResultStat,
+      activityDistribution: [
+        { ...aMeta, sessionStatistics: expectedResultStat },
+      ],
+    } as TimeBar);
   });
 
-  it('should create correct day timeBars', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
-
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-18T00:00:00Z'),
-      finalObjEndOfRange: new Date('2025-09-24T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
-      timezone,
-    });
-
-    expect(result.length).toBe(6);
-    expect(result[0]).toEqual({
-      startOfRange: new Date('2025-09-18T00:00:00Z'),
-      endOfRange: new Date('2025-09-19T00:00:00Z'),
-      sessionStatistics: {
-        sessionsAmount: 1,
-        spentTimeSeconds: 25,
-        pausedAmount: 2,
-      },
-      activityDistribution: [],
-    });
-    expect(result[1]).toEqual({
-      startOfRange: new Date('2025-09-19T00:00:00Z'),
-      endOfRange: new Date('2025-09-20T00:00:00Z'),
-      sessionStatistics: {
-        sessionsAmount: 0,
-        spentTimeSeconds: 25,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-    });
-    expect(result[2]).toEqual({
-      startOfRange: startOfToday,
-      endOfRange: startOfTomorrow,
-      sessionStatistics: {
-        sessionsAmount: 1,
-        spentTimeSeconds: 150,
-        pausedAmount: 1,
-      },
-      activityDistribution: [
-        {
-          ...aMeta,
-          sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 50,
-            pausedAmount: 1,
-          },
-        },
-        {
-          ...cMeta,
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 100,
-            pausedAmount: 0,
-          },
-        },
-      ],
-    });
-    expect(result[3]).toEqual({
-      startOfRange: new Date('2025-09-21T00:00:00Z'),
-      endOfRange: new Date('2025-09-22T00:00:00Z'),
+  it('if final bar type is year, should return left bars and properly change last bar', () => {
+    const lastLeftBarStat: SessionStatistics = {
+      sessionsAmount: 4,
+      spentTimeSeconds: 100,
+      pausedAmount: 2,
+    };
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-01-01T00:00:00Z'),
+      endOfRange: new Date('2026-06-20T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
-    });
-    expect(result[4]).toEqual({
-      startOfRange: new Date('2025-09-22T00:00:00Z'),
-      endOfRange: new Date('2025-09-23T00:00:00Z'),
-      sessionStatistics: emptySessionStat,
-      activityDistribution: [],
-    });
-    expect(result[5]).toEqual({
-      startOfRange: new Date('2025-09-23T00:00:00Z'),
-      endOfRange: new Date('2025-09-24T00:00:00Z'),
-      sessionStatistics: emptySessionStat,
-      activityDistribution: [],
-    });
-  });
-
-  it('should create correct month timeBars', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: {
-        sessionsAmount: 2,
-        spentTimeSeconds: 300,
-        pausedAmount: 3,
-      },
-      activityDistribution: [
-        {
-          ...aMeta,
-          sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 100,
-            pausedAmount: 2,
-          },
-        },
-        {
-          ...bMeta,
-          sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 200,
-            pausedAmount: 1,
-          },
-        },
-      ],
       timeBars: [
         {
           startOfRange: new Date('2025-01-01T00:00:00Z'),
-          endOfRange: new Date('2025-02-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 10,
-            spentTimeSeconds: 25,
-            pausedAmount: 2,
-          },
-          activityDistribution: [],
-        },
-        {
-          startOfRange: new Date('2025-02-01T00:00:00Z'),
-          endOfRange: new Date('2025-03-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 25,
-            pausedAmount: 0,
-          },
-          activityDistribution: [],
-        },
-        {
-          startOfRange: new Date('2025-03-01T00:00:00Z'),
-          endOfRange: new Date('2025-04-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 25,
-            pausedAmount: 0,
-          },
-          activityDistribution: [],
-        },
-        {
-          startOfRange: new Date('2025-04-01T00:00:00Z'),
-          endOfRange: new Date('2025-05-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 25,
-            pausedAmount: 0,
-          },
-          activityDistribution: [],
-        },
-        {
-          startOfRange: new Date('2025-05-01T00:00:00Z'),
-          endOfRange: new Date('2025-06-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 25,
-            pausedAmount: 0,
-          },
-          activityDistribution: [],
-        },
-        {
-          startOfRange: new Date('2025-06-01T00:00:00Z'),
-          endOfRange: new Date('2025-07-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 25,
-            pausedAmount: 0,
-          },
-          activityDistribution: [],
-        },
-        {
-          startOfRange: new Date('2025-07-01T00:00:00Z'),
-          endOfRange: new Date('2025-08-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 25,
-            pausedAmount: 0,
-          },
-          activityDistribution: [],
-        },
-        {
-          startOfRange: new Date('2025-08-01T00:00:00Z'),
-          endOfRange: new Date('2025-09-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 25,
-            pausedAmount: 0,
-          },
-          activityDistribution: [],
-        },
-        {
-          startOfRange: new Date('2025-09-01T00:00:00Z'),
-          endOfRange: new Date('2025-09-20T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 0,
-            spentTimeSeconds: 25,
-            pausedAmount: 4,
-          },
-          activityDistribution: [],
-        },
-      ],
-    };
-
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-01-01T00:00:00Z'),
-      finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
-      timezone,
-    });
-
-    expect(result.length).toBe(12);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-01-01T00:00:00Z'),
-        endOfRange: new Date('2025-02-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 10,
-          spentTimeSeconds: 25,
-          pausedAmount: 2,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-02-01T00:00:00Z'),
-        endOfRange: new Date('2025-03-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
-          pausedAmount: 0,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-03-01T00:00:00Z'),
-        endOfRange: new Date('2025-04-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
-          pausedAmount: 0,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-04-01T00:00:00Z'),
-        endOfRange: new Date('2025-05-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
-          pausedAmount: 0,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-05-01T00:00:00Z'),
-        endOfRange: new Date('2025-06-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
-          pausedAmount: 0,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-06-01T00:00:00Z'),
-        endOfRange: new Date('2025-07-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
-          pausedAmount: 0,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-07-01T00:00:00Z'),
-        endOfRange: new Date('2025-08-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
-          pausedAmount: 0,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-08-01T00:00:00Z'),
-        endOfRange: new Date('2025-09-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 0,
-          spentTimeSeconds: 25,
-          pausedAmount: 0,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-09-01T00:00:00Z'),
-        endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 175,
-          pausedAmount: 5,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-10-01T00:00:00Z'),
-        endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-11-01T00:00:00Z'),
-        endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-12-01T00:00:00Z'),
-        endOfRange: new Date('2026-01-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-    ]);
-  });
-
-  it('should create correct day time bars when starting from today 00:00', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: emptySessionStat,
-      activityDistribution: [],
-      timeBars: [],
-    };
-
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-20T00:00:00Z'),
-      finalObjEndOfRange: new Date('2025-09-23T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
-      timezone,
-    });
-
-    expect(result.length).toBe(3);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-09-20T00:00:00Z'),
-        endOfRange: new Date('2025-09-21T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 150,
-          pausedAmount: 1,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-09-21T00:00:00Z'),
-        endOfRange: new Date('2025-09-22T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-09-22T00:00:00Z'),
-        endOfRange: new Date('2025-09-23T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-    ]);
-  });
-
-  it('should create correct day time bars when starting from yesterday (1 day until today)', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: {
-        sessionsAmount: 1,
-        spentTimeSeconds: 200,
-        pausedAmount: 2,
-      },
-      activityDistribution: [],
-      timeBars: [],
-    };
-
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-19T00:00:00Z'),
-      finalObjEndOfRange: new Date('2025-09-23T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
-      timezone,
-    });
-
-    expect(result.length).toBe(4);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-09-19T00:00:00Z'),
-        endOfRange: new Date('2025-09-20T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 200,
-          pausedAmount: 2,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-09-20T00:00:00Z'),
-        endOfRange: new Date('2025-09-21T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 150,
-          pausedAmount: 1,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-09-21T00:00:00Z'),
-        endOfRange: new Date('2025-09-22T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-09-22T00:00:00Z'),
-        endOfRange: new Date('2025-09-23T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-    ]);
-  });
-
-  it('should create correct day time bars when starting 2 hours until today', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: {
-        sessionsAmount: 1,
-        spentTimeSeconds: 200,
-        pausedAmount: 2,
-      },
-      activityDistribution: [],
-      timeBars: [
-        {
-          startOfRange: new Date('2025-09-19T22:00:00Z'),
-          endOfRange: new Date('2025-09-19T23:00:00Z'),
+          endOfRange: new Date('2026-01-01T00:00:00Z'),
           sessionStatistics: emptySessionStat,
           activityDistribution: [],
         },
         {
-          startOfRange: new Date('2025-09-19T23:00:00Z'),
-          endOfRange: new Date('2025-09-20T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 200,
-            pausedAmount: 2,
-          },
-          activityDistribution: [],
-        },
-      ],
-    };
-
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-19T22:00:00Z'),
-      finalObjEndOfRange: new Date('2025-09-23T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
-      timezone,
-    });
-
-    expect(result.length).toBe(4);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-09-19T22:00:00Z'),
-        endOfRange: new Date('2025-09-20T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 200,
-          pausedAmount: 2,
-        },
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-09-20T00:00:00Z'),
-        endOfRange: new Date('2025-09-21T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 150,
-          pausedAmount: 1,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-09-21T00:00:00Z'),
-        endOfRange: new Date('2025-09-22T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-09-22T00:00:00Z'),
-        endOfRange: new Date('2025-09-23T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-    ]);
-  });
-
-  it('should create correct month time bars when the range starts a few days before today', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: {
-        sessionsAmount: 3,
-        spentTimeSeconds: 600,
-        pausedAmount: 0,
-      },
-      activityDistribution: [],
-      timeBars: [
-        {
-          startOfRange: new Date('2025-09-17T00:00:00Z'),
-          endOfRange: new Date('2025-09-18T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 200,
-            pausedAmount: 2,
-          },
+          startOfRange: new Date('2026-01-01T00:00:00Z'),
+          endOfRange: new Date('2026-06-20T00:00:00Z'),
+          sessionStatistics: lastLeftBarStat,
           activityDistribution: [
-            {
-              ...aMeta,
-              sessionStatistics: {
-                sessionsAmount: 1,
-                spentTimeSeconds: 200,
-                pausedAmount: 2,
-              },
-            },
-          ],
-        },
-        {
-          startOfRange: new Date('2025-09-18T00:00:00Z'),
-          endOfRange: new Date('2025-09-19T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 200,
-            pausedAmount: 3,
-          },
-          activityDistribution: [
-            {
-              ...aMeta,
-              sessionStatistics: {
-                sessionsAmount: 1,
-                spentTimeSeconds: 200,
-                pausedAmount: 3,
-              },
-            },
-          ],
-        },
-        {
-          startOfRange: new Date('2025-09-19T00:00:00Z'),
-          endOfRange: new Date('2025-09-20T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 1,
-            spentTimeSeconds: 200,
-            pausedAmount: 0,
-          },
-          activityDistribution: [
-            {
-              ...aMeta,
-              sessionStatistics: {
-                sessionsAmount: 1,
-                spentTimeSeconds: 200,
-                pausedAmount: 0,
-              },
-            },
+            { ...aMeta, sessionStatistics: lastLeftBarStat },
           ],
         },
       ],
     };
 
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-17T00:00:00Z'),
-      finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
-      timezone,
-    });
-
-    expect(result.length).toBe(4);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-09-17T00:00:00Z'),
-        endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 4,
-          spentTimeSeconds: 750,
-          pausedAmount: 6,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 4,
-              spentTimeSeconds: 650,
-              pausedAmount: 6,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-10-01T00:00:00Z'),
-        endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-11-01T00:00:00Z'),
-        endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-12-01T00:00:00Z'),
-        endOfRange: new Date('2026-01-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-    ]);
-  });
-
-  it('should create correct month time bars when the range starts yesterday', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: {
-        sessionsAmount: 1,
-        spentTimeSeconds: 100,
-        pausedAmount: 3,
-      },
-      activityDistribution: [],
-      timeBars: dayTimeBars,
+    const expectedResultStat: SessionStatistics = {
+      sessionsAmount: 7,
+      spentTimeSeconds: 175,
+      pausedAmount: 4,
     };
 
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-19T00:00:00Z'),
-      finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
+    // if finalObjEndOfRange is the same as rightObj.endOfRange
+    let result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      finalObjEndOfRange: rightObj.endOfRange,
       timezone,
     });
-
-    expect(result.length).toBe(4);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-09-19T00:00:00Z'),
-        endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 2,
-          spentTimeSeconds: 250,
-          pausedAmount: 4,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-10-01T00:00:00Z'),
-        endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-11-01T00:00:00Z'),
-        endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-12-01T00:00:00Z'),
-        endOfRange: new Date('2026-01-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-    ]);
-  });
-
-  it('should create correct month time bars when the range starts today', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday,
-      startOfTomorrow,
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: emptySessionStat,
-      activityDistribution: [],
-      timeBars: [],
-    };
-
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-20T00:00:00Z'),
-      finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
-      timezone,
-    });
-
-    expect(result.length).toBe(4);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-09-20T00:00:00Z'),
-        endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 150,
-          pausedAmount: 1,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-10-01T00:00:00Z'),
-        endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-11-01T00:00:00Z'),
-        endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-      {
-        startOfRange: new Date('2025-12-01T00:00:00Z'),
-        endOfRange: new Date('2026-01-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-    ]);
-  });
-
-  it('should create correct month time bars when today if start of month and start of range is few days before today', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday: new Date('2025-10-01T00:00:00Z'),
-      startOfTomorrow: new Date('2025-10-02T:00:00:00Z'),
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: {
-        sessionsAmount: 5,
-        spentTimeSeconds: 500,
-        pausedAmount: 2,
-      },
+    expect(result.length).toBe(2);
+    expect(result[1]).toEqual({
+      startOfRange: new Date('2026-01-01T00:00:00Z'),
+      endOfRange: rightObj.endOfRange,
+      sessionStatistics: expectedResultStat,
       activityDistribution: [
-        {
-          ...aMeta,
-          sessionStatistics: {
-            sessionsAmount: 3,
-            spentTimeSeconds: 300,
-            pausedAmount: 2,
-          },
-        },
-        {
-          ...cMeta,
-          sessionStatistics: {
-            sessionsAmount: 2,
-            spentTimeSeconds: 200,
-            pausedAmount: 0,
-          },
-        },
+        { ...aMeta, sessionStatistics: expectedResultStat },
       ],
-      timeBars: [
-        {
-          startOfRange: new Date('2025-09-28T00:00:00Z'),
-          endOfRange: new Date('2025-09-29T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 2,
-            spentTimeSeconds: 200,
-            pausedAmount: 0,
-          },
-          activityDistribution: [
-            {
-              ...aMeta,
-              sessionStatistics: emptySessionStat,
-            },
-            {
-              ...cMeta,
-              sessionStatistics: {
-                sessionsAmount: 1,
-                spentTimeSeconds: 100,
-                pausedAmount: 0,
-              },
-            },
-          ],
-        },
-        {
-          startOfRange: new Date('2025-09-29T00:00:00Z'),
-          endOfRange: new Date('2025-09-30T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 3,
-            spentTimeSeconds: 300,
-            pausedAmount: 2,
-          },
-          activityDistribution: [
-            {
-              ...aMeta,
-              sessionStatistics: {
-                sessionsAmount: 3,
-                spentTimeSeconds: 300,
-                pausedAmount: 2,
-              },
-            },
-            {
-              ...cMeta,
-              sessionStatistics: {
-                sessionsAmount: 1,
-                spentTimeSeconds: 100,
-                pausedAmount: 0,
-              },
-            },
-          ],
-        },
-        {
-          startOfRange: new Date('2025-09-30T00:00:00Z'),
-          endOfRange: new Date('2025-10-01T00:00:00Z'),
-          sessionStatistics: emptySessionStat,
-          activityDistribution: [],
-        },
-      ],
-    };
+    } as TimeBar);
 
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-09-28T00:00:00Z'),
-      finalObjEndOfRange: new Date('2025-12-01T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
+    // if finalObjEndOfRange is later than rightObj.endOfRange, but earlier than start of next year
+    result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      finalObjEndOfRange: new Date('2026-09-01T00:00:00Z'),
       timezone,
     });
-
-    expect(result.length).toBe(3);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-09-28T00:00:00Z'),
-        endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 5,
-          spentTimeSeconds: 500,
-          pausedAmount: 2,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 3,
-              spentTimeSeconds: 300,
-              pausedAmount: 2,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 2,
-              spentTimeSeconds: 200,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-10-01T00:00:00Z'),
-        endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 150,
-          pausedAmount: 1,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-11-01T00:00:00Z'),
-        endOfRange: new Date('2025-12-01T00:00:00Z'),
-        sessionStatistics: emptySessionStat,
-        activityDistribution: [],
-      },
-    ]);
-  });
-
-  it('should create correct month time bars when today if start of month and start of range is few months before today', () => {
-    jest.spyOn(dateUtils, 'getTodayRange').mockReturnValue({
-      startOfToday: new Date('2025-10-01T00:00:00Z'),
-      startOfTomorrow: new Date('2025-10-02T:00:00:00Z'),
-    });
-
-    const untilTodayObj: AnalyticsForRangeDTO = {
-      sessionStatistics: {
-        sessionsAmount: 5,
-        spentTimeSeconds: 500,
-        pausedAmount: 3,
-      },
+    expect(result.length).toBe(2);
+    expect(result[1]).toEqual({
+      startOfRange: new Date('2026-01-01T00:00:00Z'),
+      endOfRange: new Date('2026-09-01T00:00:00Z'),
+      sessionStatistics: expectedResultStat,
       activityDistribution: [
-        {
-          ...aMeta,
-          sessionStatistics: {
-            sessionsAmount: 3,
-            spentTimeSeconds: 300,
-            pausedAmount: 3,
-          },
-        },
-        {
-          ...cMeta,
-          sessionStatistics: {
-            sessionsAmount: 2,
-            spentTimeSeconds: 200,
-            pausedAmount: 0,
-          },
-        },
+        { ...aMeta, sessionStatistics: expectedResultStat },
       ],
-      timeBars: [
-        {
-          startOfRange: new Date('2025-08-01T00:00:00Z'),
-          endOfRange: new Date('2025-09-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 3,
-            spentTimeSeconds: 300,
-            pausedAmount: 2,
-          },
-          activityDistribution: [
-            {
-              ...aMeta,
-              sessionStatistics: {
-                sessionsAmount: 3,
-                spentTimeSeconds: 300,
-                pausedAmount: 2,
-              },
-            },
-            {
-              ...cMeta,
-              sessionStatistics: emptySessionStat,
-            },
-          ],
-        },
-        {
-          startOfRange: new Date('2025-09-01T00:00:00Z'),
-          endOfRange: new Date('2025-10-01T00:00:00Z'),
-          sessionStatistics: {
-            sessionsAmount: 2,
-            spentTimeSeconds: 200,
-            pausedAmount: 1,
-          },
-          activityDistribution: [
-            {
-              ...aMeta,
-              sessionStatistics: emptySessionStat,
-            },
-            {
-              ...cMeta,
-              sessionStatistics: {
-                sessionsAmount: 2,
-                spentTimeSeconds: 200,
-                pausedAmount: 1,
-              },
-            },
-          ],
-        },
-      ],
-    };
+    } as TimeBar);
 
-    const result = analyticsService.mergeBarsWithTodayRangeOnRight({
-      finalObjStartOfRange: new Date('2025-08-01T00:00:00Z'),
-      finalObjEndOfRange: new Date('2025-11-01T00:00:00Z'),
-      leftObj: untilTodayObj,
-      rightObj: todayObj,
+    // if finalObjEndOfRange is later than start of next year
+    result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      finalObjEndOfRange: new Date('2028-09-01T00:00:00Z'),
       timezone,
     });
-
-    expect(result.length).toBe(3);
-    expect(result).toEqual([
-      {
-        startOfRange: new Date('2025-08-01T00:00:00Z'),
-        endOfRange: new Date('2025-09-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 3,
-          spentTimeSeconds: 300,
-          pausedAmount: 2,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 3,
-              spentTimeSeconds: 300,
-              pausedAmount: 2,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: emptySessionStat,
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-09-01T00:00:00Z'),
-        endOfRange: new Date('2025-10-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 2,
-          spentTimeSeconds: 200,
-          pausedAmount: 1,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: emptySessionStat,
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 2,
-              spentTimeSeconds: 200,
-              pausedAmount: 1,
-            },
-          },
-        ],
-      },
-      {
-        startOfRange: new Date('2025-10-01T00:00:00Z'),
-        endOfRange: new Date('2025-11-01T00:00:00Z'),
-        sessionStatistics: {
-          sessionsAmount: 1,
-          spentTimeSeconds: 150,
-          pausedAmount: 1,
-        },
-        activityDistribution: [
-          {
-            ...aMeta,
-            sessionStatistics: {
-              sessionsAmount: 1,
-              spentTimeSeconds: 50,
-              pausedAmount: 1,
-            },
-          },
-          {
-            ...cMeta,
-            sessionStatistics: {
-              sessionsAmount: 0,
-              spentTimeSeconds: 100,
-              pausedAmount: 0,
-            },
-          },
-        ],
-      },
-    ]);
+    expect(result.length).toBe(4);
+    expect(result[1]).toEqual({
+      startOfRange: new Date('2026-01-01T00:00:00Z'),
+      endOfRange: new Date('2027-01-01T00:00:00Z'),
+      sessionStatistics: expectedResultStat,
+      activityDistribution: [
+        { ...aMeta, sessionStatistics: expectedResultStat },
+      ],
+    } as TimeBar);
   });
 });
 
 describe('analyticsService.mergeAdjacentTimeBars', () => {
   it('should throw an error if neither the left nor the right range is daily', () => {
     const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-09-01T00:00:00Z'),
+      endOfRange: new Date('2025-11-01T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -2971,6 +1882,8 @@ describe('analyticsService.mergeAdjacentTimeBars', () => {
     };
 
     const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2025-11-01T00:00:00Z'),
+      endOfRange: new Date('2026-01-01T00:00:00Z'),
       sessionStatistics: emptySessionStat,
       activityDistribution: [],
       timeBars: [
@@ -2993,9 +1906,9 @@ describe('analyticsService.mergeAdjacentTimeBars', () => {
       analyticsService.mergeAdjacentTimeBars({
         leftObj,
         rightObj,
-        finalObjStartOfRange: new Date('2025-09-01T00:00:00Z'),
         finalObjEndOfRange: new Date('2026-01-01T00:00:00Z'),
         timezone: 'UTC',
+        dailyRangePosition: 'left',
       });
     } catch (e) {
       expect(e).toBeInstanceOf(Error);
@@ -3008,6 +1921,8 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
     const Aid = new Types.ObjectId();
 
     const firstAnalytics: AnalyticsForRangeDTO = {
+      startOfRange: new Date(),
+      endOfRange: new Date(),
       sessionStatistics: emptySessionStat,
       activityDistribution: [
         {
@@ -3034,6 +1949,8 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       timeBars: [],
     };
     const secondAnalytics: AnalyticsForRangeDTO = {
+      startOfRange: new Date(),
+      endOfRange: new Date(),
       sessionStatistics: {
         sessionsAmount: 3,
         pausedAmount: 1,
@@ -3064,6 +1981,8 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       timeBars: [],
     };
     const thirdAnalytics: AnalyticsForRangeDTO = {
+      startOfRange: new Date(),
+      endOfRange: new Date(),
       sessionStatistics: emptySessionStat,
       activityDistribution: [
         {
@@ -3148,6 +2067,8 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
     const Aid = new Types.ObjectId();
 
     const firstAnalytics: AnalyticsForRangeDTO = {
+      startOfRange: new Date(),
+      endOfRange: new Date(),
       sessionStatistics: emptySessionStat,
       activityDistribution: [
         {
@@ -3206,6 +2127,8 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       ],
     };
     const secondAnalytics: AnalyticsForRangeDTO = {
+      startOfRange: new Date(),
+      endOfRange: new Date(),
       sessionStatistics: {
         sessionsAmount: 3,
         pausedAmount: 1,
@@ -3349,8 +2272,11 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
 
   it('should delete activity from activityDistribution and timeBars and reduce sessionStatistics overall and in timeBars (only in analytics containing the activity)', () => {
     const Aid = new Types.ObjectId();
+    const mockedDate = new Date();
 
     const firstAnalytics: AnalyticsForRangeDTO = {
+      startOfRange: mockedDate,
+      endOfRange: mockedDate,
       sessionStatistics: {
         sessionsAmount: 5,
         pausedAmount: 4,
@@ -3403,6 +2329,8 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       ],
     };
     const secondAnalytics: AnalyticsForRangeDTO = {
+      startOfRange: mockedDate,
+      endOfRange: mockedDate,
       sessionStatistics: {
         sessionsAmount: 5,
         pausedAmount: 4,
@@ -3446,6 +2374,8 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
     expect(Object.keys(result).length).toBe(1);
     expect(result).toEqual({
       cacheKey1: JSON.stringify({
+        startOfRange: mockedDate,
+        endOfRange: mockedDate,
         sessionStatistics: {
           sessionsAmount: 2,
           pausedAmount: 3,
