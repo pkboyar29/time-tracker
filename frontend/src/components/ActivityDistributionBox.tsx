@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useAppSelector } from '../redux/store';
 
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
-import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
+import { ISessionStat } from '../ts/interfaces/Statistics/ISessionStat';
 
 interface CustomTooltipProps {
   active?: boolean;
@@ -38,14 +38,14 @@ const CustomTooltip: FC<CustomTooltipProps> = ({ active, payload, label }) => {
 
 interface ActivityDistributionBoxProps {
   adItems: IActivityDistribution[];
-  sessionStatistics: ISessionStatistics;
+  sessionStat: ISessionStat;
   adBoxMode: 'table' | 'chart';
   setAdBoxMode: (newAdMode: 'table' | 'chart') => void;
 }
 
 const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   adItems,
-  sessionStatistics,
+  sessionStat,
   adBoxMode,
   setAdBoxMode,
 }) => {
@@ -56,9 +56,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
 
   const sortedItems = useMemo(() => {
     return adItems.toSorted(
-      (a, b) =>
-        b.sessionStatistics.spentTimeSeconds -
-        a.sessionStatistics.spentTimeSeconds,
+      (a, b) => b.sessionStat.spentTimeSeconds - a.sessionStat.spentTimeSeconds,
     );
   }, [adItems]);
 
@@ -81,19 +79,17 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
       for (let i = 1; i <= lessOnePercentageCount; i++) {
         const deletedLastItem = pieItems.pop();
         othersSessionsAmount += deletedLastItem
-          ? deletedLastItem.sessionStatistics.sessionsAmount
+          ? deletedLastItem.sessionStat.sessionsAmount
           : 0;
         othersPausedAmount += deletedLastItem
-          ? deletedLastItem.sessionStatistics.pausedAmount
+          ? deletedLastItem.sessionStat.pausedAmount
           : 0;
         othersSpentTimeSeconds += deletedLastItem
-          ? deletedLastItem.sessionStatistics.spentTimeSeconds
+          ? deletedLastItem.sessionStat.spentTimeSeconds
           : 0;
       }
       othersSpentTimePercentage = parseFloat(
-        (othersSpentTimeSeconds / sessionStatistics.spentTimeSeconds).toFixed(
-          2,
-        ),
+        (othersSpentTimeSeconds / sessionStat.spentTimeSeconds).toFixed(2),
       );
 
       pieItems = [
@@ -102,7 +98,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           id: 'others',
           name: t('adBox.others'),
           fill: '#4287f5',
-          sessionStatistics: {
+          sessionStat: {
             sessionsAmount: othersSessionsAmount,
             pausedAmount: othersPausedAmount,
             spentTimeSeconds: othersSpentTimeSeconds,
@@ -192,21 +188,15 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   <div className="w-1/2 text-lg font-bold truncate">
                     {item.name}
                   </div>
+                  <div className="w-1/5">{item.sessionStat.sessionsAmount}</div>
                   <div className="w-1/5">
-                    {item.sessionStatistics.sessionsAmount}
-                  </div>
-                  <div className="w-1/5">
-                    {getReadableTime(
-                      item.sessionStatistics.spentTimeSeconds,
-                      t,
-                      {
-                        short: true,
-                      },
-                    )}
+                    {getReadableTime(item.sessionStat.spentTimeSeconds, t, {
+                      short: true,
+                    })}
                   </div>
                   <div className="w-1/5">
                     {t('plural.times', {
-                      count: item.sessionStatistics.pausedAmount,
+                      count: item.sessionStat.pausedAmount,
                     })}
                   </div>
                 </div>
@@ -225,7 +215,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 <Pie
                   animationDuration={750}
                   data={pieItems}
-                  dataKey="sessionStatistics.spentTimeSeconds"
+                  dataKey="sessionStat.spentTimeSeconds"
                   nameKey="name"
                   cx="50%"
                   cy="50%"
@@ -254,16 +244,12 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   </div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
                     (
-                    {getReadableTime(
-                      item.sessionStatistics.spentTimeSeconds,
-                      t,
-                      {
-                        short: true,
-                      },
-                    )}
+                    {getReadableTime(item.sessionStat.spentTimeSeconds, t, {
+                      short: true,
+                    })}
                     ,{' '}
                     {t('plural.sessions', {
-                      count: item.sessionStatistics.sessionsAmount,
+                      count: item.sessionStat.sessionsAmount,
                     })}
                     )
                   </div>

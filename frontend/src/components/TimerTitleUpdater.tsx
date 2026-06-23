@@ -13,19 +13,18 @@ const TimerTitleUpdater: FC = () => {
   const currentUser = useAppSelector((state) => state.users.user);
   const { t } = useTranslation();
 
+  // title
   useEffect(() => {
     if (!currentUser) {
       return;
     }
     if (timerState.status === 'idle') {
       document.title = 'Session Tracker';
-      setFavicon('/favicon.ico');
       return;
     }
 
     const isFocused = timerState.status === 'running';
 
-    // title
     const timerText = currentUser.showTimerInTitle
       ? `${getRemainingTimeHoursMinutesSeconds(
           timerState.session.totalTimeSeconds,
@@ -38,8 +37,19 @@ const TimerTitleUpdater: FC = () => {
       : t('withoutActivity');
     const focusOrPaused = isFocused ? t('title.focus') : t('title.paused');
     document.title = `${timerText} ${focusOrPaused} | ${activityText}`;
+  }, [timerState.status, timerState.session, timerState.ms, currentUser]);
 
-    // favicon
+  // favicon
+  useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
+    if (timerState.status === 'idle') {
+      setFavicon('/favicon.ico');
+      return;
+    }
+
+    const isFocused = timerState.status === 'running';
     if (isFocused) {
       const canvas = document.createElement('canvas');
       canvas.width = 32;
@@ -49,17 +59,16 @@ const TimerTitleUpdater: FC = () => {
       if (!ctx) {
         return;
       }
-
       ctx.fillStyle = 'white';
       ctx.font = '30px sans-serif';
       ctx.fillText('🎯', 0, 26);
 
-      setFavicon(canvas.toDataURL());
+      setFavicon(canvas.toDataURL(''));
     } else {
       // paused
       setFavicon('/favicon.ico');
     }
-  }, [timerState.status, timerState.session, timerState.ms, currentUser]);
+  }, [timerState.status, timerState.session, currentUser]);
 
   return <></>;
 };

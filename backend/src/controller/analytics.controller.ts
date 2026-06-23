@@ -47,6 +47,12 @@ router.get('/', async (req: Request, res: Response) => {
     //   userId: res.locals.userId,
     //   timezone: tzInfo!.timezone,
     // });
+    // const data = await analyticsService.getAnalyticsForRangeAggregates({
+    //   startOfRange: fromDate,
+    //   endOfRange: toDate,
+    //   userId: res.locals.userId,
+    //   timezone: tzInfo!.timezone,
+    // });
     res.status(200).send(data);
   } catch (e) {
     sendErrorResponse(e, res);

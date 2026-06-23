@@ -182,7 +182,7 @@
     "noActivity": "За указанный период нет активности",
     "viewSelectTitle": "Показать по"
   },
-  "sessionStatisticsBox": {
+  "sessionStatBox": {
     "totalTime": "всего времени",
     "totalSessions": "всего сессий",
     "distracted": "отвлечения",

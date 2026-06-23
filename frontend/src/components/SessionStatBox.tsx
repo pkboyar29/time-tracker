@@ -1,5 +1,5 @@
 import { FC, useRef, useLayoutEffect } from 'react';
-import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
+import { ISessionStat } from '../ts/interfaces/Statistics/ISessionStat';
 import { getReadableTime } from '../helpers/timeHelpers';
 import {
   animateCountUp,
@@ -9,13 +9,11 @@ import { useTranslation } from 'react-i18next';
 
 import QuestionMarkTooltip from './common/QuestionMarkTooltip';
 
-interface SessionStatisticsBoxProps {
-  statistics: ISessionStatistics;
+interface SessionStatBoxProps {
+  statistics: ISessionStat;
 }
 
-const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
-  statistics,
-}) => {
+const SessionStatBox: FC<SessionStatBoxProps> = ({ statistics }) => {
   const { t, i18n } = useTranslation();
 
   const totalTimeRef = useRef<HTMLDivElement | null>(null);
@@ -64,7 +62,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
           className="text-xl font-bold dark:text-textDark min-w-[170px]"
         ></div>
         <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
-          {t('sessionStatisticsBox.totalTime')}
+          {t('sessionStatBox.totalTime')}
         </div>
       </div>
 
@@ -74,7 +72,7 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
           className="text-xl font-bold dark:text-textDark"
         ></div>
         <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
-          {t('sessionStatisticsBox.totalSessions')}
+          {t('sessionStatBox.totalSessions')}
         </div>
       </div>
 
@@ -85,12 +83,12 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
         ></div>
         <div className="relative w-fit">
           <div className="text-lg font-bold text-gray-500 uppercase dark:text-textDarkSecondary">
-            {t('sessionStatisticsBox.distracted')}
+            {t('sessionStatBox.distracted')}
           </div>
 
           <div className="absolute pl-2 -top-0.5 left-full">
             <QuestionMarkTooltip
-              tooltipText={t('sessionStatisticsBox.distractedTooltip')}
+              tooltipText={t('sessionStatBox.distractedTooltip')}
             />
           </div>
         </div>
@@ -99,4 +97,4 @@ const SessionStatisticsBox: FC<SessionStatisticsBoxProps> = ({
   );
 };
 
-export default SessionStatisticsBox;
+export default SessionStatBox;
