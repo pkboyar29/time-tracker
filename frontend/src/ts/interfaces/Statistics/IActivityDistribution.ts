@@ -1,9 +1,9 @@
-import { ISessionStatistics } from './ISessionStatistics';
+import { ISessionStat } from './ISessionStat';
 
 export interface IActivityDistribution {
   id: string;
   name: string;
   fill: string;
-  sessionStatistics: ISessionStatistics;
+  sessionStat: ISessionStat;
   spentTimePercentage: number;
 }

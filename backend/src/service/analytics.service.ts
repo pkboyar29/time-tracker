@@ -5,7 +5,7 @@ import {
   AnalyticsForRangeDTO,
   ActivityDistribution,
   TimeBar,
-  SessionStatistics,
+  SessionStat,
 } from '../dto/analytics.dto';
 import { ISessionPart } from '../model/sessionPart.model';
 import { ISession } from '../model/session.model';
@@ -35,21 +35,21 @@ interface GetSessionsStatisticsAggregatesOptions {
 }
 
 interface BuildADsOptions {
-  totalStat: SessionStatistics;
-  allActivitiesStat: SessionStatistics;
+  totalStat: SessionStat;
+  allActivitiesStat: SessionStat;
   userActivities: IActivity[];
-  activitiesStatMap: Map<string, SessionStatistics>;
+  activitiesStatMap: Map<string, SessionStat>;
 }
 
 interface GetADsOptions {
-  totalStat: SessionStatistics;
+  totalStat: SessionStat;
   sessionParts: ISessionPart[];
   completedSessions: ISession[];
   userActivities: IActivity[];
 }
 
 interface GetADsAggregatesOptions {
-  totalStat: SessionStatistics;
+  totalStat: SessionStat;
   dailyAds: IDailyAD[];
   userActivities: IActivity[];
 }
@@ -186,7 +186,7 @@ const analyticsService = {
   getAnalyticsForRangeInternal,
   getAnalyticsForRangeAggregates,
   getAnalyticsForRangeCache,
-  mergeSessionStatistics,
+  mergeSessionStat,
   mergeActivityDistributions,
   mergeBarsWithDailyRangeOnLeft,
   mergeBarsWithDailyRangeOnRight,
@@ -202,7 +202,7 @@ const analyticsService = {
 function getSessionsStatistics({
   sessionParts,
   completedSessions,
-}: GetSessionsStatisticsOptions): SessionStatistics {
+}: GetSessionsStatisticsOptions): SessionStat {
   const sessionsAmount = completedSessions.length;
 
   const spentTimeSeconds = sessionParts.reduce(
@@ -241,12 +241,12 @@ function buildActivityDistributions({
       id: activity._id.toString(),
       name: activity.name,
       color: activity.color,
-      sessionStatistics: stat,
+      sessionStat: stat,
     });
   }
 
   // set without activity to activityDistributions
-  const woStat: SessionStatistics = {
+  const woStat: SessionStat = {
     sessionsAmount: totalStat.sessionsAmount - allActivitiesStat.sessionsAmount,
     spentTimeSeconds:
       totalStat.spentTimeSeconds - allActivitiesStat.spentTimeSeconds,
@@ -257,7 +257,7 @@ function buildActivityDistributions({
       id: '0',
       name: 'Without activity',
       color: '#9CA3AF',
-      sessionStatistics: woStat,
+      sessionStat: woStat,
     });
   }
 
@@ -270,9 +270,9 @@ function getActivityDistributions({
   completedSessions,
   userActivities,
 }: GetADsOptions): ActivityDistribution[] {
-  const activitiesStatMap = new Map<string, SessionStatistics>();
+  const activitiesStatMap = new Map<string, SessionStat>();
 
-  const allActivitiesStat: SessionStatistics = {
+  const allActivitiesStat: SessionStat = {
     sessionsAmount: 0,
     spentTimeSeconds: 0,
     pausedAmount: 0,
@@ -352,7 +352,7 @@ function getBarStatAndAds({
   dataSource,
   userActivities,
 }: GetBarStatAndAdsOptions): {
-  barStat: SessionStatistics;
+  barStat: SessionStat;
   barAds: ActivityDistribution[];
 } {
   if (dataSource.type === 'raw') {
@@ -486,7 +486,7 @@ function getTimeBars({
   }
 
   while (true) {
-    let barStat: SessionStatistics = {
+    let barStat: SessionStat = {
       sessionsAmount: 0,
       spentTimeSeconds: 0,
       pausedAmount: 0,
@@ -513,7 +513,7 @@ function getTimeBars({
     timeBars.push({
       startOfRange: new Date(prevPeriod),
       endOfRange: new Date(nextPeriod),
-      sessionStatistics: barStat,
+      sessionStat: barStat,
       activityDistribution: barAds,
     });
 
@@ -566,8 +566,8 @@ function createEmptyBars({
 
 function getSessionsStatisticsAggregates({
   aggregates,
-}: GetSessionsStatisticsAggregatesOptions): SessionStatistics {
-  const sessionStatistics: SessionStatistics = {
+}: GetSessionsStatisticsAggregatesOptions): SessionStat {
+  const sessionStat: SessionStat = {
     spentTimeSeconds: 0,
     sessionsAmount: 0,
     pausedAmount: 0,
@@ -575,12 +575,12 @@ function getSessionsStatisticsAggregates({
   for (let i = 0; i < aggregates.length; i++) {
     const aggregate = aggregates[i];
 
-    sessionStatistics.spentTimeSeconds += aggregate.spentTimeSeconds;
-    sessionStatistics.sessionsAmount += aggregate.sessionsAmount;
-    sessionStatistics.pausedAmount += aggregate.pausedAmount;
+    sessionStat.spentTimeSeconds += aggregate.spentTimeSeconds;
+    sessionStat.sessionsAmount += aggregate.sessionsAmount;
+    sessionStat.pausedAmount += aggregate.pausedAmount;
   }
 
-  return sessionStatistics;
+  return sessionStat;
 }
 
 function getActivityDistributionsAggregates({
@@ -588,9 +588,9 @@ function getActivityDistributionsAggregates({
   userActivities,
   dailyAds,
 }: GetADsAggregatesOptions): ActivityDistribution[] {
-  const activitiesStatMap = new Map<string, SessionStatistics>();
+  const activitiesStatMap = new Map<string, SessionStat>();
 
-  const allActivitiesStat: SessionStatistics = {
+  const allActivitiesStat: SessionStat = {
     sessionsAmount: 0,
     spentTimeSeconds: 0,
     pausedAmount: 0,
@@ -915,7 +915,7 @@ async function applyActivityDeleteToAggregates({
     user: userId,
   });
 
-  const dailyAdsMap = new Map<string, SessionStatistics>();
+  const dailyAdsMap = new Map<string, SessionStat>();
   for (let i = 0; i < dailyAdsToDelete.length; i++) {
     const ad = dailyAdsToDelete[i];
 
@@ -970,7 +970,7 @@ async function getAnalyticsForRangeInternal({
     userId,
   });
 
-  const sessionStatistics = analyticsService.getSessionsStatistics({
+  const sessionStat = analyticsService.getSessionsStatistics({
     sessionParts: sessionPartsForRange,
     completedSessions: completedSessionsForRange,
   });
@@ -978,7 +978,7 @@ async function getAnalyticsForRangeInternal({
   const userActivities = await activityService.getActivities({ userId });
 
   const activityDistribution = analyticsService.getActivityDistributions({
-    totalStat: sessionStatistics,
+    totalStat: sessionStat,
     sessionParts: sessionPartsForRange,
     completedSessions: completedSessionsForRange,
     userActivities,
@@ -1000,7 +1000,7 @@ async function getAnalyticsForRangeInternal({
   const analyticsForRange: AnalyticsForRangeDTO = {
     startOfRange,
     endOfRange,
-    sessionStatistics,
+    sessionStat,
     activityDistribution: activityDistribution,
     timeBars,
   };
@@ -1081,13 +1081,13 @@ async function getAnalyticsForRangeAggregates({
       },
     });
 
-    const sessionStatistics = analyticsService.getSessionsStatisticsAggregates({
+    const sessionStat = analyticsService.getSessionsStatisticsAggregates({
       aggregates: dailyAggregates,
     });
 
     const userActivities = await activityService.getActivities({ userId });
     const ads = analyticsService.getActivityDistributionsAggregates({
-      totalStat: sessionStatistics,
+      totalStat: sessionStat,
       userActivities,
       dailyAds,
     });
@@ -1109,7 +1109,7 @@ async function getAnalyticsForRangeAggregates({
     let aggrAnalytics: AnalyticsForRangeDTO = {
       startOfRange: startOfRangeAggrDate,
       endOfRange: endOfRangeAggrDate,
-      sessionStatistics,
+      sessionStat,
       activityDistribution: ads,
       timeBars,
     };
@@ -1151,7 +1151,7 @@ async function getAnalyticsForRangeCache({
       return {
         startOfRange,
         endOfRange,
-        sessionStatistics: {
+        sessionStat: {
           sessionsAmount: 0,
           spentTimeSeconds: 0,
           pausedAmount: 0,
@@ -1224,7 +1224,7 @@ async function getAnalyticsForRangeCache({
           timezone,
         });
 
-      if (analyticsUntilToday.sessionStatistics.spentTimeSeconds > 0) {
+      if (analyticsUntilToday.sessionStat.spentTimeSeconds > 0) {
         await redisClient.set(cacheKey, JSON.stringify(analyticsUntilToday), {
           expiration: {
             type: 'EXAT',
@@ -1256,7 +1256,7 @@ async function getAnalyticsForRangeCache({
           timezone,
         });
 
-      if (analyticsForRange.sessionStatistics.spentTimeSeconds > 0) {
+      if (analyticsForRange.sessionStat.spentTimeSeconds > 0) {
         await redisClient.set(cacheKey, JSON.stringify(analyticsForRange), {
           expiration: { type: 'EX', value: 604800 }, // 7 days
         });
@@ -1269,10 +1269,8 @@ async function getAnalyticsForRangeCache({
   }
 }
 
-function mergeSessionStatistics(
-  statisticsList: SessionStatistics[],
-): SessionStatistics {
-  const mergedStat: SessionStatistics = {
+function mergeSessionStat(statisticsList: SessionStat[]): SessionStat {
+  const mergedStat: SessionStat = {
     sessionsAmount: 0,
     spentTimeSeconds: 0,
     pausedAmount: 0,
@@ -1302,16 +1300,16 @@ function mergeActivityDistributions({
     finalAd = finalAd.map((ad) => {
       for (let j = 0; j < adsList[i].length; j++) {
         if (ad.id === adsList[i][j].id) {
-          const { id: activityId, sessionStatistics } = adsList[i][j];
+          const { id: activityId, sessionStat } = adsList[i][j];
           adsList[i] = adsList[i].filter((ad) => ad.id !== activityId);
 
           return {
             id: ad.id,
             name: ad.name,
             color: ad.color,
-            sessionStatistics: analyticsService.mergeSessionStatistics([
-              ad.sessionStatistics,
-              sessionStatistics,
+            sessionStat: analyticsService.mergeSessionStat([
+              ad.sessionStat,
+              sessionStat,
             ]),
           };
         }
@@ -1357,7 +1355,7 @@ function mergeBarsWithDailyRangeOnLeft({
     const leftBar: TimeBar = {
       startOfRange: leftObj.startOfRange,
       endOfRange: rightObj.startOfRange,
-      sessionStatistics: leftObj.sessionStatistics,
+      sessionStat: leftObj.sessionStat,
       activityDistribution: leftObj.activityDistribution,
     };
 
@@ -1365,7 +1363,7 @@ function mergeBarsWithDailyRangeOnLeft({
       const rightBar: TimeBar = {
         startOfRange: rightObj.startOfRange,
         endOfRange: rightObj.endOfRange,
-        sessionStatistics: rightObj.sessionStatistics,
+        sessionStat: rightObj.sessionStat,
         activityDistribution: rightObj.activityDistribution,
       };
 
@@ -1378,9 +1376,9 @@ function mergeBarsWithDailyRangeOnLeft({
     // Но это вовсе не критично
     finalTimeBars = rightObj.timeBars;
 
-    const mergedStat = analyticsService.mergeSessionStatistics([
-      leftObj.sessionStatistics,
-      finalTimeBars[0].sessionStatistics,
+    const mergedStat = analyticsService.mergeSessionStat([
+      leftObj.sessionStat,
+      finalTimeBars[0].sessionStat,
     ]);
     const mergedAds = analyticsService.mergeActivityDistributions({
       adsList: [
@@ -1390,7 +1388,7 @@ function mergeBarsWithDailyRangeOnLeft({
     });
 
     finalTimeBars[0].startOfRange = leftObj.startOfRange;
-    finalTimeBars[0].sessionStatistics = mergedStat;
+    finalTimeBars[0].sessionStat = mergedStat;
     finalTimeBars[0].activityDistribution = mergedAds;
   }
 
@@ -1432,7 +1430,7 @@ function mergeBarsWithDailyRangeOnRight({
       const leftBar: TimeBar = {
         startOfRange: leftObj.startOfRange,
         endOfRange: leftObj.endOfRange,
-        sessionStatistics: leftObj.sessionStatistics,
+        sessionStat: leftObj.sessionStat,
         activityDistribution: leftObj.activityDistribution,
       };
 
@@ -1445,7 +1443,7 @@ function mergeBarsWithDailyRangeOnRight({
     const rightObjBar: TimeBar = {
       startOfRange: rightObj.startOfRange,
       endOfRange: rightObj.endOfRange,
-      sessionStatistics: rightObj.sessionStatistics,
+      sessionStat: rightObj.sessionStat,
       activityDistribution: rightObj.activityDistribution,
     };
     finalTimeBars.push(rightObjBar);
@@ -1474,9 +1472,9 @@ function mergeBarsWithDailyRangeOnRight({
       const monthBar: TimeBar = {
         startOfRange: leftObj.startOfRange,
         endOfRange: new Date(),
-        sessionStatistics: analyticsService.mergeSessionStatistics([
-          leftObj.sessionStatistics,
-          rightObj.sessionStatistics,
+        sessionStat: analyticsService.mergeSessionStat([
+          leftObj.sessionStat,
+          rightObj.sessionStat,
         ]),
         activityDistribution: analyticsService.mergeActivityDistributions({
           adsList: [
@@ -1500,9 +1498,9 @@ function mergeBarsWithDailyRangeOnRight({
       const lastIdx = finalTimeBars.length - 1;
       // TODO: если rightObj относится не к месяцу finalTimeBars[lastIdx], то ...
 
-      const mergedStat = analyticsService.mergeSessionStatistics([
-        finalTimeBars[lastIdx].sessionStatistics,
-        rightObj.sessionStatistics,
+      const mergedStat = analyticsService.mergeSessionStat([
+        finalTimeBars[lastIdx].sessionStat,
+        rightObj.sessionStat,
       ]);
       const mergedAds = analyticsService.mergeActivityDistributions({
         adsList: [
@@ -1513,7 +1511,7 @@ function mergeBarsWithDailyRangeOnRight({
 
       finalTimeBars[lastIdx] = {
         ...finalTimeBars[lastIdx],
-        sessionStatistics: mergedStat,
+        sessionStat: mergedStat,
         activityDistribution: mergedAds,
       };
 
@@ -1540,9 +1538,9 @@ function mergeBarsWithDailyRangeOnRight({
     finalTimeBars = [...leftObj.timeBars];
     const lastIdx = finalTimeBars.length - 1;
 
-    const mergedStat = analyticsService.mergeSessionStatistics([
-      finalTimeBars[lastIdx].sessionStatistics,
-      rightObj.sessionStatistics,
+    const mergedStat = analyticsService.mergeSessionStat([
+      finalTimeBars[lastIdx].sessionStat,
+      rightObj.sessionStat,
     ]);
     const mergedAds = analyticsService.mergeActivityDistributions({
       adsList: [
@@ -1553,7 +1551,7 @@ function mergeBarsWithDailyRangeOnRight({
 
     finalTimeBars[lastIdx] = {
       ...finalTimeBars[lastIdx],
-      sessionStatistics: mergedStat,
+      sessionStat: mergedStat,
       activityDistribution: mergedAds,
     };
 
@@ -1636,7 +1634,7 @@ function mergeAnalytics({
   const finalObj: AnalyticsForRangeDTO = {
     startOfRange: leftObj.startOfRange,
     endOfRange: finalObjEndOfRange,
-    sessionStatistics: {
+    sessionStat: {
       sessionsAmount: 0,
       spentTimeSeconds: 0,
       pausedAmount: 0,
@@ -1645,9 +1643,9 @@ function mergeAnalytics({
     timeBars: [],
   };
 
-  finalObj.sessionStatistics = analyticsService.mergeSessionStatistics([
-    leftObj.sessionStatistics,
-    rightObj.sessionStatistics,
+  finalObj.sessionStat = analyticsService.mergeSessionStat([
+    leftObj.sessionStat,
+    rightObj.sessionStat,
   ]);
   finalObj.activityDistribution = analyticsService.mergeActivityDistributions({
     adsList: [leftObj.activityDistribution, rightObj.activityDistribution],
@@ -1698,7 +1696,7 @@ function updateActivityInAds(
 
 function removeActivityFromAds(
   analyticsObject: {
-    sessionStatistics: SessionStatistics;
+    sessionStat: SessionStat;
     activityDistribution: ActivityDistribution[];
   },
   deletedActivityId: string,
@@ -1710,10 +1708,10 @@ function removeActivityFromAds(
 
   const deletedAd = analyticsObject.activityDistribution.splice(adIndex, 1)[0];
   const { spentTimeSeconds, sessionsAmount, pausedAmount } =
-    deletedAd.sessionStatistics;
-  analyticsObject.sessionStatistics.spentTimeSeconds -= spentTimeSeconds;
-  analyticsObject.sessionStatistics.sessionsAmount -= sessionsAmount;
-  analyticsObject.sessionStatistics.pausedAmount -= pausedAmount;
+    deletedAd.sessionStat;
+  analyticsObject.sessionStat.spentTimeSeconds -= spentTimeSeconds;
+  analyticsObject.sessionStat.sessionsAmount -= sessionsAmount;
+  analyticsObject.sessionStat.pausedAmount -= pausedAmount;
 
   return true;
 }

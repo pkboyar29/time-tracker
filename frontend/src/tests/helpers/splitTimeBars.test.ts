@@ -1,17 +1,17 @@
 import {
   splitTimeBars,
-  mergeSessionStatistics,
+  mergeSessionStat,
   mergeActivityDistributions,
 } from '../../helpers/splitTimeBars';
 
 import { TFunction } from 'i18next';
-import { ISessionStatistics } from '../../ts/interfaces/Statistics/ISessionStatistics';
+import { ISessionStat } from '../../ts/interfaces/Statistics/ISessionStat';
 import { IActivityDistribution } from '../../ts/interfaces/Statistics/IActivityDistribution';
 import { ITimeBar } from '../../ts/interfaces/Statistics/ITimeBar';
 
-describe('mergeSessionStatistics', () => {
+describe('mergeSessionStat', () => {
   it('correctly sums statistics from multiple entries', () => {
-    const input: ISessionStatistics[] = [
+    const input: ISessionStat[] = [
       {
         sessionsAmount: 2,
         spentTimeSeconds: 120,
@@ -24,7 +24,7 @@ describe('mergeSessionStatistics', () => {
       },
     ];
 
-    const result = mergeSessionStatistics(input);
+    const result = mergeSessionStat(input);
 
     expect(result).toEqual({
       sessionsAmount: 5,
@@ -34,7 +34,7 @@ describe('mergeSessionStatistics', () => {
   });
 
   it('returns zeros when an empty array is provided', () => {
-    const result = mergeSessionStatistics([]);
+    const result = mergeSessionStat([]);
 
     expect(result).toEqual({
       sessionsAmount: 0,
@@ -44,7 +44,7 @@ describe('mergeSessionStatistics', () => {
   });
 
   it('correctly handles a single entry', () => {
-    const input: ISessionStatistics[] = [
+    const input: ISessionStat[] = [
       {
         sessionsAmount: 1,
         spentTimeSeconds: 60,
@@ -52,7 +52,7 @@ describe('mergeSessionStatistics', () => {
       },
     ];
 
-    const result = mergeSessionStatistics(input);
+    const result = mergeSessionStat(input);
 
     expect(result).toEqual({
       sessionsAmount: 1,
@@ -62,7 +62,7 @@ describe('mergeSessionStatistics', () => {
   });
 
   it('correctly sums zero values', () => {
-    const input: ISessionStatistics[] = [
+    const input: ISessionStat[] = [
       {
         sessionsAmount: 0,
         spentTimeSeconds: 0,
@@ -75,7 +75,7 @@ describe('mergeSessionStatistics', () => {
       },
     ];
 
-    const result = mergeSessionStatistics(input);
+    const result = mergeSessionStat(input);
 
     expect(result).toEqual({
       sessionsAmount: 0,
@@ -106,7 +106,7 @@ describe('mergeActivityDistributions', () => {
     const ad: IActivityDistribution[] = [
       {
         ...codingMeta,
-        sessionStatistics: {
+        sessionStat: {
           sessionsAmount: 1,
           spentTimeSeconds: 600,
           pausedAmount: 0,
@@ -125,7 +125,7 @@ describe('mergeActivityDistributions', () => {
       [
         {
           ...codingMeta,
-          sessionStatistics: {
+          sessionStat: {
             sessionsAmount: 1,
             spentTimeSeconds: 300,
             pausedAmount: 0,
@@ -134,7 +134,7 @@ describe('mergeActivityDistributions', () => {
         },
         {
           ...readingMeta,
-          sessionStatistics: {
+          sessionStat: {
             sessionsAmount: 1,
             spentTimeSeconds: 300,
             pausedAmount: 0,
@@ -145,7 +145,7 @@ describe('mergeActivityDistributions', () => {
       [
         {
           ...codingMeta,
-          sessionStatistics: {
+          sessionStat: {
             sessionsAmount: 2,
             spentTimeSeconds: 600,
             pausedAmount: 1,
@@ -160,7 +160,7 @@ describe('mergeActivityDistributions', () => {
     expect(result).toEqual([
       {
         ...codingMeta,
-        sessionStatistics: {
+        sessionStat: {
           sessionsAmount: 3,
           spentTimeSeconds: 900,
           pausedAmount: 1,
@@ -169,7 +169,7 @@ describe('mergeActivityDistributions', () => {
       },
       {
         ...readingMeta,
-        sessionStatistics: {
+        sessionStat: {
           sessionsAmount: 1,
           spentTimeSeconds: 300,
           pausedAmount: 0,
@@ -184,7 +184,7 @@ describe('mergeActivityDistributions', () => {
       [
         {
           ...codingMeta,
-          sessionStatistics: {
+          sessionStat: {
             sessionsAmount: 1,
             spentTimeSeconds: 300,
             pausedAmount: 0,
@@ -195,7 +195,7 @@ describe('mergeActivityDistributions', () => {
       [
         {
           ...readingMeta,
-          sessionStatistics: {
+          sessionStat: {
             sessionsAmount: 1,
             spentTimeSeconds: 200,
             pausedAmount: 0,
@@ -210,7 +210,7 @@ describe('mergeActivityDistributions', () => {
     expect(result).toEqual([
       {
         ...codingMeta,
-        sessionStatistics: {
+        sessionStat: {
           sessionsAmount: 1,
           spentTimeSeconds: 300,
           pausedAmount: 0,
@@ -219,7 +219,7 @@ describe('mergeActivityDistributions', () => {
       },
       {
         ...readingMeta,
-        sessionStatistics: {
+        sessionStat: {
           sessionsAmount: 1,
           spentTimeSeconds: 200,
           pausedAmount: 0,
@@ -272,7 +272,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-02-01T00:00:00.000Z'),
       barName: 'Jan',
       barDetailedName: 'January 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
@@ -284,7 +284,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-03-01T00:00:00.000Z'),
       barName: 'Feb',
       barDetailedName: 'February 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
@@ -296,7 +296,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-04-01T00:00:00.000Z'),
       barName: 'Mar',
       barDetailedName: 'March 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 9600,
         sessionsAmount: 12,
         pausedAmount: 8,
@@ -308,7 +308,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-05-01T00:00:00.000Z'),
       barName: 'Apr',
       barDetailedName: 'April 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
@@ -320,7 +320,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-06-01T00:00:00.000Z'),
       barName: 'May',
       barDetailedName: 'May 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
@@ -332,7 +332,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-07-01T00:00:00.000Z'),
       barName: 'Jun',
       barDetailedName: 'June 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
@@ -344,7 +344,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-08-01T00:00:00.000Z'),
       barName: 'Jul',
       barDetailedName: 'July 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
@@ -356,7 +356,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-09-01T00:00:00.000Z'),
       barName: 'Aug',
       barDetailedName: 'August 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
@@ -368,7 +368,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-10-01T00:00:00.000Z'),
       barName: 'Sep',
       barDetailedName: 'September 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 17562,
         sessionsAmount: 25,
         pausedAmount: 13,
@@ -380,7 +380,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-11-01T00:00:00.000Z'),
       barName: 'Oct',
       barDetailedName: 'October 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 19980,
         sessionsAmount: 74,
         pausedAmount: 47,
@@ -392,7 +392,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2025-12-01T00:00:00.000Z'),
       barName: 'Nov',
       barDetailedName: 'November 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 5926,
         sessionsAmount: 17,
         pausedAmount: 77,
@@ -404,7 +404,7 @@ describe('splitTimeBars', () => {
       endOfRange: new Date('2026-01-01T00:00:00.000Z'),
       barName: 'Dec',
       barDetailedName: 'December 2025',
-      sessionStatistics: {
+      sessionStat: {
         spentTimeSeconds: 6688,
         sessionsAmount: 45,
         pausedAmount: 132,

@@ -3,12 +3,12 @@ import { getBarName, getBarDetailedName } from './barNaming';
 import i18n from 'i18next';
 
 import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
-import { ISessionStatistics } from '../ts/interfaces/Statistics/ISessionStatistics';
+import { ISessionStat } from '../ts/interfaces/Statistics/ISessionStat';
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
-export const mergeSessionStatistics = (
-  statisticsList: ISessionStatistics[],
-): ISessionStatistics => {
+export const mergeSessionStat = (
+  statisticsList: ISessionStat[],
+): ISessionStat => {
   const sessionsAmount = statisticsList.reduce(
     (amount, statistics) => amount + statistics.sessionsAmount,
     0,
@@ -45,16 +45,13 @@ export const mergeActivityDistributions = (
     finalAd = finalAd.map((ad) => {
       for (let j = 0; j < adsList[i].length; j++) {
         if (ad.name === adsList[i][j].name) {
-          const { id: activityId, sessionStatistics, fill } = adsList[i][j];
+          const { id: activityId, sessionStat, fill } = adsList[i][j];
           adsList[i] = adsList[i].filter((ad) => ad.id !== activityId);
 
           return {
             id: ad.id,
             name: ad.name,
-            sessionStatistics: mergeSessionStatistics([
-              ad.sessionStatistics,
-              sessionStatistics,
-            ]),
+            sessionStat: mergeSessionStat([ad.sessionStat, sessionStat]),
             spentTimePercentage: 0,
             fill,
           };
@@ -68,15 +65,13 @@ export const mergeActivityDistributions = (
   }
 
   const totalSpentTimeSeconds = finalAd.reduce(
-    (seconds, ad) => seconds + ad.sessionStatistics.spentTimeSeconds,
+    (seconds, ad) => seconds + ad.sessionStat.spentTimeSeconds,
     0,
   );
   finalAd = finalAd.map((ad) => ({
     ...ad,
     spentTimePercentage: parseFloat(
-      (ad.sessionStatistics.spentTimeSeconds / totalSpentTimeSeconds).toFixed(
-        2,
-      ),
+      (ad.sessionStat.spentTimeSeconds / totalSpentTimeSeconds).toFixed(2),
     ),
   }));
 
@@ -118,8 +113,8 @@ export const splitTimeBars = (
         t,
         i18n.language,
       ),
-      sessionStatistics: mergeSessionStatistics([
-        ...timeBarsPart.map((bar) => bar.sessionStatistics),
+      sessionStat: mergeSessionStat([
+        ...timeBarsPart.map((bar) => bar.sessionStat),
       ]),
       adItems: mergeActivityDistributions([
         ...timeBarsPart.map((bar) => bar.adItems),

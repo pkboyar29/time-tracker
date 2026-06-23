@@ -125,8 +125,8 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
 
     return timeBarsLength == 0
       ? 0
-      : analytics.sessionStatistics.spentTimeSeconds / timeBarsLength;
-  }, [analytics.sessionStatistics, displayTimeBars]);
+      : analytics.sessionStat.spentTimeSeconds / timeBarsLength;
+  }, [analytics.sessionStat, displayTimeBars]);
 
   const userInfo = useAppSelector((state) => state.users.user);
   const dailyGoalSeconds = userInfo ? userInfo.dailyGoal : 1_000_000;
@@ -210,7 +210,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
               // }}
             />
 
-            <YAxis dataKey="sessionStatistics.spentTimeSeconds" />
+            <YAxis dataKey="sessionStat.spentTimeSeconds" />
 
             <Tooltip
               trigger="click"
@@ -221,13 +221,13 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
               <Bar
                 isAnimationActive={true}
                 cursor="pointer"
-                dataKey="sessionStatistics.spentTimeSeconds"
+                dataKey="sessionStat.spentTimeSeconds"
                 shape={<CustomBar />}
               >
                 {displayTimeBars.map((bar, index) => {
                   const color =
                     getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
-                    bar.sessionStatistics.spentTimeSeconds >= dailyGoalSeconds
+                    bar.sessionStat.spentTimeSeconds >= dailyGoalSeconds
                       ? colors.primary
                       : themeState === 'dark'
                         ? '#424242'
@@ -247,7 +247,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                         (item: IActivityDistribution) => item.id === ad.id,
                       );
                       return barActivityItem
-                        ? barActivityItem.sessionStatistics.spentTimeSeconds
+                        ? barActivityItem.sessionStat.spentTimeSeconds
                         : '';
                     }}
                     fill={ad.fill}

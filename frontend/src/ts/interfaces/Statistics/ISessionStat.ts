@@ -1,4 +1,4 @@
-export interface ISessionStatistics {
+export interface ISessionStat {
   sessionsAmount: number;
   pausedAmount: number;
   spentTimeSeconds: number;

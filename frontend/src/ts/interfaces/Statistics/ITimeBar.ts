@@ -1,11 +1,11 @@
 import { IActivityDistribution } from './IActivityDistribution';
-import { ISessionStatistics } from './ISessionStatistics';
+import { ISessionStat } from './ISessionStat';
 
 export interface ITimeBar {
   startOfRange: Date;
   endOfRange: Date;
   barName: string;
   barDetailedName: string;
-  sessionStatistics: ISessionStatistics;
+  sessionStat: ISessionStat;
   adItems: IActivityDistribution[];
 }

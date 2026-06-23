@@ -182,7 +182,7 @@
     "noActivity": "No session activity for the specified dates",
     "viewSelectTitle": "View by"
   },
-  "sessionStatisticsBox": {
+  "sessionStatBox": {
     "totalTime": "total time",
     "totalSessions": "total sessions",
     "distracted": "distracted",

@@ -36,7 +36,7 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
       {isVisible && (
         <div className="flex flex-col gap-2.5">
           <p className="text-primary text-[15px]">{`${timeBar.barDetailedName}`}</p>
-          {timeBar.sessionStatistics.spentTimeSeconds == 0 ? (
+          {timeBar.sessionStat.spentTimeSeconds == 0 ? (
             <p className="text-gray-800 dark:text-textDark">
               {t('pdBox.noActivity')}
             </p>
@@ -48,8 +48,7 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
                     'days' && (
                     <p className="text-gray-800 dark:text-textDark">
                       {`${t('pdBox.dailyGoal')} ${
-                        timeBar.sessionStatistics.spentTimeSeconds >=
-                        dailyGoalSeconds
+                        timeBar.sessionStat.spentTimeSeconds >= dailyGoalSeconds
                           ? '✅'
                           : '❌'
                       }`}
@@ -57,42 +56,34 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
                   )}
 
                   <p className="text-gray-800 dark:text-textDark">
-                    {getReadableTime(
-                      timeBar.sessionStatistics.spentTimeSeconds,
-                      t,
-                      {
-                        short: false,
-                      },
-                    )}
+                    {getReadableTime(timeBar.sessionStat.spentTimeSeconds, t, {
+                      short: false,
+                    })}
                   </p>
 
                   <p className="text-gray-800 dark:text-textDark">
                     {t('plural.sessions', {
-                      count: timeBar.sessionStatistics.sessionsAmount,
+                      count: timeBar.sessionStat.sessionsAmount,
                     })}
                   </p>
 
                   <p className="text-gray-800 dark:text-textDark">
                     {t('plural.pauses', {
-                      count: timeBar.sessionStatistics.pausedAmount,
+                      count: timeBar.sessionStat.pausedAmount,
                     })}
                   </p>
                 </>
               ) : (
                 <>
                   <p className="text-gray-800 dark:text-textDark">
-                    {getReadableTime(
-                      timeBar.sessionStatistics.spentTimeSeconds,
-                      t,
-                      {
-                        short: false,
-                      },
-                    )}
+                    {getReadableTime(timeBar.sessionStat.spentTimeSeconds, t, {
+                      short: false,
+                    })}
                   </p>
 
                   <p className="text-gray-800 dark:text-textDark">
                     {t('plural.sessions', {
-                      count: timeBar.sessionStatistics.sessionsAmount,
+                      count: timeBar.sessionStat.sessionsAmount,
                     })}
                   </p>
                 </>
@@ -116,7 +107,7 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
                           <div className="text-[13px] mt-1 text-gray-600 dark:text-textDarkSecondary">
                             (
                             {getReadableTime(
-                              item.sessionStatistics.spentTimeSeconds,
+                              item.sessionStat.spentTimeSeconds,
                               t,
                               {
                                 short: true,
@@ -124,7 +115,7 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
                             )}
                             ,{' '}
                             {t('plural.sessions', {
-                              count: item.sessionStatistics.sessionsAmount,
+                              count: item.sessionStat.sessionsAmount,
                             })}
                             )
                           </div>

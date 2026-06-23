@@ -82,7 +82,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
         id: activityId.toString(),
         name: 'Work',
         color: '#000',
-        sessionStatistics: {
+        sessionStat: {
           spentTimeSeconds: 100,
           sessionsAmount: 2,
           pausedAmount: 1,
@@ -129,7 +129,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
       ],
     });
 
-    expect(result[0].sessionStatistics).toEqual({
+    expect(result[0].sessionStat).toEqual({
       spentTimeSeconds: 150,
       sessionsAmount: 3,
       pausedAmount: 1,
@@ -201,7 +201,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
     const withoutActivity = result.find((r) => r.id === '0');
 
     expect(withoutActivity).toBeDefined();
-    expect(withoutActivity?.sessionStatistics).toEqual({
+    expect(withoutActivity?.sessionStat).toEqual({
       spentTimeSeconds: 100,
       sessionsAmount: 2,
       pausedAmount: 1,

@@ -1,9 +1,9 @@
-import { ISessionStatistics } from './ISessionStatistics';
+import { ISessionStat } from './ISessionStat';
 import { IActivityDistribution } from './IActivityDistribution';
 import { ITimeBar } from './ITimeBar';
 
 export interface IAnalytics {
-  sessionStatistics: ISessionStatistics;
+  sessionStat: ISessionStat;
   adItems: IActivityDistribution[];
   timeBars: ITimeBar[];
 }
