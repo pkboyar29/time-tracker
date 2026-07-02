@@ -1494,25 +1494,39 @@ function mergeBarsWithDailyRangeOnRight({
       finalTimeBars = [monthBar];
     } else if (leftObjBarType === 'month') {
       finalTimeBars = [...leftObj.timeBars];
-      const lastIdx = finalTimeBars.length - 1;
-      // TODO: если rightObj относится не к месяцу finalTimeBars[lastIdx], то ...
+      let lastIdx = finalTimeBars.length - 1;
 
-      const mergedStat = analyticsService.mergeSessionStat([
-        finalTimeBars[lastIdx].sessionStat,
-        rightObj.sessionStat,
-      ]);
-      const mergedAds = analyticsService.mergeActivityDistributions({
-        adsList: [
-          finalTimeBars[lastIdx].activityDistribution,
-          rightObj.activityDistribution,
-        ],
-      });
+      // if right obj is first day of the next month
+      if (
+        finalTimeBars[lastIdx].startOfRange.getMonth() !==
+        rightObj.startOfRange.getMonth()
+      ) {
+        finalTimeBars.push({
+          startOfRange: rightObj.startOfRange,
+          endOfRange: rightObj.endOfRange, // it's changing lately
+          sessionStat: rightObj.sessionStat,
+          activityDistribution: rightObj.activityDistribution,
+        });
 
-      finalTimeBars[lastIdx] = {
-        ...finalTimeBars[lastIdx],
-        sessionStat: mergedStat,
-        activityDistribution: mergedAds,
-      };
+        lastIdx += 1;
+      } else {
+        const mergedStat = analyticsService.mergeSessionStat([
+          finalTimeBars[lastIdx].sessionStat,
+          rightObj.sessionStat,
+        ]);
+        const mergedAds = analyticsService.mergeActivityDistributions({
+          adsList: [
+            finalTimeBars[lastIdx].activityDistribution,
+            rightObj.activityDistribution,
+          ],
+        });
+
+        finalTimeBars[lastIdx] = {
+          ...finalTimeBars[lastIdx],
+          sessionStat: mergedStat,
+          activityDistribution: mergedAds,
+        };
+      }
 
       if (finalObjEndOfRange.getTime() === rightObj.endOfRange.getTime()) {
         finalTimeBars[lastIdx].endOfRange = rightObj.endOfRange;
