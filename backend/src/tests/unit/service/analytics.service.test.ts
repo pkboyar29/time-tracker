@@ -1764,6 +1764,45 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
     } as TimeBar);
   });
 
+  it('if final bar type is month, bar type is month on the left, but right obj is on the next month, should properly combine left bars with right obj', () => {
+    const leftObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-05-01T00:00:00Z'),
+      endOfRange: new Date('2026-07-01T00:00:00Z'),
+      sessionStat: emptySessionStat,
+      activityDistribution: [],
+      timeBars: [
+        {
+          startOfRange: new Date('2026-05-01T00:00:00Z'),
+          endOfRange: new Date('2026-06-01T00:00:00Z'),
+          sessionStat: emptySessionStat,
+          activityDistribution: [],
+        },
+        {
+          startOfRange: new Date('2026-06-01T00:00:00Z'),
+          endOfRange: new Date('2026-07-01T00:00:00Z'),
+          sessionStat: emptySessionStat,
+          activityDistribution: [],
+        },
+      ],
+    };
+
+    const rightObj: AnalyticsForRangeDTO = {
+      startOfRange: new Date('2026-07-01T00:00:00Z'),
+      endOfRange: new Date('2026-07-02T00:00:00Z'),
+      sessionStat: emptySessionStat,
+      activityDistribution: [],
+      timeBars: [],
+    };
+
+    const result = analyticsService.mergeBarsWithDailyRangeOnRight({
+      leftObj,
+      rightObj,
+      finalObjEndOfRange: new Date('2027-01-01T00:00:00Z'),
+      timezone,
+    });
+    expect(result.length).toBe(8);
+  });
+
   it('if final bar type is year, should return left bars and properly change last bar', () => {
     const lastLeftBarStat: SessionStat = {
       sessionsAmount: 4,
