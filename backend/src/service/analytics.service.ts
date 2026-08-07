@@ -1497,10 +1497,14 @@ function mergeBarsWithDailyRangeOnRight({
       let lastIdx = finalTimeBars.length - 1;
 
       // if right obj is first day of the next month
-      if (
-        finalTimeBars[lastIdx].startOfRange.getMonth() !==
-        rightObj.startOfRange.getMonth()
-      ) {
+      const leftMonth = DateTime.fromJSDate(
+        finalTimeBars[lastIdx].startOfRange,
+        { zone: timezone },
+      );
+      const rightMonth = DateTime.fromJSDate(rightObj.startOfRange, {
+        zone: timezone,
+      });
+      if (leftMonth.month !== rightMonth.month) {
         finalTimeBars.push({
           startOfRange: rightObj.startOfRange,
           endOfRange: rightObj.endOfRange, // it's changing lately
