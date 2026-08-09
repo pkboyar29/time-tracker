@@ -50,6 +50,16 @@ const userSchema = new mongoose.Schema({
     type: Date,
     required: false,
   },
+  streak: {
+    type: Number,
+    required: true,
+    min: [0, 'Streak should be minimum 0'],
+    default: 0,
+  },
+  streak_updated_at: {
+    type: Date,
+    required: false,
+  },
   showTimerInTitle: {
     type: Boolean,
     default: false,

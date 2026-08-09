@@ -3,7 +3,6 @@ import { sendServerEvent } from '../helpers/sendServerEvent';
 import { logger } from '../../logger';
 import userService from '../service/user.service';
 import User from '../model/user.model';
-import analyticsService from '../service/analytics.service';
 
 const router = Router();
 
@@ -38,8 +37,9 @@ router.get('/', async (req: Request, res: Response) => {
     }
   });
 
-  const timezoneInfo = await User.findById(userId).select('timezone');
-  const timezone = timezoneInfo!.timezone;
+  const userInfo = await User.findById(userId).select('timezone streak');
+  const timezone = userInfo!.timezone;
+  const streak = userInfo!.streak;
 
   const isDailyGoalCompletedMarkedToday =
     await userService.isDailyGoalCompletedMarkedToday(userId, timezone);
@@ -49,7 +49,6 @@ router.get('/', async (req: Request, res: Response) => {
   if (isDailyGoalCompletedMarkedToday && !isDailyGoalNotifiedMarkedToday) {
     logger.info('trying to send notification in events.controller.ts ...');
 
-    const streak = await analyticsService.getStreak({ userId, timezone });
     sendServerEvent(res, 'daily_goal_completed', {
       streak,
     });
