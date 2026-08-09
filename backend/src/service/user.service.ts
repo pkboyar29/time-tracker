@@ -11,6 +11,7 @@ import { logger } from '../../logger';
 
 import { HttpError } from '../helpers/HttpError';
 import { UserSignUpDTO, UserSignInDTO, UserResponseDTO } from '../dto/user.dto';
+import { DateTime } from 'luxon';
 import { getTodayRange } from '../helpers/getTodayRange';
 import { sseConnections } from '../controller/events.controller';
 import { sendServerEvent } from '../helpers/sendServerEvent';
@@ -49,6 +50,9 @@ const userService = {
   markDailyGoalNotified,
   notifyDailyGoalCompleted,
   updateDailyGoal,
+  updateStreak,
+  recalculateStreak,
+  isStreakRelevant,
   updateShowTimerInTitle,
   exportUserData,
   importFile,
@@ -243,17 +247,25 @@ function refreshAccessToken(refreshToken: string): string | undefined {
 async function getProfileInfo(userId: string): Promise<UserResponseDTO> {
   try {
     const profileInfo = await User.findById(userId).select(
-      'email dailyGoal showTimerInTitle createdDate',
-    ); // firstName lastName
+      'email dailyGoal streak showTimerInTitle createdDate',
+    );
     if (!profileInfo) {
       throw new HttpError(400, 'No user');
     }
 
     const userAudios = await UserAudio.find({ userId });
 
+    let streak = 0;
+    if (await userService.isStreakRelevant(userId)) {
+      streak = profileInfo.streak;
+    } else {
+      await userService.recalculateStreak(userId);
+    }
+
     return {
       email: profileInfo.email,
       dailyGoal: profileInfo.dailyGoal,
+      streak,
       showTimerInTitle: profileInfo.showTimerInTitle,
       createdDate: profileInfo.createdDate,
       audios: userAudios,
@@ -378,9 +390,8 @@ async function notifyDailyGoalCompleted(userId: string) {
     for (const res of userConnections) {
       logger.info('trying to send notification in user.service.ts ...');
 
-      const timezoneInfo = await User.findById(userId).select('timezone');
-      const timezone = timezoneInfo!.timezone;
-      const streak = await analyticsService.getStreak({ userId, timezone });
+      const userInfo = await User.findById(userId).select('streak');
+      const streak = userInfo!.streak;
       sendServerEvent(res, 'daily_goal_completed', {
         streak,
       });
@@ -398,6 +409,13 @@ async function updateDailyGoal(newDailyGoal: number, userId: string) {
     }
 
     const oldDailyGoal = user.dailyGoal;
+    if (newDailyGoal === oldDailyGoal) {
+      const message = {
+        message: 'Updated successfully',
+      };
+      return message;
+    }
+
     user.dailyGoal = newDailyGoal;
     const validationError = user.validateSync();
     if (validationError) {
@@ -417,6 +435,14 @@ async function updateDailyGoal(newDailyGoal: number, userId: string) {
       }
     }
 
+    const streak = await analyticsService.calculateStreak({
+      userId,
+      timezone: user.timezone,
+      dailyGoalSeconds: newDailyGoal,
+    });
+    user.streak = streak;
+    user.streak_updated_at = new Date();
+
     await user.save();
 
     const message = {
@@ -428,6 +454,59 @@ async function updateDailyGoal(newDailyGoal: number, userId: string) {
       throw e;
     }
   }
+}
+
+async function updateStreak(userId: string) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new HttpError(400, 'No user');
+  }
+
+  const isStreakRelevant = await userService.isStreakRelevant(userId);
+  if (isStreakRelevant) {
+    user.streak += 1;
+  } else {
+    user.streak = 1;
+  }
+
+  user.streak_updated_at = new Date();
+  await user.save();
+}
+
+async function recalculateStreak(userId: string) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new HttpError(400, 'No user');
+  }
+
+  const streak = await analyticsService.calculateStreak({
+    userId,
+    timezone: user.timezone,
+    dailyGoalSeconds: user.dailyGoal,
+  });
+
+  user.streak = streak;
+  user.streak_updated_at = new Date();
+  await user.save();
+}
+
+async function isStreakRelevant(userId: string): Promise<boolean> {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new HttpError(400, 'No user');
+  }
+
+  const streakUpdatedAt = user.streak_updated_at;
+  if (!streakUpdatedAt) {
+    return false;
+  }
+
+  const { startOfToday: today } = getTodayRange(user.timezone);
+  const yesterday = DateTime.fromJSDate(today, {
+    zone: user.timezone,
+  }).minus({ days: 1 });
+
+  return streakUpdatedAt >= yesterday.toJSDate();
 }
 
 async function updateShowTimerInTitle(

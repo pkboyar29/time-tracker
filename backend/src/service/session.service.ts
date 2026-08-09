@@ -268,16 +268,18 @@ async function updateSession(
 
     if (!isDailyGoalCompletedMarkedToday) {
       const dailyGoalInfo = await User.findById(userId).select('dailyGoal');
+      const dailyGoalSeconds = dailyGoalInfo!.dailyGoal;
 
       const isDailyGoalCompletedNow = await userService.isDailyGoalCompletedNow(
         partSpentTimeSeconds,
-        dailyGoalInfo!.dailyGoal,
+        dailyGoalSeconds,
         userId,
         timezone,
       );
       if (isDailyGoalCompletedNow) {
-        await userService.markDailyGoalCompleted(userId);
+        await userService.updateStreak(userId);
 
+        await userService.markDailyGoalCompleted(userId);
         await userService.notifyDailyGoalCompleted(userId);
       }
     }

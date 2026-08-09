@@ -8,7 +8,7 @@ mongoose.connect(MONGO_URL).then(() => {
   console.log('connection with database is successful');
 });
 
-async function addCreatedDateToUsers() {
+async function addTimezoneToUsers() {
   const allUsers = await User.find({}).exec();
   for (let i = 0; i < allUsers.length; i++) {
     allUsers[i].timezone = 'Europe/Moscow';
@@ -17,4 +17,4 @@ async function addCreatedDateToUsers() {
   console.log('Successful');
 }
 
-addCreatedDateToUsers();
+addTimezoneToUsers();

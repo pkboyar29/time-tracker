@@ -15,7 +15,6 @@ import DailyActivityDistribution, {
   IDailyAD,
 } from '../model/dailyActivityDistribution.model';
 import { getTodayRange } from '../helpers/getTodayRange';
-import User from '../model/user.model';
 
 import { redisClient } from '../../redisClient';
 import { DateTime } from 'luxon';
@@ -91,9 +90,10 @@ interface GetTodayAggregateOptions {
   timezone: string;
 }
 
-interface GetStreakOptions {
+interface CalculateStreakOptions {
   userId: string;
   timezone: string;
+  dailyGoalSeconds: number;
 }
 
 interface GetAnalyticsForRangeOptions {
@@ -179,7 +179,7 @@ const analyticsService = {
   getSessionsStatisticsAggregates,
   getActivityDistributionsAggregates,
   getTodayAggregate,
-  getStreak,
+  calculateStreak,
   applySessionUpdateToAggregates,
   applySessionDeleteToAggregates,
   applyActivityDeleteToAggregates,
@@ -651,10 +651,11 @@ async function getTodayAggregate({
   return todayAggregate;
 }
 
-async function getStreak({
+async function calculateStreak({
   userId,
   timezone,
-}: GetStreakOptions): Promise<number> {
+  dailyGoalSeconds,
+}: CalculateStreakOptions): Promise<number> {
   const { startOfToday } = getTodayRange(timezone);
   const todayDt = DateTime.fromJSDate(startOfToday, {
     zone: timezone,
@@ -667,9 +668,6 @@ async function getStreak({
   if (!todayAggregate) {
     return 0;
   }
-
-  const dailyGoalInfo = await User.findById(userId).select('dailyGoal');
-  const dailyGoalSeconds = dailyGoalInfo!.dailyGoal;
   if (todayAggregate.spentTimeSeconds < dailyGoalSeconds) {
     return 0;
   }
@@ -689,38 +687,24 @@ async function getStreak({
       user: userId,
       date: { $in: prevDays },
     });
-    if (prevAggrs.length !== 5) {
-      for (let i = 0; i < 5; i++) {
-        const aggr = prevAggrs.find((aggr) => aggr.date === prevDays[i]);
-
-        if (!aggr) {
-          break;
-        }
-        if (aggr.spentTimeSeconds < dailyGoalSeconds) {
-          break;
-        }
-
-        streak++;
+    let streakStopped = false;
+    for (let i = 0; i < 5; i++) {
+      const aggr = prevAggrs.find((aggr) => aggr.date === prevDays[i]);
+      if (!aggr) {
+        break;
+      }
+      if (aggr.spentTimeSeconds < dailyGoalSeconds) {
+        streakStopped = true;
+        break;
       }
 
+      streak++;
+    }
+
+    if (streakStopped || prevAggrs.length !== 5) {
       break;
-    } else {
-      // 5 агрегатов
-      for (let i = 0; i < 5; i++) {
-        const aggr = prevAggrs.find((aggr) => aggr.date === prevDays[i]);
-
-        if (!aggr) {
-          break;
-        }
-        if (aggr.spentTimeSeconds < dailyGoalSeconds) {
-          break;
-        }
-
-        streak++;
-      }
     }
   }
-  // TODO: повторение двух циклов
 
   return streak;
 }
