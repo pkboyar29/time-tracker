@@ -3,7 +3,7 @@
 **Session Tracker** is a convenient web application for accurately tracking time spent on your activities.  
 With it, you can easily see where your day goes, and the flexible analytics module lets you analyze data for any chosen time period.
 
-🔗 [Live demo](https://session-tracker.ru/)
+🔗 [Live demo](https://session-trackerr.ru/)
 
 ## Analytics Features:
 
