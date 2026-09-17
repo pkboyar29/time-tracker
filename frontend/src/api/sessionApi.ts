@@ -9,8 +9,9 @@ const mapResponseData = (unmappedSession: any): ISession => {
     ...unmappedSession,
     id: unmappedSession._id,
     activity: unmappedSession.activity && {
-      activityGroupName: unmappedSession.activity.activityGroup.name,
       name: unmappedSession.activity.name,
+      color: unmappedSession.activity.color,
+      activityGroupName: unmappedSession.activity.activityGroup.name,
     },
   };
 };

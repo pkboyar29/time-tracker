@@ -23,7 +23,11 @@ describe('analyticsService.getSessionStat', () => {
       {
         _id: new Types.ObjectId(),
         spentTimeSeconds: 120,
-        session: { activity: { id: new Types.ObjectId(), name: 'Reading' } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: new Types.ObjectId(), name: 'Reading' },
+        },
         user: new Types.ObjectId(),
         paused: true,
         createdDate: new Date('2025-09-20T10:00:00Z'),
@@ -31,7 +35,11 @@ describe('analyticsService.getSessionStat', () => {
       {
         _id: new Types.ObjectId(),
         spentTimeSeconds: 90,
-        session: { activity: { id: new Types.ObjectId(), name: 'Coding' } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: new Types.ObjectId(), name: 'Coding' },
+        },
         user: new Types.ObjectId(),
         paused: true,
         createdDate: new Date('2025-09-20T12:00:00Z'),
@@ -39,7 +47,11 @@ describe('analyticsService.getSessionStat', () => {
       {
         _id: new Types.ObjectId(),
         spentTimeSeconds: 60,
-        session: { activity: { id: new Types.ObjectId(), name: 'Exercise' } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: new Types.ObjectId(), name: 'Exercise' },
+        },
         user: new Types.ObjectId(),
         paused: false,
         createdDate: new Date('2025-09-20T14:00:00Z'),
@@ -56,6 +68,7 @@ describe('analyticsService.getSessionStat', () => {
         activity: {
           id: new Types.ObjectId(),
           name: 'Reading',
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         user: new Types.ObjectId(),
@@ -72,6 +85,7 @@ describe('analyticsService.getSessionStat', () => {
         activity: {
           id: new Types.ObjectId(),
           name: 'Coding',
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         user: new Types.ObjectId(),
@@ -530,6 +544,7 @@ describe('analyticsService.getActivityDistributions', () => {
         activity: {
           id: readingMeta._id,
           name: readingMeta.name,
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         totalTimeSeconds: 0,
@@ -545,6 +560,7 @@ describe('analyticsService.getActivityDistributions', () => {
         activity: {
           id: readingMeta._id,
           name: readingMeta.name,
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         totalTimeSeconds: 0,
@@ -560,6 +576,7 @@ describe('analyticsService.getActivityDistributions', () => {
         activity: {
           id: codingMeta._id,
           name: codingMeta.name,
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         totalTimeSeconds: 0,
@@ -575,7 +592,11 @@ describe('analyticsService.getActivityDistributions', () => {
     const sessionParts: ISessionPart[] = [
       {
         _id: new Types.ObjectId(),
-        session: { activity: { id: readingMeta._id, name: readingMeta.name } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: readingMeta._id, name: readingMeta.name },
+        },
         spentTimeSeconds: 100,
         createdDate: new Date(),
         paused: true,
@@ -583,7 +604,11 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         _id: new Types.ObjectId(),
-        session: { activity: { id: codingMeta._id, name: codingMeta.name } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: codingMeta._id, name: codingMeta.name },
+        },
         spentTimeSeconds: 200,
         createdDate: new Date(),
         paused: false,
@@ -591,7 +616,11 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         _id: new Types.ObjectId(),
-        session: { activity: { id: codingMeta._id, name: codingMeta.name } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: codingMeta._id, name: codingMeta.name },
+        },
         spentTimeSeconds: 200,
         createdDate: new Date(),
         paused: true,
@@ -649,6 +678,7 @@ describe('analyticsService.getActivityDistributions', () => {
         activity: {
           id: readingMeta._id,
           name: readingMeta.name,
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         totalTimeSeconds: 0,
@@ -665,7 +695,11 @@ describe('analyticsService.getActivityDistributions', () => {
       {
         _id: new Types.ObjectId(),
         paused: false,
-        session: { activity: { id: readingMeta._id, name: readingMeta.name } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: readingMeta._id, name: readingMeta.name },
+        },
         spentTimeSeconds: 300,
         createdDate: new Date(),
         user: new Types.ObjectId(),

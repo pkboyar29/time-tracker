@@ -1,4 +1,8 @@
-import Session, { ISession } from '../model/session.model';
+import Session, {
+  ISession,
+  PopulatedActivity,
+  activityPopulateConfig,
+} from '../model/session.model';
 import SessionPart, { ISessionPart } from '../model/sessionPart.model';
 import { SessionCreateDTO, SessionUpdateDTO } from '../dto/session.dto';
 import activityService from './activity.service';
@@ -8,24 +12,6 @@ import analyticsService from './analytics.service';
 import mongoose from 'mongoose';
 import User from '../model/user.model';
 import { HttpError } from '../helpers/HttpError';
-
-interface PopulatedActivity {
-  id: mongoose.Types.ObjectId;
-  name: string;
-  activityGroup: {
-    id: mongoose.Types.ObjectId;
-    name: string;
-  };
-}
-
-const activityPopulateConfig = {
-  path: 'activity',
-  select: 'name activityGroup id',
-  populate: {
-    path: 'activityGroup',
-    select: 'name id',
-  },
-};
 
 interface GetSessionsOptions {
   filter: Record<string, unknown>;

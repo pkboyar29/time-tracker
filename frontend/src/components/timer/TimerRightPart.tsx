@@ -136,7 +136,11 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
               )}
             </div>
           ) : timerState.session.activity ? (
-            <div className="hidden text-base sm:block dark:text-textDark">
+            <div className="hidden text-base sm:inline-flex items-center gap-1.5 dark:text-textDark">
+              <span
+                className="w-3 h-3 rounded-full shrink-0"
+                style={{ backgroundColor: timerState.session.activity.color }}
+              />
               {timerState.session.activity.name}
             </div>
           ) : (
