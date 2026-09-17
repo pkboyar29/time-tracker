@@ -50,10 +50,10 @@ const ActivityGroupsPage: FC = () => {
         >
           <ActivityGroupCreateForm
             afterSubmitHandler={(newActivityGroup) => {
-              queryClient.setQueryData(
-                ['activityGroups'],
-                (oldData: IActivityGroup[]) => [newActivityGroup, ...oldData],
-              );
+              queryClient.setQueryData(['activityGroups'], (oldData: IActivityGroup[]) => [
+                newActivityGroup,
+                ...oldData,
+              ]);
 
               setCreateModal(false);
             }}
@@ -76,9 +76,7 @@ const ActivityGroupsPage: FC = () => {
             />
 
             <div className="hidden md:block w-fit">
-              <Button onClick={() => setCreateModal(true)}>
-                {t('groupsPage.createButton')}
-              </Button>
+              <Button onClick={() => setCreateModal(true)}>{t('groupsPage.createButton')}</Button>
             </div>
 
             <button
@@ -107,46 +105,32 @@ const ActivityGroupsPage: FC = () => {
           activityGroups && (
             <div className="flex flex-wrap justify-center gap-4 mt-5 md:justify-start">
               {activityGroups.filter((activityGroup) =>
-                activityGroup.name
-                  .toLowerCase()
-                  .includes(searchString.toLowerCase()),
+                activityGroup.name.toLowerCase().includes(searchString.toLowerCase()),
               ).length !== 0 ? (
                 activityGroups
                   .filter((activityGroup) =>
-                    activityGroup.name
-                      .toLowerCase()
-                      .includes(searchString.toLowerCase()),
+                    activityGroup.name.toLowerCase().includes(searchString.toLowerCase()),
                   )
                   .map((activityGroup) => (
                     <ActivityItem
                       key={activityGroup.id}
                       activityCommon={activityGroup}
                       afterUpdateHandler={(updatedGroup) => {
-                        queryClient.setQueryData(
-                          ['activityGroups'],
-                          (oldData: IActivityGroup[]) =>
-                            oldData.map((group) =>
-                              group.id == updatedGroup.id
-                                ? updatedGroup
-                                : group,
-                            ),
+                        queryClient.setQueryData(['activityGroups'], (oldData: IActivityGroup[]) =>
+                          oldData.map((group) =>
+                            group.id == updatedGroup.id ? updatedGroup : group,
+                          ),
                         );
                       }}
                       afterDeleteHandler={(deletedItemId) => {
-                        queryClient.setQueryData(
-                          ['activityGroups'],
-                          (oldData: IActivityGroup[]) =>
-                            oldData.filter(
-                              (group) => group.id !== deletedItemId,
-                            ),
+                        queryClient.setQueryData(['activityGroups'], (oldData: IActivityGroup[]) =>
+                          oldData.filter((group) => group.id !== deletedItemId),
                         );
                       }}
                     />
                   ))
               ) : (
-                <div className="text-base dark:text-textDark">
-                  {t('groupsPage.notFound')}
-                </div>
+                <div className="text-base dark:text-textDark">{t('groupsPage.notFound')}</div>
               )}
             </div>
           )

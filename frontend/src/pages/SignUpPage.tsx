@@ -101,11 +101,7 @@ const SignUpPage: FC = () => {
               },
             }}
             inputProps={{ maxLength: 40 }}
-            errorMessage={
-              typeof errors.email?.message === 'string'
-                ? errors.email.message
-                : ''
-            }
+            errorMessage={typeof errors.email?.message === 'string' ? errors.email.message : ''}
             enlarged={true}
           />
 
@@ -130,19 +126,13 @@ const SignUpPage: FC = () => {
             }}
             inputProps={{ maxLength: 20 }}
             errorMessage={
-              typeof errors.password?.message === 'string'
-                ? errors.password.message
-                : ''
+              typeof errors.password?.message === 'string' ? errors.password.message : ''
             }
             inputType="password"
             enlarged={true}
           />
 
-          <Button
-            disabled={isPending}
-            className="text-[18px] py-3"
-            type="submit"
-          >
+          <Button disabled={isPending} className="text-[18px] py-3" type="submit">
             {t('signup.button')}
           </Button>
 

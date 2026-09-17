@@ -9,15 +9,8 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { updateSession } from '../api/sessionApi';
-import {
-  saveSessionToLS,
-  removeSessionFromLS,
-} from '../helpers/localstorageHelpers';
-import {
-  secondsToMs,
-  msToSeconds,
-  getTimerEndDate,
-} from '../helpers/timeHelpers';
+import { saveSessionToLS, removeSessionFromLS } from '../helpers/localstorageHelpers';
+import { secondsToMs, msToSeconds, getTimerEndDate } from '../helpers/timeHelpers';
 import { showSessionCompletedNotification } from '../helpers/notificationHelpers';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -301,10 +294,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         }
 
         // automatic timer update on server
-        if (
-          diff - lastSavedToServerMsRef.current >=
-          syncIntervalMsRef.current
-        ) {
+        if (diff - lastSavedToServerMsRef.current >= syncIntervalMsRef.current) {
           lastSavedToServerMsRef.current += syncIntervalMsRef.current;
 
           updateSession({
@@ -355,10 +345,7 @@ export const useTimerWithMs = (): TimerContextWithMs => {
   const context = useContext(TimerContext);
   const session = context.timerState.session;
 
-  const currentTick = useSyncExternalStore(
-    timerTickStore.subscribe,
-    timerTickStore.getSnapshot,
-  );
+  const currentTick = useSyncExternalStore(timerTickStore.subscribe, timerTickStore.getSnapshot);
 
   // TODO: если currentTick.sessionId !== session.id, то мы просто вернем 0. Это неправильно
   return {

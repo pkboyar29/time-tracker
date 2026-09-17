@@ -59,9 +59,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
             minValue={1}
             maxValue={600}
             currentValue={selectedMinutes}
-            changeCurrentValue={(newCurrentValue) =>
-              setSelectedMinutes(newCurrentValue)
-            }
+            changeCurrentValue={(newCurrentValue) => setSelectedMinutes(newCurrentValue)}
           />
         </div>
 

@@ -2,15 +2,7 @@ import { TFunction } from 'i18next';
 import { getLocaleFromLanguage } from './i18n/getLocaleFromLanguage';
 
 export const getDayRange = (date: Date): [Date, Date] => {
-  const startOfDay = new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    0,
-    0,
-    0,
-    0,
-  );
+  const startOfDay = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0);
 
   const endOfDay = new Date(startOfDay);
   endOfDay.setDate(startOfDay.getDate() + 1);
@@ -94,10 +86,7 @@ export const getDayOfWeekName = (dayNumber: number, t: TFunction): string => {
   return (t('daysOfWeek', { returnObjects: true }) as [])[dayNumber];
 };
 
-export const shiftWeekDays = (
-  days: [Date, Date][],
-  right: boolean,
-): [Date, Date][] => {
+export const shiftWeekDays = (days: [Date, Date][], right: boolean): [Date, Date][] => {
   let newDays: [Date, Date][] = [];
   for (let i = 0; i < 7; i++) {
     newDays.push([new Date(days[i][0]), new Date(days[i][1])]);
@@ -231,10 +220,7 @@ export const getMonths = (
   return months;
 };
 
-export const shiftMonths = (
-  months: [Date, Date][],
-  right: boolean,
-): [Date, Date][] => {
+export const shiftMonths = (months: [Date, Date][], right: boolean): [Date, Date][] => {
   const monthsCount = months.length;
   let newMonths: [Date, Date][] = [];
   for (let i = 0; i < monthsCount; i++) {
@@ -254,17 +240,11 @@ export const getYears = (yearDate: Date): [Date, Date][] => {
   const previousYearDate: Date = new Date(yearDate);
   previousYearDate.setFullYear(yearDate.getFullYear() - 1);
 
-  const twoYears: [Date, Date][] = [
-    getYearRange(previousYearDate),
-    getYearRange(yearDate),
-  ];
+  const twoYears: [Date, Date][] = [getYearRange(previousYearDate), getYearRange(yearDate)];
   return twoYears;
 };
 
-export const shiftYears = (
-  twoYears: [Date, Date][],
-  right: boolean,
-): [Date, Date][] => {
+export const shiftYears = (twoYears: [Date, Date][], right: boolean): [Date, Date][] => {
   let newTwoYears: [Date, Date][] = [];
   for (let i = 0; i < 2; i++) {
     newTwoYears.push([new Date(twoYears[i][0]), new Date(twoYears[i][1])]);
@@ -313,9 +293,7 @@ export const getRangeType = (fromDate: Date, toDate: Date): RangeType => {
     (toDate.getTime() - fromDate.getTime() == 86400000 &&
       isStartOfDay(fromDate) &&
       isStartOfDay(toDate)) ||
-    (isSameDay(fromDate, toDate) &&
-      isStartOfDay(fromDate) &&
-      isEndOfDay(toDate))
+    (isSameDay(fromDate, toDate) && isStartOfDay(fromDate) && isEndOfDay(toDate))
   ) {
     return 'days';
   } else if (
@@ -381,30 +359,20 @@ export const isCurrentDay = (dayDate: Date): boolean => {
 export const isCurrentWeek = (weekDate: [Date, Date]): boolean => {
   const now = new Date();
 
-  return (
-    now.getTime() > weekDate[0].getTime() &&
-    now.getTime() < weekDate[1].getTime()
-  );
+  return now.getTime() > weekDate[0].getTime() && now.getTime() < weekDate[1].getTime();
 };
 
 export const isCurrentMonth = (monthDate: Date): boolean => {
   const now = new Date();
 
-  return (
-    now.getMonth() == monthDate.getMonth() &&
-    now.getFullYear() == monthDate.getFullYear()
-  );
+  return now.getMonth() == monthDate.getMonth() && now.getFullYear() == monthDate.getFullYear();
 };
 
 export const isCurrentYear = (yearDate: Date): boolean => {
   return new Date().getFullYear() == yearDate.getFullYear();
 };
 
-export const shiftTwoDates = (
-  fromDate: Date,
-  toDate: Date,
-  right: boolean,
-): [Date, Date] => {
+export const shiftTwoDates = (fromDate: Date, toDate: Date, right: boolean): [Date, Date] => {
   const rangeType = getRangeType(fromDate, toDate);
 
   if (rangeType == 'days') {
@@ -443,11 +411,7 @@ export const shiftTwoDates = (
   return [new Date(), new Date()];
 };
 
-export const formatDate = (
-  date: Date,
-  i18nLang: string,
-  options?: { withWeekDay?: boolean },
-) =>
+export const formatDate = (date: Date, i18nLang: string, options?: { withWeekDay?: boolean }) =>
   date.toLocaleDateString(getLocaleFromLanguage(i18nLang), {
     weekday: options?.withWeekDay ? 'short' : undefined,
     month: 'short',

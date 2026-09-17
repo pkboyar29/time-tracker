@@ -1,12 +1,4 @@
-import {
-  FC,
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  RefObject,
-  ReactNode,
-} from 'react';
+import { FC, useState, useEffect, useLayoutEffect, useRef, RefObject, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { isOutOfBoundary } from '../../helpers/htmlHelpers';
 
@@ -21,10 +13,7 @@ const TOOLTIP_EDGE_OFFSET = 10;
 // left - отображается левее (выходило за правую границу), right - отображается правее (выходило за левую границу)
 type TooltipPosition = 'center' | 'left' | 'right';
 
-function Tooltip<T extends HTMLElement>({
-  tooltipText,
-  children,
-}: TooltipProps<T>) {
+function Tooltip<T extends HTMLElement>({ tooltipText, children }: TooltipProps<T>) {
   const [isVisible, setIsVisible] = useState<boolean>(false);
   const [top, setTop] = useState<number>(0);
   const [left, setLeft] = useState<number>(0);
@@ -76,8 +65,7 @@ function Tooltip<T extends HTMLElement>({
         const elementRect = elementEl.getBoundingClientRect();
         const tooltipRect = tooltipEl.getBoundingClientRect();
 
-        const centerLeft =
-          elementRect.left + elementRect.width / 2 - tooltipRect.width / 2;
+        const centerLeft = elementRect.left + elementRect.width / 2 - tooltipRect.width / 2;
         const centerRect = { x: centerLeft, width: tooltipRect.width };
 
         const position: TooltipPosition = isOutOfBoundary(centerRect, 'right')
@@ -110,9 +98,7 @@ function Tooltip<T extends HTMLElement>({
         <div
           ref={tooltipRef}
           className={`fixed z-[100001] max-w-[280px] px-2 py-1 text-sm text-gray-200 bg-surfaceDarkDarker rounded-md shadow-lg text-center ${
-            isVisible
-              ? 'opacity-100 pointer-events-auto'
-              : 'opacity-0 pointer-events-none'
+            isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
           }`}
           style={{
             top,

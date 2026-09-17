@@ -6,11 +6,7 @@ interface RadioButtonProps {
   disabled?: boolean;
 }
 
-const RadioButton: FC<RadioButtonProps> = ({
-  isChecked,
-  onSelect,
-  disabled = false,
-}) => {
+const RadioButton: FC<RadioButtonProps> = ({ isChecked, onSelect, disabled = false }) => {
   return (
     <button
       type="button"

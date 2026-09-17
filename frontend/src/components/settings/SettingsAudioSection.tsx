@@ -31,18 +31,14 @@ const SettingsAudioSection: FC = () => {
   const onUploadAudioButtonClick = () => {
     document.getElementById('audioFileInput')?.click();
   };
-  const onAudioFileInputChange = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const onAudioFileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     try {
       const newUserAudio = await uploadAudio(file);
 
-      dispatch(
-        setUser({ ...userInfo, audios: [...userInfo.audios, newUserAudio] }),
-      );
+      dispatch(setUser({ ...userInfo, audios: [...userInfo.audios, newUserAudio] }));
     } catch (e) {
       toast(t('serverErrors.uploadAudio'), { type: 'error' });
     }
@@ -65,10 +61,7 @@ const SettingsAudioSection: FC = () => {
     }
   };
 
-  const onSelectAudioButtonClick = async (
-    audioId: string,
-    newCurrent: boolean,
-  ) => {
+  const onSelectAudioButtonClick = async (audioId: string, newCurrent: boolean) => {
     try {
       if (audioId === '') {
         if (newCurrent) {
@@ -168,9 +161,7 @@ const SettingsAudioSection: FC = () => {
         />
 
         <div className="absolute pl-0.5 -top-0.5 left-full">
-          <QuestionMarkTooltip
-            tooltipText={t('audioSettings.uploadAudioConstraints')}
-          />
+          <QuestionMarkTooltip tooltipText={t('audioSettings.uploadAudioConstraints')} />
         </div>
       </div>
 

@@ -439,89 +439,49 @@ describe('splitTimeBars', () => {
   it('splits time bars into 1 segment if parts is 1', () => {
     const result = splitTimeBars(timeBars, 1, tEnMock as TFunction);
     expect(result.length).toBe(1);
-    expect(result[0].startOfRange.getTime()).toBe(
-      new Date('2025-01-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[0].endOfRange.getTime()).toBe(
-      new Date('2026-01-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[0].startOfRange.getTime()).toBe(new Date('2025-01-01T00:00:00.000Z').getTime());
+    expect(result[0].endOfRange.getTime()).toBe(new Date('2026-01-01T00:00:00.000Z').getTime());
   });
 
   it('splits time bars into 2 equal segments', () => {
     const result = splitTimeBars(timeBars, 2, tEnMock as TFunction);
     expect(result.length).toBe(2);
 
-    expect(result[0].startOfRange.getTime()).toBe(
-      new Date('2025-01-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[0].endOfRange.getTime()).toBe(
-      new Date('2025-07-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[0].startOfRange.getTime()).toBe(new Date('2025-01-01T00:00:00.000Z').getTime());
+    expect(result[0].endOfRange.getTime()).toBe(new Date('2025-07-01T00:00:00.000Z').getTime());
 
-    expect(result[1].startOfRange.getTime()).toBe(
-      new Date('2025-07-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[1].endOfRange.getTime()).toBe(
-      new Date('2026-01-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[1].startOfRange.getTime()).toBe(new Date('2025-07-01T00:00:00.000Z').getTime());
+    expect(result[1].endOfRange.getTime()).toBe(new Date('2026-01-01T00:00:00.000Z').getTime());
   });
 
   it('splits time bars into 3 equal segments', () => {
     const result = splitTimeBars(timeBars, 3, tEnMock as TFunction);
     expect(result.length).toBe(3);
 
-    expect(result[0].startOfRange.getTime()).toBe(
-      new Date('2025-01-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[0].endOfRange.getTime()).toBe(
-      new Date('2025-05-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[0].startOfRange.getTime()).toBe(new Date('2025-01-01T00:00:00.000Z').getTime());
+    expect(result[0].endOfRange.getTime()).toBe(new Date('2025-05-01T00:00:00.000Z').getTime());
 
-    expect(result[1].startOfRange.getTime()).toBe(
-      new Date('2025-05-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[1].endOfRange.getTime()).toBe(
-      new Date('2025-09-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[1].startOfRange.getTime()).toBe(new Date('2025-05-01T00:00:00.000Z').getTime());
+    expect(result[1].endOfRange.getTime()).toBe(new Date('2025-09-01T00:00:00.000Z').getTime());
 
-    expect(result[2].startOfRange.getTime()).toBe(
-      new Date('2025-09-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[2].endOfRange.getTime()).toBe(
-      new Date('2026-01-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[2].startOfRange.getTime()).toBe(new Date('2025-09-01T00:00:00.000Z').getTime());
+    expect(result[2].endOfRange.getTime()).toBe(new Date('2026-01-01T00:00:00.000Z').getTime());
   });
 
   it('splits time bars into 4 equal segments', () => {
     const result = splitTimeBars(timeBars, 4, tEnMock as TFunction);
     expect(result.length).toBe(4);
 
-    expect(result[0].startOfRange.getTime()).toBe(
-      new Date('2025-01-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[0].endOfRange.getTime()).toBe(
-      new Date('2025-04-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[0].startOfRange.getTime()).toBe(new Date('2025-01-01T00:00:00.000Z').getTime());
+    expect(result[0].endOfRange.getTime()).toBe(new Date('2025-04-01T00:00:00.000Z').getTime());
 
-    expect(result[1].startOfRange.getTime()).toBe(
-      new Date('2025-04-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[1].endOfRange.getTime()).toBe(
-      new Date('2025-07-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[1].startOfRange.getTime()).toBe(new Date('2025-04-01T00:00:00.000Z').getTime());
+    expect(result[1].endOfRange.getTime()).toBe(new Date('2025-07-01T00:00:00.000Z').getTime());
 
-    expect(result[2].startOfRange.getTime()).toBe(
-      new Date('2025-07-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[2].endOfRange.getTime()).toBe(
-      new Date('2025-10-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[2].startOfRange.getTime()).toBe(new Date('2025-07-01T00:00:00.000Z').getTime());
+    expect(result[2].endOfRange.getTime()).toBe(new Date('2025-10-01T00:00:00.000Z').getTime());
 
-    expect(result[3].startOfRange.getTime()).toBe(
-      new Date('2025-10-01T00:00:00.000Z').getTime(),
-    );
-    expect(result[3].endOfRange.getTime()).toBe(
-      new Date('2026-01-01T00:00:00.000Z').getTime(),
-    );
+    expect(result[3].startOfRange.getTime()).toBe(new Date('2025-10-01T00:00:00.000Z').getTime());
+    expect(result[3].endOfRange.getTime()).toBe(new Date('2026-01-01T00:00:00.000Z').getTime());
   });
 });

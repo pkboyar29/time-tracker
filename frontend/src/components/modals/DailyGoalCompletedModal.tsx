@@ -9,17 +9,11 @@ interface DailyGoalCompletedModalProps {
   streak: number;
 }
 
-const DailyGoalCompletedModal: FC<DailyGoalCompletedModalProps> = ({
-  onCloseModal,
-  streak,
-}) => {
+const DailyGoalCompletedModal: FC<DailyGoalCompletedModalProps> = ({ onCloseModal, streak }) => {
   const { t } = useTranslation();
 
   return (
-    <Modal
-      title={t('dailyGoalCompletedModal.title')}
-      onCloseModal={onCloseModal}
-    >
+    <Modal title={t('dailyGoalCompletedModal.title')} onCloseModal={onCloseModal}>
       <div className="flex flex-col items-center px-6 py-4 pt-8 text-center">
         <div className="flex items-center justify-center w-20 h-20 mb-4 bg-green-100 rounded-full">
           <span className="text-3xl">🎉</span>
@@ -41,9 +35,7 @@ const DailyGoalCompletedModal: FC<DailyGoalCompletedModalProps> = ({
           <div className="mb-6" />
         )}
 
-        <Button onClick={onCloseModal}>
-          {t('dailyGoalCompletedModal.button')}
-        </Button>
+        <Button onClick={onCloseModal}>{t('dailyGoalCompletedModal.button')}</Button>
       </div>
     </Modal>
   );

@@ -1,9 +1,6 @@
 import { ISession } from '../ts/interfaces/Session/ISession';
 
-export const saveSessionToLS = (
-  session: ISession,
-  lsKey: 'session' | 'unsyncedSession'
-) => {
+export const saveSessionToLS = (session: ISession, lsKey: 'session' | 'unsyncedSession') => {
   window.localStorage.setItem(lsKey, JSON.stringify(session));
 };
 
@@ -13,9 +10,7 @@ export const removeSessionFromLS = (lsKey: 'session' | 'unsyncedSession') => {
   }
 };
 
-export const getSessionFromLS = (
-  lsKey: 'session' | 'unsyncedSession'
-): ISession | null => {
+export const getSessionFromLS = (lsKey: 'session' | 'unsyncedSession'): ISession | null => {
   const unparsedSession = window.localStorage.getItem(lsKey);
   if (!unparsedSession) {
     return null;
@@ -97,11 +92,7 @@ export const getSelectedSecondsFromLS = (): number => {
   } else {
     selectedSeconds = Number(selectedSecondsFromLS);
 
-    if (
-      isNaN(selectedSeconds) ||
-      selectedSeconds <= 0 ||
-      selectedSeconds > 36_000
-    ) {
+    if (isNaN(selectedSeconds) || selectedSeconds <= 0 || selectedSeconds > 36_000) {
       selectedSeconds = 1500;
       setSelectedSecondsInLS(1500);
     }

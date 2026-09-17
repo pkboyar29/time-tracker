@@ -22,21 +22,13 @@ interface TimerLeftPartProps {
   selectedActivityId: string;
 }
 
-const TimerLeftPart: FC<TimerLeftPartProps> = ({
-  selectedSeconds,
-  selectedActivityId,
-}) => {
+const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivityId }) => {
   const { t } = useTranslation();
 
   const { mutateAsync, isPending } = useMutation({ mutationFn: createSession });
 
-  const {
-    startTimer,
-    toggleTimer,
-    changeTotalTimeSeconds,
-    stopTimer,
-    timerState,
-  } = useTimerWithMs();
+  const { startTimer, toggleTimer, changeTotalTimeSeconds, stopTimer, timerState } =
+    useTimerWithMs();
   const isTimerStarted = timerState.status != 'idle';
 
   useEffect(() => {
@@ -112,14 +104,11 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
     <>
       <div className="relative inline-flex items-center justify-center">
         {isTimerStarted && (
-          <Tooltip<HTMLButtonElement>
-            tooltipText={t('timerPage.minus5Tooltip')}
-          >
+          <Tooltip<HTMLButtonElement> tooltipText={t('timerPage.minus5Tooltip')}>
             {(ref) => (
               <button
                 disabled={
-                  timerState.session.totalTimeSeconds - 5 * 60 <=
-                  msToSeconds(timerState.ms)
+                  timerState.session.totalTimeSeconds - 5 * 60 <= msToSeconds(timerState.ms)
                 }
                 ref={ref}
                 tabIndex={-1}
@@ -137,9 +126,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
         <CustomCircularProgress
           valuePercent={
             isTimerStarted
-              ? (timerState.ms /
-                  secondsToMs(timerState.session.totalTimeSeconds)) *
-                100
+              ? (timerState.ms / secondsToMs(timerState.session.totalTimeSeconds)) * 100
               : 0
           }
           label={
@@ -206,18 +193,12 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({
                     handleToggleButtonClick();
                   }}
                 >
-                  {timerState.status === 'running' ? (
-                    <PauseIcon />
-                  ) : (
-                    <PlayIcon />
-                  )}
+                  {timerState.status === 'running' ? <PauseIcon /> : <PlayIcon />}
                 </button>
               )}
             </Tooltip>
 
-            <Tooltip<HTMLButtonElement>
-              tooltipText={t('timerPage.stopTooltip')}
-            >
+            <Tooltip<HTMLButtonElement> tooltipText={t('timerPage.stopTooltip')}>
               {(ref) => (
                 <button
                   ref={ref}

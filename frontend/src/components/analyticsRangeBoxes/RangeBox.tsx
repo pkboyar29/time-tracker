@@ -82,10 +82,7 @@ const isRangeItemSelected = (
   return false;
 };
 
-const isCurrentRangeItem = (
-  rangeType: RangeType,
-  rangeItemDate: [Date, Date],
-): boolean => {
+const isCurrentRangeItem = (rangeType: RangeType, rangeItemDate: [Date, Date]): boolean => {
   if (rangeType == 'days') {
     return isCurrentDay(rangeItemDate[0]);
   }
@@ -136,8 +133,7 @@ const renderDateLabel = (
             </time>
             <span>-</span>
             <time>
-              {getMonthName(endDisplayDate.getMonth(), t)}{' '}
-              {endDisplayDate.getDate()}
+              {getMonthName(endDisplayDate.getMonth(), t)} {endDisplayDate.getDate()}
             </time>
           </div>
         )}
@@ -148,20 +144,11 @@ const renderDateLabel = (
       <>
         {isCurrentMonth(fromDate)
           ? t('rangeBox.thisMonth')
-          : `${fromDate.getFullYear()} ${getMonthDetailedName(
-              fromDate.getMonth(),
-              t,
-            )}`}
+          : `${fromDate.getFullYear()} ${getMonthDetailedName(fromDate.getMonth(), t)}`}
       </>
     );
   } else if (rangeType == 'years') {
-    return (
-      <>
-        {isCurrentYear(fromDate)
-          ? t('rangeBox.thisYear')
-          : fromDate.getFullYear()}
-      </>
-    );
+    return <>{isCurrentYear(fromDate) ? t('rangeBox.thisYear') : fromDate.getFullYear()}</>;
   }
 };
 
@@ -177,9 +164,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
     rangeType === 'days'
       ? 'w-12 rounded-[4px] items-center gap-1 py-1'
       : 'w-36 lg:w-40 rounded-[5px] py-2.5'
-  } ${rangeType !== 'weeks' && 'flex flex-col'} ${
-    rangeType === 'years' && 'gap-2'
-  }`;
+  } ${rangeType !== 'weeks' && 'flex flex-col'} ${rangeType === 'years' && 'gap-2'}`;
 
   const [rangeItems, setRangeItems] = useState<[Date, Date][]>(() =>
     getRangeItems(rangeType, range.fromDate, windowWidth),
@@ -203,11 +188,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
         }
       } else {
         if (event.code == 'ArrowLeft') {
-          const [newFromDate, newToDate] = shiftTwoDates(
-            range.fromDate,
-            range.toDate,
-            false,
-          );
+          const [newFromDate, newToDate] = shiftTwoDates(range.fromDate, range.toDate, false);
           navigate(
             `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
             { replace: true },
@@ -225,11 +206,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
             setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
           }
         } else if (event.code == 'ArrowRight') {
-          const [newFromDate, newToDate] = shiftTwoDates(
-            range.fromDate,
-            range.toDate,
-            true,
-          );
+          const [newFromDate, newToDate] = shiftTwoDates(range.fromDate, range.toDate, true);
           navigate(
             `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
             { replace: true },
@@ -344,13 +321,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
           onClick={currentRangeItemClickHandler}
           className="flex items-center justify-center text-lg font-medium transition duration-300 border border-gray-400 border-solid rounded-md dark:border-white/10 w-52 hover:bg-gray-200 dark:hover:bg-backgroundDarkHover dark:text-textDark"
         >
-          {renderDateLabel(
-            rangeType,
-            range.fromDate,
-            range.toDate,
-            t,
-            i18n.language,
-          )}
+          {renderDateLabel(rangeType, range.fromDate, range.toDate, t, i18n.language)}
         </div>
 
         <button
@@ -361,11 +332,7 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
         </button>
       </div>
 
-      <div
-        className={`flex flex-wrap justify-center ${
-          rangeType === 'days' ? 'gap-1' : 'gap-3'
-        }`}
-      >
+      <div className={`flex flex-wrap justify-center ${rangeType === 'days' ? 'gap-1' : 'gap-3'}`}>
         {rangeItems.map((rangeItem, index) => {
           // it's used only for weeks
           const endDisplayDate = new Date(rangeItem[1]);
@@ -397,26 +364,22 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
               {rangeType == 'weeks' && (
                 <>
                   <div className="text-base text-left text-slate-600 dark:text-textDarkSecondary">
-                    {rangeItem[0].getFullYear() ==
-                    endDisplayDate.getFullYear() ? (
+                    {rangeItem[0].getFullYear() == endDisplayDate.getFullYear() ? (
                       <>{rangeItem[0].getFullYear()}</>
                     ) : (
                       <>
-                        {rangeItem[0].getFullYear()}/
-                        {endDisplayDate.getFullYear()}
+                        {rangeItem[0].getFullYear()}/{endDisplayDate.getFullYear()}
                       </>
                     )}
                   </div>
 
                   <div className="flex gap-1.5 text-base lg:text-lg dark:text-textDark">
                     <time>
-                      {getMonthName(rangeItem[0].getMonth(), t)}{' '}
-                      {rangeItem[0].getDate()}
+                      {getMonthName(rangeItem[0].getMonth(), t)} {rangeItem[0].getDate()}
                     </time>
                     <span>-</span>
                     <time>
-                      {getMonthName(endDisplayDate.getMonth(), t)}{' '}
-                      {endDisplayDate.getDate()}
+                      {getMonthName(endDisplayDate.getMonth(), t)} {endDisplayDate.getDate()}
                     </time>
                   </div>
                 </>

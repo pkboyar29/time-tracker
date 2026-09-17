@@ -1,8 +1,5 @@
 import { FC, useState } from 'react';
-import {
-  getRemainingTimeHoursMinutesSeconds,
-  getReadableTime,
-} from '../helpers/timeHelpers';
+import { getRemainingTimeHoursMinutesSeconds, getReadableTime } from '../helpers/timeHelpers';
 import { useTranslation } from 'react-i18next';
 
 import { ISession } from '../ts/interfaces/Session/ISession';
@@ -17,7 +14,7 @@ const SessionProgress: FC<SessionProgressProps> = ({ session }) => {
 
   const remainingLabel = getRemainingTimeHoursMinutesSeconds(
     session.totalTimeSeconds,
-    session.spentTimeSeconds
+    session.spentTimeSeconds,
   );
   const passedLabel = getReadableTime(session.spentTimeSeconds, t, {
     short: true,

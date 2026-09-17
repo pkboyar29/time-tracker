@@ -18,11 +18,7 @@ const SearchBar: FC<SearchBarProps> = ({
   const { t } = useTranslation();
 
   return (
-    <div
-      className={`${
-        compact ? 'w-[160px]' : 'w-full'
-      } h-[32px] relative ${className}`}
-    >
+    <div className={`${compact ? 'w-[160px]' : 'w-full'} h-[32px] relative ${className}`}>
       <input
         value={searchString}
         onChange={(e) => setSearchString(e.target.value)}
@@ -32,10 +28,7 @@ const SearchBar: FC<SearchBarProps> = ({
       />
 
       {searchString && (
-        <button
-          className="absolute right-0 z-10 top-[4px]"
-          onClick={() => setSearchString('')}
-        >
+        <button className="absolute right-0 z-10 top-[4px]" onClick={() => setSearchString('')}>
           <CrossIcon />
         </button>
       )}

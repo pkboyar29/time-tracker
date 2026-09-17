@@ -9,9 +9,7 @@ import {
 const mapResponseData = (unmappedActivityGroup: any): IActivityGroup => {
   return {
     ...unmappedActivityGroup,
-    sessionsAmount: unmappedActivityGroup.sessionsAmount
-      ? unmappedActivityGroup.sessionsAmount
-      : 0,
+    sessionsAmount: unmappedActivityGroup.sessionsAmount ? unmappedActivityGroup.sessionsAmount : 0,
     spentTimeSeconds: unmappedActivityGroup.spentTimeSeconds
       ? unmappedActivityGroup.spentTimeSeconds
       : 0,
@@ -26,9 +24,7 @@ export const fetchActivityGroups = async (): Promise<IActivityGroup[]> => {
   return data.map((unmappedGroup: any) => mapResponseData(unmappedGroup));
 };
 
-export const fetchActivityGroup = async (
-  activityGroupId: string,
-): Promise<IActivityGroup> => {
+export const fetchActivityGroup = async (activityGroupId: string): Promise<IActivityGroup> => {
   const { data } = await axios.get(`/activity-groups/${activityGroupId}`);
 
   return mapResponseData(data);
@@ -50,19 +46,13 @@ export const updateActivityGroup = async (
   return mapResponseData(data);
 };
 
-export const archiveAllActivities = async (
-  activityGroupId: string,
-): Promise<string> => {
-  const { data } = await axios.put(
-    `/activity-groups/${activityGroupId}/activities/archive`,
-  );
+export const archiveAllActivities = async (activityGroupId: string): Promise<string> => {
+  const { data } = await axios.put(`/activity-groups/${activityGroupId}/activities/archive`);
 
   return data;
 };
 
-export const deleteActivityGroup = async (
-  activityGroupId: string,
-): Promise<string> => {
+export const deleteActivityGroup = async (activityGroupId: string): Promise<string> => {
   const { data } = await axios.delete(`activity-groups/${activityGroupId}`);
 
   return data;

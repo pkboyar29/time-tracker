@@ -6,9 +6,7 @@ import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
 import { ISessionStat } from '../ts/interfaces/Statistics/ISessionStat';
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
 
-export const mergeSessionStat = (
-  statisticsList: ISessionStat[],
-): ISessionStat => {
+export const mergeSessionStat = (statisticsList: ISessionStat[]): ISessionStat => {
   const sessionsAmount = statisticsList.reduce(
     (amount, statistics) => amount + statistics.sessionsAmount,
     0,
@@ -78,11 +76,7 @@ export const mergeActivityDistributions = (
   return finalAd;
 };
 
-export const splitTimeBars = (
-  timeBars: ITimeBar[],
-  parts: number,
-  t: TFunction,
-): ITimeBar[] => {
+export const splitTimeBars = (timeBars: ITimeBar[], parts: number, t: TFunction): ITimeBar[] => {
   if (!Number.isInteger(parts) || parts < 1) {
     throw new Error(`parts must be a positive integer, got ${parts}`);
   }
@@ -107,18 +101,9 @@ export const splitTimeBars = (
       startOfRange,
       endOfRange,
       barName: getBarName(startOfRange, endOfRange, t),
-      barDetailedName: getBarDetailedName(
-        startOfRange,
-        endOfRange,
-        t,
-        i18n.language,
-      ),
-      sessionStat: mergeSessionStat([
-        ...timeBarsPart.map((bar) => bar.sessionStat),
-      ]),
-      adItems: mergeActivityDistributions([
-        ...timeBarsPart.map((bar) => bar.adItems),
-      ]),
+      barDetailedName: getBarDetailedName(startOfRange, endOfRange, t, i18n.language),
+      sessionStat: mergeSessionStat([...timeBarsPart.map((bar) => bar.sessionStat)]),
+      adItems: mergeActivityDistributions([...timeBarsPart.map((bar) => bar.adItems)]),
     };
     aggregatedTimeBars.push(aggregatedTimeBar);
   }

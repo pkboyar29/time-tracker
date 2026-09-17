@@ -10,11 +10,7 @@ const CrossIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
       className="size-6 stroke-black dark:stroke-textDark"
       {...props}
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M6 18 18 6M6 6l12 12"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
     </svg>
   );
 };

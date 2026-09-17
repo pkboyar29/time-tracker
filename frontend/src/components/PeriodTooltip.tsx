@@ -37,20 +37,15 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
         <div className="flex flex-col gap-2.5">
           <p className="text-primary text-[15px]">{`${timeBar.barDetailedName}`}</p>
           {timeBar.sessionStat.spentTimeSeconds == 0 ? (
-            <p className="text-gray-800 dark:text-textDark">
-              {t('pdBox.noActivity')}
-            </p>
+            <p className="text-gray-800 dark:text-textDark">{t('pdBox.noActivity')}</p>
           ) : (
             <>
               {!adMode ? (
                 <>
-                  {getRangeType(timeBar.startOfRange, timeBar.endOfRange) ==
-                    'days' && (
+                  {getRangeType(timeBar.startOfRange, timeBar.endOfRange) == 'days' && (
                     <p className="text-gray-800 dark:text-textDark">
                       {`${t('pdBox.dailyGoal')} ${
-                        timeBar.sessionStat.spentTimeSeconds >= dailyGoalSeconds
-                          ? '✅'
-                          : '❌'
+                        timeBar.sessionStat.spentTimeSeconds >= dailyGoalSeconds ? '✅' : '❌'
                       }`}
                     </p>
                   )}
@@ -91,38 +86,30 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
 
               {adMode && (
                 <>
-                  {timeBar.adItems.map(
-                    (item: IActivityDistribution, index: number) => (
-                      <div className="flex items-center gap-2.5" key={index}>
-                        <div
-                          style={{ backgroundColor: item.fill }}
-                          className="w-10 h-3 rounded-lg shrink-0"
-                        />
+                  {timeBar.adItems.map((item: IActivityDistribution, index: number) => (
+                    <div className="flex items-center gap-2.5" key={index}>
+                      <div
+                        style={{ backgroundColor: item.fill }}
+                        className="w-10 h-3 rounded-lg shrink-0"
+                      />
 
-                        <div className="flex flex-col min-w-0">
-                          <div className="text-[15px] truncate dark:text-textDark">
-                            {item.name}
-                          </div>
+                      <div className="flex flex-col min-w-0">
+                        <div className="text-[15px] truncate dark:text-textDark">{item.name}</div>
 
-                          <div className="text-[13px] mt-1 text-gray-600 dark:text-textDarkSecondary">
-                            (
-                            {getReadableTime(
-                              item.sessionStat.spentTimeSeconds,
-                              t,
-                              {
-                                short: true,
-                              },
-                            )}
-                            ,{' '}
-                            {t('plural.sessions', {
-                              count: item.sessionStat.sessionsAmount,
-                            })}
-                            )
-                          </div>
+                        <div className="text-[13px] mt-1 text-gray-600 dark:text-textDarkSecondary">
+                          (
+                          {getReadableTime(item.sessionStat.spentTimeSeconds, t, {
+                            short: true,
+                          })}
+                          ,{' '}
+                          {t('plural.sessions', {
+                            count: item.sessionStat.sessionsAmount,
+                          })}
+                          )
                         </div>
                       </div>
-                    ),
-                  )}
+                    </div>
+                  ))}
                 </>
               )}
             </>

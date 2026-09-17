@@ -39,10 +39,7 @@ const CustomSelect: FC<CustomSelectProps> = ({
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (
-        customSelectRef.current &&
-        !customSelectRef.current.contains(e.target as Node)
-      ) {
+      if (customSelectRef.current && !customSelectRef.current.contains(e.target as Node)) {
         setDropdown(false);
       }
     }

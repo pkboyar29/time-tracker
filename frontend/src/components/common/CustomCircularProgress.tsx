@@ -29,10 +29,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
   size = 'small',
 }) => {
   const circleSize = useMemo(() => getSize(size), [size]);
-  const circleThinkness = useMemo(
-    () => (size === 'big' ? 4 : size == 'verybig' ? 2.5 : 2),
-    [size],
-  );
+  const circleThinkness = useMemo(() => (size === 'big' ? 4 : size == 'verybig' ? 2.5 : 2), [size]);
   const labelClassnames = useMemo(
     () =>
       size === 'big'
@@ -53,9 +50,7 @@ const CustomCircularProgress: FC<CustomCircularProgressProps> = ({
         sx={{
           // 800 если темный
           color: (theme) =>
-            themeState === 'dark'
-              ? theme.palette.grey[800]
-              : theme.palette.grey[200],
+            themeState === 'dark' ? theme.palette.grey[800] : theme.palette.grey[200],
         }}
         size={circleSize}
         thickness={circleThinkness}

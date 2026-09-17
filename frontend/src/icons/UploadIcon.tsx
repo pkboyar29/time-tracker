@@ -16,11 +16,7 @@ const UploadIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M12 15L12 3M12 3L8 7M12 3L16 7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M12 15L12 3M12 3L8 7M12 3L16 7" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 };

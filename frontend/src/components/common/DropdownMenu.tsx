@@ -1,11 +1,4 @@
-import {
-  ReactNode,
-  useState,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  FC,
-} from 'react';
+import { ReactNode, useState, useEffect, useLayoutEffect, useRef, FC } from 'react';
 import { isOutOfBoundary } from '../../helpers/htmlHelpers';
 
 interface DropdownMenuProps {
@@ -14,20 +7,13 @@ interface DropdownMenuProps {
   setDropdown: (dropdown: boolean) => void;
 }
 
-const DropdownMenu: FC<DropdownMenuProps> = ({
-  children,
-  dropdown,
-  setDropdown,
-}) => {
+const DropdownMenu: FC<DropdownMenuProps> = ({ children, dropdown, setDropdown }) => {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const [isOnLeft, setIsOnLeft] = useState<boolean>(false);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node)
-      ) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdown(false);
       }
     }
@@ -41,12 +27,7 @@ const DropdownMenu: FC<DropdownMenuProps> = ({
   useLayoutEffect(() => {
     if (dropdownRef.current) {
       const dropdownRect = dropdownRef.current.getBoundingClientRect();
-      if (
-        isOutOfBoundary(
-          { x: dropdownRect.x, width: dropdownRect.width },
-          'right',
-        )
-      ) {
+      if (isOutOfBoundary({ x: dropdownRect.x, width: dropdownRect.width }, 'right')) {
         setIsOnLeft(true);
       } else {
         setIsOnLeft(false);
@@ -58,9 +39,7 @@ const DropdownMenu: FC<DropdownMenuProps> = ({
     <div
       ref={dropdownRef}
       className={`${
-        dropdown
-          ? 'opacity-100 pointer-events-auto'
-          : 'opacity-0 pointer-events-none'
+        dropdown ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
       } ${
         isOnLeft ? 'right-0' : 'left-0'
       } rounded-lg absolute top-full z-50 p-1 border border-solid bg-surfaceLight dark:bg-surfaceDark border-gray-300/80 dark:border-white/10 shadow-2xl`}

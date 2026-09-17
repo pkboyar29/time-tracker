@@ -24,18 +24,11 @@ const TimerPage: FC = () => {
   const sessionFromLS = getSessionFromLS('session');
   const unsyncedSessionFromLS = getSessionFromLS('unsyncedSession');
 
-  const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>(
-    [],
-  );
-  const [isSessionsBlockOpen, setIsSessionsBlockOpen] =
-    useState<boolean>(false);
+  const [uncompletedSessions, setUncompletedSessions] = useState<ISession[]>([]);
+  const [isSessionsBlockOpen, setIsSessionsBlockOpen] = useState<boolean>(false);
 
-  const [selectedSeconds, setSelectedSeconds] = useState<number>(() =>
-    getSelectedSecondsFromLS(),
-  );
-  const [selectedActivityId, setSelectedActivityId] = useState<string>(() =>
-    getActivityFromLS(),
-  );
+  const [selectedSeconds, setSelectedSeconds] = useState<number>(() => getSelectedSecondsFromLS());
+  const [selectedActivityId, setSelectedActivityId] = useState<string>(() => getActivityFromLS());
 
   const { timerState } = useTimer();
   const isTimerStarted = timerState.status != 'idle';
@@ -45,13 +38,8 @@ const TimerPage: FC = () => {
       let sessions = await fetchSessions({ completed: false });
 
       if (unsyncedSessionFromLS) {
-        if (
-          unsyncedSessionFromLS.spentTimeSeconds ==
-          unsyncedSessionFromLS.totalTimeSeconds
-        ) {
-          sessions = sessions.filter(
-            (session) => session.id != unsyncedSessionFromLS.id,
-          );
+        if (unsyncedSessionFromLS.spentTimeSeconds == unsyncedSessionFromLS.totalTimeSeconds) {
+          sessions = sessions.filter((session) => session.id != unsyncedSessionFromLS.id);
         } else {
           sessions = sessions.map((session) => {
             if (session.id == unsyncedSessionFromLS.id) {

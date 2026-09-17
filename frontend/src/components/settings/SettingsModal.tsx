@@ -16,8 +16,7 @@ type SettingsSection = 'general' | 'audio' | 'hotkeys';
 const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
   const { t } = useTranslation();
 
-  const [activeSection, setActiveSection] =
-    useState<SettingsSection>('general');
+  const [activeSection, setActiveSection] = useState<SettingsSection>('general');
 
   return (
     <Modal

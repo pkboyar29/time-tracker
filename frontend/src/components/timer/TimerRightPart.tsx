@@ -2,16 +2,10 @@ import { FC, useState, useEffect } from 'react';
 import { useQueryCustom } from '../../hooks/useQueryCustom';
 import { fetchActivities } from '../../api/activityApi';
 import { useTimer } from '../../hooks/useTimer';
-import {
-  getReadableTime,
-  getTimeHHmmFromDate,
-} from '../../helpers/timeHelpers';
+import { getReadableTime, getTimeHHmmFromDate } from '../../helpers/timeHelpers';
 import { useTranslation } from 'react-i18next';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
-import {
-  setActivityInLS,
-  setSelectedSecondsInLS,
-} from '../../helpers/localstorageHelpers';
+import { setActivityInLS, setSelectedSecondsInLS } from '../../helpers/localstorageHelpers';
 
 import PrimaryClipLoader from '../common/PrimaryClipLoader';
 import CustomSelect from '../common/CustomSelect';
@@ -37,28 +31,24 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { data: activitiesToChoose, isLoading: isLoadingActivities } =
-    useQueryCustom({
-      queryKey: ['activitiesToChoose'],
-      queryFn: () => fetchActivities(),
-    });
+  const { data: activitiesToChoose, isLoading: isLoadingActivities } = useQueryCustom({
+    queryKey: ['activitiesToChoose'],
+    queryFn: () => fetchActivities(),
+  });
 
   const { timerState, timerEndDate } = useTimer();
   const isTimerStarted = timerState.status != 'idle';
 
   const { currentVolume, updateVolume } = useAudioPlayer();
 
-  const [durationMode, setDurationMode] = useState<'rangeSlider' | 'inputs'>(
-    'rangeSlider',
-  );
+  const [durationMode, setDurationMode] = useState<'rangeSlider' | 'inputs'>('rangeSlider');
 
   useEffect(() => {
     if (activitiesToChoose) {
       if (
-        ![
-          ...activitiesToChoose.topActivities,
-          ...activitiesToChoose.remainingActivities,
-        ].find((a) => a.id === selectedActivityId)
+        ![...activitiesToChoose.topActivities, ...activitiesToChoose.remainingActivities].find(
+          (a) => a.id === selectedActivityId,
+        )
       ) {
         setSelectedActivityId('');
         setActivityInLS('');
@@ -97,9 +87,7 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
             <div className="flex items-center dark:text-textDark">
               <span>{t('timerPage.endsAt')}</span>
               <span className="inline-block min-w-[3.5rem] text-center font-bold">
-                {timerState.status === 'paused'
-                  ? '...'
-                  : getTimeHHmmFromDate(timerEndDate)}
+                {timerState.status === 'paused' ? '...' : getTimeHHmmFromDate(timerEndDate)}
               </span>
             </div>
           </>
@@ -174,9 +162,7 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
                   { value: 'inputs', label: t('timerPage.inputs') },
                 ]}
                 value={durationMode}
-                onChange={(value) =>
-                  setDurationMode(value as 'rangeSlider' | 'inputs')
-                }
+                onChange={(value) => setDurationMode(value as 'rangeSlider' | 'inputs')}
               />
             </div>
 
@@ -190,10 +176,7 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
                 />
               </div>
             ) : (
-              <SessionDurationInputs
-                seconds={selectedSeconds}
-                setSeconds={onSessionInputsChange}
-              />
+              <SessionDurationInputs seconds={selectedSeconds} setSeconds={onSessionInputsChange} />
             )}
           </div>
         )}
@@ -219,9 +202,7 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
 
         {isTimerStarted && (
           <div className="flex flex-col flex-grow">
-            <div className="mb-2 text-xl font-bold dark:text-textDark">
-              {t('timerPage.notes')}
-            </div>
+            <div className="mb-2 text-xl font-bold dark:text-textDark">{t('timerPage.notes')}</div>
             <NotesSection />
           </div>
         )}

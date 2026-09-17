@@ -20,9 +20,7 @@ interface SessionsListProps {
   setIsSessionsBlockOpen?: (state: boolean) => void;
   isExpandable: boolean;
   sessions: ISession[];
-  updateSessionsListHandler: (
-    updater: (prev: ISession[]) => ISession[],
-  ) => void;
+  updateSessionsListHandler: (updater: (prev: ISession[]) => ISession[]) => void;
 }
 
 const SessionsList: FC<SessionsListProps> = ({
@@ -35,14 +33,11 @@ const SessionsList: FC<SessionsListProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { timerState, startTimer, finalSpentSeconds, finalSessionId } =
-    useTimerWithMs();
+  const { timerState, startTimer, finalSpentSeconds, finalSessionId } = useTimerWithMs();
   const sessionFromLS = getSessionFromLS('session');
 
   // removing current session from the list
-  const sessionsWithoutCurrent = sessions.filter(
-    (session) => session.id !== sessionFromLS?.id,
-  );
+  const sessionsWithoutCurrent = sessions.filter((session) => session.id !== sessionFromLS?.id);
 
   const [deleteModal, setDeleteModal] = useState<ModalState>({
     status: false,
@@ -57,9 +52,7 @@ const SessionsList: FC<SessionsListProps> = ({
     const currentSession = timerState.session;
 
     updateSessionsListHandler((prev) => {
-      const currentSessionIdx = prev.findIndex(
-        (s) => s.id === currentSession.id,
-      );
+      const currentSessionIdx = prev.findIndex((s) => s.id === currentSession.id);
 
       if (currentSessionIdx === -1) {
         return [...prev, currentSession];
@@ -119,9 +112,7 @@ const SessionsList: FC<SessionsListProps> = ({
   const handleSessionDelete = async (sessionId: string) => {
     try {
       await deleteSession(sessionId);
-      updateSessionsListHandler((prev) =>
-        prev.filter((s) => s.id !== sessionId),
-      );
+      updateSessionsListHandler((prev) => prev.filter((s) => s.id !== sessionId));
 
       setDeleteModal({
         status: false,
@@ -154,15 +145,12 @@ const SessionsList: FC<SessionsListProps> = ({
             })
           }
         >
-          <p className="text-base/6 dark:text-textDark">
-            {t('deleteSessionModal.descr')}
-          </p>
+          <p className="text-base/6 dark:text-textDark">{t('deleteSessionModal.descr')}</p>
 
           <div className="mt-10 ml-auto w-fit">
             <Button
               onClick={() =>
-                deleteModal.selectedItemId &&
-                handleSessionDelete(deleteModal.selectedItemId)
+                deleteModal.selectedItemId && handleSessionDelete(deleteModal.selectedItemId)
               }
             >
               {t('deleteSessionModal.button')}
@@ -185,9 +173,7 @@ const SessionsList: FC<SessionsListProps> = ({
 
           {!less && (
             <div className="w-full overflow-x-hidden overflow-y-auto">
-              <div
-                className={`flex flex-col gap-5 w-full min-[400px]:w-96 ml-auto mr-1.5`}
-              >
+              <div className={`flex flex-col gap-5 w-full min-[400px]:w-96 ml-auto mr-1.5`}>
                 {sessionsWithoutCurrent.map((session) => (
                   <SessionItem
                     key={session.id}

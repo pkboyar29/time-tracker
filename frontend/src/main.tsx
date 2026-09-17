@@ -23,5 +23,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         </AudioPlayerProvider>
       </Provider>
     </QueryClientProvider>
-  </BrowserRouter>
+  </BrowserRouter>,
 );

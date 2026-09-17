@@ -7,10 +7,7 @@ import { fetchSession, updateSession } from './api/sessionApi';
 import { useTimer } from './hooks/useTimer';
 import { fetchProfileInfo } from './api/userApi';
 import { setUser } from './redux/slices/userSlice';
-import {
-  getSessionFromLS,
-  removeSessionFromLS,
-} from './helpers/localstorageHelpers';
+import { getSessionFromLS, removeSessionFromLS } from './helpers/localstorageHelpers';
 import { useTranslation } from 'react-i18next';
 import { AxiosError } from 'axios';
 import { API_URL } from './api/axios';
@@ -84,9 +81,7 @@ const App: FC = () => {
             return;
           }
 
-          if (
-            sessionFromLS.spentTimeSeconds > sessionFromServer.spentTimeSeconds
-          ) {
+          if (sessionFromLS.spentTimeSeconds > sessionFromServer.spentTimeSeconds) {
             startTimer(sessionFromLS, true);
             updateSession(sessionFromLS, true); // TODO: отображать серверные ошибки?
           } else {
@@ -172,18 +167,14 @@ const App: FC = () => {
       {dailyGoalComplModal.status && (
         <DailyGoalCompletedModal
           streak={dailyGoalComplModal.streak}
-          onCloseModal={() =>
-            setDailyGoalComplModal({ status: false, streak: 0 })
-          }
+          onCloseModal={() => setDailyGoalComplModal({ status: false, streak: 0 })}
         />
       )}
 
       <div
         id="app"
         className={`relative App h-screen bg-backgroundLight dark:bg-backgroundDark ${
-          requiredAuth
-            ? 'min-[1340px]:grid min-[1340px]:grid-cols-[auto,1fr]'
-            : ''
+          requiredAuth ? 'min-[1340px]:grid min-[1340px]:grid-cols-[auto,1fr]' : ''
         }`}
       >
         {requiredAuth && (

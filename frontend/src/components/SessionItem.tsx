@@ -52,9 +52,7 @@ const SessionItem: FC<SessionItemProps> = ({
                 {t('sessionItem.activity')}
               </div>
               <div className="dark:text-textDarkSecondary">
-                {session.activity
-                  ? session.activity.name
-                  : t('withoutActivity')}
+                {session.activity ? session.activity.name : t('withoutActivity')}
               </div>
             </div>
           </div>
@@ -68,15 +66,7 @@ const SessionItem: FC<SessionItemProps> = ({
               className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover translate-y-[1px] disabled:opacity-40"
               onClick={() => sessionClickHandler(session)}
             >
-              {isActive ? (
-                isEnabled ? (
-                  <PauseIcon />
-                ) : (
-                  <ResumeIcon />
-                )
-              ) : (
-                <PlayIcon />
-              )}
+              {isActive ? isEnabled ? <PauseIcon /> : <ResumeIcon /> : <PlayIcon />}
             </button>
 
             <button

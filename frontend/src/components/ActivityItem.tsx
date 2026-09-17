@@ -1,8 +1,5 @@
 import { FC, useState } from 'react';
-import {
-  updateActivityGroup,
-  deleteActivityGroup,
-} from '../api/activityGroupApi';
+import { updateActivityGroup, deleteActivityGroup } from '../api/activityGroupApi';
 import {
   updateActivity,
   archiveActivity,
@@ -50,9 +47,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [name, setName] = useState<string>(activityCommon.name);
 
-  const [color, setColor] = useState<string>(
-    isActivity ? activityCommon.color : '',
-  );
+  const [color, setColor] = useState<string>(isActivity ? activityCommon.color : '');
 
   const [dropdown, setDropdown] = useState<boolean>(false);
 
@@ -76,9 +71,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
         afterUpdateHandler({ ...activityCommon, archived });
 
         toast(
-          archived
-            ? t('activityItem.successfulArchive')
-            : t('activityItem.successfulUnarchive'),
+          archived ? t('activityItem.successfulArchive') : t('activityItem.successfulUnarchive'),
           {
             type: 'success',
           },
@@ -105,14 +98,9 @@ const ActivityItem: FC<ActivityBoxProps> = ({
       afterDeleteHandler(activityCommon.id);
       setDeleteModal(false);
     } catch (e) {
-      toast(
-        isActivity
-          ? t('serverErrors.deleteActivity')
-          : t('serverErrors.deleteGroup'),
-        {
-          type: 'error',
-        },
-      );
+      toast(isActivity ? t('serverErrors.deleteActivity') : t('serverErrors.deleteGroup'), {
+        type: 'error',
+      });
     }
   };
 
@@ -171,17 +159,11 @@ const ActivityItem: FC<ActivityBoxProps> = ({
     <>
       {deleteModal && (
         <Modal
-          title={
-            isActivity
-              ? t('deleteActivityModal.title')
-              : t('deleteGroupModal.title')
-          }
+          title={isActivity ? t('deleteActivityModal.title') : t('deleteGroupModal.title')}
           onCloseModal={() => setDeleteModal(false)}
         >
           <p className="text-base/6 dark:text-textDark">
-            {isActivity
-              ? t('deleteActivityModal.descrTitle')
-              : t('deleteGroupModal.descrTitle')}
+            {isActivity ? t('deleteActivityModal.descrTitle') : t('deleteGroupModal.descrTitle')}
           </p>
 
           <p className="mt-4 text-sm font-medium text-red-600 dark:text-red-400">
@@ -192,9 +174,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
           <div className="mt-10 ml-auto w-fit">
             <Button onClick={onDeleteActivityCommon}>
-              {isActivity
-                ? t('deleteActivityModal.button')
-                : t('deleteGroupModal.button')}
+              {isActivity ? t('deleteActivityModal.button') : t('deleteGroupModal.button')}
             </Button>
           </div>
         </Modal>
@@ -339,10 +319,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
         <div className="flex justify-end mt-4">
           <div className="w-fit">
             {isActivity ? (
-              <Button
-                disabled={activityCommon.archived}
-                onClick={() => setStartSessionModal(true)}
-              >
+              <Button disabled={activityCommon.archived} onClick={() => setStartSessionModal(true)}>
                 <span>{t('activityItem.startSessionButton')}</span>
               </Button>
             ) : (
@@ -355,9 +332,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
         <div className="flex justify-center gap-6 mt-6">
           <div className="text-center">
-            <div className="font-bold dark:text-textDark">
-              {activityCommon.sessionsAmount}
-            </div>
+            <div className="font-bold dark:text-textDark">{activityCommon.sessionsAmount}</div>
             <div className="text-[13px] dark:text-textDarkSecondary">
               {t('activityItem.sessions')}
             </div>

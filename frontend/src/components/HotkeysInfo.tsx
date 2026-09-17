@@ -37,9 +37,7 @@ const HotkeysInfo: FC = () => {
             className="flex items-center justify-between pb-2 border-b border-gray-300 dark:border-gray-700"
           >
             <div className="font-mono text-base lg:text-lg">{item.combo}</div>
-            <div className="text-sm text-right lg:text-base opacity-80">
-              {item.description}
-            </div>
+            <div className="text-sm text-right lg:text-base opacity-80">{item.description}</div>
           </div>
         ))}
       </div>

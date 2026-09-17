@@ -17,14 +17,10 @@ const NotesSection: FC = () => {
     if (!timerState.session) return;
 
     const sessionNoteFromLS = getNoteFromLS(timerState.session.id);
-    setNote(
-      sessionNoteFromLS ? sessionNoteFromLS : (timerState.session.note ?? ''),
-    );
+    setNote(sessionNoteFromLS ? sessionNoteFromLS : (timerState.session.note ?? ''));
   }, [timerState.session?.id]);
 
-  const handleChangeNoteInput = (
-    event: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
+  const handleChangeNoteInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     if (!timerState.session) return;
 
     setNote(event.target.value);
