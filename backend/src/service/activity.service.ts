@@ -75,9 +75,7 @@ async function getActivities({
   }
 }
 
-async function getSplitActivities({
-  userId,
-}: GetSplitActivitiesOptions): Promise<{
+async function getSplitActivities({ userId }: GetSplitActivitiesOptions): Promise<{
   topActivities: IActivity[];
   remainingActivities: IActivity[];
 }> {
@@ -86,10 +84,7 @@ async function getSplitActivities({
     archived: false,
   });
 
-  const userTopActivities = await UserTopActivity.find(
-    { userId },
-    'activityId',
-  ).sort({
+  const userTopActivities = await UserTopActivity.find({ userId }, 'activityId').sort({
     createdDate: -1,
   });
 
@@ -101,9 +96,7 @@ async function getSplitActivities({
     .map((id) => idMap.get(id))
     .filter((a): a is IActivity => Boolean(a));
 
-  const remainingActivities = allActivities.filter(
-    (a) => !topActivityIdsSet.has(a._id.toString()),
-  );
+  const remainingActivities = allActivities.filter((a) => !topActivityIdsSet.has(a._id.toString()));
 
   return {
     topActivities,
@@ -143,10 +136,7 @@ async function getActivity({
   }
 }
 
-async function createActivity(
-  activityDTO: ActivityCreateDTO,
-  userId: string,
-): Promise<IActivity> {
+async function createActivity(activityDTO: ActivityCreateDTO, userId: string): Promise<IActivity> {
   try {
     await activityGroupService.getActivityGroup({
       activityGroupId: activityDTO.activityGroupId,
@@ -293,10 +283,7 @@ async function archiveActivity(
 }
 
 // TODO: делать это атомарно
-async function deleteActivity(
-  activityId: string,
-  userId: string,
-): Promise<{ message: string }> {
+async function deleteActivity(activityId: string, userId: string): Promise<{ message: string }> {
   try {
     const activity = await activityService.getActivity({
       activityId,
@@ -310,11 +297,7 @@ async function deleteActivity(
     });
     await Promise.all(
       sessions.map(async (session) => {
-        await sessionService.deleteSession(
-          session._id.toString(),
-          userId,
-          false,
-        );
+        await sessionService.deleteSession(session._id.toString(), userId, false);
       }),
     );
 

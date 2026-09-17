@@ -33,10 +33,7 @@ const sessionSchema = new Schema({
   note: {
     type: String,
     required: false,
-    maxLength: [
-      1600,
-      'Note is too long. Maximum allowed length is 1600 characters',
-    ],
+    maxLength: [1600, 'Note is too long. Maximum allowed length is 1600 characters'],
   },
   completed: {
     type: Boolean,

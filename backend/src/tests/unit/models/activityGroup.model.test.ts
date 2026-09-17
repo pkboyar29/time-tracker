@@ -32,9 +32,7 @@ describe('Activity group model validation', () => {
 
     const error = group.validateSync();
     expect(error?.errors.name).toBeDefined();
-    expect(error?.errors.name.message).toBe(
-      'Name maximum length is 50 characters'
-    );
+    expect(error?.errors.name.message).toBe('Name maximum length is 50 characters');
   });
 
   it('should fail if description is too long', () => {
@@ -46,9 +44,7 @@ describe('Activity group model validation', () => {
 
     const error = group.validateSync();
     expect(error?.errors.descr).toBeDefined();
-    expect(error?.errors.descr.message).toBe(
-      'Description maximum length is 500 characters'
-    );
+    expect(error?.errors.descr.message).toBe('Description maximum length is 500 characters');
   });
 
   it('should fail if user is missing', () => {

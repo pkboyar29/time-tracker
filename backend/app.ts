@@ -99,9 +99,7 @@ app.use(
         delete safeBody.password;
         return {
           requestBody: safeBody,
-          responseBody: (res as any)._bodyForLog
-            ? (res as any)._bodyForLog
-            : {},
+          responseBody: (res as any)._bodyForLog ? (res as any)._bodyForLog : {},
         };
       }
 

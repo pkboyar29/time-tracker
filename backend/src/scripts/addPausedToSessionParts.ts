@@ -2,8 +2,7 @@ import mongoose from 'mongoose';
 import SessionPart from '../model/sessionPart.model';
 import Session from '../model/session.model';
 
-const MONGO_URL =
-  process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
 mongoose.connect(MONGO_URL).then(() => {
   console.log('connection with database is successful');
@@ -19,9 +18,7 @@ async function addPausedToSessionParts() {
     const session = allSessions[i];
     const sessionId = session._id.toString();
 
-    const sessionParts = allSessionParts.filter((part) =>
-      part.session._id.equals(sessionId),
-    );
+    const sessionParts = allSessionParts.filter((part) => part.session._id.equals(sessionId));
 
     sessionsMap.set(sessionId, sessionParts);
   }

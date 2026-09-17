@@ -35,9 +35,7 @@ describe('Activity group controller endpoints', () => {
   });
 
   test('get activity groups endpoint returns ok', async () => {
-    await authorizedRequest(getAccessToken())
-      .post('/activity-groups/')
-      .send({ name: 'name' });
+    await authorizedRequest(getAccessToken()).post('/activity-groups/').send({ name: 'name' });
 
     await authorizedRequest(getAccessToken())
       .post('/activity-groups/')

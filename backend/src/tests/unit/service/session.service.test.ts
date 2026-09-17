@@ -36,10 +36,7 @@ describe('sessionService.getSession', () => {
     } as any);
 
     try {
-      await sessionService.getSession(
-        new Types.ObjectId().toString(),
-        'user123',
-      );
+      await sessionService.getSession(new Types.ObjectId().toString(), 'user123');
     } catch (e) {
       expect(e).toBeInstanceOf(HttpError);
     }
@@ -56,10 +53,7 @@ describe('sessionService.getSession', () => {
     } as any);
 
     try {
-      await sessionService.getSession(
-        new Types.ObjectId().toString(),
-        'user123',
-      );
+      await sessionService.getSession(new Types.ObjectId().toString(), 'user123');
     } catch (e) {
       expect(e).toBeInstanceOf(HttpError);
     }
@@ -72,10 +66,7 @@ describe('sessionService.getSession', () => {
     } as any);
 
     try {
-      await sessionService.getSession(
-        new Types.ObjectId().toString(),
-        'user123',
-      );
+      await sessionService.getSession(new Types.ObjectId().toString(), 'user123');
     } catch (e) {
       expect(e).toBeInstanceOf(HttpError);
     }
@@ -108,9 +99,9 @@ describe('sessionService.createSession', () => {
       .spyOn(activityService, 'getActivity')
       .mockRejectedValue(new HttpError(404, 'Activity Not Found'));
 
-    await expect(
-      sessionService.createSession(mockSessionDTO, userId),
-    ).rejects.toThrow('Activity Not Found');
+    await expect(sessionService.createSession(mockSessionDTO, userId)).rejects.toThrow(
+      'Activity Not Found',
+    );
   });
 });
 
@@ -176,9 +167,7 @@ describe('sessionService.updateSession', () => {
     } catch (e) {
       if (e instanceof HttpError) {
         expect(e.status).toBe(400);
-        expect(e.message).toBe(
-          'Total time must be greater or equal spent time',
-        );
+        expect(e.message).toBe('Total time must be greater or equal spent time');
       }
     }
   });
@@ -204,9 +193,7 @@ describe('sessionService.updateSession', () => {
     } catch (e) {
       if (e instanceof HttpError) {
         expect(e.status).toBe(400);
-        expect(e.message).toBe(
-          'You cannot update an already completed session',
-        );
+        expect(e.message).toBe('You cannot update an already completed session');
       }
     }
   });
@@ -233,9 +220,7 @@ describe('sessionService.updateSession', () => {
     } catch (e) {
       if (e instanceof HttpError) {
         expect(e.status).toBe(400);
-        expect(e.message).toBe(
-          "You cannot reduce a session's spentTimeSeconds",
-        );
+        expect(e.message).toBe("You cannot reduce a session's spentTimeSeconds");
       }
     }
   });
@@ -250,21 +235,13 @@ describe('sessionService.updateSession', () => {
       save: jest.fn().mockResolvedValue(true),
     };
 
-    jest
-      .spyOn(sessionService, 'getSession')
-      .mockResolvedValue(sessionMock as any);
+    jest.spyOn(sessionService, 'getSession').mockResolvedValue(sessionMock as any);
 
-    const saveSpy = jest
-      .spyOn(SessionPart.prototype, 'save')
-      .mockResolvedValue(true);
+    const saveSpy = jest.spyOn(SessionPart.prototype, 'save').mockResolvedValue(true);
 
-    jest
-      .spyOn(userService, 'isDailyGoalCompletedMarkedToday')
-      .mockResolvedValue(true);
+    jest.spyOn(userService, 'isDailyGoalCompletedMarkedToday').mockResolvedValue(true);
 
-    jest
-      .spyOn(analyticsService, 'applySessionUpdateToAggregates')
-      .mockResolvedValue(undefined);
+    jest.spyOn(analyticsService, 'applySessionUpdateToAggregates').mockResolvedValue(undefined);
 
     await sessionService.updateSession(
       'sessionId',

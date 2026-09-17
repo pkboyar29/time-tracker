@@ -41,10 +41,7 @@ router.get('/', async (req: Request, res: Response) => {
 
 router.get('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await sessionService.getSession(
-      req.params.id,
-      res.locals.userId,
-    );
+    const data = await sessionService.getSession(req.params.id, res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);
@@ -53,10 +50,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const data = await sessionService.createSession(
-      req.body,
-      res.locals.userId,
-    );
+    const data = await sessionService.createSession(req.body, res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);
@@ -103,11 +97,7 @@ router.patch('/:id/note', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await sessionService.deleteSession(
-      req.params.id,
-      res.locals.userId,
-      true,
-    );
+    const data = await sessionService.deleteSession(req.params.id, res.locals.userId, true);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);

@@ -402,34 +402,22 @@ describe('analyticsService.getTimeBars', () => {
 
     expect(result.length).toBe(6);
 
-    expect(result[0].startOfRange).toEqual(
-      new Date('2024-06-30T21:00:00.000Z'),
-    );
+    expect(result[0].startOfRange).toEqual(new Date('2024-06-30T21:00:00.000Z'));
     expect(result[0].endOfRange).toEqual(new Date('2024-07-31T21:00:00.000Z'));
 
-    expect(result[1].startOfRange).toEqual(
-      new Date('2024-07-31T21:00:00.000Z'),
-    );
+    expect(result[1].startOfRange).toEqual(new Date('2024-07-31T21:00:00.000Z'));
     expect(result[1].endOfRange).toEqual(new Date('2024-08-31T21:00:00.000Z'));
 
-    expect(result[2].startOfRange).toEqual(
-      new Date('2024-08-31T21:00:00.000Z'),
-    );
+    expect(result[2].startOfRange).toEqual(new Date('2024-08-31T21:00:00.000Z'));
     expect(result[2].endOfRange).toEqual(new Date('2024-09-30T21:00:00.000Z'));
 
-    expect(result[3].startOfRange).toEqual(
-      new Date('2024-09-30T21:00:00.000Z'),
-    );
+    expect(result[3].startOfRange).toEqual(new Date('2024-09-30T21:00:00.000Z'));
     expect(result[3].endOfRange).toEqual(new Date('2024-10-31T21:00:00.000Z'));
 
-    expect(result[4].startOfRange).toEqual(
-      new Date('2024-10-31T21:00:00.000Z'),
-    );
+    expect(result[4].startOfRange).toEqual(new Date('2024-10-31T21:00:00.000Z'));
     expect(result[4].endOfRange).toEqual(new Date('2024-11-30T21:00:00.000Z'));
 
-    expect(result[5].startOfRange).toEqual(
-      new Date('2024-11-30T21:00:00.000Z'),
-    );
+    expect(result[5].startOfRange).toEqual(new Date('2024-11-30T21:00:00.000Z'));
     expect(result[5].endOfRange).toEqual(new Date('2024-12-31T21:00:00.000Z'));
   });
 
@@ -698,9 +686,7 @@ describe('analyticsService.getActivityDistributions', () => {
     expect(result).toHaveLength(1); // only one activity - reading, even if there are many activities returned in getActivities
 
     expect(result).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ id: '0', name: 'Without activity' }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ id: '0', name: 'Without activity' })]),
     );
   });
 });
@@ -2059,30 +2045,22 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       spentTimeSeconds: 120,
     };
 
-    const result = analyticsService.buildUpdatedCacheValues(
-      cacheKeys,
-      cacheValues,
-      {
-        type: 'activityUpdated',
-        activity: updatedActivity,
-      },
-    );
+    const result = analyticsService.buildUpdatedCacheValues(cacheKeys, cacheValues, {
+      type: 'activityUpdated',
+      activity: updatedActivity,
+    });
     expect(Object.keys(result).length).toBe(2);
     expect(result).toEqual({
       cacheKey1: JSON.stringify({
         ...firstAnalytics,
         activityDistribution: firstAnalytics.activityDistribution.map((ad) =>
-          ad.id === Aid.toString()
-            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-            : ad,
+          ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
         ),
       }),
       cacheKey2: JSON.stringify({
         ...secondAnalytics,
         activityDistribution: secondAnalytics.activityDistribution.map((ad) =>
-          ad.id === Aid.toString()
-            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-            : ad,
+          ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
         ),
       }),
     });
@@ -2227,10 +2205,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       ],
     };
     const cacheKeys: string[] = ['cacheKey1', 'cacheKey2'];
-    const cacheValues: string[] = [
-      JSON.stringify(firstAnalytics),
-      JSON.stringify(secondAnalytics),
-    ];
+    const cacheValues: string[] = [JSON.stringify(firstAnalytics), JSON.stringify(secondAnalytics)];
     const updatedActivity: IActivity = {
       _id: Aid,
       name: 'Aupdated',
@@ -2250,45 +2225,33 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       spentTimeSeconds: 120,
     };
 
-    const result = analyticsService.buildUpdatedCacheValues(
-      cacheKeys,
-      cacheValues,
-      {
-        type: 'activityUpdated',
-        activity: updatedActivity,
-      },
-    );
+    const result = analyticsService.buildUpdatedCacheValues(cacheKeys, cacheValues, {
+      type: 'activityUpdated',
+      activity: updatedActivity,
+    });
     expect(Object.keys(result).length).toBe(2);
     expect(result).toEqual({
       cacheKey1: JSON.stringify({
         ...firstAnalytics,
         activityDistribution: firstAnalytics.activityDistribution.map((ad) =>
-          ad.id === Aid.toString()
-            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-            : ad,
+          ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
         ),
         timeBars: firstAnalytics.timeBars.map((bar) => ({
           ...bar,
           activityDistribution: bar.activityDistribution.map((ad) =>
-            ad.id === Aid.toString()
-              ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-              : ad,
+            ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
           ),
         })),
       }),
       cacheKey2: JSON.stringify({
         ...secondAnalytics,
         activityDistribution: secondAnalytics.activityDistribution.map((ad) =>
-          ad.id === Aid.toString()
-            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-            : ad,
+          ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
         ),
         timeBars: secondAnalytics.timeBars.map((bar) => ({
           ...bar,
           activityDistribution: bar.activityDistribution.map((ad) =>
-            ad.id === Aid.toString()
-              ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-              : ad,
+            ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
           ),
         })),
       }),
@@ -2386,16 +2349,12 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       timeBars: [],
     };
     const cacheKeys: string[] = ['cacheKey1', 'cacheKey2'];
-    const cacheValues: string[] = [
-      JSON.stringify(firstAnalytics),
-      JSON.stringify(secondAnalytics),
-    ];
+    const cacheValues: string[] = [JSON.stringify(firstAnalytics), JSON.stringify(secondAnalytics)];
 
-    const result = analyticsService.buildUpdatedCacheValues(
-      cacheKeys,
-      cacheValues,
-      { type: 'activityDeleted', activityId: Aid.toString() },
-    );
+    const result = analyticsService.buildUpdatedCacheValues(cacheKeys, cacheValues, {
+      type: 'activityDeleted',
+      activityId: Aid.toString(),
+    });
     expect(Object.keys(result).length).toBe(1);
     expect(result).toEqual({
       cacheKey1: JSON.stringify({
@@ -2410,9 +2369,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           (ad) => ad.id !== Aid.toString(),
         ),
         timeBars: firstAnalytics.timeBars.map((bar) => {
-          const adIndex = bar.activityDistribution.findIndex(
-            (ad) => ad.id === Aid.toString(),
-          );
+          const adIndex = bar.activityDistribution.findIndex((ad) => ad.id === Aid.toString());
           if (adIndex === -1) {
             return bar;
           }
@@ -2424,9 +2381,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
               pausedAmount: 0,
               spentTimeSeconds: 50,
             },
-            activityDistribution: bar.activityDistribution.filter(
-              (ad) => ad.id !== Aid.toString(),
-            ),
+            activityDistribution: bar.activityDistribution.filter((ad) => ad.id !== Aid.toString()),
           };
         }),
       } as AnalyticsForRangeDTO),

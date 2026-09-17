@@ -48,10 +48,7 @@ const sessionService = {
   deleteSession,
 };
 
-async function getSessions({
-  filter = {},
-  userId,
-}: GetSessionsOptions): Promise<ISession[]> {
+async function getSessions({ filter = {}, userId }: GetSessionsOptions): Promise<ISession[]> {
   try {
     const sessions = await Session.find({
       deleted: false,
@@ -119,10 +116,7 @@ async function getSession(
   }
 }
 
-async function createSession(
-  sessionDTO: SessionCreateDTO,
-  userId: string,
-): Promise<ISession> {
+async function createSession(sessionDTO: SessionCreateDTO, userId: string): Promise<ISession> {
   try {
     if (sessionDTO.activity) {
       const activity = await activityService.getActivity({
@@ -130,10 +124,7 @@ async function createSession(
         userId,
       });
       if (activity.archived) {
-        throw new HttpError(
-          400,
-          'Cannot create session with archived activity',
-        );
+        throw new HttpError(400, 'Cannot create session with archived activity');
       }
     }
 
@@ -147,18 +138,12 @@ async function createSession(
     const validationError = newSession.validateSync();
     if (validationError) {
       if (validationError.errors.totalTimeSeconds) {
-        throw new HttpError(
-          400,
-          validationError.errors.totalTimeSeconds.toString(),
-        );
+        throw new HttpError(400, validationError.errors.totalTimeSeconds.toString());
       }
     }
 
     if (sessionDTO.activity) {
-      await activityService.addActivityToLastActivities(
-        sessionDTO.activity,
-        userId,
-      );
+      await activityService.addActivityToLastActivities(sessionDTO.activity, userId);
     }
 
     return (await newSession.save()).populate(activityPopulateConfig);
@@ -175,32 +160,22 @@ async function updateSession(
 ): Promise<ISession> {
   try {
     if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
-      throw new HttpError(
-        400,
-        'Total time must be greater or equal spent time',
-      );
+      throw new HttpError(400, 'Total time must be greater or equal spent time');
     }
 
     const session = await sessionService.getSession(sessionId, userId);
     if (session.completed) {
-      throw new HttpError(
-        400,
-        'You cannot update an already completed session',
-      );
+      throw new HttpError(400, 'You cannot update an already completed session');
     }
     if (sessionDTO.spentTimeSeconds < session.spentTimeSeconds) {
-      throw new HttpError(
-        400,
-        "You cannot reduce a session's spentTimeSeconds",
-      );
+      throw new HttpError(400, "You cannot reduce a session's spentTimeSeconds");
     }
 
     const now = new Date();
 
     let partSpentTimeSeconds = 0;
     if (sessionDTO.spentTimeSeconds > session.spentTimeSeconds) {
-      partSpentTimeSeconds =
-        sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
+      partSpentTimeSeconds = sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
       const newSessionPart = new SessionPart({
         spentTimeSeconds: partSpentTimeSeconds,
         session: sessionId,
@@ -263,8 +238,10 @@ async function updateSession(
       activityId: session.activity ? session.activity.id.toString() : undefined,
     });
 
-    const isDailyGoalCompletedMarkedToday =
-      await userService.isDailyGoalCompletedMarkedToday(userId, timezone);
+    const isDailyGoalCompletedMarkedToday = await userService.isDailyGoalCompletedMarkedToday(
+      userId,
+      timezone,
+    );
 
     if (!isDailyGoalCompletedMarkedToday) {
       const dailyGoalInfo = await User.findById(userId).select('dailyGoal');
@@ -299,10 +276,7 @@ async function updateSessionNote(
     const session = await sessionService.getSession(sessionId, userId);
 
     if (session.completed) {
-      throw new HttpError(
-        400,
-        'You cannot update an already completed session',
-      );
+      throw new HttpError(400, 'You cannot update an already completed session');
     }
 
     session.note = note;
@@ -341,9 +315,7 @@ async function deleteSession(
         userId,
         timezone: tzInfo!.timezone,
         deletedParts: partsToDelete,
-        activityId: session.activity
-          ? session.activity.id.toString()
-          : undefined,
+        activityId: session.activity ? session.activity.id.toString() : undefined,
         completedDate: session.completed ? session.updatedDate : undefined,
       });
     }

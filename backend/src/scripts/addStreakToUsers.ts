@@ -2,8 +2,7 @@ import mongoose from 'mongoose';
 import analyticsService from '../service/analytics.service';
 import User from '../model/user.model';
 
-const MONGO_URL =
-  process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
 mongoose.connect(MONGO_URL).then(async () => {
   console.log('connection with database is successful');

@@ -45,10 +45,7 @@ router.get('/profile', async (req: Request, res: Response) => {
 
 router.put('/updateDailyGoal', async (req: Request, res: Response) => {
   try {
-    const data = await userService.updateDailyGoal(
-      req.body.newDailyGoal,
-      res.locals.userId,
-    );
+    const data = await userService.updateDailyGoal(req.body.newDailyGoal, res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);
@@ -80,51 +77,41 @@ router.get('/export', async (req: Request, res: Response) => {
   }
 });
 
-router.post(
-  '/import',
-  memoryUpload.single('file'),
-  async (req: Request, res: Response) => {
-    const file = req.file;
+router.post('/import', memoryUpload.single('file'), async (req: Request, res: Response) => {
+  const file = req.file;
 
-    if (!file) {
-      return res.status(400).send('You didnt send file!');
-    }
+  if (!file) {
+    return res.status(400).send('You didnt send file!');
+  }
 
-    const sessionDurationParam = req.body.sessionDuration;
-    const sessionDuration = Number(sessionDurationParam);
-    if (!sessionDurationParam) {
-      return res.status(400).send('sessionsDuration body param is required!');
-    }
-    if (Number.isNaN(sessionDuration)) {
-      return res
-        .status(400)
-        .send('sessionsDuration body param should be number!');
-    }
-    if (sessionDuration > 36000) {
-      return res
-        .status(400)
-        .send(
-          'sessionsDuration body param should be maximum 36000 seconds (10 hours)!',
-        );
-    }
-    if (sessionDuration <= 0) {
-      return res
-        .status(400)
-        .send('sessionsDuration body param should be minimum 1 second!');
-    }
+  const sessionDurationParam = req.body.sessionDuration;
+  const sessionDuration = Number(sessionDurationParam);
+  if (!sessionDurationParam) {
+    return res.status(400).send('sessionsDuration body param is required!');
+  }
+  if (Number.isNaN(sessionDuration)) {
+    return res.status(400).send('sessionsDuration body param should be number!');
+  }
+  if (sessionDuration > 36000) {
+    return res
+      .status(400)
+      .send('sessionsDuration body param should be maximum 36000 seconds (10 hours)!');
+  }
+  if (sessionDuration <= 0) {
+    return res.status(400).send('sessionsDuration body param should be minimum 1 second!');
+  }
 
-    const buffer = file.buffer;
-    const fileContent = buffer.toString('utf-8');
+  const buffer = file.buffer;
+  const fileContent = buffer.toString('utf-8');
 
-    const responseMessage = await userService.importFile(
-      fileContent,
-      sessionDuration,
-      res.locals.userId,
-    );
+  const responseMessage = await userService.importFile(
+    fileContent,
+    sessionDuration,
+    res.locals.userId,
+  );
 
-    res.status(200).send(responseMessage);
-  },
-);
+  res.status(200).send(responseMessage);
+});
 
 // TODO: обрабатывать ошибку, когда отправляем несколько файлов
 router.post(
@@ -139,14 +126,8 @@ router.post(
     // application/octet-stream - m4r
     // audio/ogg - ogg
     // audio/mpeg - mp3
-    if (
-      !['application/octet-stream', 'audio/ogg', 'audio/mpeg'].includes(
-        file.mimetype,
-      )
-    ) {
-      return res
-        .status(400)
-        .send('audio file should be mp3, m4r or ogg format');
+    if (!['application/octet-stream', 'audio/ogg', 'audio/mpeg'].includes(file.mimetype)) {
+      return res.status(400).send('audio file should be mp3, m4r or ogg format');
     }
 
     const THREE_MB_BYTES = 3_000_000;
@@ -161,11 +142,7 @@ router.post(
     }
 
     try {
-      const data = await userService.uploadAudio(
-        file.originalname,
-        file.buffer,
-        res.locals.userId,
-      );
+      const data = await userService.uploadAudio(file.originalname, file.buffer, res.locals.userId);
 
       res.status(200).json(data);
     } catch (e) {
@@ -176,10 +153,7 @@ router.post(
 
 router.get('/audio/:id', async (req: Request, res: Response) => {
   try {
-    const { buffer, fileName } = await userService.getAudioFile(
-      req.params.id,
-      res.locals.userId,
-    );
+    const { buffer, fileName } = await userService.getAudioFile(req.params.id, res.locals.userId);
 
     const fileNameArray = fileName.split('.');
     const fileExtension = fileNameArray[fileNameArray.length - 1];
@@ -214,10 +188,7 @@ router.put('/audio/:id', async (req: Request, res: Response) => {
 
 router.delete('/audio/:id', async (req: Request, res: Response) => {
   try {
-    const responseMessage = await userService.deleteAudio(
-      req.params.id,
-      res.locals.userId,
-    );
+    const responseMessage = await userService.deleteAudio(req.params.id, res.locals.userId);
 
     res.status(200).send(responseMessage);
   } catch (e) {

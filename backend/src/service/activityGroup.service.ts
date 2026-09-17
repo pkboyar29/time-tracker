@@ -25,9 +25,7 @@ const activityGroupService = {
   deleteActivityGroup,
 };
 
-async function getActivityGroups({
-  userId,
-}: GetActivityGroupsOptions): Promise<IActivityGroup[]> {
+async function getActivityGroups({ userId }: GetActivityGroupsOptions): Promise<IActivityGroup[]> {
   try {
     const filter = {
       deleted: false,
@@ -44,9 +42,7 @@ async function getActivityGroups({
 async function getActivityGroup({
   activityGroupId,
   userId,
-}: GetActivityGroupOptions): Promise<
-  mongoose.HydratedDocument<IActivityGroup>
-> {
+}: GetActivityGroupOptions): Promise<mongoose.HydratedDocument<IActivityGroup>> {
   const notFoundError = new HttpError(404, 'Activity Group Not Found');
   try {
     if (!mongoose.Types.ObjectId.isValid(activityGroupId)) {
@@ -164,10 +160,7 @@ async function archiveGroupActivities(
 ): Promise<{ message: string }> {
   await activityGroupService.getActivityGroup({ activityGroupId, userId });
 
-  await Activity.updateMany(
-    { activityGroup: activityGroupId },
-    { archived: true },
-  );
+  await Activity.updateMany({ activityGroup: activityGroupId }, { archived: true });
 
   const activities = await activityService.getActivities({
     activityGroupId,
