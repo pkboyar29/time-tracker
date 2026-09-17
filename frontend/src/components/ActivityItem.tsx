@@ -157,44 +157,40 @@ const ActivityItem: FC<ActivityBoxProps> = ({
 
   return (
     <>
-      {deleteModal && (
-        <Modal
-          title={isActivity ? t('deleteActivityModal.title') : t('deleteGroupModal.title')}
-          onCloseModal={() => setDeleteModal(false)}
-        >
-          <p className="text-base/6 dark:text-textDark">
-            {isActivity ? t('deleteActivityModal.descrTitle') : t('deleteGroupModal.descrTitle')}
-          </p>
+      <Modal
+        title={isActivity ? t('deleteActivityModal.title') : t('deleteGroupModal.title')}
+        isOpen={deleteModal}
+        onCloseModal={() => setDeleteModal(false)}
+      >
+        <p className="text-base/6 dark:text-textDark">
+          {isActivity ? t('deleteActivityModal.descrTitle') : t('deleteGroupModal.descrTitle')}
+        </p>
 
-          <p className="mt-4 text-sm font-medium text-red-600 dark:text-red-400">
-            {isActivity
-              ? t('deleteActivityModal.descrWarning')
-              : t('deleteGroupModal.descrWarning')}
-          </p>
+        <p className="mt-4 text-sm font-medium text-red-600 dark:text-red-400">
+          {isActivity ? t('deleteActivityModal.descrWarning') : t('deleteGroupModal.descrWarning')}
+        </p>
 
-          <div className="mt-10 ml-auto w-fit">
-            <Button onClick={onDeleteActivityCommon}>
-              {isActivity ? t('deleteActivityModal.button') : t('deleteGroupModal.button')}
-            </Button>
+        <div className="mt-10 ml-auto w-fit">
+          <Button onClick={onDeleteActivityCommon}>
+            {isActivity ? t('deleteActivityModal.button') : t('deleteGroupModal.button')}
+          </Button>
+        </div>
+      </Modal>
+
+      <SessionCreateModal
+        modalTitle={
+          <div>
+            <span className="font-bold">{activityCommon.name}</span>:{' '}
+            {t('createSessionModal.title')}
           </div>
-        </Modal>
-      )}
-
-      {startSessionModal && (
-        <SessionCreateModal
-          modalTitle={
-            <div>
-              <span className="font-bold">{activityCommon.name}</span>:{' '}
-              {t('createSessionModal.title')}
-            </div>
-          }
-          onCloseModal={() => {
-            setStartSessionModal(false);
-          }}
-          defaultActivity={activityCommon.id}
-          afterSubmitHandler={afterCreateSessionHandler}
-        />
-      )}
+        }
+        isOpen={startSessionModal}
+        onCloseModal={() => {
+          setStartSessionModal(false);
+        }}
+        defaultActivity={activityCommon.id}
+        afterSubmitHandler={afterCreateSessionHandler}
+      />
 
       <div className="p-5 bg-surfaceLight dark:bg-surfaceDark border border-gray-300/80 dark:border-white/10 border-solid rounded-xl w-[320px] min-h-[150px] flex flex-col">
         <div className="flex items-start justify-between flex-1 gap-4">

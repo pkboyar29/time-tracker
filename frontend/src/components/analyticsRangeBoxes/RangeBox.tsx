@@ -180,49 +180,54 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
+      if (document.body.classList.contains('modal-open')) {
+        return;
+      }
+
       if (event.ctrlKey) {
-        if (event.code == 'ArrowLeft') {
+        if (event.code === 'ArrowLeft') {
           leftArrowClickHandler();
-        } else if (event.code == 'ArrowRight') {
+        } else if (event.code === 'ArrowRight') {
           rightArrowClickHandler();
         }
-      } else {
-        if (event.code == 'ArrowLeft') {
-          const [newFromDate, newToDate] = shiftTwoDates(range.fromDate, range.toDate, false);
-          navigate(
-            `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
-            { replace: true },
-          );
+        return;
+      }
 
-          const index = rangeItems.findIndex(
-            (rangeItem) =>
-              rangeItem[0].getTime() == range.fromDate.getTime() &&
-              rangeItem[1].getTime() == range.toDate.getTime(),
-          );
-          if (index == 0) {
-            leftArrowClickHandler();
-          }
-          if (index == -1) {
-            setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
-          }
-        } else if (event.code == 'ArrowRight') {
-          const [newFromDate, newToDate] = shiftTwoDates(range.fromDate, range.toDate, true);
-          navigate(
-            `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
-            { replace: true },
-          );
+      if (event.code === 'ArrowLeft') {
+        const [newFromDate, newToDate] = shiftTwoDates(range.fromDate, range.toDate, false);
+        navigate(
+          `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
+          { replace: true },
+        );
 
-          const index = rangeItems.findIndex(
-            (rangeItem) =>
-              rangeItem[0].getTime() == range.fromDate.getTime() &&
-              rangeItem[1].getTime() == range.toDate.getTime(),
-          );
-          if (index == rangeItems.length - 1) {
-            rightArrowClickHandler();
-          }
-          if (index == -1) {
-            setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
-          }
+        const index = rangeItems.findIndex(
+          (rangeItem) =>
+            rangeItem[0].getTime() === range.fromDate.getTime() &&
+            rangeItem[1].getTime() === range.toDate.getTime(),
+        );
+        if (index == 0) {
+          leftArrowClickHandler();
+        }
+        if (index == -1) {
+          setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
+        }
+      } else if (event.code === 'ArrowRight') {
+        const [newFromDate, newToDate] = shiftTwoDates(range.fromDate, range.toDate, true);
+        navigate(
+          `/analytics/range?from=${newFromDate.toISOString()}&to=${newToDate.toISOString()}`,
+          { replace: true },
+        );
+
+        const index = rangeItems.findIndex(
+          (rangeItem) =>
+            rangeItem[0].getTime() === range.fromDate.getTime() &&
+            rangeItem[1].getTime() === range.toDate.getTime(),
+        );
+        if (index == rangeItems.length - 1) {
+          rightArrowClickHandler();
+        }
+        if (index == -1) {
+          setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
         }
       }
     };

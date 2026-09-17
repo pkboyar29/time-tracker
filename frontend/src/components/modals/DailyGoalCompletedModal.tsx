@@ -1,19 +1,74 @@
-import { FC } from 'react';
+import { FC, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { API_URL } from '../../api/axios';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
+import Cookies from 'js-cookie';
+import { refreshAccessToken, isAuthRequired } from '../../helpers/authHelpers';
 
 import Modal from './Modal';
 import Button from '../common/Button';
 
-interface DailyGoalCompletedModalProps {
-  onCloseModal: () => void;
-  streak: number;
-}
+interface DailyGoalCompletedModalProps {}
 
-const DailyGoalCompletedModal: FC<DailyGoalCompletedModalProps> = ({ onCloseModal, streak }) => {
+const DailyGoalCompletedModal: FC<DailyGoalCompletedModalProps> = () => {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [streak, setStreak] = useState<number>(0);
   const { t } = useTranslation();
 
+  const location = useLocation();
+  const authRequired = isAuthRequired(location.pathname);
+
+  useEffect(() => {
+    const subscribeToServerEvents = async () => {
+      if (!authRequired) {
+        return;
+      }
+
+      await fetchEventSource(`${API_URL}/events`, {
+        headers: {
+          Authorization: `Bearer ${Cookies.get('access')}`,
+        },
+        async onopen(response) {
+          if (response.ok) {
+            return;
+          }
+          if (response.status === 403) {
+            throw new Error('REFRESH_REQUIRED');
+          } else {
+            throw new Error(`SERVER_ERROR_${response.status}`);
+          }
+        },
+        onmessage: (event) => {
+          try {
+            if (event.event === 'daily_goal_completed') {
+              const data = JSON.parse(event.data);
+
+              setStreak(data.streak);
+              setIsOpen(true);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        },
+        onerror: (error) => {
+          if (error.message === 'REFRESH_REQUIRED') {
+            refreshAccessToken();
+            throw error;
+          }
+        },
+      });
+    };
+
+    subscribeToServerEvents();
+  }, [authRequired]);
+
   return (
-    <Modal title={t('dailyGoalCompletedModal.title')} onCloseModal={onCloseModal}>
+    <Modal
+      title={t('dailyGoalCompletedModal.title')}
+      isOpen={isOpen}
+      onCloseModal={() => setIsOpen(false)}
+    >
       <div className="flex flex-col items-center px-6 py-4 pt-8 text-center">
         <div className="flex items-center justify-center w-20 h-20 mb-4 bg-green-100 rounded-full">
           <span className="text-3xl">🎉</span>
@@ -35,7 +90,7 @@ const DailyGoalCompletedModal: FC<DailyGoalCompletedModalProps> = ({ onCloseModa
           <div className="mb-6" />
         )}
 
-        <Button onClick={onCloseModal}>{t('dailyGoalCompletedModal.button')}</Button>
+        <Button onClick={() => setIsOpen(false)}>{t('dailyGoalCompletedModal.button')}</Button>
       </div>
     </Modal>
   );

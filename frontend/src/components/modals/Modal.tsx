@@ -6,15 +6,11 @@ interface ModalProps {
   children: ReactNode;
   modalClassnames?: string;
   title: ReactNode;
+  isOpen: boolean;
   onCloseModal: () => void;
 }
 
-const Modal: FC<ModalProps> = ({
-  children,
-  title,
-  modalClassnames,
-  onCloseModal,
-}) => {
+const Modal: FC<ModalProps> = ({ children, title, modalClassnames, isOpen, onCloseModal }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const isMouseDownInside = useRef<boolean>(false);
 
@@ -26,9 +22,7 @@ const Modal: FC<ModalProps> = ({
     };
   }, []);
 
-  const handleMouseDown = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-  ) => {
+  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (modalRef.current?.contains(event.target as Node)) {
       isMouseDownInside.current = true;
     } else {
@@ -36,16 +30,15 @@ const Modal: FC<ModalProps> = ({
     }
   };
 
-  const handleMouseUp = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>,
-  ) => {
-    if (
-      !isMouseDownInside.current &&
-      !modalRef.current?.contains(event.target as Node)
-    ) {
+  const handleMouseUp = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (!isMouseDownInside.current && !modalRef.current?.contains(event.target as Node)) {
       onCloseModal();
     }
   };
+
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div

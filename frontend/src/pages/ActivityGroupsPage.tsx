@@ -42,24 +42,23 @@ const ActivityGroupsPage: FC = () => {
 
   return (
     <>
-      {createModal && (
-        <Modal
-          modalClassnames="md:basis-2/5 xl:basis-1/5"
-          title={t('createGroupModal.title')}
-          onCloseModal={() => setCreateModal(false)}
-        >
-          <ActivityGroupCreateForm
-            afterSubmitHandler={(newActivityGroup) => {
-              queryClient.setQueryData(['activityGroups'], (oldData: IActivityGroup[]) => [
-                newActivityGroup,
-                ...oldData,
-              ]);
+      <Modal
+        modalClassnames="md:basis-2/5 xl:basis-1/5"
+        title={t('createGroupModal.title')}
+        isOpen={createModal}
+        onCloseModal={() => setCreateModal(false)}
+      >
+        <ActivityGroupCreateForm
+          afterSubmitHandler={(newActivityGroup) => {
+            queryClient.setQueryData(['activityGroups'], (oldData: IActivityGroup[]) => [
+              newActivityGroup,
+              ...oldData,
+            ]);
 
-              setCreateModal(false);
-            }}
-          />
-        </Modal>
-      )}
+            setCreateModal(false);
+          }}
+        />
+      </Modal>
 
       <div className="container my-[65px] xl:my-5">
         <div className="flex items-center justify-between">

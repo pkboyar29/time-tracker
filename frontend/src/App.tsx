@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect } from 'react';
 import routeConfig from './router/routeConfig';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import ProtectedRoute from './router/ProtectedRoute';
@@ -10,10 +10,7 @@ import { setUser } from './redux/slices/userSlice';
 import { getSessionFromLS, removeSessionFromLS } from './helpers/localstorageHelpers';
 import { useTranslation } from 'react-i18next';
 import { AxiosError } from 'axios';
-import { API_URL } from './api/axios';
-import { fetchEventSource } from '@microsoft/fetch-event-source';
-import Cookies from 'js-cookie';
-import { refreshAccessToken } from './helpers/authHelpers';
+import { isAuthRequired } from './helpers/authHelpers';
 
 import { ToastContainer, toast } from 'react-toastify';
 import Sidebar from './components/Sidebar';
@@ -26,14 +23,8 @@ const App: FC = () => {
   const { t } = useTranslation();
   const { startTimer } = useTimer();
 
-  const [dailyGoalComplModal, setDailyGoalComplModal] = useState<{
-    status: boolean;
-    streak: number;
-  }>({ status: false, streak: 0 });
-
   const location = useLocation();
-  const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
-  const requiredAuth = !nonRequiredAuthRoutes.includes(location.pathname);
+  const authRequired = isAuthRequired(location.pathname);
 
   useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -42,7 +33,7 @@ const App: FC = () => {
       dispatch(setUser(userInfo));
     };
 
-    if (requiredAuth) {
+    if (authRequired) {
       fetchCurrentUser();
     }
   }, []);
@@ -51,7 +42,7 @@ const App: FC = () => {
     const updateUnsyncedSession = async () => {
       const unsyncedSessionFromLS = getSessionFromLS('unsyncedSession');
 
-      if (requiredAuth && unsyncedSessionFromLS) {
+      if (authRequired && unsyncedSessionFromLS) {
         try {
           await updateSession(unsyncedSessionFromLS);
           removeSessionFromLS('unsyncedSession');
@@ -73,7 +64,7 @@ const App: FC = () => {
     const fetchCurrentSession = async () => {
       const sessionFromLS = getSessionFromLS('session');
 
-      if (requiredAuth && sessionFromLS) {
+      if (authRequired && sessionFromLS) {
         try {
           const sessionFromServer = await fetchSession(sessionFromLS.id);
           if (sessionFromServer.completed) {
@@ -108,51 +99,6 @@ const App: FC = () => {
     }
   }, []);
 
-  // TODO: когда мы находились на странице авторизации и после авторизовались, то запроса не произойдет, в эффектах ничего нету
-  useEffect(() => {
-    const subscribeToServerEvents = async () => {
-      if (requiredAuth) {
-        await fetchEventSource(`${API_URL}/events`, {
-          headers: {
-            Authorization: `Bearer ${Cookies.get('access')}`,
-          },
-          async onopen(response) {
-            if (response.ok) {
-              return;
-            } else if (response.status === 403) {
-              throw new Error('REFRESH_REQUIRED');
-            } else {
-              throw new Error(`SERVER_ERROR_${response.status}`);
-            }
-          },
-          onmessage: (event) => {
-            try {
-              if (event.event === 'daily_goal_completed') {
-                const data = JSON.parse(event.data);
-
-                setDailyGoalComplModal({
-                  status: true,
-                  streak: data.streak,
-                });
-              }
-            } catch (e) {
-              console.error(e);
-            }
-          },
-          onerror: (error) => {
-            if (error.message === 'REFRESH_REQUIRED') {
-              refreshAccessToken();
-
-              throw error;
-            }
-          },
-        });
-      }
-    };
-
-    subscribeToServerEvents();
-  }, []);
-
   return (
     <>
       <ToastContainer
@@ -164,23 +110,17 @@ const App: FC = () => {
 
       <TimerTitleUpdater />
 
-      {dailyGoalComplModal.status && (
-        <DailyGoalCompletedModal
-          streak={dailyGoalComplModal.streak}
-          onCloseModal={() => setDailyGoalComplModal({ status: false, streak: 0 })}
-        />
-      )}
+      <DailyGoalCompletedModal />
 
       <div
         id="app"
         className={`relative App h-screen bg-backgroundLight dark:bg-backgroundDark ${
-          requiredAuth ? 'min-[1340px]:grid min-[1340px]:grid-cols-[auto,1fr]' : ''
+          authRequired ? 'min-[1340px]:grid min-[1340px]:grid-cols-[auto,1fr]' : ''
         }`}
       >
-        {requiredAuth && (
+        {authRequired && (
           <>
             <BurgerButton />
-
             <Sidebar />
           </>
         )}

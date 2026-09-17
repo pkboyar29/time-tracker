@@ -78,34 +78,33 @@ const ActivityGroupPage: FC = () => {
 
   return (
     <>
-      {createModal && (
-        <Modal
-          modalClassnames="md:basis-2/5 xl:basis-1/5"
-          title={
-            <div>
-              <span className="font-bold">{currentActivityGroup?.name}</span>:{' '}
-              {t('createActivityModal.title')}
-            </div>
-          }
-          onCloseModal={() => {
-            setCreateModal(false);
-          }}
-        >
-          {currentActivityGroup && (
-            <ActivityCreateForm
-              afterSubmitHandler={(newActivity) => {
-                queryClient.setQueryData(
-                  ['activities', activityGroupId],
-                  (oldData: IActivity[]) => [newActivity, ...oldData],
-                );
+      <Modal
+        modalClassnames="md:basis-2/5 xl:basis-1/5"
+        title={
+          <div>
+            <span className="font-bold">{currentActivityGroup?.name}</span>:{' '}
+            {t('createActivityModal.title')}
+          </div>
+        }
+        isOpen={createModal}
+        onCloseModal={() => {
+          setCreateModal(false);
+        }}
+      >
+        {currentActivityGroup && (
+          <ActivityCreateForm
+            afterSubmitHandler={(newActivity) => {
+              queryClient.setQueryData(['activities', activityGroupId], (oldData: IActivity[]) => [
+                newActivity,
+                ...oldData,
+              ]);
 
-                setCreateModal(false);
-              }}
-              activityGroupId={currentActivityGroup.id}
-            />
-          )}
-        </Modal>
-      )}
+              setCreateModal(false);
+            }}
+            activityGroupId={currentActivityGroup.id}
+          />
+        )}
+      </Modal>
 
       {isLoading ? (
         <div className="my-[65px] xl:my-5 text-center">

@@ -65,7 +65,7 @@ const Sidebar: FC = () => {
 
   return (
     <>
-      {settingsModal && <SettingsModal onCloseModal={() => setSettingsModal(false)} />}
+      <SettingsModal isOpen={settingsModal} onCloseModal={() => setSettingsModal(false)} />
 
       {isSidebarOpen && (
         <div

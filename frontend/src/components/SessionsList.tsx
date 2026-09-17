@@ -44,7 +44,7 @@ const SessionsList: FC<SessionsListProps> = ({
     selectedItemId: null,
   });
 
-  const [less, setLess] = useState<boolean>(false); // less - true, more - false\
+  const [less, setLess] = useState<boolean>(false); // less - true, more - false
 
   // эффект, добавляющий текущую сессию в список, если ее нет
   useEffect(() => {
@@ -134,30 +134,29 @@ const SessionsList: FC<SessionsListProps> = ({
 
   return (
     <>
-      {deleteModal.status && (
-        <Modal
-          title={t('deleteSessionModal.title')}
-          modalClassnames="basis-5/6 md:basis-5/6"
-          onCloseModal={() =>
-            setDeleteModal({
-              status: false,
-              selectedItemId: null,
-            })
-          }
-        >
-          <p className="text-base/6 dark:text-textDark">{t('deleteSessionModal.descr')}</p>
+      <Modal
+        title={t('deleteSessionModal.title')}
+        modalClassnames="basis-5/6 md:basis-5/6"
+        isOpen={deleteModal.status}
+        onCloseModal={() =>
+          setDeleteModal({
+            status: false,
+            selectedItemId: null,
+          })
+        }
+      >
+        <p className="text-base/6 dark:text-textDark">{t('deleteSessionModal.descr')}</p>
 
-          <div className="mt-10 ml-auto w-fit">
-            <Button
-              onClick={() =>
-                deleteModal.selectedItemId && handleSessionDelete(deleteModal.selectedItemId)
-              }
-            >
-              {t('deleteSessionModal.button')}
-            </Button>
-          </div>
-        </Modal>
-      )}
+        <div className="mt-10 ml-auto w-fit">
+          <Button
+            onClick={() =>
+              deleteModal.selectedItemId && handleSessionDelete(deleteModal.selectedItemId)
+            }
+          >
+            {t('deleteSessionModal.button')}
+          </Button>
+        </div>
+      </Modal>
 
       {sessionsWithoutCurrent.length !== 0 && (
         <div className={`flex flex-col items-end ml-auto ${classname}`}>

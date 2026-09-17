@@ -36,4 +36,9 @@ const isAuth = () => {
   }
 };
 
-export { refreshAccessToken, clearAuthSession, isAuth };
+const isAuthRequired = (pathname: string) => {
+  const nonRequiredAuthRoutes = ['/sign-in', '/sign-up', '/not-found'];
+  return !nonRequiredAuthRoutes.includes(pathname);
+};
+
+export { refreshAccessToken, clearAuthSession, isAuth, isAuthRequired };
