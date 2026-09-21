@@ -33,7 +33,8 @@ const SessionsList: FC<SessionsListProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { timerState, startTimer, finalSpentSeconds, finalSessionId } = useTimerWithMs();
+  const { timerState, startTimer, finalSpentSeconds, finalSessionId, completedSessionId } =
+    useTimerWithMs();
   const sessionFromLS = getSessionFromLS('session');
 
   // removing current session from the list
@@ -78,28 +79,23 @@ const SessionsList: FC<SessionsListProps> = ({
     });
   }, [timerState.session?.totalTimeSeconds]);
 
-  // эффект, изменяющий spentTimeSeconds у текущей сессии в списке и удаляющий текущую сессию из списка, если она завершилась
+  // эффект, изменяющий spentTimeSeconds у текущей сессии в списке
   useEffect(() => {
     if (finalSessionId === '') return;
 
-    updateSessionsListHandler((prev) => {
-      const currentSession = prev.find((s) => s.id === finalSessionId);
-
-      if (currentSession) {
-        if (finalSpentSeconds >= currentSession.totalTimeSeconds) {
-          return prev.filter((s) => s.id !== finalSessionId);
-        } else {
-          return prev.map((s) =>
-            s.id === finalSessionId
-              ? { ...currentSession, spentTimeSeconds: finalSpentSeconds }
-              : s,
-          );
-        }
-      } else {
-        return prev;
-      }
-    });
+    updateSessionsListHandler((prev) =>
+      prev.map((s) =>
+        s.id === finalSessionId ? { ...s, spentTimeSeconds: finalSpentSeconds } : s,
+      ),
+    );
   }, [finalSpentSeconds, finalSessionId]);
+
+  // эффект, удаляющий текущую сессию из списка, если она завершилась
+  useEffect(() => {
+    if (completedSessionId === '') return;
+
+    updateSessionsListHandler((prev) => prev.filter((s) => s.id !== completedSessionId));
+  }, [completedSessionId]);
 
   const handleSessionClick = async (session: ISession) => {
     startTimer(session);

@@ -30,10 +30,12 @@ interface TimerContextType {
   toggleTimer: () => Promise<void>;
   stopTimer: (shouldUpdateSession?: boolean) => Promise<void>;
   changeTotalTimeSeconds: (newTotalTimeSeconds: number) => Promise<void>;
+  finishTimer: (isEarly: boolean) => Promise<void>;
   timerState: TimerState;
   timerEndDate: Date;
   finalSpentSeconds: number;
   finalSessionId: string;
+  completedSessionId: string;
 }
 
 const defaultContext: TimerContextType = {
@@ -41,10 +43,12 @@ const defaultContext: TimerContextType = {
   toggleTimer: async () => {},
   stopTimer: async () => {},
   changeTotalTimeSeconds: async () => {},
+  finishTimer: async () => {},
   timerState: { status: 'idle', session: null },
   timerEndDate: new Date(),
   finalSpentSeconds: 0,
   finalSessionId: '',
+  completedSessionId: '',
 };
 
 const TimerContext = createContext<TimerContextType>(defaultContext);
@@ -62,6 +66,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   const sessionRef = useRef<ISession | null>(null);
   const [finalSpentSeconds, setFinalSpentSeconds] = useState<number>(0);
   const [finalSessionId, setFinalSessionId] = useState<string>('');
+  const [completedSessionId, setCompletedSessionId] = useState<string>('');
 
   const startTimestampRef = useRef<number>(0);
   const startSpentMsRef = useRef<number>(0);
@@ -111,7 +116,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   };
 
   const toggleTimer = async () => {
-    if (timerState.status == 'running') {
+    if (timerState.status === 'running') {
       startTimestampRef.current = 0;
       startSpentMsRef.current = 0;
 
@@ -134,7 +139,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
           type: 'error',
         });
       }
-    } else if (timerState.status == 'paused') {
+    } else if (timerState.status === 'paused') {
       startTimestampRef.current = Date.now();
       startSpentMsRef.current = timerTickStore.getSnapshot().ms;
 
@@ -182,6 +187,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       ...timerState.session,
       spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
     };
+    // TODO: delete, хотя вроде не надо удалять
     setFinalSpentSeconds(sessionToUpdate.spentTimeSeconds);
     setFinalSessionId(sessionToUpdate.id);
 
@@ -193,7 +199,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     lastSavedToServerMsRef.current = 0;
     removeSessionFromLS('session');
 
-    if (timerState.status == 'running' && shouldUpdateSession) {
+    if (timerState.status === 'running' && shouldUpdateSession) {
       try {
         await updateSession(sessionToUpdate, true);
       } catch (e) {
@@ -205,14 +211,22 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     }
   };
 
-  const finishTimer = async () => {
+  const finishTimer = async (isEarly: boolean) => {
     if (timerState.status === 'idle') return;
     if (!sessionRef.current) return;
 
-    const completedSession: ISession = {
-      ...sessionRef.current,
-      spentTimeSeconds: sessionRef.current.totalTimeSeconds,
-    };
+    const completedSession: ISession = { ...sessionRef.current };
+    if (isEarly) {
+      const spentTimeSeconds = msToSeconds(timerTickStore.getSnapshot().ms);
+
+      completedSession.totalTimeSeconds = spentTimeSeconds;
+      completedSession.spentTimeSeconds = spentTimeSeconds;
+    } else {
+      completedSession.spentTimeSeconds = completedSession.totalTimeSeconds;
+    }
+
+    setCompletedSessionId(completedSession.id);
+
     stopTimer();
 
     try {
@@ -262,7 +276,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   }, [timerState.status, timerState.session?.totalTimeSeconds]);
 
   useEffect(() => {
-    if (timerState.status == 'running') {
+    if (timerState.status === 'running') {
       timerWorker.postMessage({
         startTimestamp: startTimestampRef.current,
         startSpentMs: startSpentMsRef.current,
@@ -274,10 +288,8 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
         timerTickStore.setTick(sessionRef.current.id, ev.data);
 
-        // TODO: в объекте session можно хранить totalTimeMs для того, чтобы было меньше вычислений. Также это надо будет изменять в changeTotalTimeSeconds
         if (ev.data >= secondsToMs(sessionRef.current.totalTimeSeconds)) {
-          finishTimer();
-          timerWorker.postMessage({ action: 'pause' });
+          finishTimer(false);
           return;
         }
 
@@ -316,10 +328,12 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         toggleTimer,
         changeTotalTimeSeconds,
         stopTimer,
+        finishTimer,
         timerState,
         timerEndDate,
         finalSpentSeconds,
         finalSessionId,
+        completedSessionId,
       }}
     >
       {children}

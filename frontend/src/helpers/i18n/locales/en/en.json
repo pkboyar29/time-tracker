@@ -138,8 +138,9 @@
     "stopTooltip": "Stop the session",
     "pauseTooltip": "Pause the session",
     "resumeTooltip": "Resume the session",
-    "plus5Tooltip": "extend by 5 minutes",
-    "minus5Tooltip": "reduce by 5 minutes"
+    "plusTooltip": "extend by",
+    "minusTooltip": "reduce by",
+    "finishEarlyTooltip": "Finish the session early"
   },
   "sessionItem": {
     "duration": "Duration",
@@ -237,20 +238,7 @@
     "streakMessage": "🔥 {{streak}} day streak!"
   },
   "months": {
-    "short": [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec"
-    ],
+    "short": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
     "long": [
       "January",
       "February",

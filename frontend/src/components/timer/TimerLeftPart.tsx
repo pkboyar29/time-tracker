@@ -16,18 +16,22 @@ import Tooltip from '../common/Tooltip';
 import PauseIcon from '../../icons/PauseIcon';
 import PlayIcon from '../../icons/PlayIcon';
 import StopIcon from '../../icons/StopIcon';
+import CheckIcon from '../../icons/CheckIcon';
 
 interface TimerLeftPartProps {
   selectedSeconds: number;
   selectedActivityId: string;
 }
 
+const adjustmentMinutes = 5;
+const adjustmentSeconds = adjustmentMinutes * 60;
+
 const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivityId }) => {
   const { t } = useTranslation();
 
   const { mutateAsync, isPending } = useMutation({ mutationFn: createSession });
 
-  const { startTimer, toggleTimer, changeTotalTimeSeconds, stopTimer, timerState } =
+  const { startTimer, toggleTimer, changeTotalTimeSeconds, finishTimer, stopTimer, timerState } =
     useTimerWithMs();
   const isTimerStarted = timerState.status != 'idle';
 
@@ -88,36 +92,41 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
     stopTimer(true);
   };
 
-  const handleMinus5ButtonClick = () => {
+  const handleMinusButtonClick = () => {
     if (!timerState.session) return;
-
-    changeTotalTimeSeconds(timerState.session.totalTimeSeconds - 5 * 60);
+    changeTotalTimeSeconds(timerState.session.totalTimeSeconds - adjustmentSeconds);
   };
 
-  const handlePlus5ButtonClick = () => {
-    if (!timerState.session) return;
+  const handleFinishEarlyClick = () => {
+    finishTimer(true);
+  };
 
-    changeTotalTimeSeconds(timerState.session.totalTimeSeconds + 5 * 60);
+  const handlePlusButtonClick = () => {
+    if (!timerState.session) return;
+    changeTotalTimeSeconds(timerState.session.totalTimeSeconds + adjustmentSeconds);
   };
 
   return (
     <>
       <div className="relative inline-flex items-center justify-center">
         {isTimerStarted && (
-          <Tooltip<HTMLButtonElement> tooltipText={t('timerPage.minus5Tooltip')}>
+          <Tooltip<HTMLButtonElement>
+            tooltipText={`${t('timerPage.minusTooltip')} ${t('time.minutes', { count: adjustmentMinutes })}`}
+          >
             {(ref) => (
               <button
                 disabled={
-                  timerState.session.totalTimeSeconds - 5 * 60 <= msToSeconds(timerState.ms)
+                  timerState.session.totalTimeSeconds - adjustmentSeconds <=
+                  msToSeconds(timerState.ms)
                 }
                 ref={ref}
                 tabIndex={-1}
                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-[116%] sm:-translate-x-[130%] bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover
       w-[31.5px] h-[31.5px] transition duration-300 rounded-full p-1.5 flex justify-center items-center dark:text-textDark 
       opacity-70 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handleMinus5ButtonClick}
+                onClick={handleMinusButtonClick}
               >
-                -5
+                -{adjustmentMinutes}
               </button>
             )}
           </Tooltip>
@@ -141,18 +150,20 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
         />
 
         {isTimerStarted && (
-          <Tooltip<HTMLButtonElement> tooltipText={t('timerPage.plus5Tooltip')}>
+          <Tooltip<HTMLButtonElement>
+            tooltipText={`${t('timerPage.plusTooltip')} ${t('time.minutes', { count: adjustmentMinutes })}`}
+          >
             {(ref) => (
               <button
                 ref={ref}
                 tabIndex={-1}
-                disabled={timerState.session.totalTimeSeconds + 5 * 60 > 36_000} // 10 hours
+                disabled={timerState.session.totalTimeSeconds + adjustmentSeconds > 36_000} // 10 hours
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[116%] sm:translate-x-[130%] bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover
       w-[31.5px] h-[31.5px] transition duration-300 rounded-full p-1.5 flex justify-center items-center dark:text-textDark 
       opacity-70 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handlePlus5ButtonClick}
+                onClick={handlePlusButtonClick}
               >
-                +5
+                +{adjustmentMinutes}
               </button>
             )}
           </Tooltip>
@@ -175,7 +186,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
         </div>
       ) : (
         <>
-          <div className="flex mt-2 gap-7">
+          <div className="flex gap-5 mt-2">
             <Tooltip<HTMLButtonElement>
               tooltipText={
                 timerState.status === 'running'
@@ -213,10 +224,24 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
                 </button>
               )}
             </Tooltip>
+
+            <Tooltip<HTMLButtonElement> tooltipText={t('timerPage.finishEarlyTooltip')}>
+              {(ref) => (
+                <button
+                  ref={ref}
+                  tabIndex={-1}
+                  className="bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover
+      transition duration-300 rounded-full p-1.5"
+                  onClick={handleFinishEarlyClick}
+                >
+                  <CheckIcon />
+                </button>
+              )}
+            </Tooltip>
           </div>
 
           <div className="h-6 dark:text-textDark">
-            {timerState.status == 'paused' && t('timerPage.paused')}
+            {timerState.status === 'paused' && t('timerPage.paused')}
           </div>
         </>
       )}
