@@ -30,10 +30,17 @@ const SessionItem: FC<SessionItemProps> = ({
 
   return (
     <div
-      className={`p-5 w-full min-[400px]:w-96 border border-solid rounded-xl ${
+      className={`relative overflow-hidden p-5 w-full min-[400px]:w-96 border border-solid rounded-xl ${
         isActive ? 'border-primary' : 'border-black dark:border-white/10'
       }`}
     >
+      {session.activity && (
+        <div
+          className="absolute top-0 bottom-0 left-0 w-1.5"
+          style={{ backgroundColor: session.activity.color }}
+        />
+      )}
+
       <div className="flex items-start justify-between gap-10 min-[400px]:gap-20">
         <div className="flex gap-5">
           <div className="flex flex-col gap-3 ml-auto">
@@ -52,9 +59,7 @@ const SessionItem: FC<SessionItemProps> = ({
                 {t('sessionItem.activity')}
               </div>
               <div className="dark:text-textDarkSecondary">
-                {session.activity
-                  ? session.activity.name
-                  : t('withoutActivity')}
+                {session.activity ? session.activity.name : t('withoutActivity')}
               </div>
             </div>
           </div>
@@ -68,15 +73,7 @@ const SessionItem: FC<SessionItemProps> = ({
               className="p-1 transition duration-300 rounded-lg hover:bg-surfaceLightHover dark:hover:bg-surfaceDarkHover translate-y-[1px] disabled:opacity-40"
               onClick={() => sessionClickHandler(session)}
             >
-              {isActive ? (
-                isEnabled ? (
-                  <PauseIcon />
-                ) : (
-                  <ResumeIcon />
-                )
-              ) : (
-                <PlayIcon />
-              )}
+              {isActive ? isEnabled ? <PauseIcon /> : <ResumeIcon /> : <PlayIcon />}
             </button>
 
             <button

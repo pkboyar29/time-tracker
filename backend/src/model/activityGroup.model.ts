@@ -59,10 +59,6 @@ const activityGroupSchema = new Schema({
   },
 });
 
-const ActivityGroup = model(
-  'ActivityGroup',
-  activityGroupSchema,
-  'activity_groups',
-);
+const ActivityGroup = model('ActivityGroup', activityGroupSchema, 'activity_groups');
 
 export default ActivityGroup;

@@ -42,10 +42,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const data = await activityService.createActivity(
-      req.body,
-      res.locals.userId,
-    );
+    const data = await activityService.createActivity(req.body, res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);
@@ -54,11 +51,7 @@ router.post('/', async (req: Request, res: Response) => {
 
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await activityService.updateActivity(
-      req.params.id,
-      req.body,
-      res.locals.userId,
-    );
+    const data = await activityService.updateActivity(req.params.id, req.body, res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);
@@ -93,10 +86,7 @@ router.patch('/:id/archive', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await activityService.deleteActivity(
-      req.params.id,
-      res.locals.userId,
-    );
+    const data = await activityService.deleteActivity(req.params.id, res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);

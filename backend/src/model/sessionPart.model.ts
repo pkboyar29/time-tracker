@@ -1,9 +1,27 @@
 import { Schema, model, Types, InferSchemaType } from 'mongoose';
 
+export interface PopulatedSession {
+  _id: Types.ObjectId;
+  deleted: boolean;
+  activity: {
+    id: Types.ObjectId;
+    name: string;
+  };
+}
+
+export const sessionPopulateConfig = {
+  path: 'session',
+  select: '_id deleted activity',
+  populate: {
+    path: 'activity',
+    select: 'name id',
+  },
+};
+
 export interface ISessionPart {
   _id: Types.ObjectId;
   spentTimeSeconds: number;
-  session: { activity: { id: Types.ObjectId; name: string } };
+  session: PopulatedSession;
   user: Types.ObjectId;
   paused: boolean;
   createdDate: Date;

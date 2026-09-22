@@ -38,9 +38,7 @@ describe('Activity model validation', () => {
 
     const error = activity.validateSync();
     expect(error?.errors.name).toBeDefined();
-    expect(error?.errors.name.message).toBe(
-      'Name maximum length is 50 characters',
-    );
+    expect(error?.errors.name.message).toBe('Name maximum length is 50 characters');
   });
 
   it('should fail if description is too long', () => {
@@ -54,9 +52,7 @@ describe('Activity model validation', () => {
 
     const error = activity.validateSync();
     expect(error?.errors.descr).toBeDefined();
-    expect(error?.errors.descr.message).toBe(
-      'Description maximum length is 500 characters',
-    );
+    expect(error?.errors.descr.message).toBe('Description maximum length is 500 characters');
   });
 
   it('should fail if color is missing', () => {
@@ -96,9 +92,7 @@ describe('Activity model validation', () => {
 
     const error = activity.validateSync();
     expect(error?.errors.color).toBeDefined();
-    expect(error?.errors.color.message).toBe(
-      'Color maximum length is 9 characters',
-    );
+    expect(error?.errors.color.message).toBe('Color maximum length is 9 characters');
   });
 
   it('should fail if color is too short', () => {
@@ -111,9 +105,7 @@ describe('Activity model validation', () => {
 
     const error = activity.validateSync();
     expect(error?.errors.color).toBeDefined();
-    expect(error?.errors.color.message).toBe(
-      'Color minimum length is 7 characters',
-    );
+    expect(error?.errors.color.message).toBe('Color minimum length is 7 characters');
   });
 
   it('should fail if activityGroup is missing', () => {
@@ -125,9 +117,7 @@ describe('Activity model validation', () => {
 
     const error = activity.validateSync();
     expect(error?.errors.activityGroup).toBeDefined();
-    expect(error?.errors.activityGroup.message).toContain(
-      'Path `activityGroup` is required',
-    );
+    expect(error?.errors.activityGroup.message).toContain('Path `activityGroup` is required');
   });
 
   it('should fail if user is missing', () => {

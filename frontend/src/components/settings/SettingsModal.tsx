@@ -8,21 +8,22 @@ import SettingsNavItem from './SettingsNavItem';
 import HotkeysInfo from '../HotkeysInfo';
 
 interface SettingsModalProps {
+  isOpen: boolean;
   onCloseModal: () => void;
 }
 
 type SettingsSection = 'general' | 'audio' | 'hotkeys';
 
-const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal }) => {
+const SettingsModal: FC<SettingsModalProps> = ({ onCloseModal, isOpen }) => {
   const { t } = useTranslation();
 
-  const [activeSection, setActiveSection] =
-    useState<SettingsSection>('general');
+  const [activeSection, setActiveSection] = useState<SettingsSection>('general');
 
   return (
     <Modal
       modalClassnames="pt-5 pb-0 md:basis-2/3 xl:basis-2/4 2xl:basis-1/3"
       title={t('settingsModal.title')}
+      isOpen={isOpen}
       onCloseModal={onCloseModal}
     >
       <div className="h-[60vh] sm:h-[50vh] flex flex-col sm:flex-row gap-2 pr-1.5 sm:pr-2">

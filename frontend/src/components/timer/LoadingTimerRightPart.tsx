@@ -1,9 +1,7 @@
 import { FC } from 'react';
 
 const Skeleton = ({ className }: { className: string }) => (
-  <div
-    className={`animate-pulse bg-gray-300 dark:bg-surfaceDarkHover rounded ${className}`}
-  />
+  <div className={`animate-pulse bg-gray-300 dark:bg-surfaceDarkHover rounded ${className}`} />
 );
 
 const LoadingTimerRightPart: FC = () => {

@@ -17,9 +17,7 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
   const dailyGoalPercent =
     spentTimeSeconds > dailyGoalSeconds
       ? 100
-      : (Math.trunc(spentTimeSeconds / 60) /
-          Math.trunc(dailyGoalSeconds / 60)) *
-        100;
+      : (Math.trunc(spentTimeSeconds / 60) / Math.trunc(dailyGoalSeconds / 60)) * 100;
 
   return (
     dailyGoalSeconds && (
@@ -27,13 +25,9 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
         <div className="flex flex-col items-center gap-5">
           <CustomCircularProgress
             valuePercent={dailyGoalPercent}
-            label={`${t('dailyGoalBox.title')}: ${getReadableTime(
-              dailyGoalSeconds,
-              t,
-              {
-                short: true,
-              },
-            )}`}
+            label={`${t('dailyGoalBox.title')}: ${getReadableTime(dailyGoalSeconds, t, {
+              short: true,
+            })}`}
             size="big"
           />
 

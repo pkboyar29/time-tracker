@@ -170,12 +170,8 @@ describe('getWeekDays', () => {
 
     expect(result).toHaveLength(7);
     expect(result[0][0].getDay()).toBe(1); // Monday
-    expect(result[0][0].toDateString()).toBe(
-      new Date('2023-08-07').toDateString(),
-    );
-    expect(result[6][0].toDateString()).toBe(
-      new Date('2023-08-13').toDateString(),
-    );
+    expect(result[0][0].toDateString()).toBe(new Date('2023-08-07').toDateString());
+    expect(result[6][0].toDateString()).toBe(new Date('2023-08-13').toDateString());
   });
 
   it('should return correct week when date is a Monday', () => {
@@ -193,9 +189,7 @@ describe('getWeekDays', () => {
 
     expect(result).toHaveLength(7);
     expect(result[0][0].getDay()).toBe(1); // Monday
-    expect(result[0][0].toDateString()).toBe(
-      new Date('2025-08-11').toDateString(),
-    );
+    expect(result[0][0].toDateString()).toBe(new Date('2025-08-11').toDateString());
     expect(result[6][0].getDay()).toBe(0); // Sunday
   });
 });

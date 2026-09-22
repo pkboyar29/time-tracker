@@ -2,10 +2,7 @@ import { FC, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueryCustom } from '../hooks/useQueryCustom';
-import {
-  fetchActivityGroup,
-  archiveAllActivities,
-} from '../api/activityGroupApi';
+import { fetchActivityGroup, archiveAllActivities } from '../api/activityGroupApi';
 import { fetchGroupActivities } from '../api/activityApi';
 import { toast } from 'react-toastify';
 import { useTranslation } from 'react-i18next';
@@ -69,10 +66,8 @@ const ActivityGroupPage: FC = () => {
     try {
       await archiveAllActivities(currentActivityGroup!.id);
 
-      queryClient.setQueryData(
-        ['activities', activityGroupId],
-        (oldData: IActivity[]) =>
-          oldData.map((activity) => ({ ...activity, archived: true })),
+      queryClient.setQueryData(['activities', activityGroupId], (oldData: IActivity[]) =>
+        oldData.map((activity) => ({ ...activity, archived: true })),
       );
     } catch (e) {
       toast(t('serverErrors.archiveAllActivites'), {
@@ -83,34 +78,33 @@ const ActivityGroupPage: FC = () => {
 
   return (
     <>
-      {createModal && (
-        <Modal
-          modalClassnames="md:basis-2/5 xl:basis-1/5"
-          title={
-            <div>
-              <span className="font-bold">{currentActivityGroup?.name}</span>:{' '}
-              {t('createActivityModal.title')}
-            </div>
-          }
-          onCloseModal={() => {
-            setCreateModal(false);
-          }}
-        >
-          {currentActivityGroup && (
-            <ActivityCreateForm
-              afterSubmitHandler={(newActivity) => {
-                queryClient.setQueryData(
-                  ['activities', activityGroupId],
-                  (oldData: IActivity[]) => [newActivity, ...oldData],
-                );
+      <Modal
+        modalClassnames="md:basis-2/5 xl:basis-1/5"
+        title={
+          <div>
+            <span className="font-bold">{currentActivityGroup?.name}</span>:{' '}
+            {t('createActivityModal.title')}
+          </div>
+        }
+        isOpen={createModal}
+        onCloseModal={() => {
+          setCreateModal(false);
+        }}
+      >
+        {currentActivityGroup && (
+          <ActivityCreateForm
+            afterSubmitHandler={(newActivity) => {
+              queryClient.setQueryData(['activities', activityGroupId], (oldData: IActivity[]) => [
+                newActivity,
+                ...oldData,
+              ]);
 
-                setCreateModal(false);
-              }}
-              activityGroupId={currentActivityGroup.id}
-            />
-          )}
-        </Modal>
-      )}
+              setCreateModal(false);
+            }}
+            activityGroupId={currentActivityGroup.id}
+          />
+        )}
+      </Modal>
 
       {isLoading ? (
         <div className="my-[65px] xl:my-5 text-center">
@@ -131,9 +125,7 @@ const ActivityGroupPage: FC = () => {
             </div>
 
             <div className="flex items-center justify-between mt-5">
-              {currentActivityGroup && (
-                <Title>{currentActivityGroup.name}</Title>
-              )}
+              {currentActivityGroup && <Title>{currentActivityGroup.name}</Title>}
 
               <div className="flex h-full gap-5">
                 <SearchBar
@@ -183,15 +175,11 @@ const ActivityGroupPage: FC = () => {
 
             <div className="flex flex-wrap justify-center gap-4 md:justify-start mt-7">
               {activities.filter((activity) =>
-                activity.name
-                  .toLowerCase()
-                  .includes(searchString.toLowerCase()),
+                activity.name.toLowerCase().includes(searchString.toLowerCase()),
               ).length !== 0 ? (
                 activities
                   .filter((activity) =>
-                    activity.name
-                      .toLowerCase()
-                      .includes(searchString.toLowerCase()),
+                    activity.name.toLowerCase().includes(searchString.toLowerCase()),
                   )
                   .map((activity) => (
                     <ActivityItem
@@ -202,9 +190,7 @@ const ActivityGroupPage: FC = () => {
                           ['activities', activityGroupId],
                           (oldData: IActivity[]) =>
                             oldData.map((activity) =>
-                              activity.id == updatedActivity.id
-                                ? updatedActivity
-                                : activity,
+                              activity.id == updatedActivity.id ? updatedActivity : activity,
                             ),
                         );
                       }}
@@ -212,17 +198,13 @@ const ActivityGroupPage: FC = () => {
                         queryClient.setQueryData(
                           ['activities', activityGroupId],
                           (oldData: IActivity[]) =>
-                            oldData.filter(
-                              (activity) => activity.id !== deletedItemId,
-                            ),
+                            oldData.filter((activity) => activity.id !== deletedItemId),
                         );
                       }}
                     />
                   ))
               ) : (
-                <div className="dark:text-textDark">
-                  {t('groupPage.notFound')}
-                </div>
+                <div className="dark:text-textDark">{t('groupPage.notFound')}</div>
               )}
             </div>
           </div>

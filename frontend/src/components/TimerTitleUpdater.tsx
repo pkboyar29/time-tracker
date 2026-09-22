@@ -1,8 +1,5 @@
 import { FC, useEffect } from 'react';
-import {
-  getRemainingTimeHoursMinutesSeconds,
-  msToSeconds,
-} from '../helpers/timeHelpers';
+import { getRemainingTimeHoursMinutesSeconds, msToSeconds } from '../helpers/timeHelpers';
 import { setFavicon } from '../helpers/htmlHelpers';
 import { useTimerWithMs } from '../hooks/useTimer';
 import { useAppSelector } from '../redux/store';

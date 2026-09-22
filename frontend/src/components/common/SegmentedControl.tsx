@@ -11,11 +11,7 @@ interface SegmentedControlProps {
   onChange: (value: string) => void;
 }
 
-const SegmentedControl: FC<SegmentedControlProps> = ({
-  options,
-  value,
-  onChange,
-}) => {
+const SegmentedControl: FC<SegmentedControlProps> = ({ options, value, onChange }) => {
   return (
     <div
       role="radiogroup"

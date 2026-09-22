@@ -4,10 +4,7 @@ import { useTimerWithMs } from '../hooks/useTimer';
 import { useAppSelector, useAppDispatch } from '../redux/store';
 import { setIsSidebarOpen } from '../redux/slices/windowSlice';
 import { setTheme } from '../redux/slices/themeSlice';
-import {
-  getRemainingTimeHoursMinutesSeconds,
-  msToSeconds,
-} from '../helpers/timeHelpers';
+import { getRemainingTimeHoursMinutesSeconds, msToSeconds } from '../helpers/timeHelpers';
 import { toggleThemeInLS } from '../helpers/localstorageHelpers';
 import { getWeekRange } from '../helpers/dateHelpers';
 import { useTranslation } from 'react-i18next';
@@ -36,11 +33,7 @@ const Sidebar: FC = () => {
 
   useEffect(() => {
     function handleClickOutsideSidebar(e: MouseEvent) {
-      if (
-        isSidebarOpen &&
-        sidebarRef.current &&
-        !sidebarRef.current.contains(e.target as Node)
-      ) {
+      if (isSidebarOpen && sidebarRef.current && !sidebarRef.current.contains(e.target as Node)) {
         dispatch(setIsSidebarOpen(false));
       }
     }
@@ -72,9 +65,7 @@ const Sidebar: FC = () => {
 
   return (
     <>
-      {settingsModal && (
-        <SettingsModal onCloseModal={() => setSettingsModal(false)} />
-      )}
+      <SettingsModal isOpen={settingsModal} onCloseModal={() => setSettingsModal(false)} />
 
       {isSidebarOpen && (
         <div
@@ -137,9 +128,7 @@ const Sidebar: FC = () => {
                 }
               >
                 <BookIcon />
-                <div className="dark:text-textDark">
-                  {t('sidebar.activities')}
-                </div>
+                <div className="dark:text-textDark">{t('sidebar.activities')}</div>
               </NavLink>
             </li>
 
@@ -154,18 +143,14 @@ const Sidebar: FC = () => {
                 }
               >
                 <AnalyticsIcon />
-                <div className="dark:text-textDark">
-                  {t('sidebar.analytics')}
-                </div>
+                <div className="dark:text-textDark">{t('sidebar.analytics')}</div>
               </NavLink>
             </li>
           </div>
 
           <li className="flex flex-col items-center w-full gap-6 mt-5">
             <div className="flex items-center justify-between w-full gap-2 px-4">
-              <span className="dark:text-textDark">
-                {t('sidebar.darkTheme')}
-              </span>
+              <span className="dark:text-textDark">{t('sidebar.darkTheme')}</span>
 
               <ToggleButton
                 isChecked={theme === 'dark'}

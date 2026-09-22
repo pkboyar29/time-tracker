@@ -1,12 +1,4 @@
-import {
-  createContext,
-  useRef,
-  useEffect,
-  useContext,
-  ReactNode,
-  FC,
-  useState,
-} from 'react';
+import { createContext, useRef, useEffect, useContext, ReactNode, FC, useState } from 'react';
 import { useAppSelector } from '../redux/store';
 import defaultAudioUrl from '../assets/discordSound.mp3';
 import { getVolumeFromLS, setVolumeInLS } from '../helpers/localstorageHelpers';

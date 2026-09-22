@@ -1,16 +1,28 @@
 import { InferSchemaType, Schema, Types, model } from 'mongoose';
 
+export interface PopulatedActivity {
+  id: Types.ObjectId;
+  name: string;
+  color: string;
+  activityGroup: { id: Types.ObjectId; name: string };
+}
+
+export const activityPopulateConfig = {
+  path: 'activity',
+  select: 'name color activityGroup id',
+  populate: {
+    path: 'activityGroup',
+    select: 'name id',
+  },
+};
+
 export interface ISession {
   _id: Types.ObjectId;
   totalTimeSeconds: number;
   spentTimeSeconds: number;
   note?: string | null;
   completed: boolean;
-  activity: {
-    id: Types.ObjectId;
-    name: string;
-    activityGroup: { id: Types.ObjectId; name: string };
-  };
+  activity: PopulatedActivity;
   user: Types.ObjectId;
   createdDate: Date;
   updatedDate: Date;
@@ -33,10 +45,7 @@ const sessionSchema = new Schema({
   note: {
     type: String,
     required: false,
-    maxLength: [
-      1600,
-      'Note is too long. Maximum allowed length is 1600 characters',
-    ],
+    maxLength: [1600, 'Note is too long. Maximum allowed length is 1600 characters'],
   },
   completed: {
     type: Boolean,

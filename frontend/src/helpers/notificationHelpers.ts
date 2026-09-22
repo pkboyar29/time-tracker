@@ -17,27 +17,18 @@ export const showSessionCompletedNotification = ({
 
   try {
     if (Notification.permission === 'granted') {
-      const activityName = session.activity
-        ? session.activity.name
-        : t('withoutActivity');
+      const activityName = session.activity ? session.activity.name : t('withoutActivity');
 
-      let notificationBody = `${activityName} - ${getReadableTime(
-        session.totalTimeSeconds,
-        t,
-        {
-          short: false,
-        },
-      )}`;
+      let notificationBody = `${activityName} - ${getReadableTime(session.totalTimeSeconds, t, {
+        short: false,
+      })}`;
       if (dailyGoalCompleted) {
         notificationBody += `\n${t('notifications.dailyGoalCompleted')}`;
       }
 
-      const notification = new Notification(
-        t('notifications.sessionCompleted'),
-        {
-          body: notificationBody,
-        },
-      );
+      const notification = new Notification(t('notifications.sessionCompleted'), {
+        body: notificationBody,
+      });
       if (onClose) {
         notification.addEventListener('close', () => {
           onClose();

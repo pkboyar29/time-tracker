@@ -23,7 +23,11 @@ describe('analyticsService.getSessionStat', () => {
       {
         _id: new Types.ObjectId(),
         spentTimeSeconds: 120,
-        session: { activity: { id: new Types.ObjectId(), name: 'Reading' } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: new Types.ObjectId(), name: 'Reading' },
+        },
         user: new Types.ObjectId(),
         paused: true,
         createdDate: new Date('2025-09-20T10:00:00Z'),
@@ -31,7 +35,11 @@ describe('analyticsService.getSessionStat', () => {
       {
         _id: new Types.ObjectId(),
         spentTimeSeconds: 90,
-        session: { activity: { id: new Types.ObjectId(), name: 'Coding' } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: new Types.ObjectId(), name: 'Coding' },
+        },
         user: new Types.ObjectId(),
         paused: true,
         createdDate: new Date('2025-09-20T12:00:00Z'),
@@ -39,7 +47,11 @@ describe('analyticsService.getSessionStat', () => {
       {
         _id: new Types.ObjectId(),
         spentTimeSeconds: 60,
-        session: { activity: { id: new Types.ObjectId(), name: 'Exercise' } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: new Types.ObjectId(), name: 'Exercise' },
+        },
         user: new Types.ObjectId(),
         paused: false,
         createdDate: new Date('2025-09-20T14:00:00Z'),
@@ -56,6 +68,7 @@ describe('analyticsService.getSessionStat', () => {
         activity: {
           id: new Types.ObjectId(),
           name: 'Reading',
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         user: new Types.ObjectId(),
@@ -72,6 +85,7 @@ describe('analyticsService.getSessionStat', () => {
         activity: {
           id: new Types.ObjectId(),
           name: 'Coding',
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         user: new Types.ObjectId(),
@@ -402,34 +416,22 @@ describe('analyticsService.getTimeBars', () => {
 
     expect(result.length).toBe(6);
 
-    expect(result[0].startOfRange).toEqual(
-      new Date('2024-06-30T21:00:00.000Z'),
-    );
+    expect(result[0].startOfRange).toEqual(new Date('2024-06-30T21:00:00.000Z'));
     expect(result[0].endOfRange).toEqual(new Date('2024-07-31T21:00:00.000Z'));
 
-    expect(result[1].startOfRange).toEqual(
-      new Date('2024-07-31T21:00:00.000Z'),
-    );
+    expect(result[1].startOfRange).toEqual(new Date('2024-07-31T21:00:00.000Z'));
     expect(result[1].endOfRange).toEqual(new Date('2024-08-31T21:00:00.000Z'));
 
-    expect(result[2].startOfRange).toEqual(
-      new Date('2024-08-31T21:00:00.000Z'),
-    );
+    expect(result[2].startOfRange).toEqual(new Date('2024-08-31T21:00:00.000Z'));
     expect(result[2].endOfRange).toEqual(new Date('2024-09-30T21:00:00.000Z'));
 
-    expect(result[3].startOfRange).toEqual(
-      new Date('2024-09-30T21:00:00.000Z'),
-    );
+    expect(result[3].startOfRange).toEqual(new Date('2024-09-30T21:00:00.000Z'));
     expect(result[3].endOfRange).toEqual(new Date('2024-10-31T21:00:00.000Z'));
 
-    expect(result[4].startOfRange).toEqual(
-      new Date('2024-10-31T21:00:00.000Z'),
-    );
+    expect(result[4].startOfRange).toEqual(new Date('2024-10-31T21:00:00.000Z'));
     expect(result[4].endOfRange).toEqual(new Date('2024-11-30T21:00:00.000Z'));
 
-    expect(result[5].startOfRange).toEqual(
-      new Date('2024-11-30T21:00:00.000Z'),
-    );
+    expect(result[5].startOfRange).toEqual(new Date('2024-11-30T21:00:00.000Z'));
     expect(result[5].endOfRange).toEqual(new Date('2024-12-31T21:00:00.000Z'));
   });
 
@@ -542,6 +544,7 @@ describe('analyticsService.getActivityDistributions', () => {
         activity: {
           id: readingMeta._id,
           name: readingMeta.name,
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         totalTimeSeconds: 0,
@@ -557,6 +560,7 @@ describe('analyticsService.getActivityDistributions', () => {
         activity: {
           id: readingMeta._id,
           name: readingMeta.name,
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         totalTimeSeconds: 0,
@@ -572,6 +576,7 @@ describe('analyticsService.getActivityDistributions', () => {
         activity: {
           id: codingMeta._id,
           name: codingMeta.name,
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         totalTimeSeconds: 0,
@@ -587,7 +592,11 @@ describe('analyticsService.getActivityDistributions', () => {
     const sessionParts: ISessionPart[] = [
       {
         _id: new Types.ObjectId(),
-        session: { activity: { id: readingMeta._id, name: readingMeta.name } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: readingMeta._id, name: readingMeta.name },
+        },
         spentTimeSeconds: 100,
         createdDate: new Date(),
         paused: true,
@@ -595,7 +604,11 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         _id: new Types.ObjectId(),
-        session: { activity: { id: codingMeta._id, name: codingMeta.name } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: codingMeta._id, name: codingMeta.name },
+        },
         spentTimeSeconds: 200,
         createdDate: new Date(),
         paused: false,
@@ -603,7 +616,11 @@ describe('analyticsService.getActivityDistributions', () => {
       },
       {
         _id: new Types.ObjectId(),
-        session: { activity: { id: codingMeta._id, name: codingMeta.name } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: codingMeta._id, name: codingMeta.name },
+        },
         spentTimeSeconds: 200,
         createdDate: new Date(),
         paused: true,
@@ -661,6 +678,7 @@ describe('analyticsService.getActivityDistributions', () => {
         activity: {
           id: readingMeta._id,
           name: readingMeta.name,
+          color: '#000',
           activityGroup: mockActivityGroup,
         },
         totalTimeSeconds: 0,
@@ -677,7 +695,11 @@ describe('analyticsService.getActivityDistributions', () => {
       {
         _id: new Types.ObjectId(),
         paused: false,
-        session: { activity: { id: readingMeta._id, name: readingMeta.name } },
+        session: {
+          _id: new Types.ObjectId(),
+          deleted: false,
+          activity: { id: readingMeta._id, name: readingMeta.name },
+        },
         spentTimeSeconds: 300,
         createdDate: new Date(),
         user: new Types.ObjectId(),
@@ -698,9 +720,7 @@ describe('analyticsService.getActivityDistributions', () => {
     expect(result).toHaveLength(1); // only one activity - reading, even if there are many activities returned in getActivities
 
     expect(result).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ id: '0', name: 'Without activity' }),
-      ]),
+      expect.arrayContaining([expect.objectContaining({ id: '0', name: 'Without activity' })]),
     );
   });
 });
@@ -2059,30 +2079,22 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       spentTimeSeconds: 120,
     };
 
-    const result = analyticsService.buildUpdatedCacheValues(
-      cacheKeys,
-      cacheValues,
-      {
-        type: 'activityUpdated',
-        activity: updatedActivity,
-      },
-    );
+    const result = analyticsService.buildUpdatedCacheValues(cacheKeys, cacheValues, {
+      type: 'activityUpdated',
+      activity: updatedActivity,
+    });
     expect(Object.keys(result).length).toBe(2);
     expect(result).toEqual({
       cacheKey1: JSON.stringify({
         ...firstAnalytics,
         activityDistribution: firstAnalytics.activityDistribution.map((ad) =>
-          ad.id === Aid.toString()
-            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-            : ad,
+          ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
         ),
       }),
       cacheKey2: JSON.stringify({
         ...secondAnalytics,
         activityDistribution: secondAnalytics.activityDistribution.map((ad) =>
-          ad.id === Aid.toString()
-            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-            : ad,
+          ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
         ),
       }),
     });
@@ -2227,10 +2239,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       ],
     };
     const cacheKeys: string[] = ['cacheKey1', 'cacheKey2'];
-    const cacheValues: string[] = [
-      JSON.stringify(firstAnalytics),
-      JSON.stringify(secondAnalytics),
-    ];
+    const cacheValues: string[] = [JSON.stringify(firstAnalytics), JSON.stringify(secondAnalytics)];
     const updatedActivity: IActivity = {
       _id: Aid,
       name: 'Aupdated',
@@ -2250,45 +2259,33 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       spentTimeSeconds: 120,
     };
 
-    const result = analyticsService.buildUpdatedCacheValues(
-      cacheKeys,
-      cacheValues,
-      {
-        type: 'activityUpdated',
-        activity: updatedActivity,
-      },
-    );
+    const result = analyticsService.buildUpdatedCacheValues(cacheKeys, cacheValues, {
+      type: 'activityUpdated',
+      activity: updatedActivity,
+    });
     expect(Object.keys(result).length).toBe(2);
     expect(result).toEqual({
       cacheKey1: JSON.stringify({
         ...firstAnalytics,
         activityDistribution: firstAnalytics.activityDistribution.map((ad) =>
-          ad.id === Aid.toString()
-            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-            : ad,
+          ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
         ),
         timeBars: firstAnalytics.timeBars.map((bar) => ({
           ...bar,
           activityDistribution: bar.activityDistribution.map((ad) =>
-            ad.id === Aid.toString()
-              ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-              : ad,
+            ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
           ),
         })),
       }),
       cacheKey2: JSON.stringify({
         ...secondAnalytics,
         activityDistribution: secondAnalytics.activityDistribution.map((ad) =>
-          ad.id === Aid.toString()
-            ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-            : ad,
+          ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
         ),
         timeBars: secondAnalytics.timeBars.map((bar) => ({
           ...bar,
           activityDistribution: bar.activityDistribution.map((ad) =>
-            ad.id === Aid.toString()
-              ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' }
-              : ad,
+            ad.id === Aid.toString() ? { ...ad, name: 'Aupdated', color: 'AcolorUpdated' } : ad,
           ),
         })),
       }),
@@ -2386,16 +2383,12 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       timeBars: [],
     };
     const cacheKeys: string[] = ['cacheKey1', 'cacheKey2'];
-    const cacheValues: string[] = [
-      JSON.stringify(firstAnalytics),
-      JSON.stringify(secondAnalytics),
-    ];
+    const cacheValues: string[] = [JSON.stringify(firstAnalytics), JSON.stringify(secondAnalytics)];
 
-    const result = analyticsService.buildUpdatedCacheValues(
-      cacheKeys,
-      cacheValues,
-      { type: 'activityDeleted', activityId: Aid.toString() },
-    );
+    const result = analyticsService.buildUpdatedCacheValues(cacheKeys, cacheValues, {
+      type: 'activityDeleted',
+      activityId: Aid.toString(),
+    });
     expect(Object.keys(result).length).toBe(1);
     expect(result).toEqual({
       cacheKey1: JSON.stringify({
@@ -2410,9 +2403,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           (ad) => ad.id !== Aid.toString(),
         ),
         timeBars: firstAnalytics.timeBars.map((bar) => {
-          const adIndex = bar.activityDistribution.findIndex(
-            (ad) => ad.id === Aid.toString(),
-          );
+          const adIndex = bar.activityDistribution.findIndex((ad) => ad.id === Aid.toString());
           if (adIndex === -1) {
             return bar;
           }
@@ -2424,9 +2415,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
               pausedAmount: 0,
               spentTimeSeconds: 50,
             },
-            activityDistribution: bar.activityDistribution.filter(
-              (ad) => ad.id !== Aid.toString(),
-            ),
+            activityDistribution: bar.activityDistribution.filter((ad) => ad.id !== Aid.toString()),
           };
         }),
       } as AnalyticsForRangeDTO),

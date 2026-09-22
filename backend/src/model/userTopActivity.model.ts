@@ -21,7 +21,7 @@ const userTopActivitySchema = new mongoose.Schema({
 const UserTopActivity = mongoose.model(
   'UserTopActivity',
   userTopActivitySchema,
-  'user_top_activities'
+  'user_top_activities',
 );
 
 export default UserTopActivity;

@@ -29,9 +29,7 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
       return;
     }
 
-    navigate(
-      `/analytics/range?from=${fromDate.toISOString()}&to=${toDate.toISOString()}`,
-    );
+    navigate(`/analytics/range?from=${fromDate.toISOString()}&to=${toDate.toISOString()}`);
     setIsEditing(false);
   };
 
@@ -66,9 +64,7 @@ const CustomRangeBox: FC<CustomRangeBoxProps> = ({ fromDate, toDate }) => {
       </div>
 
       <div className="w-[110px] h-[32px]">
-        {isEditing && (
-          <Button onClick={handleApply}>{t('customRangeBox.apply')}</Button>
-        )}
+        {isEditing && <Button onClick={handleApply}>{t('customRangeBox.apply')}</Button>}
       </div>
     </div>
   );

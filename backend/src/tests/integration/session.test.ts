@@ -39,30 +39,20 @@ describe('Session controller endpoints', () => {
   });
 
   test('delete session endpoint returns ok', async () => {
-    jest
-      .spyOn(analyticsService, 'applySessionDeleteToAggregates')
-      .mockResolvedValue(undefined);
-    jest
-      .spyOn(analyticsService, 'invalidateCache')
-      .mockResolvedValue(undefined);
+    jest.spyOn(analyticsService, 'applySessionDeleteToAggregates').mockResolvedValue(undefined);
+    jest.spyOn(analyticsService, 'invalidateCache').mockResolvedValue(undefined);
 
     const response = await authorizedRequest(getAccessToken())
       .post('/sessions/')
       .send({ totalTimeSeconds: 1000 });
 
-    await authorizedRequest(getAccessToken())
-      .delete(`/sessions/${response.body._id}`)
-      .expect(200);
+    await authorizedRequest(getAccessToken()).delete(`/sessions/${response.body._id}`).expect(200);
   });
 
   test('get uncompleted sessions endpoint returns ok with 2 objects', async () => {
-    await authorizedRequest(getAccessToken())
-      .post('/sessions/')
-      .send({ totalTimeSeconds: 1000 });
+    await authorizedRequest(getAccessToken()).post('/sessions/').send({ totalTimeSeconds: 1000 });
 
-    await authorizedRequest(getAccessToken())
-      .post('/sessions/')
-      .send({ totalTimeSeconds: 1500 });
+    await authorizedRequest(getAccessToken()).post('/sessions/').send({ totalTimeSeconds: 1500 });
 
     await authorizedRequest(getAccessToken())
       .get(`/sessions?completed=false`)

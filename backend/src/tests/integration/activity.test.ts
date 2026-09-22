@@ -10,9 +10,7 @@ describe('Activity controller endpoints', () => {
   test('create activity endpoint returns ok', async () => {
     const {
       body: { _id },
-    } = await authorizedRequest(getAccessToken())
-      .post('/activity-groups/')
-      .send({ name: 'name' });
+    } = await authorizedRequest(getAccessToken()).post('/activity-groups/').send({ name: 'name' });
 
     await authorizedRequest(getAccessToken())
       .post('/activities/')
@@ -25,9 +23,7 @@ describe('Activity controller endpoints', () => {
 
     const {
       body: { _id },
-    } = await authorizedRequest(getAccessToken())
-      .post('/activity-groups/')
-      .send({ name: 'name' });
+    } = await authorizedRequest(getAccessToken()).post('/activity-groups/').send({ name: 'name' });
 
     const createActivityResponse = await authorizedRequest(getAccessToken())
       .post('/activities/')
@@ -48,9 +44,7 @@ describe('Activity controller endpoints', () => {
 
     const {
       body: { _id },
-    } = await authorizedRequest(getAccessToken())
-      .post('/activity-groups/')
-      .send({ name: 'name' });
+    } = await authorizedRequest(getAccessToken()).post('/activity-groups/').send({ name: 'name' });
 
     const createActivityResponse = await authorizedRequest(getAccessToken())
       .post('/activities/')
@@ -64,9 +58,7 @@ describe('Activity controller endpoints', () => {
   test('get activities endpoint returns ok', async () => {
     const {
       body: { _id },
-    } = await authorizedRequest(getAccessToken())
-      .post('/activity-groups/')
-      .send({ name: 'name' });
+    } = await authorizedRequest(getAccessToken()).post('/activity-groups/').send({ name: 'name' });
 
     await authorizedRequest(getAccessToken()).post('/activities/').send({
       name: 'activity name 1',
@@ -91,9 +83,7 @@ describe('Activity controller endpoints', () => {
   test('get activity endpoint returns ok', async () => {
     const {
       body: { _id },
-    } = await authorizedRequest(getAccessToken())
-      .post('/activity-groups/')
-      .send({ name: 'name' });
+    } = await authorizedRequest(getAccessToken()).post('/activity-groups/').send({ name: 'name' });
 
     const createActivityResponse = await authorizedRequest(getAccessToken())
       .post('/activities/')

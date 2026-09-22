@@ -11,12 +11,8 @@ import {
 const mapResponseData = (unmappedActivity: any): IActivity => {
   return {
     ...unmappedActivity,
-    sessionsAmount: unmappedActivity.sessionsAmount
-      ? unmappedActivity.sessionsAmount
-      : 0,
-    spentTimeSeconds: unmappedActivity.spentTimeSeconds
-      ? unmappedActivity.spentTimeSeconds
-      : 0,
+    sessionsAmount: unmappedActivity.sessionsAmount ? unmappedActivity.sessionsAmount : 0,
+    spentTimeSeconds: unmappedActivity.spentTimeSeconds ? unmappedActivity.spentTimeSeconds : 0,
     id: unmappedActivity._id,
     activityGroup: {
       id: unmappedActivity.activityGroup._id,
@@ -33,15 +29,11 @@ export const fetchActivities = async (): Promise<{
 
   return {
     topActivities: data.topActivities.map((a: any) => mapResponseData(a)),
-    remainingActivities: data.remainingActivities.map((a: any) =>
-      mapResponseData(a),
-    ),
+    remainingActivities: data.remainingActivities.map((a: any) => mapResponseData(a)),
   };
 };
 
-export const fetchGroupActivities = async (
-  activityGroupId: string,
-): Promise<IActivity[]> => {
+export const fetchGroupActivities = async (activityGroupId: string): Promise<IActivity[]> => {
   const searchParams = new URLSearchParams();
   searchParams.append('activityGroupId', activityGroupId);
 
@@ -56,40 +48,26 @@ export const fetchActivity = async (activityId: string): Promise<IActivity> => {
   return mapResponseData(data);
 };
 
-export const createActivity = async (
-  payload: IActivityCreate,
-): Promise<IActivity> => {
+export const createActivity = async (payload: IActivityCreate): Promise<IActivity> => {
   const { data } = await axios.post('/activities', payload);
 
   return mapResponseData(data);
 };
 
-export const updateActivity = async (
-  payload: IActivityUpdate,
-): Promise<IActivity> => {
+export const updateActivity = async (payload: IActivityUpdate): Promise<IActivity> => {
   const { data } = await axios.put(`/activities/${payload.id}`, payload);
 
   return mapResponseData(data);
 };
 
-export const archiveActivity = async (
-  payload: IActivityArchive,
-): Promise<string> => {
-  const { data } = await axios.patch(
-    `/activities/${payload.id}/archive`,
-    payload,
-  );
+export const archiveActivity = async (payload: IActivityArchive): Promise<string> => {
+  const { data } = await axios.patch(`/activities/${payload.id}/archive`, payload);
 
   return data;
 };
 
-export const updateActivityColor = async (
-  payload: IActivityColor,
-): Promise<IActivity> => {
-  const { data } = await axios.patch(
-    `/activities/${payload.id}/color`,
-    payload,
-  );
+export const updateActivityColor = async (payload: IActivityColor): Promise<IActivity> => {
+  const { data } = await axios.patch(`/activities/${payload.id}/color`, payload);
 
   return mapResponseData(data);
 };

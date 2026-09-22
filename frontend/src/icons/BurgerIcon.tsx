@@ -11,11 +11,7 @@ const BurgerIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
       stroke="currentColor"
       className="w-6 h-6 text-primary"
     >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M4 6h16M4 12h16M4 18h16"
-      />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
     </svg>
   );
 };

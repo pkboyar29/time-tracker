@@ -52,10 +52,7 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col items-start gap-3 text-base"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-start gap-3 text-base">
       <Input
         fieldName="name"
         register={register}
@@ -67,16 +64,11 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
             message: t('createActivityModal.maxError', { count: 50 }),
           },
         }}
-        errorMessage={
-          typeof errors.name?.message === 'string' ? errors.name.message : ''
-        }
+        errorMessage={typeof errors.name?.message === 'string' ? errors.name.message : ''}
       />
 
       <div className="flex items-center gap-3">
-        <label
-          htmlFor="color"
-          className="text-sm text-gray-600 dark:text-textDark"
-        >
+        <label htmlFor="color" className="text-sm text-gray-600 dark:text-textDark">
           {t('createActivityModal.colorLabel')}
         </label>
 
@@ -90,9 +82,7 @@ const ActivityCreateForm: FC<ActivityCreateFormProps> = ({
             className="p-0 rounded-md cursor-pointer dark:bg-surfaceDark"
           />
 
-          <span className="font-mono text-sm text-gray-400 opacity-60">
-            {watch('color')}
-          </span>
+          <span className="font-mono text-sm text-gray-400 opacity-60">{watch('color')}</span>
         </div>
       </div>
 

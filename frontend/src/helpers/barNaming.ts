@@ -7,11 +7,7 @@ import {
 } from '../helpers/dateHelpers';
 import { getTimeHHmmFromDate } from '../helpers/timeHelpers';
 
-export const getBarName = (
-  startOfRange: Date,
-  endOfRange: Date,
-  t: TFunction,
-): string => {
+export const getBarName = (startOfRange: Date, endOfRange: Date, t: TFunction): string => {
   const ONE_HOUR_MS = 60 * 60 * 1000;
   const ONE_DAY_MS = 24 * ONE_HOUR_MS;
 
@@ -79,10 +75,7 @@ export const getBarDetailedName = (
       startOfRange,
     )} - ${getTimeHHmmFromDate(endOfRange)}`;
   } else if (rangeType === 'months') {
-    return `${getMonthDetailedName(
-      startOfRange.getMonth(),
-      t,
-    )} ${startOfRange.getFullYear()}`;
+    return `${getMonthDetailedName(startOfRange.getMonth(), t)} ${startOfRange.getFullYear()}`;
     // if there is more than one day in range
   } else if (rangeDurationMs > ONE_DAY_MS - 1) {
     const startMonthName = getMonthName(startOfRange.getMonth(), t);

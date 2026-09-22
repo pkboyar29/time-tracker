@@ -42,24 +42,23 @@ const ActivityGroupsPage: FC = () => {
 
   return (
     <>
-      {createModal && (
-        <Modal
-          modalClassnames="md:basis-2/5 xl:basis-1/5"
-          title={t('createGroupModal.title')}
-          onCloseModal={() => setCreateModal(false)}
-        >
-          <ActivityGroupCreateForm
-            afterSubmitHandler={(newActivityGroup) => {
-              queryClient.setQueryData(
-                ['activityGroups'],
-                (oldData: IActivityGroup[]) => [newActivityGroup, ...oldData],
-              );
+      <Modal
+        modalClassnames="md:basis-2/5 xl:basis-1/5"
+        title={t('createGroupModal.title')}
+        isOpen={createModal}
+        onCloseModal={() => setCreateModal(false)}
+      >
+        <ActivityGroupCreateForm
+          afterSubmitHandler={(newActivityGroup) => {
+            queryClient.setQueryData(['activityGroups'], (oldData: IActivityGroup[]) => [
+              newActivityGroup,
+              ...oldData,
+            ]);
 
-              setCreateModal(false);
-            }}
-          />
-        </Modal>
-      )}
+            setCreateModal(false);
+          }}
+        />
+      </Modal>
 
       <div className="container my-[65px] xl:my-5">
         <div className="flex items-center justify-between">
@@ -76,9 +75,7 @@ const ActivityGroupsPage: FC = () => {
             />
 
             <div className="hidden md:block w-fit">
-              <Button onClick={() => setCreateModal(true)}>
-                {t('groupsPage.createButton')}
-              </Button>
+              <Button onClick={() => setCreateModal(true)}>{t('groupsPage.createButton')}</Button>
             </div>
 
             <button
@@ -107,46 +104,32 @@ const ActivityGroupsPage: FC = () => {
           activityGroups && (
             <div className="flex flex-wrap justify-center gap-4 mt-5 md:justify-start">
               {activityGroups.filter((activityGroup) =>
-                activityGroup.name
-                  .toLowerCase()
-                  .includes(searchString.toLowerCase()),
+                activityGroup.name.toLowerCase().includes(searchString.toLowerCase()),
               ).length !== 0 ? (
                 activityGroups
                   .filter((activityGroup) =>
-                    activityGroup.name
-                      .toLowerCase()
-                      .includes(searchString.toLowerCase()),
+                    activityGroup.name.toLowerCase().includes(searchString.toLowerCase()),
                   )
                   .map((activityGroup) => (
                     <ActivityItem
                       key={activityGroup.id}
                       activityCommon={activityGroup}
                       afterUpdateHandler={(updatedGroup) => {
-                        queryClient.setQueryData(
-                          ['activityGroups'],
-                          (oldData: IActivityGroup[]) =>
-                            oldData.map((group) =>
-                              group.id == updatedGroup.id
-                                ? updatedGroup
-                                : group,
-                            ),
+                        queryClient.setQueryData(['activityGroups'], (oldData: IActivityGroup[]) =>
+                          oldData.map((group) =>
+                            group.id == updatedGroup.id ? updatedGroup : group,
+                          ),
                         );
                       }}
                       afterDeleteHandler={(deletedItemId) => {
-                        queryClient.setQueryData(
-                          ['activityGroups'],
-                          (oldData: IActivityGroup[]) =>
-                            oldData.filter(
-                              (group) => group.id !== deletedItemId,
-                            ),
+                        queryClient.setQueryData(['activityGroups'], (oldData: IActivityGroup[]) =>
+                          oldData.filter((group) => group.id !== deletedItemId),
                         );
                       }}
                     />
                   ))
               ) : (
-                <div className="text-base dark:text-textDark">
-                  {t('groupsPage.notFound')}
-                </div>
+                <div className="text-base dark:text-textDark">{t('groupsPage.notFound')}</div>
               )}
             </div>
           )

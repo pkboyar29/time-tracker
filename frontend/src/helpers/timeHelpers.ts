@@ -8,16 +8,13 @@ export const getRemainingTimeHoursMinutesSeconds = (
   const remainingSeconds = totalTimeSeconds - spentTimeSeconds;
 
   const hours: number = Math.trunc(remainingSeconds / 3600);
-  const formattedHours: string =
-    hours < 10 ? `0${hours.toString()}` : `${hours.toString()}`;
+  const formattedHours: string = hours < 10 ? `0${hours.toString()}` : `${hours.toString()}`;
 
   const minutes: number = Math.trunc(remainingSeconds / 60) - hours * 60;
-  const formattedMinutes: string =
-    minutes < 10 ? '0' + minutes : minutes.toString();
+  const formattedMinutes: string = minutes < 10 ? '0' + minutes : minutes.toString();
 
   const seconds: number = remainingSeconds % 60;
-  const formattedSeconds: string =
-    seconds < 10 ? '0' + (seconds % 60) : (seconds % 60).toString();
+  const formattedSeconds: string = seconds < 10 ? '0' + (seconds % 60) : (seconds % 60).toString();
 
   if (spentTimeSeconds > totalTimeSeconds) {
     return '00:00';
@@ -34,11 +31,9 @@ export const getTimeHMS = (allSeconds: number): string => {
   const hours: number = Math.trunc(allSeconds / 3600);
   const formattedHours: string = hours < 10 ? '0' + hours : hours.toString();
   const minutes: number = Math.trunc(allSeconds / 60) - hours * 60;
-  const formattedMinutes: string =
-    minutes < 10 ? '0' + minutes : minutes.toString();
+  const formattedMinutes: string = minutes < 10 ? '0' + minutes : minutes.toString();
   const seconds: number = allSeconds % 60;
-  const formattedSeconds: string =
-    seconds < 10 ? '0' + (seconds % 60) : (seconds % 60).toString();
+  const formattedSeconds: string = seconds < 10 ? '0' + (seconds % 60) : (seconds % 60).toString();
 
   return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 };
@@ -62,26 +57,18 @@ export const getReadableTime = (
   const parts: string[] = [];
 
   if (hours > 0 || zeroUnits) {
-    parts.push(
-      short
-        ? t('time.hoursShort', { count: hours })
-        : t('time.hours', { count: hours }),
-    );
+    parts.push(short ? t('time.hoursShort', { count: hours }) : t('time.hours', { count: hours }));
   }
 
   if (minutes > 0 || zeroUnits) {
     parts.push(
-      short
-        ? t('time.minutesShort', { count: minutes })
-        : t('time.minutes', { count: minutes }),
+      short ? t('time.minutesShort', { count: minutes }) : t('time.minutes', { count: minutes }),
     );
   }
 
   if (parts.length === 0) {
     parts.push(
-      short
-        ? t('time.secondsShort', { count: secs })
-        : t('time.seconds', { count: secs }),
+      short ? t('time.secondsShort', { count: secs }) : t('time.seconds', { count: secs }),
     );
   }
 
@@ -92,9 +79,7 @@ export const getTimeHHmmFromDate = (date: Date) => {
   const hours = date.getHours();
   const minutes = date.getMinutes();
 
-  return `${hours < 10 ? `0${hours}` : `${hours}`}:${
-    minutes < 10 ? `0${minutes}` : `${minutes}`
-  }`;
+  return `${hours < 10 ? `0${hours}` : `${hours}`}:${minutes < 10 ? `0${minutes}` : `${minutes}`}`;
 };
 
 export const getTimerEndDate = (
@@ -102,9 +87,7 @@ export const getTimerEndDate = (
   startTimerSpentSeconds: number,
   sessionTotalSeconds: number,
 ): Date => {
-  return new Date(
-    startTimerTimestamp + (sessionTotalSeconds - startTimerSpentSeconds) * 1000,
-  );
+  return new Date(startTimerTimestamp + (sessionTotalSeconds - startTimerSpentSeconds) * 1000);
 };
 
 export const secondsToMs = (seconds: number): number => {

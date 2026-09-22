@@ -11,9 +11,7 @@ import { ISessionPart } from '../model/sessionPart.model';
 import { ISession } from '../model/session.model';
 import { IActivity } from '../model/activity.model';
 import DailyAggregate, { IDailyAggregate } from '../model/dailyAggregate.model';
-import DailyActivityDistribution, {
-  IDailyAD,
-} from '../model/dailyActivityDistribution.model';
+import DailyActivityDistribution, { IDailyAD } from '../model/dailyActivityDistribution.model';
 import { getTodayRange } from '../helpers/getTodayRange';
 
 import { redisClient } from '../../redisClient';
@@ -206,8 +204,7 @@ function getSessionsStatistics({
   const sessionsAmount = completedSessions.length;
 
   const spentTimeSeconds = sessionParts.reduce(
-    (spentTimeSeconds, sessionPart) =>
-      spentTimeSeconds + sessionPart.spentTimeSeconds,
+    (spentTimeSeconds, sessionPart) => spentTimeSeconds + sessionPart.spentTimeSeconds,
     0,
   );
 
@@ -230,9 +227,7 @@ function buildActivityDistributions({
   const ads: ActivityDistribution[] = [];
 
   for (const [activityId, stat] of activitiesStatMap) {
-    const activity = userActivities.find((activity) =>
-      activity._id.equals(activityId),
-    );
+    const activity = userActivities.find((activity) => activity._id.equals(activityId));
     if (!activity) {
       continue;
     }
@@ -248,8 +243,7 @@ function buildActivityDistributions({
   // set without activity to activityDistributions
   const woStat: SessionStat = {
     sessionsAmount: totalStat.sessionsAmount - allActivitiesStat.sessionsAmount,
-    spentTimeSeconds:
-      totalStat.spentTimeSeconds - allActivitiesStat.spentTimeSeconds,
+    spentTimeSeconds: totalStat.spentTimeSeconds - allActivitiesStat.spentTimeSeconds,
     pausedAmount: totalStat.pausedAmount - allActivitiesStat.pausedAmount,
   };
   if (woStat.spentTimeSeconds > 0) {
@@ -331,9 +325,7 @@ function getActivityDistributions({
 }
 
 function getTimeBarType(startOfRange: Date, endOfRange: Date): TimeBarType {
-  const daysInRange = Math.ceil(
-    (endOfRange.getTime() - startOfRange.getTime()) / DAY_MS,
-  );
+  const daysInRange = Math.ceil((endOfRange.getTime() - startOfRange.getTime()) / DAY_MS);
   if (daysInRange === 1) {
     return 'hour';
   } else if (daysInRange <= 40) {
@@ -359,19 +351,13 @@ function getBarStatAndAds({
     const filteredParts = dataSource.sessionParts.filter((part) => {
       const createdDate = part.createdDate.getTime();
 
-      return (
-        createdDate >= startOfPeriod.getTime() &&
-        createdDate < endOfPeriod.getTime()
-      );
+      return createdDate >= startOfPeriod.getTime() && createdDate < endOfPeriod.getTime();
     });
 
     const filteredSessions = dataSource.completedSessions.filter((session) => {
       const completedDate = session.updatedDate.getTime();
 
-      return (
-        completedDate >= startOfPeriod.getTime() &&
-        completedDate < endOfPeriod.getTime()
-      );
+      return completedDate >= startOfPeriod.getTime() && completedDate < endOfPeriod.getTime();
     });
 
     const barStat = analyticsService.getSessionsStatistics({
@@ -472,13 +458,7 @@ function getTimeBars({
     // bar type is year
     const dt = DateTime.fromJSDate(nextPeriod, { zone: timezone });
     // if date is exact start of year in user timezone
-    if (
-      dt.month === 1 &&
-      dt.day === 1 &&
-      dt.hour === 0 &&
-      dt.minute === 0 &&
-      dt.second === 0
-    ) {
+    if (dt.month === 1 && dt.day === 1 && dt.hour === 0 && dt.minute === 0 && dt.second === 0) {
       nextPeriod = dt.plus({ years: 1 }).toJSDate();
     } else {
       nextPeriod = dt.plus({ years: 1 }).startOf('year').toJSDate();
@@ -494,13 +474,12 @@ function getTimeBars({
     let barAds: ActivityDistribution[] = [];
 
     if (prevPeriod.getTime() < new Date().getTime()) {
-      const { barStat: computedStat, barAds: computedAds } =
-        analyticsService.getBarStatAndAds({
-          startOfPeriod: prevPeriod,
-          endOfPeriod: nextPeriod,
-          dataSource,
-          userActivities,
-        });
+      const { barStat: computedStat, barAds: computedAds } = analyticsService.getBarStatAndAds({
+        startOfPeriod: prevPeriod,
+        endOfPeriod: nextPeriod,
+        dataSource,
+        userActivities,
+      });
 
       barStat = computedStat;
       barAds = computedAds;
@@ -802,10 +781,7 @@ async function applySessionDeleteToAggregates({
     }
   }
 
-  const deletedStatMap = new Map<
-    string,
-    { spentTimeSeconds: number; pausedAmount: number }
-  >(); // dateISO / object
+  const deletedStatMap = new Map<string, { spentTimeSeconds: number; pausedAmount: number }>(); // dateISO / object
   for (let i = 0; i < deletedParts.length; i++) {
     const dateISO = DateTime.fromJSDate(deletedParts[i].createdDate, {
       zone: timezone,
@@ -940,12 +916,11 @@ async function getAnalyticsForRangeInternal({
   userId,
   timezone,
 }: GetAnalyticsForRangeOptions): Promise<AnalyticsForRangeDTO> {
-  const sessionPartsForRange =
-    await sessionPartService.getSessionPartsInDateRange({
-      startRange: startOfRange,
-      endRange: endOfRange,
-      userId,
-    });
+  const sessionPartsForRange = await sessionPartService.getSessionPartsInDateRange({
+    startRange: startOfRange,
+    endRange: endOfRange,
+    userId,
+  });
   const completedSessionsForRange = await sessionService.getSessions({
     filter: {
       updatedDate: { $gte: startOfRange, $lte: endOfRange },
@@ -1019,11 +994,7 @@ async function getAnalyticsForRangeAggregates({
     let trailingAnalytics: AnalyticsForRangeDTO | null = null;
 
     // if it's not exact start of day in user timezone
-    if (
-      startOfRangeDt.hour !== 0 ||
-      startOfRangeDt.minute !== 0 ||
-      startOfRangeDt.second !== 0
-    ) {
+    if (startOfRangeDt.hour !== 0 || startOfRangeDt.minute !== 0 || startOfRangeDt.second !== 0) {
       startOfRangeAggr = startOfRangeDt.plus({ days: 1 }).startOf('day');
 
       leadingAnalytics = await analyticsService.getAnalyticsForRangeInternal({
@@ -1035,11 +1006,7 @@ async function getAnalyticsForRangeAggregates({
     }
 
     // if it's not exact start of day in user timezone
-    if (
-      endOfRangeDt.hour !== 0 ||
-      endOfRangeDt.minute !== 0 ||
-      endOfRangeDt.second !== 0
-    ) {
+    if (endOfRangeDt.hour !== 0 || endOfRangeDt.minute !== 0 || endOfRangeDt.second !== 0) {
       endOfRangeAggr = endOfRangeDt.startOf('day');
 
       trailingAnalytics = await analyticsService.getAnalyticsForRangeInternal({
@@ -1081,10 +1048,7 @@ async function getAnalyticsForRangeAggregates({
     const timeBars = analyticsService.getTimeBars({
       startOfRange: startOfRangeAggrDate,
       endOfRange: endOfRangeAggrDate,
-      barType: analyticsService.getTimeBarType(
-        startOfRangeAggrDate,
-        endOfRangeAggrDate,
-      ),
+      barType: analyticsService.getTimeBarType(startOfRangeAggrDate, endOfRangeAggrDate),
       timezone,
       userActivities,
       dataSource: { type: 'aggregates', dailyAggregates, dailyAds, timezone },
@@ -1149,13 +1113,12 @@ async function getAnalyticsForRangeCache({
 
     // if it's today analytics
     if (startOfRange >= startOfToday && endOfRange <= startOfTomorrow) {
-      const analyticsForToday =
-        await analyticsService.getAnalyticsForRangeInternal({
-          startOfRange,
-          endOfRange,
-          userId,
-          timezone,
-        });
+      const analyticsForToday = await analyticsService.getAnalyticsForRangeInternal({
+        startOfRange,
+        endOfRange,
+        userId,
+        timezone,
+      });
 
       return analyticsForToday;
     }
@@ -1166,29 +1129,23 @@ async function getAnalyticsForRangeCache({
       // Хотя было бы неплохо брать инфу сегодняшнего дня из сегодняшнего агрегата
       // Но это мы сможем сделать только в том случае, если startOfRange - это ровно startOfToday, и endOfRange позже сейчашнего момента,
       // вот тогда точно можно обратиться к агрегату сегодняшнего дня
-      const analyticsForToday =
-        await analyticsService.getAnalyticsForRangeInternal({
-          startOfRange:
-            startOfRange > startOfToday ? startOfRange : startOfToday,
-          endOfRange:
-            endOfRange < startOfTomorrow ? endOfRange : startOfTomorrow,
-          userId,
-          timezone,
-        });
+      const analyticsForToday = await analyticsService.getAnalyticsForRangeInternal({
+        startOfRange: startOfRange > startOfToday ? startOfRange : startOfToday,
+        endOfRange: endOfRange < startOfTomorrow ? endOfRange : startOfTomorrow,
+        userId,
+        timezone,
+      });
 
       const cacheKey = `analytics:${userId}:${startOfRange.toISOString()}:${startOfToday.toISOString()}`;
 
       const cacheValue = await redisClient.get(cacheKey);
       if (cacheValue) {
-        const analyticsUntilToday: AnalyticsForRangeDTO = JSON.parse(
-          cacheValue,
-          (key, value) => {
-            if (key === 'startOfRange' || key === 'endOfRange') {
-              return new Date(value);
-            }
-            return value;
-          },
-        );
+        const analyticsUntilToday: AnalyticsForRangeDTO = JSON.parse(cacheValue, (key, value) => {
+          if (key === 'startOfRange' || key === 'endOfRange') {
+            return new Date(value);
+          }
+          return value;
+        });
 
         return analyticsService.mergeAnalytics({
           finalObjEndOfRange: endOfRange,
@@ -1199,13 +1156,12 @@ async function getAnalyticsForRangeCache({
         });
       }
 
-      const analyticsUntilToday =
-        await analyticsService.getAnalyticsForRangeAggregates({
-          startOfRange,
-          endOfRange: startOfToday,
-          userId,
-          timezone,
-        });
+      const analyticsUntilToday = await analyticsService.getAnalyticsForRangeAggregates({
+        startOfRange,
+        endOfRange: startOfToday,
+        userId,
+        timezone,
+      });
 
       if (analyticsUntilToday.sessionStat.spentTimeSeconds > 0) {
         await redisClient.set(cacheKey, JSON.stringify(analyticsUntilToday), {
@@ -1231,13 +1187,12 @@ async function getAnalyticsForRangeCache({
         return JSON.parse(cacheValue) as AnalyticsForRangeDTO;
       }
 
-      const analyticsForRange =
-        await analyticsService.getAnalyticsForRangeAggregates({
-          startOfRange,
-          endOfRange,
-          userId,
-          timezone,
-        });
+      const analyticsForRange = await analyticsService.getAnalyticsForRangeAggregates({
+        startOfRange,
+        endOfRange,
+        userId,
+        timezone,
+      });
 
       if (analyticsForRange.sessionStat.spentTimeSeconds > 0) {
         await redisClient.set(cacheKey, JSON.stringify(analyticsForRange), {
@@ -1290,10 +1245,7 @@ function mergeActivityDistributions({
             id: ad.id,
             name: ad.name,
             color: ad.color,
-            sessionStat: analyticsService.mergeSessionStat([
-              ad.sessionStat,
-              sessionStat,
-            ]),
+            sessionStat: analyticsService.mergeSessionStat([ad.sessionStat, sessionStat]),
           };
         }
       }
@@ -1311,12 +1263,7 @@ function mergeBarsWithDailyRangeOnLeft({
   leftObj,
   rightObj,
 }: MergeBarsDailyRangeOnLeftOptions): TimeBar[] {
-  if (
-    analyticsService.getTimeBarType(
-      leftObj.startOfRange,
-      leftObj.endOfRange,
-    ) !== 'hour'
-  ) {
+  if (analyticsService.getTimeBarType(leftObj.startOfRange, leftObj.endOfRange) !== 'hour') {
     throw new Error('Left object must be day or shorter range');
   }
 
@@ -1364,10 +1311,7 @@ function mergeBarsWithDailyRangeOnLeft({
       finalTimeBars[0].sessionStat,
     ]);
     const mergedAds = analyticsService.mergeActivityDistributions({
-      adsList: [
-        leftObj.activityDistribution,
-        finalTimeBars[0].activityDistribution,
-      ],
+      adsList: [leftObj.activityDistribution, finalTimeBars[0].activityDistribution],
     });
 
     finalTimeBars[0].startOfRange = leftObj.startOfRange;
@@ -1384,27 +1328,16 @@ function mergeBarsWithDailyRangeOnRight({
   timezone,
   finalObjEndOfRange,
 }: MergeBarsDailyRangeOnRightOptions): TimeBar[] {
-  if (
-    analyticsService.getTimeBarType(
-      rightObj.startOfRange,
-      rightObj.endOfRange,
-    ) !== 'hour'
-  ) {
+  if (analyticsService.getTimeBarType(rightObj.startOfRange, rightObj.endOfRange) !== 'hour') {
     throw new Error('Right object must be day or shorter range');
   }
 
-  const finalObjBarType = analyticsService.getTimeBarType(
-    leftObj.startOfRange,
-    finalObjEndOfRange,
-  );
+  const finalObjBarType = analyticsService.getTimeBarType(leftObj.startOfRange, finalObjEndOfRange);
   if (finalObjBarType === 'hour') {
     return [...leftObj.timeBars, ...rightObj.timeBars];
   }
 
-  const leftObjBarType = analyticsService.getTimeBarType(
-    leftObj.startOfRange,
-    leftObj.endOfRange,
-  );
+  const leftObjBarType = analyticsService.getTimeBarType(leftObj.startOfRange, leftObj.endOfRange);
   let finalTimeBars: TimeBar[] = [];
 
   if (finalObjBarType === 'day') {
@@ -1455,15 +1388,9 @@ function mergeBarsWithDailyRangeOnRight({
       const monthBar: TimeBar = {
         startOfRange: leftObj.startOfRange,
         endOfRange: new Date(),
-        sessionStat: analyticsService.mergeSessionStat([
-          leftObj.sessionStat,
-          rightObj.sessionStat,
-        ]),
+        sessionStat: analyticsService.mergeSessionStat([leftObj.sessionStat, rightObj.sessionStat]),
         activityDistribution: analyticsService.mergeActivityDistributions({
-          adsList: [
-            leftObj.activityDistribution,
-            rightObj.activityDistribution,
-          ],
+          adsList: [leftObj.activityDistribution, rightObj.activityDistribution],
         }),
       };
 
@@ -1481,10 +1408,9 @@ function mergeBarsWithDailyRangeOnRight({
       let lastIdx = finalTimeBars.length - 1;
 
       // if right obj is first day of the next month
-      const leftMonth = DateTime.fromJSDate(
-        finalTimeBars[lastIdx].startOfRange,
-        { zone: timezone },
-      );
+      const leftMonth = DateTime.fromJSDate(finalTimeBars[lastIdx].startOfRange, {
+        zone: timezone,
+      });
       const rightMonth = DateTime.fromJSDate(rightObj.startOfRange, {
         zone: timezone,
       });
@@ -1503,10 +1429,7 @@ function mergeBarsWithDailyRangeOnRight({
           rightObj.sessionStat,
         ]);
         const mergedAds = analyticsService.mergeActivityDistributions({
-          adsList: [
-            finalTimeBars[lastIdx].activityDistribution,
-            rightObj.activityDistribution,
-          ],
+          adsList: [finalTimeBars[lastIdx].activityDistribution, rightObj.activityDistribution],
         });
 
         finalTimeBars[lastIdx] = {
@@ -1544,10 +1467,7 @@ function mergeBarsWithDailyRangeOnRight({
       rightObj.sessionStat,
     ]);
     const mergedAds = analyticsService.mergeActivityDistributions({
-      adsList: [
-        finalTimeBars[lastIdx].activityDistribution,
-        rightObj.activityDistribution,
-      ],
+      adsList: [finalTimeBars[lastIdx].activityDistribution, rightObj.activityDistribution],
     });
 
     finalTimeBars[lastIdx] = {
@@ -1593,18 +1513,13 @@ function mergeAdjacentTimeBars({
   timezone,
   dailyRangePosition,
 }: MergeBarsOptions): TimeBar[] {
-  const leftObjBarType = analyticsService.getTimeBarType(
-    leftObj.startOfRange,
-    leftObj.endOfRange,
-  );
+  const leftObjBarType = analyticsService.getTimeBarType(leftObj.startOfRange, leftObj.endOfRange);
   const rightObjBarType = analyticsService.getTimeBarType(
     rightObj.startOfRange,
     rightObj.endOfRange,
   );
   if (leftObjBarType !== 'hour' && rightObjBarType !== 'hour') {
-    throw new Error(
-      'Either left or right analytics object must be a day or shorter range',
-    );
+    throw new Error('Either left or right analytics object must be a day or shorter range');
   }
 
   if (dailyRangePosition === 'left') {
@@ -1684,9 +1599,7 @@ function updateActivityInAds(
   activityDistributions: ActivityDistribution[],
   updatedActivity: IActivity,
 ): boolean {
-  const adIndex = activityDistributions.findIndex(
-    (ad) => ad.id === updatedActivity._id.toString(),
-  );
+  const adIndex = activityDistributions.findIndex((ad) => ad.id === updatedActivity._id.toString());
   if (adIndex === -1) return false;
 
   activityDistributions[adIndex].name = updatedActivity.name;
@@ -1708,8 +1621,7 @@ function removeActivityFromAds(
   if (adIndex === -1) return false;
 
   const deletedAd = analyticsObject.activityDistribution.splice(adIndex, 1)[0];
-  const { spentTimeSeconds, sessionsAmount, pausedAmount } =
-    deletedAd.sessionStat;
+  const { spentTimeSeconds, sessionsAmount, pausedAmount } = deletedAd.sessionStat;
   analyticsObject.sessionStat.spentTimeSeconds -= spentTimeSeconds;
   analyticsObject.sessionStat.sessionsAmount -= sessionsAmount;
   analyticsObject.sessionStat.pausedAmount -= pausedAmount;
@@ -1732,12 +1644,7 @@ function buildUpdatedCacheValues(
 
     if (options.type === 'activityUpdated') {
       const updatedActivity = options.activity;
-      if (
-        !analyticsService.updateActivityInAds(
-          cacheValue.activityDistribution,
-          updatedActivity,
-        )
-      ) {
+      if (!analyticsService.updateActivityInAds(cacheValue.activityDistribution, updatedActivity)) {
         continue;
       }
 
@@ -1749,17 +1656,12 @@ function buildUpdatedCacheValues(
       }
     } else if (options.type === 'activityDeleted') {
       const deletedActivityId = options.activityId;
-      if (
-        !analyticsService.removeActivityFromAds(cacheValue, deletedActivityId)
-      ) {
+      if (!analyticsService.removeActivityFromAds(cacheValue, deletedActivityId)) {
         continue;
       }
 
       for (let i = 0; i < cacheValue.timeBars.length; i++) {
-        analyticsService.removeActivityFromAds(
-          cacheValue.timeBars[i],
-          deletedActivityId,
-        );
+        analyticsService.removeActivityFromAds(cacheValue.timeBars[i], deletedActivityId);
       }
     }
 

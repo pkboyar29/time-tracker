@@ -7,17 +7,11 @@ const NotFoundPage: FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 text-center bg-background">
-      <h1 className="font-bold tracking-tight select-none text-primary text-9xl">
-        404
-      </h1>
+      <h1 className="font-bold tracking-tight select-none text-primary text-9xl">404</h1>
 
-      <h2 className="mt-2 text-3xl font-semibold dark:text-textDark">
-        {t('notFoundPage.title')}
-      </h2>
+      <h2 className="mt-2 text-3xl font-semibold dark:text-textDark">{t('notFoundPage.title')}</h2>
 
-      <p className="max-w-md mt-4 text-gray-500 dark:text-gray-400">
-        {t('notFoundPage.descr')}
-      </p>
+      <p className="max-w-md mt-4 text-gray-500 dark:text-gray-400">{t('notFoundPage.descr')}</p>
 
       <Link
         to="/"

@@ -17,9 +17,7 @@ interface ActivityGroupFields {
   name: string;
 }
 
-const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
-  afterSubmitHandler,
-}) => {
+const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({ afterSubmitHandler }) => {
   const { t } = useTranslation();
 
   const {
@@ -43,10 +41,7 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col items-start gap-3 text-base"
-    >
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col items-start gap-3 text-base">
       <Input
         fieldName="name"
         register={register}
@@ -58,9 +53,7 @@ const ActivityGroupCreateForm: FC<ActivityGroupCreateFormProps> = ({
             message: t('createGroupModal.maxError', { count: 50 }),
           },
         }}
-        errorMessage={
-          typeof errors.name?.message === 'string' ? errors.name.message : ''
-        }
+        errorMessage={typeof errors.name?.message === 'string' ? errors.name.message : ''}
       />
 
       <div className="ml-auto w-fit">

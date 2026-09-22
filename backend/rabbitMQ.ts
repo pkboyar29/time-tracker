@@ -12,9 +12,7 @@ export async function getRabbitConnection(): Promise<ChannelModel> {
   while (!connection) {
     try {
       // TODO: добавить в .env (однако в docker-compose.yml также должно быть обращение к .env файлу)
-      connection = await amqplib.connect(
-        'amqp://admin123:admin123@rabbitmq:5672',
-      );
+      connection = await amqplib.connect('amqp://admin123:admin123@rabbitmq:5672');
       connection.on('close', () => {
         logger.error('RabbitMQ connection closed');
         connection = null;

@@ -12,7 +12,7 @@ describe('Session model validation', () => {
     const error = session.validateSync();
     expect(error?.errors.totalTimeSeconds).toBeDefined();
     expect(error?.errors.totalTimeSeconds.message).toBe(
-      'TotalTimeSeconds should be minimum 1 second'
+      'TotalTimeSeconds should be minimum 1 second',
     );
   });
 
@@ -26,7 +26,7 @@ describe('Session model validation', () => {
     const error = session.validateSync();
     expect(error?.errors.totalTimeSeconds).toBeDefined();
     expect(error?.errors.totalTimeSeconds.message).toBe(
-      'TotalTimeSeconds should be maximum 10 hours'
+      'TotalTimeSeconds should be maximum 10 hours',
     );
   });
 

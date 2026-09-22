@@ -151,10 +151,7 @@ const RingtoneItem: FC<RingtoneItemProps> = ({
         </a>
 
         {onDelete && (
-          <button
-            onClick={() => onDelete(audio.id)}
-            title={t('audioSettings.deleteTitle')}
-          >
+          <button onClick={() => onDelete(audio.id)} title={t('audioSettings.deleteTitle')}>
             <DeleteIcon className="w-5 h-5 stroke-gray-400 dark:stroke-gray-400 hover:stroke-primary dark:hover:stroke-primary" />
           </button>
         )}

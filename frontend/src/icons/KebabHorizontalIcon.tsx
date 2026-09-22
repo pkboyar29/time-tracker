@@ -42,12 +42,7 @@ const KebabHorizontalIcon: FC<React.SVGProps<SVGSVGElement>> = (props) => {
 
       <defs>
         <clipPath id="clip0_105_1881">
-          <rect
-            fill="white"
-            height="24"
-            transform="translate(0 0.000976562)"
-            width="24"
-          />
+          <rect fill="white" height="24" transform="translate(0 0.000976562)" width="24" />
         </clipPath>
       </defs>
     </svg>

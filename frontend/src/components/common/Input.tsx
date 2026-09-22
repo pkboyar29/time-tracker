@@ -26,9 +26,7 @@ const Input: FC<InputProps> = ({
   isTextArea = false,
   enlarged = false,
 }) => {
-  const [toggledType, setToggledType] = useState<'text' | 'password'>(
-    inputType,
-  );
+  const [toggledType, setToggledType] = useState<'text' | 'password'>(inputType);
 
   return (
     <div className="flex flex-col w-full">
@@ -67,9 +65,7 @@ const Input: FC<InputProps> = ({
           <button
             type="button"
             className="absolute -translate-y-1/2 right-3 top-1/2"
-            onClick={() =>
-              setToggledType(toggledType === 'text' ? 'password' : 'text')
-            }
+            onClick={() => setToggledType(toggledType === 'text' ? 'password' : 'text')}
           >
             {toggledType === 'password' ? (
               <Visibility className="dark:fill-textDark" fontSize="small" />
@@ -80,9 +76,7 @@ const Input: FC<InputProps> = ({
         )}
       </div>
 
-      <div className="min-h-[20px] mt-1 text-sm text-primary">
-        {errorMessage}
-      </div>
+      <div className="min-h-[20px] mt-1 text-sm text-primary">{errorMessage}</div>
     </div>
   );
 };

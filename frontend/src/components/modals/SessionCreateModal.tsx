@@ -10,6 +10,7 @@ import Button from '../common/Button';
 import RangeSlider from '../common/RangeSlider';
 
 interface SessionCreateModalProps {
+  isOpen: boolean;
   onCloseModal: () => void;
   modalTitle: ReactNode;
   afterSubmitHandler: () => void;
@@ -17,13 +18,13 @@ interface SessionCreateModalProps {
 }
 
 const SessionCreateModal: FC<SessionCreateModalProps> = ({
+  isOpen,
   afterSubmitHandler,
   defaultActivity,
   onCloseModal,
   modalTitle,
 }) => {
   const { t } = useTranslation();
-
   const { startTimer } = useTimer();
 
   const [selectedMinutes, setSelectedMinutes] = useState<number>(25);
@@ -45,7 +46,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
   };
 
   return (
-    <Modal title={modalTitle} onCloseModal={onCloseModal}>
+    <Modal title={modalTitle} isOpen={isOpen} onCloseModal={onCloseModal}>
       <form className="flex flex-col items-start gap-10">
         <div className="flex flex-col w-full gap-3">
           <div className="flex gap-1 dark:text-textDark">
@@ -59,9 +60,7 @@ const SessionCreateModal: FC<SessionCreateModalProps> = ({
             minValue={1}
             maxValue={600}
             currentValue={selectedMinutes}
-            changeCurrentValue={(newCurrentValue) =>
-              setSelectedMinutes(newCurrentValue)
-            }
+            changeCurrentValue={(newCurrentValue) => setSelectedMinutes(newCurrentValue)}
           />
         </div>
 

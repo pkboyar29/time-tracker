@@ -1,24 +1,9 @@
 import '../model/activity.model';
-import SessionPart, { ISessionPart } from '../model/sessionPart.model';
-import mongoose from 'mongoose';
-
-interface PopulatedSession {
-  _id: mongoose.Types.ObjectId;
-  deleted: boolean;
-  activity: {
-    id: mongoose.Types.ObjectId;
-    name: string;
-  };
-}
-
-const sessionPopulateConfig = {
-  path: 'session',
-  select: '_id deleted activity',
-  populate: {
-    path: 'activity',
-    select: 'name id',
-  },
-};
+import SessionPart, {
+  ISessionPart,
+  PopulatedSession,
+  sessionPopulateConfig,
+} from '../model/sessionPart.model';
 
 interface GetSessionPartsInDateRangeOptions {
   startRange: Date;

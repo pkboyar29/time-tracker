@@ -27,9 +27,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
       value={currentValue}
       onChange={(e) => changeCurrentValue(Number(e.target.value))}
       style={{
-        background: `linear-gradient(to right, ${
-          colors.primary
-        } ${percentage}%, ${
+        background: `linear-gradient(to right, ${colors.primary} ${percentage}%, ${
           themeState === 'dark' ? '#333' : '#fff'
         } ${percentage}%)`,
       }}

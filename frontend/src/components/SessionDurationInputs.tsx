@@ -6,10 +6,7 @@ interface SessionDurationInputsProps {
   setSeconds: (newSeconds: number) => void;
 }
 
-const SessionDurationInputs: FC<SessionDurationInputsProps> = ({
-  seconds,
-  setSeconds,
-}) => {
+const SessionDurationInputs: FC<SessionDurationInputsProps> = ({ seconds, setSeconds }) => {
   const { t } = useTranslation();
 
   const hours = Math.floor(seconds / 3600);

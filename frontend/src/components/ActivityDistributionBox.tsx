@@ -78,12 +78,8 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
 
       for (let i = 1; i <= lessOnePercentageCount; i++) {
         const deletedLastItem = pieItems.pop();
-        othersSessionsAmount += deletedLastItem
-          ? deletedLastItem.sessionStat.sessionsAmount
-          : 0;
-        othersPausedAmount += deletedLastItem
-          ? deletedLastItem.sessionStat.pausedAmount
-          : 0;
+        othersSessionsAmount += deletedLastItem ? deletedLastItem.sessionStat.sessionsAmount : 0;
+        othersPausedAmount += deletedLastItem ? deletedLastItem.sessionStat.pausedAmount : 0;
         othersSpentTimeSeconds += deletedLastItem
           ? deletedLastItem.sessionStat.spentTimeSeconds
           : 0;
@@ -148,9 +144,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           <button
             onClick={onTableBarClick}
             className={`transition duration-300 hover:text-primary dark:hover:text-primary ${
-              adBoxMode == 'table'
-                ? 'text-primary dark:text-primary'
-                : 'dark:text-textDark'
+              adBoxMode == 'table' ? 'text-primary dark:text-primary' : 'dark:text-textDark'
             }`}
           >
             {t('adBox.table')}
@@ -158,9 +152,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           <button
             onClick={onChartBarClick}
             className={`transition duration-300 hover:text-primary dark:hover:text-primary ${
-              adBoxMode == 'chart'
-                ? 'text-primary dark:text-primary'
-                : 'dark:text-textDark'
+              adBoxMode == 'chart' ? 'text-primary dark:text-primary' : 'dark:text-textDark'
             }`}
           >
             {t('adBox.chart')}
@@ -185,9 +177,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
             <div className="flex flex-col gap-3 dark:text-textDark">
               {sortedItems.map((item) => (
                 <div className="flex items-center text-base" key={item.id}>
-                  <div className="w-1/2 text-lg font-bold truncate">
-                    {item.name}
-                  </div>
+                  <div className="w-1/2 text-lg font-bold truncate">{item.name}</div>
                   <div className="w-1/5">{item.sessionStat.sessionsAmount}</div>
                   <div className="w-1/5">
                     {getReadableTime(item.sessionStat.spentTimeSeconds, t, {
@@ -239,9 +229,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 />
 
                 <div className="flex flex-col min-w-0">
-                  <div className="text-lg truncate dark:text-textDark">
-                    {item.name}
-                  </div>
+                  <div className="text-lg truncate dark:text-textDark">{item.name}</div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
                     (
                     {getReadableTime(item.sessionStat.spentTimeSeconds, t, {

@@ -131,9 +131,7 @@ const SettingsGeneralSection: FC = () => {
           <div className="relative w-fit">
             <div>{t('settingsModal.notifications')}</div>
             <div className="absolute pl-2 -top-2 left-full">
-              <QuestionMarkTooltip
-                tooltipText={t('settingsModal.notificationsTooltip')}
-              />
+              <QuestionMarkTooltip tooltipText={t('settingsModal.notificationsTooltip')} />
             </div>
           </div>
           <ToggleButton
@@ -166,15 +164,11 @@ const SettingsGeneralSection: FC = () => {
 
       <div className="flex flex-wrap justify-end gap-3 pb-5">
         <div>
-          <Button onClick={downloadUserDataFile}>
-            {t('settingsModal.exportButton')}
-          </Button>
+          <Button onClick={downloadUserDataFile}>{t('settingsModal.exportButton')}</Button>
         </div>
 
         <div>
-          <Button onClick={logOutHandler}>
-            {t('settingsModal.logoutButton')}
-          </Button>
+          <Button onClick={logOutHandler}>{t('settingsModal.logoutButton')}</Button>
         </div>
       </div>
     </div>

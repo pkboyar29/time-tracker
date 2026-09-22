@@ -123,9 +123,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
       }
     }
 
-    return timeBarsLength == 0
-      ? 0
-      : analytics.sessionStat.spentTimeSeconds / timeBarsLength;
+    return timeBarsLength == 0 ? 0 : analytics.sessionStat.spentTimeSeconds / timeBarsLength;
   }, [analytics.sessionStat, displayTimeBars]);
 
   const userInfo = useAppSelector((state) => state.users.user);
@@ -187,12 +185,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
       )}
 
       <div className="pb-5 overflow-x-auto overflow-y-hidden scroll-overlay">
-        <ResponsiveContainer
-          minWidth={575}
-          width="100%"
-          className="px-5 sm:px-10"
-          height={300}
-        >
+        <ResponsiveContainer minWidth={575} width="100%" className="px-5 sm:px-10" height={300}>
           <BarChart
             key={chartKey}
             data={displayTimeBars}
@@ -212,10 +205,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
 
             <YAxis dataKey="sessionStat.spentTimeSeconds" />
 
-            <Tooltip
-              trigger="click"
-              content={<PeriodTooltip adMode={adMode} />}
-            />
+            <Tooltip trigger="click" content={<PeriodTooltip adMode={adMode} />} />
 
             {!adMode ? (
               <Bar
@@ -246,9 +236,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                       const barActivityItem = bar.adItems.find(
                         (item: IActivityDistribution) => item.id === ad.id,
                       );
-                      return barActivityItem
-                        ? barActivityItem.sessionStat.spentTimeSeconds
-                        : '';
+                      return barActivityItem ? barActivityItem.sessionStat.spentTimeSeconds : '';
                     }}
                     fill={ad.fill}
                     stackId="a"

@@ -33,19 +33,16 @@ const AnalyticsRangePage: FC = () => {
   const [searchParams] = useSearchParams();
   const fromParam = searchParams.get('from');
   const toParam = searchParams.get('to');
-  const overallMode: boolean =
-    typeof searchParams.get('overall') === 'string' ? true : false;
+  const overallMode = typeof searchParams.get('overall') === 'string' ? true : false;
 
   const currentUser = useAppSelector((state) => state.users.user);
 
   const viewOptionsArr = useMemo(
     () =>
-      ['days', 'weeks', 'months', 'years', 'overall', 'custom'].map(
-        (option) => ({
-          id: option,
-          name: t(`viewOptions.${option}`),
-        }),
-      ),
+      ['days', 'weeks', 'months', 'years', 'overall', 'custom'].map((option) => ({
+        id: option,
+        name: t(`viewOptions.${option}`),
+      })),
     [t],
   );
 
@@ -69,9 +66,7 @@ const AnalyticsRangePage: FC = () => {
     fromDate: new Date(fromParam),
     toDate: new Date(toParam),
   });
-  const [rangeType, setRangeType] = useState<RangeType>(
-    getRangeType(range.fromDate, range.toDate),
-  );
+  const [rangeType, setRangeType] = useState<RangeType>(getRangeType(range.fromDate, range.toDate));
   const viewOption = overallMode ? 'overall' : rangeType;
 
   const {
@@ -95,9 +90,7 @@ const AnalyticsRangePage: FC = () => {
       );
     } else if (selectedOption === 'weeks') {
       const [startOfWeek, endOfWeek] = getWeekRange(new Date());
-      navigate(
-        `/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`,
-      );
+      navigate(`/analytics/range?from=${startOfWeek.toISOString()}&to=${endOfWeek.toISOString()}`);
     } else if (selectedOption === 'months') {
       const [startOfMonth, endOfMonth] = getMonthRange(new Date());
       navigate(
@@ -105,9 +98,7 @@ const AnalyticsRangePage: FC = () => {
       );
     } else if (selectedOption === 'years') {
       const [startOfYear, endOfYear] = getYearRange(new Date());
-      navigate(
-        `/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`,
-      );
+      navigate(`/analytics/range?from=${startOfYear.toISOString()}&to=${endOfYear.toISOString()}`);
     } else if (selectedOption === 'overall' && currentUser) {
       navigate(
         `/analytics/range?from=${currentUser.createdDate.toISOString()}&to=${new Date().toISOString()}&overall`,
@@ -173,8 +164,7 @@ const AnalyticsRangePage: FC = () => {
         <div className="h-full pt-5 text-center">
           <PrimaryClipLoader />
         </div>
-      ) : rangeAnalytics &&
-        rangeAnalytics.sessionStat.spentTimeSeconds !== 0 ? (
+      ) : rangeAnalytics && rangeAnalytics.sessionStat.spentTimeSeconds !== 0 ? (
         <div className="flex flex-col pb-5 lg:pb-0 lg:h-full lg:flex-row">
           <div className="flex flex-col h-full gap-5 px-4 pt-5 lg:w-1/2 lg:border-r lg:border-gray-400 lg:border-solid lg:dark:border-white/10">
             {rangeAnalytics.sessionStat && (
@@ -203,9 +193,7 @@ const AnalyticsRangePage: FC = () => {
             )}
 
             {rangeType == 'days' && (
-              <DailyGoalBox
-                spentTimeSeconds={rangeAnalytics.sessionStat.spentTimeSeconds}
-              />
+              <DailyGoalBox spentTimeSeconds={rangeAnalytics.sessionStat.spentTimeSeconds} />
             )}
           </div>
         </div>

@@ -12,10 +12,8 @@ const OverallAnalyticsLabel: FC = () => {
       <div className="text-xl font-semibold">{t('overallAnalytics.title')}</div>
       <div className="flex items-center justify-center gap-2 mt-2 text-base text-gray-500">
         <span>
-          {currentUser
-            ? formatDate(currentUser.createdDate, i18n.language)
-            : '...'}{' '}
-          → {t('overallAnalytics.now')}
+          {currentUser ? formatDate(currentUser.createdDate, i18n.language) : '...'} →{' '}
+          {t('overallAnalytics.now')}
         </span>
       </div>
     </div>

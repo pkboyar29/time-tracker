@@ -1,6 +1,4 @@
-export const convertParamToBoolean = (
-  booleanParam: string | undefined
-): boolean => {
+export const convertParamToBoolean = (booleanParam: string | undefined): boolean => {
   if (typeof booleanParam === 'boolean') {
     return booleanParam;
   }

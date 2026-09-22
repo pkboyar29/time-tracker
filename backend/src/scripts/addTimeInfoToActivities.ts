@@ -3,8 +3,7 @@ import Activity from '../model/activity.model';
 import ActivityGroup from '../model/activityGroup.model';
 import Session from '../model/session.model';
 
-const MONGO_URL =
-  process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
 mongoose.connect(MONGO_URL).then(() => {
   console.log('connection with database is successful');
@@ -22,12 +21,9 @@ async function addTimeInfoToActivities() {
         activity: allActivities[i]._id,
       });
       allActivities[i].sessionsAmount = activitySessions.length;
-      allActivities[i].spentTimeSeconds = activitySessions.reduce(
-        (seconds, session) => {
-          return seconds + session.totalTimeSeconds;
-        },
-        0,
-      );
+      allActivities[i].spentTimeSeconds = activitySessions.reduce((seconds, session) => {
+        return seconds + session.totalTimeSeconds;
+      }, 0);
     }
   }
 
@@ -43,18 +39,12 @@ async function addTimeInfoToActivities() {
       const groupActivities = allActivities.filter((activity) =>
         activity.activityGroup._id.equals(allActivityGroups[i]._id),
       );
-      allActivityGroups[i].sessionsAmount = groupActivities.reduce(
-        (sessions, activity) => {
-          return sessions + activity.sessionsAmount;
-        },
-        0,
-      );
-      allActivityGroups[i].spentTimeSeconds = groupActivities.reduce(
-        (seconds, activity) => {
-          return seconds + activity.spentTimeSeconds;
-        },
-        0,
-      );
+      allActivityGroups[i].sessionsAmount = groupActivities.reduce((sessions, activity) => {
+        return sessions + activity.sessionsAmount;
+      }, 0);
+      allActivityGroups[i].spentTimeSeconds = groupActivities.reduce((seconds, activity) => {
+        return seconds + activity.spentTimeSeconds;
+      }, 0);
     }
   }
 

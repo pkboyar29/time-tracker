@@ -41,10 +41,14 @@ router.get('/', async (req: Request, res: Response) => {
   const timezone = userInfo!.timezone;
   const streak = userInfo!.streak;
 
-  const isDailyGoalCompletedMarkedToday =
-    await userService.isDailyGoalCompletedMarkedToday(userId, timezone);
-  const isDailyGoalNotifiedMarkedToday =
-    await userService.isDailyGoalNotifiedMarkedToday(userId, timezone);
+  const isDailyGoalCompletedMarkedToday = await userService.isDailyGoalCompletedMarkedToday(
+    userId,
+    timezone,
+  );
+  const isDailyGoalNotifiedMarkedToday = await userService.isDailyGoalNotifiedMarkedToday(
+    userId,
+    timezone,
+  );
 
   if (isDailyGoalCompletedMarkedToday && !isDailyGoalNotifiedMarkedToday) {
     logger.info('trying to send notification in events.controller.ts ...');

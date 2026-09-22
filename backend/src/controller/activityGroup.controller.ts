@@ -30,10 +30,7 @@ router.get('/:id', async (req: Request, res: Response) => {
 
 router.post('/', async (req: Request, res: Response) => {
   try {
-    const data = await activityGroupService.createActivityGroup(
-      req.body,
-      res.locals.userId
-    );
+    const data = await activityGroupService.createActivityGroup(req.body, res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);
@@ -45,7 +42,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     const data = await activityGroupService.updateActivityGroup(
       req.params.id,
       req.body,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -57,7 +54,7 @@ router.put('/:id/activities/archive', async (req: Request, res: Response) => {
   try {
     const data = await activityGroupService.archiveGroupActivities(
       req.params.id,
-      res.locals.userId
+      res.locals.userId,
     );
     res.status(200).json(data);
   } catch (e) {
@@ -67,10 +64,7 @@ router.put('/:id/activities/archive', async (req: Request, res: Response) => {
 
 router.delete('/:id', async (req: Request, res: Response) => {
   try {
-    const data = await activityGroupService.deleteActivityGroup(
-      req.params.id,
-      res.locals.userId
-    );
+    const data = await activityGroupService.deleteActivityGroup(req.params.id, res.locals.userId);
     res.status(200).json(data);
   } catch (e) {
     sendErrorResponse(e, res);

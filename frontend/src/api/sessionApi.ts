@@ -9,8 +9,9 @@ const mapResponseData = (unmappedSession: any): ISession => {
     ...unmappedSession,
     id: unmappedSession._id,
     activity: unmappedSession.activity && {
-      activityGroupName: unmappedSession.activity.activityGroup.name,
       name: unmappedSession.activity.name,
+      color: unmappedSession.activity.color,
+      activityGroupName: unmappedSession.activity.activityGroup.name,
     },
   };
 };
@@ -21,9 +22,7 @@ export const fetchSession = async (sessionId: string): Promise<ISession> => {
   return mapResponseData(data);
 };
 
-export const fetchSessions = async (
-  params: Record<string, unknown>,
-): Promise<ISession[]> => {
+export const fetchSessions = async (params: Record<string, unknown>): Promise<ISession[]> => {
   const { data } = await axios.get('/sessions', {
     params: {
       ...params,
@@ -37,9 +36,7 @@ export const fetchSessions = async (
   return mappedData;
 };
 
-export const createSession = async (
-  payload: ISessionCreate,
-): Promise<ISession> => {
+export const createSession = async (payload: ISessionCreate): Promise<ISession> => {
   // const { data } = await axios.post('/sessions', {
   //   ...payload,
   //   totalTimeSeconds: 20,
@@ -49,10 +46,7 @@ export const createSession = async (
   return mapResponseData(data);
 };
 
-export const updateSession = async (
-  payload: ISession,
-  isPaused?: boolean,
-): Promise<ISession> => {
+export const updateSession = async (payload: ISession, isPaused?: boolean): Promise<ISession> => {
   const noteFromLS = getNoteFromLS(payload.id);
 
   const body = {

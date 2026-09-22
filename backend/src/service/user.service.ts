@@ -1,9 +1,5 @@
 import { genSaltSync, hashSync, compareSync } from 'bcrypt';
-import jsonwebtoken, {
-  JsonWebTokenError,
-  JwtPayload,
-  TokenExpiredError,
-} from 'jsonwebtoken';
+import jsonwebtoken, { JsonWebTokenError, JwtPayload, TokenExpiredError } from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
@@ -63,9 +59,7 @@ const userService = {
   deleteAudio,
 };
 
-async function signUp(
-  userSignUpDTO: UserSignUpDTO,
-): Promise<AuthorizeResponse> {
+async function signUp(userSignUpDTO: UserSignUpDTO): Promise<AuthorizeResponse> {
   const users = await User.find({});
   users.forEach((user) => {
     if (user.email === userSignUpDTO.email) {
@@ -115,9 +109,7 @@ async function signUp(
   return userService.createTokens(newUserWithId.id);
 }
 
-async function signIn(
-  userSignInDTO: UserSignInDTO,
-): Promise<AuthorizeResponse> {
+async function signIn(userSignInDTO: UserSignInDTO): Promise<AuthorizeResponse> {
   const user = await User.find({ email: userSignInDTO.email });
   if (!user[0]) {
     throw new HttpError(400, 'User with this email doesnt exists');
@@ -137,11 +129,7 @@ function createTokens(userId: string): AuthorizeResponse {
   };
 }
 
-function createToken(
-  userId: string,
-  tokenType: 'access' | 'refresh',
-  secretKey: string,
-): string {
+function createToken(userId: string, tokenType: 'access' | 'refresh', secretKey: string): string {
   let token: string = '';
 
   const payload = {
@@ -201,9 +189,7 @@ function createAccessToken(userId: string): string {
   let accessToken = userService.createToken(
     userId,
     'access',
-    process.env.ACCESS_TOKEN_SECRET
-      ? process.env.ACCESS_TOKEN_SECRET
-      : 'default-access-secret',
+    process.env.ACCESS_TOKEN_SECRET ? process.env.ACCESS_TOKEN_SECRET : 'default-access-secret',
   );
 
   return accessToken;
@@ -214,11 +200,7 @@ function createRefreshToken(userId: string): string {
     ? process.env.REFRESH_TOKEN_SECRET
     : 'default-refresh-secret';
 
-  let refreshToken = userService.createToken(
-    userId,
-    'refresh',
-    refreshTokenSecret,
-  );
+  let refreshToken = userService.createToken(userId, 'refresh', refreshTokenSecret);
 
   return refreshToken;
 }
@@ -318,10 +300,7 @@ async function isDailyGoalCompletedNow(
   return false;
 }
 
-async function isDailyGoalCompletedMarkedToday(
-  userId: string,
-  timezone: string,
-) {
+async function isDailyGoalCompletedMarkedToday(userId: string, timezone: string) {
   const user = await User.findById(userId).select('daily_goal_completed_at');
   const daily_goal_completed_at = user!.daily_goal_completed_at;
 
@@ -335,10 +314,7 @@ async function isDailyGoalCompletedMarkedToday(
   return isDailyGoalCompletedToday;
 }
 
-async function isDailyGoalNotifiedMarkedToday(
-  userId: string,
-  timezone: string,
-) {
+async function isDailyGoalNotifiedMarkedToday(userId: string, timezone: string) {
   const user = await User.findById(userId).select('daily_goal_notified_at');
   const daily_goal_notified_at = user!.daily_goal_notified_at;
 
@@ -509,10 +485,7 @@ async function isStreakRelevant(userId: string): Promise<boolean> {
   return streakUpdatedAt >= yesterday.toJSDate();
 }
 
-async function updateShowTimerInTitle(
-  showTimerInTitle: boolean,
-  userId: string,
-) {
+async function updateShowTimerInTitle(showTimerInTitle: boolean, userId: string) {
   try {
     const user = await User.findById(userId);
     if (!user) {
@@ -587,19 +560,16 @@ async function exportUserData(userId: string): Promise<Buffer> {
     filter: { activity: undefined, completed: true },
     userId,
   });
-  const sessionsWithoutActivityAmount: number =
-    sessionsWithoutActivity.length ?? 0;
+  const sessionsWithoutActivityAmount: number = sessionsWithoutActivity.length ?? 0;
   let sessionsWithoutActivitySpentTimeSeconds: number = 0;
   sessionsWithoutActivity.forEach((s) => {
     sessionsWithoutActivitySpentTimeSeconds += s.spentTimeSeconds;
   });
 
-  const withoutActivityLine: string = `# Without activity ${getSessionsInfoInBrackets(
-    {
-      sessionsAmount: sessionsWithoutActivityAmount,
-      spentTimeSeconds: sessionsWithoutActivitySpentTimeSeconds,
-    },
-  )}`;
+  const withoutActivityLine: string = `# Without activity ${getSessionsInfoInBrackets({
+    sessionsAmount: sessionsWithoutActivityAmount,
+    spentTimeSeconds: sessionsWithoutActivitySpentTimeSeconds,
+  })}`;
   fileContent = fileContent.concat(withoutActivityLine);
 
   const buffer = Buffer.from(fileContent, 'utf-8');
@@ -648,10 +618,7 @@ async function importFile(
 
     const lastSpaceIndex = cleanedActivityLine.lastIndexOf(' ');
     const activityName = cleanedActivityLine.slice(0, lastSpaceIndex);
-    const activitySessionCount = parseInt(
-      cleanedActivityLine.slice(lastSpaceIndex + 1),
-      10,
-    );
+    const activitySessionCount = parseInt(cleanedActivityLine.slice(lastSpaceIndex + 1), 10);
 
     const activity = await new Activity({
       name: activityName,
@@ -706,10 +673,7 @@ async function uploadAudio(
     const fileExtension = originalNameArray[originalNameArray.length - 1];
 
     const UPLOADS_ROOT = path.resolve(process.env.UPLOADS_ROOT ?? '');
-    const relativeAudioPath = path.join(
-      userId,
-      `${crypto.randomUUID()}.${fileExtension}`,
-    );
+    const relativeAudioPath = path.join(userId, `${crypto.randomUUID()}.${fileExtension}`);
 
     const absoluteAudioPath = path.join(UPLOADS_ROOT, relativeAudioPath);
     if (!fs.existsSync(UPLOADS_ROOT)) {
@@ -789,10 +753,7 @@ async function updateAudioCurrent(
     const userAudio = await userService.getAudioObject(audioId, userId);
 
     if (current) {
-      await UserAudio.findOneAndUpdate(
-        { userId, current: true },
-        { current: false },
-      );
+      await UserAudio.findOneAndUpdate({ userId, current: true }, { current: false });
     }
 
     userAudio.current = current;
@@ -806,10 +767,7 @@ async function updateAudioCurrent(
   }
 }
 
-async function deleteAudio(
-  audioId: string,
-  userId: string,
-): Promise<{ message: string }> {
+async function deleteAudio(audioId: string, userId: string): Promise<{ message: string }> {
   const userAudio = await userService.getAudioObject(audioId, userId);
   const UPLOADS_ROOT = path.resolve(process.env.UPLOADS_ROOT ?? '');
   const absoluteFilePath = path.join(UPLOADS_ROOT, userAudio.audioPath);

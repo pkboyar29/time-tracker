@@ -1,15 +1,12 @@
 import mongoose from 'mongoose';
 import DailyAggregate, { IDailyAggregate } from '../model/dailyAggregate.model';
-import DailyActivityDistribution, {
-  IDailyAD,
-} from '../model/dailyActivityDistribution.model';
+import DailyActivityDistribution, { IDailyAD } from '../model/dailyActivityDistribution.model';
 import Session from '../model/session.model';
 import sessionPartService from '../service/sessionPart.service';
 import User from '../model/user.model';
 import { DateTime } from 'luxon';
 
-const MONGO_URL =
-  process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
 mongoose.connect(MONGO_URL).then(async () => {
   console.log('connection with database is successful');
@@ -71,10 +68,7 @@ async function createDailyAggregates() {
     const dailyAds: IDailyAD[] = [];
 
     for (const [dateISO, parts] of datesMap) {
-      const totalSeconds = parts.reduce(
-        (seconds, part) => seconds + part.spentTimeSeconds,
-        0,
-      );
+      const totalSeconds = parts.reduce((seconds, part) => seconds + part.spentTimeSeconds, 0);
       const totalPaused = parts.filter((part) => part.paused).length;
 
       const dayStartLuxon = DateTime.fromISO(dateISO, { zone: userTimezone });
@@ -115,10 +109,7 @@ async function createDailyAggregates() {
       }
 
       for (const [activityId, parts] of activitiesMap) {
-        const totalSeconds = parts.reduce(
-          (seconds, part) => seconds + part.spentTimeSeconds,
-          0,
-        );
+        const totalSeconds = parts.reduce((seconds, part) => seconds + part.spentTimeSeconds, 0);
         const totalPaused = parts.filter((part) => part.paused).length;
 
         const activitySessions = filteredSessions.filter(

@@ -20,9 +20,7 @@ interface SessionsListProps {
   setIsSessionsBlockOpen?: (state: boolean) => void;
   isExpandable: boolean;
   sessions: ISession[];
-  updateSessionsListHandler: (
-    updater: (prev: ISession[]) => ISession[],
-  ) => void;
+  updateSessionsListHandler: (updater: (prev: ISession[]) => ISession[]) => void;
 }
 
 const SessionsList: FC<SessionsListProps> = ({
@@ -35,21 +33,19 @@ const SessionsList: FC<SessionsListProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const { timerState, startTimer, finalSpentSeconds, finalSessionId } =
+  const { timerState, startTimer, finalSpentSeconds, finalSessionId, completedSessionId } =
     useTimerWithMs();
   const sessionFromLS = getSessionFromLS('session');
 
   // removing current session from the list
-  const sessionsWithoutCurrent = sessions.filter(
-    (session) => session.id !== sessionFromLS?.id,
-  );
+  const sessionsWithoutCurrent = sessions.filter((session) => session.id !== sessionFromLS?.id);
 
   const [deleteModal, setDeleteModal] = useState<ModalState>({
     status: false,
     selectedItemId: null,
   });
 
-  const [less, setLess] = useState<boolean>(false); // less - true, more - false\
+  const [less, setLess] = useState<boolean>(false); // less - true, more - false
 
   // эффект, добавляющий текущую сессию в список, если ее нет
   useEffect(() => {
@@ -57,9 +53,7 @@ const SessionsList: FC<SessionsListProps> = ({
     const currentSession = timerState.session;
 
     updateSessionsListHandler((prev) => {
-      const currentSessionIdx = prev.findIndex(
-        (s) => s.id === currentSession.id,
-      );
+      const currentSessionIdx = prev.findIndex((s) => s.id === currentSession.id);
 
       if (currentSessionIdx === -1) {
         return [...prev, currentSession];
@@ -85,28 +79,23 @@ const SessionsList: FC<SessionsListProps> = ({
     });
   }, [timerState.session?.totalTimeSeconds]);
 
-  // эффект, изменяющий spentTimeSeconds у текущей сессии в списке и удаляющий текущую сессию из списка, если она завершилась
+  // эффект, изменяющий spentTimeSeconds у текущей сессии в списке
   useEffect(() => {
     if (finalSessionId === '') return;
 
-    updateSessionsListHandler((prev) => {
-      const currentSession = prev.find((s) => s.id === finalSessionId);
-
-      if (currentSession) {
-        if (finalSpentSeconds >= currentSession.totalTimeSeconds) {
-          return prev.filter((s) => s.id !== finalSessionId);
-        } else {
-          return prev.map((s) =>
-            s.id === finalSessionId
-              ? { ...currentSession, spentTimeSeconds: finalSpentSeconds }
-              : s,
-          );
-        }
-      } else {
-        return prev;
-      }
-    });
+    updateSessionsListHandler((prev) =>
+      prev.map((s) =>
+        s.id === finalSessionId ? { ...s, spentTimeSeconds: finalSpentSeconds } : s,
+      ),
+    );
   }, [finalSpentSeconds, finalSessionId]);
+
+  // эффект, удаляющий текущую сессию из списка, если она завершилась
+  useEffect(() => {
+    if (completedSessionId === '') return;
+
+    updateSessionsListHandler((prev) => prev.filter((s) => s.id !== completedSessionId));
+  }, [completedSessionId]);
 
   const handleSessionClick = async (session: ISession) => {
     startTimer(session);
@@ -119,9 +108,7 @@ const SessionsList: FC<SessionsListProps> = ({
   const handleSessionDelete = async (sessionId: string) => {
     try {
       await deleteSession(sessionId);
-      updateSessionsListHandler((prev) =>
-        prev.filter((s) => s.id !== sessionId),
-      );
+      updateSessionsListHandler((prev) => prev.filter((s) => s.id !== sessionId));
 
       setDeleteModal({
         status: false,
@@ -143,33 +130,29 @@ const SessionsList: FC<SessionsListProps> = ({
 
   return (
     <>
-      {deleteModal.status && (
-        <Modal
-          title={t('deleteSessionModal.title')}
-          modalClassnames="basis-5/6 md:basis-5/6"
-          onCloseModal={() =>
-            setDeleteModal({
-              status: false,
-              selectedItemId: null,
-            })
-          }
-        >
-          <p className="text-base/6 dark:text-textDark">
-            {t('deleteSessionModal.descr')}
-          </p>
+      <Modal
+        title={t('deleteSessionModal.title')}
+        modalClassnames="basis-5/6 md:basis-5/6"
+        isOpen={deleteModal.status}
+        onCloseModal={() =>
+          setDeleteModal({
+            status: false,
+            selectedItemId: null,
+          })
+        }
+      >
+        <p className="text-base/6 dark:text-textDark">{t('deleteSessionModal.descr')}</p>
 
-          <div className="mt-10 ml-auto w-fit">
-            <Button
-              onClick={() =>
-                deleteModal.selectedItemId &&
-                handleSessionDelete(deleteModal.selectedItemId)
-              }
-            >
-              {t('deleteSessionModal.button')}
-            </Button>
-          </div>
-        </Modal>
-      )}
+        <div className="mt-10 ml-auto w-fit">
+          <Button
+            onClick={() =>
+              deleteModal.selectedItemId && handleSessionDelete(deleteModal.selectedItemId)
+            }
+          >
+            {t('deleteSessionModal.button')}
+          </Button>
+        </div>
+      </Modal>
 
       {sessionsWithoutCurrent.length !== 0 && (
         <div className={`flex flex-col items-end ml-auto ${classname}`}>
@@ -185,9 +168,7 @@ const SessionsList: FC<SessionsListProps> = ({
 
           {!less && (
             <div className="w-full overflow-x-hidden overflow-y-auto">
-              <div
-                className={`flex flex-col gap-5 w-full min-[400px]:w-96 ml-auto mr-1.5`}
-              >
+              <div className={`flex flex-col gap-5 w-full min-[400px]:w-96 ml-auto mr-1.5`}>
                 {sessionsWithoutCurrent.map((session) => (
                   <SessionItem
                     key={session.id}
