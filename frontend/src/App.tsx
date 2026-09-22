@@ -114,7 +114,7 @@ const App: FC = () => {
 
       <div
         id="app"
-        className={`relative App h-screen bg-backgroundLight dark:bg-backgroundDark ${
+        className={`relative App h-dvh bg-backgroundLight dark:bg-backgroundDark ${
           authRequired ? 'min-[1340px]:grid min-[1340px]:grid-cols-[auto,1fr]' : ''
         }`}
       >

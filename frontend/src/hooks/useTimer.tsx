@@ -187,7 +187,6 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       ...timerState.session,
       spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
     };
-    // TODO: delete, хотя вроде не надо удалять
     setFinalSpentSeconds(sessionToUpdate.spentTimeSeconds);
     setFinalSessionId(sessionToUpdate.id);
 
