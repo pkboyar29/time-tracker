@@ -37,6 +37,10 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
+      if (document.body.classList.contains('modal-open')) {
+        return;
+      }
+
       const target = event.target as HTMLElement;
       if (
         target.tagName === 'INPUT' ||

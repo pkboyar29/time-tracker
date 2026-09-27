@@ -217,6 +217,9 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     const completedSession: ISession = { ...sessionRef.current };
     if (isEarly) {
       const spentTimeSeconds = msToSeconds(timerTickStore.getSnapshot().ms);
+      if (spentTimeSeconds === 0) {
+        return;
+      }
 
       completedSession.totalTimeSeconds = spentTimeSeconds;
       completedSession.spentTimeSeconds = spentTimeSeconds;
