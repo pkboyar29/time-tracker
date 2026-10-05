@@ -6,18 +6,18 @@ import { useTranslation } from 'react-i18next';
 import CustomCircularProgress from './common/CustomCircularProgress';
 
 interface DailyGoalBoxProps {
-  spentTimeSeconds: number;
+  spentSeconds: number;
 }
 
-const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
+const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentSeconds }) => {
   const { t } = useTranslation();
   const userInfo = useAppSelector((state) => state.users.user);
 
   const dailyGoalSeconds = userInfo?.dailyGoal ?? 0;
   const dailyGoalPercent =
-    spentTimeSeconds > dailyGoalSeconds
+    spentSeconds > dailyGoalSeconds
       ? 100
-      : (Math.trunc(spentTimeSeconds / 60) / Math.trunc(dailyGoalSeconds / 60)) * 100;
+      : (Math.trunc(spentSeconds / 60) / Math.trunc(dailyGoalSeconds / 60)) * 100;
 
   return (
     dailyGoalSeconds && (
@@ -34,10 +34,10 @@ const DailyGoalBox: FC<DailyGoalBoxProps> = ({ spentTimeSeconds }) => {
           <div className="text-center tex-lg md:text-xl dark:text-textDark">
             {t('dailyGoalBox.youAchieved')}:{' '}
             <span className="font-bold">
-              {getReadableTime(spentTimeSeconds, t, {
+              {getReadableTime(spentSeconds, t, {
                 short: false,
               })}{' '}
-              ({Math.trunc((spentTimeSeconds / dailyGoalSeconds) * 100)}%)
+              ({Math.trunc((spentSeconds / dailyGoalSeconds) * 100)}%)
             </span>
           </div>
         </div>

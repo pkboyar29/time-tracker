@@ -18,8 +18,8 @@ const SessionStatBox: FC<SessionStatBoxProps> = ({ statistics }) => {
   const distractedRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
-    if (statistics.sessionsAmount < 2 || statistics.spentTimeSeconds < 300) {
-      totalTimeRef.current!.textContent = getReadableTime(statistics.spentTimeSeconds, t, {
+    if (statistics.sessionsAmount < 2 || statistics.spentSeconds < 300) {
+      totalTimeRef.current!.textContent = getReadableTime(statistics.spentSeconds, t, {
         short: false,
         zeroUnits: true,
       });
@@ -28,7 +28,7 @@ const SessionStatBox: FC<SessionStatBoxProps> = ({ statistics }) => {
     } else {
       animateCountUpWithInterval(
         totalTimeRef.current!,
-        statistics.spentTimeSeconds,
+        statistics.spentSeconds,
         1500,
         0.5,
         (seconds) => getReadableTime(seconds, t, { short: false, zeroUnits: true }),

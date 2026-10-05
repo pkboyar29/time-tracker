@@ -72,7 +72,7 @@ const App: FC = () => {
             return;
           }
 
-          if (sessionFromLS.spentTimeSeconds > sessionFromServer.spentTimeSeconds) {
+          if (sessionFromLS.spentSeconds > sessionFromServer.spentSeconds) {
             startTimer(sessionFromLS, true);
             updateSession(sessionFromLS, true); // TODO: отображать серверные ошибки?
           } else {

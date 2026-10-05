@@ -36,7 +36,7 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
       {isVisible && (
         <div className="flex flex-col gap-2.5">
           <p className="text-primary text-[15px]">{`${timeBar.barDetailedName}`}</p>
-          {timeBar.sessionStat.spentTimeSeconds == 0 ? (
+          {timeBar.sessionStat.spentSeconds == 0 ? (
             <p className="text-gray-800 dark:text-textDark">{t('pdBox.noActivity')}</p>
           ) : (
             <>
@@ -45,13 +45,13 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
                   {getRangeType(timeBar.startOfRange, timeBar.endOfRange) == 'days' && (
                     <p className="text-gray-800 dark:text-textDark">
                       {`${t('pdBox.dailyGoal')} ${
-                        timeBar.sessionStat.spentTimeSeconds >= dailyGoalSeconds ? '✅' : '❌'
+                        timeBar.sessionStat.spentSeconds >= dailyGoalSeconds ? '✅' : '❌'
                       }`}
                     </p>
                   )}
 
                   <p className="text-gray-800 dark:text-textDark">
-                    {getReadableTime(timeBar.sessionStat.spentTimeSeconds, t, {
+                    {getReadableTime(timeBar.sessionStat.spentSeconds, t, {
                       short: false,
                     })}
                   </p>
@@ -71,7 +71,7 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
               ) : (
                 <>
                   <p className="text-gray-800 dark:text-textDark">
-                    {getReadableTime(timeBar.sessionStat.spentTimeSeconds, t, {
+                    {getReadableTime(timeBar.sessionStat.spentSeconds, t, {
                       short: false,
                     })}
                   </p>
@@ -98,7 +98,7 @@ const PeriodTooltip: FC<PeriodTooltipProps> = ({ payload, adMode }) => {
 
                         <div className="text-[13px] mt-1 text-gray-600 dark:text-textDarkSecondary">
                           (
-                          {getReadableTime(item.sessionStat.spentTimeSeconds, t, {
+                          {getReadableTime(item.sessionStat.spentSeconds, t, {
                             short: true,
                           })}
                           ,{' '}

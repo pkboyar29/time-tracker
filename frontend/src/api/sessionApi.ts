@@ -8,6 +8,9 @@ const mapResponseData = (unmappedSession: any): ISession => {
   return {
     ...unmappedSession,
     id: unmappedSession._id,
+    // TODO: remove
+    totalSeconds: unmappedSession.totalTimeSeconds,
+    spentSeconds: unmappedSession.spentTimeSeconds,
     activity: unmappedSession.activity && {
       name: unmappedSession.activity.name,
       color: unmappedSession.activity.color,
@@ -41,7 +44,11 @@ export const createSession = async (payload: ISessionCreate): Promise<ISession> 
   //   ...payload,
   //   totalTimeSeconds: 20,
   // });
-  const { data } = await axios.post('/sessions', payload);
+  // TODO: remove
+  const { data } = await axios.post('/sessions', {
+    ...payload,
+    totalTimeSeconds: payload.totalSeconds,
+  });
 
   return mapResponseData(data);
 };
@@ -50,8 +57,8 @@ export const updateSession = async (payload: ISession, isPaused?: boolean): Prom
   const noteFromLS = getNoteFromLS(payload.id);
 
   const body = {
-    spentTimeSeconds: payload.spentTimeSeconds,
-    totalTimeSeconds: payload.totalTimeSeconds,
+    spentTimeSeconds: payload.spentSeconds,
+    totalTimeSeconds: payload.totalSeconds,
     note: noteFromLS,
     isPaused: isPaused !== undefined ? isPaused : false,
   };

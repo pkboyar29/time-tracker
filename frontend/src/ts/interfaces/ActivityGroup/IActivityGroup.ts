@@ -3,7 +3,7 @@ export interface IActivityGroup {
   name: string;
   descr?: string;
   sessionsAmount: number;
-  spentTimeSeconds: number;
+  spentSeconds: number;
 }
 
 export interface IActivityGroupCreate {

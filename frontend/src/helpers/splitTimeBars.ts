@@ -11,8 +11,8 @@ export const mergeSessionStat = (statisticsList: ISessionStat[]): ISessionStat =
     (amount, statistics) => amount + statistics.sessionsAmount,
     0,
   );
-  const spentTimeSeconds = statisticsList.reduce(
-    (seconds, statistics) => seconds + statistics.spentTimeSeconds,
+  const spentSeconds = statisticsList.reduce(
+    (seconds, statistics) => seconds + statistics.spentSeconds,
     0,
   );
   const pausedAmount = statisticsList.reduce(
@@ -22,7 +22,7 @@ export const mergeSessionStat = (statisticsList: ISessionStat[]): ISessionStat =
 
   return {
     sessionsAmount,
-    spentTimeSeconds,
+    spentSeconds,
     pausedAmount,
   };
 };
@@ -62,15 +62,13 @@ export const mergeActivityDistributions = (
     finalAd = finalAd.concat(adsList[i]);
   }
 
-  const totalSpentTimeSeconds = finalAd.reduce(
-    (seconds, ad) => seconds + ad.sessionStat.spentTimeSeconds,
+  const totalSpentSeconds = finalAd.reduce(
+    (seconds, ad) => seconds + ad.sessionStat.spentSeconds,
     0,
   );
   finalAd = finalAd.map((ad) => ({
     ...ad,
-    spentTimePercentage: parseFloat(
-      (ad.sessionStat.spentTimeSeconds / totalSpentTimeSeconds).toFixed(2),
-    ),
+    spentTimePercentage: parseFloat((ad.sessionStat.spentSeconds / totalSpentSeconds).toFixed(2)),
   }));
 
   return finalAd;

@@ -49,7 +49,7 @@ const SessionItem: FC<SessionItemProps> = ({
                 {t('sessionItem.duration')}
               </div>
               <div className="dark:text-textDarkSecondary">
-                {getReadableTime(session.totalTimeSeconds, t, {
+                {getReadableTime(session.totalSeconds, t, {
                   short: false,
                 })}
               </div>

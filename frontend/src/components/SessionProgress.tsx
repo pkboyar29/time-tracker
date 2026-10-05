@@ -13,14 +13,14 @@ const SessionProgress: FC<SessionProgressProps> = ({ session }) => {
   const { t } = useTranslation();
 
   const remainingLabel = getRemainingTimeHoursMinutesSeconds(
-    session.totalTimeSeconds,
-    session.spentTimeSeconds,
+    session.totalSeconds,
+    session.spentSeconds,
   );
-  const passedLabel = getReadableTime(session.spentTimeSeconds, t, {
+  const passedLabel = getReadableTime(session.spentSeconds, t, {
     short: true,
   });
 
-  const percent = (session.spentTimeSeconds / session.totalTimeSeconds) * 100;
+  const percent = (session.spentSeconds / session.totalSeconds) * 100;
 
   const [hovered, setHovered] = useState<boolean>(false);
 

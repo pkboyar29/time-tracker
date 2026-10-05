@@ -24,7 +24,7 @@ const TimerTitleUpdater: FC = () => {
 
     const timerText = currentUser.showTimerInTitle
       ? `${getRemainingTimeHoursMinutesSeconds(
-          timerState.session.totalTimeSeconds,
+          timerState.session.totalSeconds,
           msToSeconds(timerState.ms),
           true,
         )}`
