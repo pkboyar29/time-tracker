@@ -275,7 +275,7 @@ async function isDailyGoalCompleted(
 }
 
 async function isDailyGoalCompletedNow(
-  newSpentTimeSeconds: number,
+  newSpentSeconds: number,
   dailyGoalSeconds: number,
   userId: string,
   timezone: string,
@@ -286,14 +286,14 @@ async function isDailyGoalCompletedNow(
   });
 
   let secondsBeforeUpdate = todayAggregate.spentSeconds;
-  secondsBeforeUpdate -= newSpentTimeSeconds;
+  secondsBeforeUpdate -= newSpentSeconds;
 
   // if goal has reached before
   if (secondsBeforeUpdate >= dailyGoalSeconds) {
     return false;
   }
   // if goal has reached now
-  if (secondsBeforeUpdate + newSpentTimeSeconds >= dailyGoalSeconds) {
+  if (secondsBeforeUpdate + newSpentSeconds >= dailyGoalSeconds) {
     return true;
   }
   // if goal hasn't reached yet

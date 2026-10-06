@@ -95,12 +95,11 @@ describe('analyticsService.getSessionStat', () => {
       },
     ];
 
-    const { spentTimeSeconds, sessionsAmount, pausedAmount } =
-      analyticsService.getSessionsStatistics({
-        sessionParts,
-        completedSessions,
-      });
-    expect(spentTimeSeconds).toBe(270);
+    const { spentSeconds, sessionsAmount, pausedAmount } = analyticsService.getSessionsStat({
+      sessionParts,
+      completedSessions,
+    });
+    expect(spentSeconds).toBe(270);
     expect(sessionsAmount).toBe(2);
     expect(pausedAmount).toBe(2);
   });
@@ -631,7 +630,7 @@ describe('analyticsService.getActivityDistributions', () => {
     const result = analyticsService.getActivityDistributions({
       totalStat: {
         sessionsAmount: 4,
-        spentTimeSeconds: 600,
+        spentSeconds: 600,
         pausedAmount: 2,
       },
       sessionParts,
@@ -645,7 +644,7 @@ describe('analyticsService.getActivityDistributions', () => {
         name: 'Reading',
         color: '#fff000',
         sessionStat: {
-          spentTimeSeconds: 100,
+          spentSeconds: 100,
           sessionsAmount: 2,
           pausedAmount: 1,
         },
@@ -653,7 +652,7 @@ describe('analyticsService.getActivityDistributions', () => {
       {
         ...codingAdMeta,
         sessionStat: {
-          spentTimeSeconds: 400,
+          spentSeconds: 400,
           sessionsAmount: 1,
           pausedAmount: 1,
         },
@@ -663,7 +662,7 @@ describe('analyticsService.getActivityDistributions', () => {
         name: 'Without activity',
         color: '#9CA3AF',
         sessionStat: {
-          spentTimeSeconds: 100, // 400 - (100 + 200)
+          spentSeconds: 100, // 400 - (100 + 200)
           sessionsAmount: 1, // 4 - 3
           pausedAmount: 0,
         },
@@ -709,7 +708,7 @@ describe('analyticsService.getActivityDistributions', () => {
     const result = analyticsService.getActivityDistributions({
       totalStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 300,
+        spentSeconds: 300,
         pausedAmount: 0,
       },
       sessionParts,
@@ -730,12 +729,12 @@ describe('analyticsService.mergeSessionStat', () => {
     const input: SessionStat[] = [
       {
         sessionsAmount: 2,
-        spentTimeSeconds: 120,
+        spentSeconds: 120,
         pausedAmount: 1,
       },
       {
         sessionsAmount: 3,
-        spentTimeSeconds: 300,
+        spentSeconds: 300,
         pausedAmount: 2,
       },
     ];
@@ -744,7 +743,7 @@ describe('analyticsService.mergeSessionStat', () => {
 
     expect(result).toEqual({
       sessionsAmount: 5,
-      spentTimeSeconds: 420,
+      spentSeconds: 420,
       pausedAmount: 3,
     });
   });
@@ -759,7 +758,7 @@ describe('analyticsService.mergeSessionStat', () => {
     const input: SessionStat[] = [
       {
         sessionsAmount: 1,
-        spentTimeSeconds: 60,
+        spentSeconds: 60,
         pausedAmount: 0,
       },
     ];
@@ -768,7 +767,7 @@ describe('analyticsService.mergeSessionStat', () => {
 
     expect(result).toEqual({
       sessionsAmount: 1,
-      spentTimeSeconds: 60,
+      spentSeconds: 60,
       pausedAmount: 0,
     });
   });
@@ -815,7 +814,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...aMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         pausedAmount: 1,
       },
     },
@@ -823,7 +822,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...bMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         pausedAmount: 0,
       },
     },
@@ -833,7 +832,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...aMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 50,
+        spentSeconds: 50,
         pausedAmount: 1,
       },
     },
@@ -841,7 +840,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...cMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         pausedAmount: 2,
       },
     },
@@ -851,7 +850,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...aMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 50,
+        spentSeconds: 50,
         pausedAmount: 0,
       },
     },
@@ -859,7 +858,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...bMeta,
       sessionStat: {
         sessionsAmount: 2,
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         pausedAmount: 0,
       },
     },
@@ -867,7 +866,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...dMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         pausedAmount: 0,
       },
     },
@@ -877,7 +876,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...bMeta,
       sessionStat: {
         sessionsAmount: 2,
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         pausedAmount: 0,
       },
     },
@@ -885,7 +884,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...dMeta,
       sessionStat: {
         sessionsAmount: 0,
-        spentTimeSeconds: 300,
+        spentSeconds: 300,
         pausedAmount: 1,
       },
     },
@@ -893,7 +892,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...eMeta,
       sessionStat: {
         sessionsAmount: 2,
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         pausedAmount: 0,
       },
     },
@@ -925,7 +924,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...aMeta,
       sessionStat: {
         sessionsAmount: 2,
-        spentTimeSeconds: 150,
+        spentSeconds: 150,
         pausedAmount: 2,
       },
     });
@@ -935,7 +934,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...bMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         pausedAmount: 0,
       },
     });
@@ -945,7 +944,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...cMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         pausedAmount: 2,
       },
     });
@@ -962,7 +961,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...aMeta,
       sessionStat: {
         sessionsAmount: 3,
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         pausedAmount: 2,
       },
     });
@@ -972,7 +971,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...bMeta,
       sessionStat: {
         sessionsAmount: 5,
-        spentTimeSeconds: 500,
+        spentSeconds: 500,
         pausedAmount: 0,
       },
     });
@@ -982,7 +981,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...cMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         pausedAmount: 2,
       },
     });
@@ -992,7 +991,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...dMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 400,
+        spentSeconds: 400,
         pausedAmount: 1,
       },
     });
@@ -1002,7 +1001,7 @@ describe('analyticsService.mergeActivityDistributions', () => {
       ...eMeta,
       sessionStat: {
         sessionsAmount: 2,
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         pausedAmount: 0,
       },
     });
@@ -1023,7 +1022,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
 
   const leftObjStat: SessionStat = {
     sessionsAmount: 2,
-    spentTimeSeconds: 60,
+    spentSeconds: 60,
     pausedAmount: 1,
   };
   const leftObjAds = [
@@ -1031,7 +1030,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
       ...aMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 40,
+        spentSeconds: 40,
         pausedAmount: 1,
       },
     },
@@ -1039,7 +1038,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
       ...bMeta,
       sessionStat: {
         sessionsAmount: 1,
-        spentTimeSeconds: 20,
+        spentSeconds: 20,
         pausedAmount: 0,
       },
     },
@@ -1187,7 +1186,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
 
     const rightObjStat: SessionStat = {
       sessionsAmount: 1,
-      spentTimeSeconds: 65,
+      spentSeconds: 65,
       pausedAmount: 3,
     };
     const rightObjAds: ActivityDistribution[] = [
@@ -1195,7 +1194,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
         ...aMeta,
         sessionStat: {
           sessionsAmount: 1,
-          spentTimeSeconds: 65,
+          spentSeconds: 65,
           pausedAmount: 3,
         },
       },
@@ -1299,7 +1298,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
           endOfRange: new Date('2025-10-01T00:00:00Z'),
           sessionStat: {
             sessionsAmount: 3,
-            spentTimeSeconds: 60,
+            spentSeconds: 60,
             pausedAmount: 2,
           },
           activityDistribution: [
@@ -1307,7 +1306,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
               ...aMeta,
               sessionStat: {
                 sessionsAmount: 3,
-                spentTimeSeconds: 60,
+                spentSeconds: 60,
                 pausedAmount: 2,
               },
             },
@@ -1344,7 +1343,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
       endOfRange: new Date('2025-10-01T00:00:00Z'),
       sessionStat: {
         sessionsAmount: 5,
-        spentTimeSeconds: 120,
+        spentSeconds: 120,
         pausedAmount: 3,
       },
       activityDistribution: [
@@ -1352,7 +1351,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
           ...aMeta,
           sessionStat: {
             sessionsAmount: 4,
-            spentTimeSeconds: 100,
+            spentSeconds: 100,
             pausedAmount: 3,
           },
         },
@@ -1360,7 +1359,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnLeft', () => {
           ...bMeta,
           sessionStat: {
             sessionsAmount: 1,
-            spentTimeSeconds: 20,
+            spentSeconds: 20,
             pausedAmount: 0,
           },
         },
@@ -1385,7 +1384,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
   }));
   const rightObjStat: SessionStat = {
     sessionsAmount: 3,
-    spentTimeSeconds: 75,
+    spentSeconds: 75,
     pausedAmount: 2,
   };
   const rightObj: AnalyticsForRangeDTO = {
@@ -1501,7 +1500,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
   it('if final bar type is day and bar type is hour on the left, should create proper left time bar', () => {
     const leftObjStat = {
       sessionsAmount: 1,
-      spentTimeSeconds: 40,
+      spentSeconds: 40,
       pausedAmount: 2,
     };
     const leftObj: AnalyticsForRangeDTO = {
@@ -1608,7 +1607,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
       endOfRange: new Date('2026-06-20T00:00:00Z'),
       sessionStat: {
         sessionsAmount: 5,
-        spentTimeSeconds: 30,
+        spentSeconds: 30,
         pausedAmount: 2,
       },
       activityDistribution: [
@@ -1616,7 +1615,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
           ...aMeta,
           sessionStat: {
             sessionsAmount: 5,
-            spentTimeSeconds: 30,
+            spentSeconds: 30,
             pausedAmount: 2,
           },
         },
@@ -1649,7 +1648,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
       endOfRange: new Date('2026-07-01T00:00:00Z'),
       sessionStat: {
         sessionsAmount: 8,
-        spentTimeSeconds: 105,
+        spentSeconds: 105,
         pausedAmount: 4,
       },
       activityDistribution: [
@@ -1657,7 +1656,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
           ...aMeta,
           sessionStat: {
             sessionsAmount: 8,
-            spentTimeSeconds: 105,
+            spentSeconds: 105,
             pausedAmount: 4,
           },
         },
@@ -1670,12 +1669,12 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
   it('if final bar type is month, bar type is month on the left, should properly combine left bars with right obj', () => {
     const leftObjStat: SessionStat = {
       sessionsAmount: 2,
-      spentTimeSeconds: 60,
+      spentSeconds: 60,
       pausedAmount: 2,
     };
     const leftBarStat: SessionStat = {
       sessionsAmount: 1,
-      spentTimeSeconds: 40,
+      spentSeconds: 40,
       pausedAmount: 2,
     };
     const leftObj: AnalyticsForRangeDTO = {
@@ -1695,7 +1694,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
           endOfRange: new Date('2026-06-20T00:00:00Z'),
           sessionStat: {
             sessionsAmount: 1,
-            spentTimeSeconds: 20,
+            spentSeconds: 20,
             pausedAmount: 0,
           },
           activityDistribution: [
@@ -1703,7 +1702,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
               ...aMeta,
               sessionStat: {
                 sessionsAmount: 1,
-                spentTimeSeconds: 20,
+                spentSeconds: 20,
                 pausedAmount: 0,
               },
             },
@@ -1714,7 +1713,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
 
     const expectedResultStat: SessionStat = {
       sessionsAmount: 4,
-      spentTimeSeconds: 95,
+      spentSeconds: 95,
       pausedAmount: 2,
     };
 
@@ -1826,7 +1825,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
   it('if final bar type is year, should return left bars and properly change last bar', () => {
     const lastLeftBarStat: SessionStat = {
       sessionsAmount: 4,
-      spentTimeSeconds: 100,
+      spentSeconds: 100,
       pausedAmount: 2,
     };
     const leftObj: AnalyticsForRangeDTO = {
@@ -1852,7 +1851,7 @@ describe('analyticsService.mergeBarsWithDailyRangeOnRight', () => {
 
     const expectedResultStat: SessionStat = {
       sessionsAmount: 7,
-      spentTimeSeconds: 175,
+      spentSeconds: 175,
       pausedAmount: 4,
     };
 
@@ -1977,7 +1976,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 2,
             pausedAmount: 2,
-            spentTimeSeconds: 120,
+            spentSeconds: 120,
           },
         },
         {
@@ -1987,7 +1986,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 1,
             pausedAmount: 0,
-            spentTimeSeconds: 60,
+            spentSeconds: 60,
           },
         },
       ],
@@ -1999,7 +1998,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       sessionStat: {
         sessionsAmount: 3,
         pausedAmount: 1,
-        spentTimeSeconds: 180,
+        spentSeconds: 180,
       },
       activityDistribution: [
         {
@@ -2009,7 +2008,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 5,
             pausedAmount: 4,
-            spentTimeSeconds: 1000,
+            spentSeconds: 1000,
           },
         },
         {
@@ -2019,7 +2018,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 1,
             pausedAmount: 1,
-            spentTimeSeconds: 30,
+            spentSeconds: 30,
           },
         },
       ],
@@ -2037,7 +2036,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 1,
             pausedAmount: 0,
-            spentTimeSeconds: 60,
+            spentSeconds: 60,
           },
         },
         {
@@ -2047,7 +2046,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 1,
             pausedAmount: 1,
-            spentTimeSeconds: 30,
+            spentSeconds: 30,
           },
         },
       ],
@@ -2115,7 +2114,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 2,
             pausedAmount: 2,
-            spentTimeSeconds: 120,
+            spentSeconds: 120,
           },
         },
         {
@@ -2125,7 +2124,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 1,
             pausedAmount: 0,
-            spentTimeSeconds: 60,
+            spentSeconds: 60,
           },
         },
       ],
@@ -2136,7 +2135,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 3,
             pausedAmount: 2,
-            spentTimeSeconds: 180,
+            spentSeconds: 180,
           },
           activityDistribution: [
             {
@@ -2146,7 +2145,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
               sessionStat: {
                 sessionsAmount: 2,
                 pausedAmount: 2,
-                spentTimeSeconds: 120,
+                spentSeconds: 120,
               },
             },
             {
@@ -2156,7 +2155,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
               sessionStat: {
                 sessionsAmount: 1,
                 pausedAmount: 0,
-                spentTimeSeconds: 60,
+                spentSeconds: 60,
               },
             },
           ],
@@ -2169,7 +2168,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       sessionStat: {
         sessionsAmount: 3,
         pausedAmount: 1,
-        spentTimeSeconds: 180,
+        spentSeconds: 180,
       },
       activityDistribution: [
         {
@@ -2179,7 +2178,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 5,
             pausedAmount: 4,
-            spentTimeSeconds: 1000,
+            spentSeconds: 1000,
           },
         },
         {
@@ -2189,7 +2188,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 1,
             pausedAmount: 1,
-            spentTimeSeconds: 30,
+            spentSeconds: 30,
           },
         },
       ],
@@ -2200,7 +2199,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 5,
             pausedAmount: 4,
-            spentTimeSeconds: 1000,
+            spentSeconds: 1000,
           },
           activityDistribution: [
             {
@@ -2210,7 +2209,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
               sessionStat: {
                 sessionsAmount: 5,
                 pausedAmount: 4,
-                spentTimeSeconds: 1000,
+                spentSeconds: 1000,
               },
             },
           ],
@@ -2221,7 +2220,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 1,
             pausedAmount: 1,
-            spentTimeSeconds: 30,
+            spentSeconds: 30,
           },
           activityDistribution: [
             {
@@ -2231,7 +2230,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
               sessionStat: {
                 sessionsAmount: 1,
                 pausedAmount: 1,
-                spentTimeSeconds: 30,
+                spentSeconds: 30,
               },
             },
           ],
@@ -2302,7 +2301,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       sessionStat: {
         sessionsAmount: 5,
         pausedAmount: 4,
-        spentTimeSeconds: 240,
+        spentSeconds: 240,
       },
       activityDistribution: [
         {
@@ -2312,7 +2311,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 3,
             pausedAmount: 1,
-            spentTimeSeconds: 180,
+            spentSeconds: 180,
           },
         },
         {
@@ -2322,7 +2321,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 2,
             pausedAmount: 3,
-            spentTimeSeconds: 60,
+            spentSeconds: 60,
           },
         },
       ],
@@ -2333,7 +2332,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 4,
             pausedAmount: 1,
-            spentTimeSeconds: 150,
+            spentSeconds: 150,
           },
           activityDistribution: [
             {
@@ -2343,7 +2342,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
               sessionStat: {
                 sessionsAmount: 3,
                 pausedAmount: 1,
-                spentTimeSeconds: 100,
+                spentSeconds: 100,
               },
             },
           ],
@@ -2356,7 +2355,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       sessionStat: {
         sessionsAmount: 5,
         pausedAmount: 4,
-        spentTimeSeconds: 240,
+        spentSeconds: 240,
       },
       activityDistribution: [
         {
@@ -2366,7 +2365,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 2,
             pausedAmount: 3,
-            spentTimeSeconds: 60,
+            spentSeconds: 60,
           },
         },
         {
@@ -2376,7 +2375,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
           sessionStat: {
             sessionsAmount: 3,
             pausedAmount: 1,
-            spentTimeSeconds: 180,
+            spentSeconds: 180,
           },
         },
       ],
@@ -2397,7 +2396,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
         sessionStat: {
           sessionsAmount: 2,
           pausedAmount: 3,
-          spentTimeSeconds: 60,
+          spentSeconds: 60,
         },
         activityDistribution: firstAnalytics.activityDistribution.filter(
           (ad) => ad.id !== Aid.toString(),
@@ -2413,7 +2412,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
             sessionStat: {
               sessionsAmount: 1,
               pausedAmount: 0,
-              spentTimeSeconds: 50,
+              spentSeconds: 50,
             },
             activityDistribution: bar.activityDistribution.filter((ad) => ad.id !== Aid.toString()),
           };

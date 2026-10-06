@@ -1,11 +1,11 @@
 export interface SessionStat {
   sessionsAmount: number;
   pausedAmount: number;
-  spentTimeSeconds: number;
+  spentSeconds: number;
 }
 export const emptySessionStat: SessionStat = {
   sessionsAmount: 0,
-  spentTimeSeconds: 0,
+  spentSeconds: 0,
   pausedAmount: 0,
 };
 

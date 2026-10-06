@@ -8,23 +8,15 @@ import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDist
 import { ISessionStat } from '../ts/interfaces/Statistics/ISessionStat';
 
 const mapResponseData = (unmappedData: any): IAnalytics => {
-  // TODO: remove
-  const sessionStat: ISessionStat = {
-    ...unmappedData.sessionStat,
-    spentSeconds: unmappedData.sessionStat.spentTimeSeconds,
-  };
+  const sessionStat: ISessionStat = unmappedData.sessionStat;
 
   const adItems: IActivityDistribution[] = unmappedData.activityDistribution.map((ad: any) => ({
     id: ad.id,
     name: ad.name,
     fill: ad.color,
-    // TODO: remove
-    sessionStat: {
-      ...ad.sessionStat,
-      spentSeconds: ad.sessionStat.spentTimeSeconds,
-    },
+    sessionStat: ad.sessionStat,
     spentTimePercentage: parseFloat(
-      (ad.sessionStat.spentTimeSeconds / sessionStat.spentSeconds).toFixed(2),
+      (ad.sessionStat.spentSeconds / sessionStat.spentSeconds).toFixed(2),
     ),
   }));
 
@@ -40,13 +32,9 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
         id: ad.id,
         name: ad.name,
         fill: ad.color,
-        // TODO: remove
-        sessionStat: {
-          ...ad.sessionStat,
-          spentSeconds: ad.sessionStat.spentTimeSeconds,
-        },
+        sessionStat: ad.sessionStat,
         spentTimePercentage: parseFloat(
-          (ad.sessionStat.spentTimeSeconds / sessionStat.spentSeconds).toFixed(2),
+          (ad.sessionStat.spentSeconds / sessionStat.spentSeconds).toFixed(2),
         ),
       };
     });
@@ -58,8 +46,7 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
         ? startOfRange.getFullYear().toString()
         : getBarName(startOfRange, endOfRange, i18n.t),
       barDetailedName: getBarDetailedName(startOfRange, endOfRange, i18n.t, i18n.language),
-      // TODO: remove
-      sessionStat: { ...bar.sessionStat, spentSeconds: bar.sessionStat.spentTimeSeconds },
+      sessionStat: bar.sessionStat,
       adItems: barAds,
     };
   });

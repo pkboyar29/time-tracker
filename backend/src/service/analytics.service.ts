@@ -22,12 +22,12 @@ type TimeBarType = 'hour' | 'day' | 'month' | 'year';
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 
-interface GetSessionsStatisticsOptions {
+interface GetSessionsStatOptions {
   sessionParts: ISessionPart[];
   completedSessions: ISession[];
 }
 
-interface GetSessionsStatisticsAggregatesOptions {
+interface GetSessionsStatAggregatesOptions {
   aggregates: IDailyAggregate[];
 }
 
@@ -167,14 +167,14 @@ type UpdateCacheOptions =
   | { type: 'activityDeleted'; activityId: string };
 
 const analyticsService = {
-  getSessionsStatistics,
+  getSessionsStat,
   buildActivityDistributions,
   getActivityDistributions,
   getTimeBarType,
   getBarStatAndAds,
   getTimeBars,
   createEmptyBars,
-  getSessionsStatisticsAggregates,
+  getSessionsStatAggregates,
   getActivityDistributionsAggregates,
   getTodayAggregate,
   calculateStreak,
@@ -197,15 +197,11 @@ const analyticsService = {
   updateCache,
 };
 
-// TODO: переименовать на getSessionStat
-function getSessionsStatistics({
-  sessionParts,
-  completedSessions,
-}: GetSessionsStatisticsOptions): SessionStat {
+function getSessionsStat({ sessionParts, completedSessions }: GetSessionsStatOptions): SessionStat {
   const sessionsAmount = completedSessions.length;
 
-  const spentTimeSeconds = sessionParts.reduce(
-    (spentTimeSeconds, sessionPart) => spentTimeSeconds + sessionPart.spentSeconds,
+  const spentSeconds = sessionParts.reduce(
+    (spentSeconds, sessionPart) => spentSeconds + sessionPart.spentSeconds,
     0,
   );
 
@@ -214,7 +210,7 @@ function getSessionsStatistics({
 
   return {
     sessionsAmount,
-    spentTimeSeconds,
+    spentSeconds,
     pausedAmount,
   };
 }
@@ -244,10 +240,10 @@ function buildActivityDistributions({
   // set without activity to activityDistributions
   const woStat: SessionStat = {
     sessionsAmount: totalStat.sessionsAmount - allActivitiesStat.sessionsAmount,
-    spentTimeSeconds: totalStat.spentTimeSeconds - allActivitiesStat.spentTimeSeconds,
+    spentSeconds: totalStat.spentSeconds - allActivitiesStat.spentSeconds,
     pausedAmount: totalStat.pausedAmount - allActivitiesStat.pausedAmount,
   };
-  if (woStat.spentTimeSeconds > 0) {
+  if (woStat.spentSeconds > 0) {
     ads.push({
       id: '0',
       name: 'Without activity',
@@ -269,7 +265,7 @@ function getActivityDistributions({
 
   const allActivitiesStat: SessionStat = {
     sessionsAmount: 0,
-    spentTimeSeconds: 0,
+    spentSeconds: 0,
     pausedAmount: 0,
   };
 
@@ -282,7 +278,7 @@ function getActivityDistributions({
     if (!activityStat) {
       activityStat = {
         sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         pausedAmount: 0,
       };
     }
@@ -293,7 +289,7 @@ function getActivityDistributions({
     activitiesStatMap.set(activityId, activityStat);
   }
 
-  // set spentTimeSeconds and pausedAmount to activityDistributions
+  // set spentSeconds and pausedAmount to activityDistributions
   for (const part of sessionParts) {
     if (!part.session.activity) continue;
     const activityId = part.session.activity.id.toString();
@@ -302,13 +298,13 @@ function getActivityDistributions({
     if (!activityStat) {
       activityStat = {
         sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         pausedAmount: 0,
       };
     }
 
-    activityStat.spentTimeSeconds += part.spentSeconds;
-    allActivitiesStat.spentTimeSeconds += part.spentSeconds;
+    activityStat.spentSeconds += part.spentSeconds;
+    allActivitiesStat.spentSeconds += part.spentSeconds;
     if (part.paused) {
       activityStat.pausedAmount += 1;
       allActivitiesStat.pausedAmount += 1;
@@ -361,7 +357,7 @@ function getBarStatAndAds({
       return completedDate >= startOfPeriod.getTime() && completedDate < endOfPeriod.getTime();
     });
 
-    const barStat = analyticsService.getSessionsStatistics({
+    const barStat = analyticsService.getSessionsStat({
       sessionParts: filteredParts,
       completedSessions: filteredSessions,
     });
@@ -398,7 +394,7 @@ function getBarStatAndAds({
       return adDate >= startOfPeriodISO && adDate < endOfPeriodISO;
     });
 
-    const barStat = analyticsService.getSessionsStatisticsAggregates({
+    const barStat = analyticsService.getSessionsStatAggregates({
       aggregates: filteredAggregates,
     });
     const barAds = analyticsService.getActivityDistributionsAggregates({
@@ -469,7 +465,7 @@ function getTimeBars({
   while (true) {
     let barStat: SessionStat = {
       sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
       pausedAmount: 0,
     };
     let barAds: ActivityDistribution[] = [];
@@ -544,18 +540,16 @@ function createEmptyBars({
   });
 }
 
-function getSessionsStatisticsAggregates({
-  aggregates,
-}: GetSessionsStatisticsAggregatesOptions): SessionStat {
+function getSessionsStatAggregates({ aggregates }: GetSessionsStatAggregatesOptions): SessionStat {
   const sessionStat: SessionStat = {
-    spentTimeSeconds: 0,
+    spentSeconds: 0,
     sessionsAmount: 0,
     pausedAmount: 0,
   };
   for (let i = 0; i < aggregates.length; i++) {
     const aggregate = aggregates[i];
 
-    sessionStat.spentTimeSeconds += aggregate.spentSeconds;
+    sessionStat.spentSeconds += aggregate.spentSeconds;
     sessionStat.sessionsAmount += aggregate.sessionsAmount;
     sessionStat.pausedAmount += aggregate.pausedAmount;
   }
@@ -572,7 +566,7 @@ function getActivityDistributionsAggregates({
 
   const allActivitiesStat: SessionStat = {
     sessionsAmount: 0,
-    spentTimeSeconds: 0,
+    spentSeconds: 0,
     pausedAmount: 0,
   };
 
@@ -582,18 +576,18 @@ function getActivityDistributionsAggregates({
     if (!activityStat) {
       activityStat = {
         sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         pausedAmount: 0,
       };
     }
 
-    activityStat.spentTimeSeconds += dailyAd.spentSeconds;
+    activityStat.spentSeconds += dailyAd.spentSeconds;
     activityStat.sessionsAmount += dailyAd.sessionsAmount;
     activityStat.pausedAmount += dailyAd.pausedAmount;
 
     activitiesStatMap.set(activityId, activityStat);
 
-    allActivitiesStat.spentTimeSeconds += dailyAd.spentSeconds;
+    allActivitiesStat.spentSeconds += dailyAd.spentSeconds;
     allActivitiesStat.sessionsAmount += dailyAd.sessionsAmount;
     allActivitiesStat.pausedAmount += dailyAd.pausedAmount;
   }
@@ -782,7 +776,7 @@ async function applySessionDeleteToAggregates({
     }
   }
 
-  const deletedStatMap = new Map<string, { spentTimeSeconds: number; pausedAmount: number }>(); // dateISO / object
+  const deletedStatMap = new Map<string, { spentSeconds: number; pausedAmount: number }>(); // dateISO / object
   for (let i = 0; i < deletedParts.length; i++) {
     const dateISO = DateTime.fromJSDate(deletedParts[i].createdDate, {
       zone: timezone,
@@ -793,9 +787,9 @@ async function applySessionDeleteToAggregates({
 
     let dailyStat = deletedStatMap.get(dateISO);
     if (!dailyStat) {
-      dailyStat = { spentTimeSeconds: 0, pausedAmount: 0 };
+      dailyStat = { spentSeconds: 0, pausedAmount: 0 };
     }
-    dailyStat.spentTimeSeconds += deletedParts[i].spentSeconds;
+    dailyStat.spentSeconds += deletedParts[i].spentSeconds;
     if (deletedParts[i].paused) {
       dailyStat.pausedAmount += 1;
     }
@@ -820,7 +814,7 @@ async function applySessionDeleteToAggregates({
       continue;
     }
 
-    aggregate.spentSeconds -= statToDelete.spentTimeSeconds;
+    aggregate.spentSeconds -= statToDelete.spentSeconds;
     aggregate.pausedAmount -= statToDelete.pausedAmount;
 
     if (completedDateISO && aggregate.date === completedDateISO) {
@@ -848,7 +842,7 @@ async function applySessionDeleteToAggregates({
       continue;
     }
 
-    dailyAd.spentSeconds -= statToDelete.spentTimeSeconds;
+    dailyAd.spentSeconds -= statToDelete.spentSeconds;
     dailyAd.pausedAmount -= statToDelete.pausedAmount;
 
     if (completedDateISO && dailyAd.date === completedDateISO) {
@@ -881,7 +875,7 @@ async function applyActivityDeleteToAggregates({
     const ad = dailyAdsToDelete[i];
 
     dailyAdsMap.set(ad.date, {
-      spentTimeSeconds: ad.spentSeconds,
+      spentSeconds: ad.spentSeconds,
       sessionsAmount: ad.sessionsAmount,
       pausedAmount: ad.pausedAmount,
     });
@@ -901,7 +895,7 @@ async function applyActivityDeleteToAggregates({
     }
 
     aggr.sessionsAmount -= adStat.sessionsAmount;
-    aggr.spentSeconds -= adStat.spentTimeSeconds;
+    aggr.spentSeconds -= adStat.spentSeconds;
     aggr.pausedAmount -= adStat.pausedAmount;
   }
 
@@ -930,7 +924,7 @@ async function getAnalyticsForRangeInternal({
     userId,
   });
 
-  const sessionStat = analyticsService.getSessionsStatistics({
+  const sessionStat = analyticsService.getSessionsStat({
     sessionParts: sessionPartsForRange,
     completedSessions: completedSessionsForRange,
   });
@@ -1033,7 +1027,7 @@ async function getAnalyticsForRangeAggregates({
       },
     });
 
-    const sessionStat = analyticsService.getSessionsStatisticsAggregates({
+    const sessionStat = analyticsService.getSessionsStatAggregates({
       aggregates: dailyAggregates,
     });
 
@@ -1102,7 +1096,7 @@ async function getAnalyticsForRangeCache({
         endOfRange,
         sessionStat: {
           sessionsAmount: 0,
-          spentTimeSeconds: 0,
+          spentSeconds: 0,
           pausedAmount: 0,
         },
         activityDistribution: [],
@@ -1164,7 +1158,7 @@ async function getAnalyticsForRangeCache({
         timezone,
       });
 
-      if (analyticsUntilToday.sessionStat.spentTimeSeconds > 0) {
+      if (analyticsUntilToday.sessionStat.spentSeconds > 0) {
         await redisClient.set(cacheKey, JSON.stringify(analyticsUntilToday), {
           expiration: {
             type: 'EXAT',
@@ -1195,7 +1189,7 @@ async function getAnalyticsForRangeCache({
         timezone,
       });
 
-      if (analyticsForRange.sessionStat.spentTimeSeconds > 0) {
+      if (analyticsForRange.sessionStat.spentSeconds > 0) {
         await redisClient.set(cacheKey, JSON.stringify(analyticsForRange), {
           expiration: { type: 'EX', value: 604800 }, // 7 days
         });
@@ -1211,13 +1205,13 @@ async function getAnalyticsForRangeCache({
 function mergeSessionStat(statisticsList: SessionStat[]): SessionStat {
   const mergedStat: SessionStat = {
     sessionsAmount: 0,
-    spentTimeSeconds: 0,
+    spentSeconds: 0,
     pausedAmount: 0,
   };
 
   statisticsList.forEach((stat) => {
     mergedStat.sessionsAmount += stat.sessionsAmount;
-    mergedStat.spentTimeSeconds += stat.spentTimeSeconds;
+    mergedStat.spentSeconds += stat.spentSeconds;
     mergedStat.pausedAmount += stat.pausedAmount;
   });
 
@@ -1553,7 +1547,7 @@ function mergeAnalytics({
     endOfRange: finalObjEndOfRange,
     sessionStat: {
       sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
       pausedAmount: 0,
     },
     activityDistribution: [],
@@ -1622,8 +1616,8 @@ function removeActivityFromAds(
   if (adIndex === -1) return false;
 
   const deletedAd = analyticsObject.activityDistribution.splice(adIndex, 1)[0];
-  const { spentTimeSeconds, sessionsAmount, pausedAmount } = deletedAd.sessionStat;
-  analyticsObject.sessionStat.spentTimeSeconds -= spentTimeSeconds;
+  const { spentSeconds, sessionsAmount, pausedAmount } = deletedAd.sessionStat;
+  analyticsObject.sessionStat.spentSeconds -= spentSeconds;
   analyticsObject.sessionStat.sessionsAmount -= sessionsAmount;
   analyticsObject.sessionStat.pausedAmount -= pausedAmount;
 

@@ -6,7 +6,7 @@ const mockAggregate = {
   _id: new Types.ObjectId(),
   date: '',
   user: new Types.ObjectId(),
-  spentTimeSeconds: 0,
+  spentSeconds: 0,
   sessionsAmount: 0,
   pausedAmount: 0,
 };

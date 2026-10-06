@@ -86,7 +86,7 @@ async function createDailyAggregates() {
         new DailyAggregate({
           date: dateISO,
           user: userId,
-          spentTimeSeconds: totalSeconds,
+          spentSeconds: totalSeconds,
           sessionsAmount: filteredSessions.length,
           pausedAmount: totalPaused,
         }),
@@ -121,7 +121,7 @@ async function createDailyAggregates() {
             date: dateISO,
             user: userId,
             activity: new mongoose.Types.ObjectId(activityId),
-            spentTimeSeconds: totalSeconds,
+            spentSeconds: totalSeconds,
             sessionsAmount: activitySessions.length,
             pausedAmount: totalPaused,
           }),
