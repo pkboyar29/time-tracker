@@ -131,11 +131,11 @@ async function updateActivityGroup(
   }
 }
 
-// newSessionsAmount and newSpentTimeSeconds could be negative
+// TODO: newSessionsAmount and newSpentSeconds could be negative
 async function updateActivityGroupStats(
   activityGroupId: string,
   newSessionsAmount: number,
-  newSpentTimeSeconds: number,
+  newSpentSeconds: number,
   userId: string,
 ): Promise<void> {
   const activityGroup = await activityGroupService.getActivityGroup({
@@ -144,7 +144,7 @@ async function updateActivityGroupStats(
   });
 
   activityGroup.sessionsAmount += newSessionsAmount;
-  activityGroup.spentTimeSeconds += newSpentTimeSeconds;
+  activityGroup.spentSeconds += newSpentSeconds;
 
   const validationError = activityGroup.validateSync();
   if (validationError) {

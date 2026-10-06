@@ -12,7 +12,7 @@ export interface IActivity {
   archived: boolean;
   deleted: boolean;
   sessionsAmount: number;
-  spentTimeSeconds: number;
+  spentSeconds: number;
 }
 
 const activitySchema = new Schema<IActivity>({
@@ -74,7 +74,7 @@ const activitySchema = new Schema<IActivity>({
     default: 0,
     required: true,
   },
-  spentTimeSeconds: {
+  spentSeconds: {
     type: Number,
     min: 0,
     default: 0,

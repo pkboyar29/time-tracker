@@ -238,16 +238,16 @@ async function updateActivityColor(
   return activity;
 }
 
-// newSessionsAmount and newSpentTimeSeconds could be negative
+// TODO: newSessionsAmount and newSpentSeconds could be negative
 async function updateActivityStats(
   activityId: string,
   newSessionsAmount: number,
-  newSpentTimeSeconds: number,
+  newSpentSeconds: number,
   userId: string,
 ): Promise<void> {
   const activity = await activityService.getActivity({ activityId, userId });
   activity.sessionsAmount += newSessionsAmount;
-  activity.spentTimeSeconds += newSpentTimeSeconds;
+  activity.spentSeconds += newSpentSeconds;
 
   const validationError = activity.validateSync();
   if (validationError) {
@@ -308,7 +308,7 @@ async function deleteActivity(activityId: string, userId: string): Promise<{ mes
     await activityGroupService.updateActivityGroupStats(
       activity.activityGroup._id.toString(),
       -activity.sessionsAmount,
-      -activity.spentTimeSeconds,
+      -activity.spentSeconds,
       userId,
     );
 

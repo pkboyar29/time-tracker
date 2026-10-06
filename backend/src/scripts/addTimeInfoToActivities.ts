@@ -14,14 +14,14 @@ async function addTimeInfoToActivities() {
   for (let i = 0; i < allActivities.length; i++) {
     if (allActivities[i].deleted) {
       allActivities[i].sessionsAmount = 0;
-      allActivities[i].spentTimeSeconds = 0;
+      allActivities[i].spentSeconds = 0;
     } else {
       const activitySessions = await Session.find({
         completed: true,
         activity: allActivities[i]._id,
       });
       allActivities[i].sessionsAmount = activitySessions.length;
-      allActivities[i].spentTimeSeconds = activitySessions.reduce((seconds, session) => {
+      allActivities[i].spentSeconds = activitySessions.reduce((seconds, session) => {
         return seconds + session.totalSeconds;
       }, 0);
     }
@@ -33,7 +33,7 @@ async function addTimeInfoToActivities() {
   const allActivityGroups = await ActivityGroup.find({}).exec();
   for (let i = 0; i < allActivityGroups.length; i++) {
     if (allActivityGroups[i].deleted) {
-      allActivityGroups[i].spentTimeSeconds = 0;
+      allActivityGroups[i].spentSeconds = 0;
       allActivityGroups[i].sessionsAmount = 0;
     } else {
       const groupActivities = allActivities.filter((activity) =>
@@ -42,8 +42,8 @@ async function addTimeInfoToActivities() {
       allActivityGroups[i].sessionsAmount = groupActivities.reduce((sessions, activity) => {
         return sessions + activity.sessionsAmount;
       }, 0);
-      allActivityGroups[i].spentTimeSeconds = groupActivities.reduce((seconds, activity) => {
-        return seconds + activity.spentTimeSeconds;
+      allActivityGroups[i].spentSeconds = groupActivities.reduce((seconds, activity) => {
+        return seconds + activity.spentSeconds;
       }, 0);
     }
   }

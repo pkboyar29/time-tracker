@@ -522,7 +522,7 @@ describe('analyticsService.getActivityDistributions', () => {
       deleted: false,
       archived: false,
       sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
     },
     {
       ...codingMeta,
@@ -533,7 +533,7 @@ describe('analyticsService.getActivityDistributions', () => {
       deleted: false,
       archived: false,
       sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
     },
   ];
 
@@ -2076,7 +2076,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       archived: false,
       deleted: false,
       sessionsAmount: 2,
-      spentTimeSeconds: 120,
+      spentSeconds: 120,
     };
 
     const result = analyticsService.buildUpdatedCacheValues(cacheKeys, cacheValues, {
@@ -2256,7 +2256,7 @@ describe('analyticsService.buildUpdatedCacheValues', () => {
       archived: false,
       deleted: false,
       sessionsAmount: 2,
-      spentTimeSeconds: 120,
+      spentSeconds: 120,
     };
 
     const result = analyticsService.buildUpdatedCacheValues(cacheKeys, cacheValues, {

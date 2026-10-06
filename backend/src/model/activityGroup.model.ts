@@ -9,7 +9,7 @@ export interface IActivityGroup {
   createdDate: Date;
   updatedDate: Date;
   sessionsAmount: number;
-  spentTimeSeconds: number;
+  spentSeconds: number;
 }
 
 const activityGroupSchema = new Schema({
@@ -51,7 +51,7 @@ const activityGroupSchema = new Schema({
     default: 0,
     required: true,
   },
-  spentTimeSeconds: {
+  spentSeconds: {
     type: Number,
     min: 0,
     default: 0,
