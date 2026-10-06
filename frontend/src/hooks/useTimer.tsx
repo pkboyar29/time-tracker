@@ -29,7 +29,7 @@ interface TimerContextType {
   startTimer: (session: ISession, paused?: boolean) => Promise<void>;
   toggleTimer: () => Promise<void>;
   stopTimer: (shouldUpdateSession?: boolean) => Promise<void>;
-  changeTotalTimeSeconds: (newTotalTimeSeconds: number) => Promise<void>;
+  changeTotalSeconds: (newTotalSeconds: number) => Promise<void>;
   finishTimer: (isEarly: boolean) => Promise<void>;
   timerState: TimerState;
   timerEndDate: Date;
@@ -42,7 +42,7 @@ const defaultContext: TimerContextType = {
   startTimer: async () => {},
   toggleTimer: async () => {},
   stopTimer: async () => {},
-  changeTotalTimeSeconds: async () => {},
+  changeTotalSeconds: async () => {},
   finishTimer: async () => {},
   timerState: { status: 'idle', session: null },
   timerEndDate: new Date(),
@@ -150,13 +150,13 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     }
   };
 
-  const changeTotalTimeSeconds = async (newTotalTimeSeconds: number) => {
+  const changeTotalSeconds = async (newTotalSeconds: number) => {
     if (timerState.status === 'idle') return;
 
-    const oldTotalTimeSeconds = timerState.session.totalSeconds; // TODO: если мы к старому состоянию при ошибке возвращаться не будем, то delete
+    const oldTotalSeconds = timerState.session.totalSeconds; // TODO: если мы к старому состоянию при ошибке возвращаться не будем, то delete
     const sessionToUpdate: ISession = {
       ...timerState.session,
-      totalSeconds: newTotalTimeSeconds,
+      totalSeconds: newTotalSeconds,
       spentSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
     };
 
@@ -174,7 +174,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       });
 
       setTimerState({
-        session: { ...sessionToUpdate, totalSeconds: oldTotalTimeSeconds },
+        session: { ...sessionToUpdate, totalSeconds: oldTotalSeconds },
         status: timerState.status,
       });
     }
@@ -325,7 +325,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       value={{
         startTimer,
         toggleTimer,
-        changeTotalTimeSeconds,
+        changeTotalSeconds,
         stopTimer,
         finishTimer,
         timerState,

@@ -63,7 +63,7 @@ const SessionsList: FC<SessionsListProps> = ({
     });
   }, [timerState.session?.id]);
 
-  // эффект, изменяющий totalTimeSeconds у текущей сессии
+  // эффект, изменяющий totalSeconds у текущей сессии
   useEffect(() => {
     if (!timerState.session) return;
     const currentSession = timerState.session;

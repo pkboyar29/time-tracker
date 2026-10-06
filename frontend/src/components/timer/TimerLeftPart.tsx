@@ -31,7 +31,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
 
   const { mutateAsync, isPending } = useMutation({ mutationFn: createSession });
 
-  const { startTimer, toggleTimer, changeTotalTimeSeconds, finishTimer, stopTimer, timerState } =
+  const { startTimer, toggleTimer, changeTotalSeconds, finishTimer, stopTimer, timerState } =
     useTimerWithMs();
   const isTimerStarted = timerState.status != 'idle';
 
@@ -98,7 +98,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
 
   const handleMinusButtonClick = () => {
     if (!timerState.session) return;
-    changeTotalTimeSeconds(timerState.session.totalSeconds - adjustmentSeconds);
+    changeTotalSeconds(timerState.session.totalSeconds - adjustmentSeconds);
   };
 
   const handleFinishEarlyClick = () => {
@@ -107,7 +107,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
 
   const handlePlusButtonClick = () => {
     if (!timerState.session) return;
-    changeTotalTimeSeconds(timerState.session.totalSeconds + adjustmentSeconds);
+    changeTotalSeconds(timerState.session.totalSeconds + adjustmentSeconds);
   };
 
   return (
