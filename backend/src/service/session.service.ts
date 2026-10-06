@@ -163,7 +163,7 @@ async function updateSession(
     if (sessionDTO.spentTimeSeconds > session.spentTimeSeconds) {
       partSpentTimeSeconds = sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
       const newSessionPart = new SessionPart({
-        spentTimeSeconds: partSpentTimeSeconds,
+        spentSeconds: partSpentTimeSeconds,
         session: sessionId,
         user: userId,
         paused: sessionDTO.isPaused,

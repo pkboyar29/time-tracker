@@ -5,13 +5,13 @@ import SessionPart, {
   sessionPopulateConfig,
 } from '../model/sessionPart.model';
 
-interface GetSessionPartsInDateRangeOptions {
+interface GetSessionPartsInRangeOptions {
   startRange: Date;
   endRange: Date;
   userId: string;
 }
 
-interface GetSpentTimeSecondsInDateRange {
+interface GetSpentSecondsInRangeOptions {
   startRange: Date;
   endRange: Date;
   userId: string;
@@ -19,14 +19,14 @@ interface GetSpentTimeSecondsInDateRange {
 
 const sessionPartService = {
   getSessionPartsInDateRange,
-  getSpentTimeSecondsInDateRange,
+  getSpentSecondsInDateRange,
 };
 
 async function getSessionPartsInDateRange({
   startRange,
   endRange,
   userId,
-}: GetSessionPartsInDateRangeOptions): Promise<ISessionPart[]> {
+}: GetSessionPartsInRangeOptions): Promise<ISessionPart[]> {
   try {
     // TODO: все равно запрашиваем все session parts, даже удаленных сессий. Можно делать напрямую Aggregation $lookup + $match.
     // Либо можно начать хранить sessionDeleted в самом session part (то есть будем хранить дополнительный флаг, с которым запрос станет простым)
@@ -46,11 +46,11 @@ async function getSessionPartsInDateRange({
   }
 }
 
-async function getSpentTimeSecondsInDateRange({
+async function getSpentSecondsInDateRange({
   startRange,
   endRange,
   userId,
-}: GetSpentTimeSecondsInDateRange): Promise<number> {
+}: GetSpentSecondsInRangeOptions): Promise<number> {
   try {
     const sessionParts = await sessionPartService.getSessionPartsInDateRange({
       startRange,
@@ -58,12 +58,8 @@ async function getSpentTimeSecondsInDateRange({
       userId,
     });
 
-    const spentTimeSeconds = sessionParts.reduce(
-      (seconds, part) => seconds + part.spentTimeSeconds,
-      0,
-    );
-
-    return spentTimeSeconds;
+    const spentSeconds = sessionParts.reduce((seconds, part) => seconds + part.spentSeconds, 0);
+    return spentSeconds;
   } catch (e) {
     throw e;
   }

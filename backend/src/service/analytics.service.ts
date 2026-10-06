@@ -197,6 +197,7 @@ const analyticsService = {
   updateCache,
 };
 
+// TODO: переименовать на getSessionStat
 function getSessionsStatistics({
   sessionParts,
   completedSessions,
@@ -204,7 +205,7 @@ function getSessionsStatistics({
   const sessionsAmount = completedSessions.length;
 
   const spentTimeSeconds = sessionParts.reduce(
-    (spentTimeSeconds, sessionPart) => spentTimeSeconds + sessionPart.spentTimeSeconds,
+    (spentTimeSeconds, sessionPart) => spentTimeSeconds + sessionPart.spentSeconds,
     0,
   );
 
@@ -306,8 +307,8 @@ function getActivityDistributions({
       };
     }
 
-    activityStat.spentTimeSeconds += part.spentTimeSeconds;
-    allActivitiesStat.spentTimeSeconds += part.spentTimeSeconds;
+    activityStat.spentTimeSeconds += part.spentSeconds;
+    allActivitiesStat.spentTimeSeconds += part.spentSeconds;
     if (part.paused) {
       activityStat.pausedAmount += 1;
       allActivitiesStat.pausedAmount += 1;
@@ -794,7 +795,7 @@ async function applySessionDeleteToAggregates({
     if (!dailyStat) {
       dailyStat = { spentTimeSeconds: 0, pausedAmount: 0 };
     }
-    dailyStat.spentTimeSeconds += deletedParts[i].spentTimeSeconds;
+    dailyStat.spentTimeSeconds += deletedParts[i].spentSeconds;
     if (deletedParts[i].paused) {
       dailyStat.pausedAmount += 1;
     }

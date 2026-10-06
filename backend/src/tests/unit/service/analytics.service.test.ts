@@ -22,7 +22,7 @@ describe('analyticsService.getSessionStat', () => {
     const sessionParts: ISessionPart[] = [
       {
         _id: new Types.ObjectId(),
-        spentTimeSeconds: 120,
+        spentSeconds: 120,
         session: {
           _id: new Types.ObjectId(),
           deleted: false,
@@ -34,7 +34,7 @@ describe('analyticsService.getSessionStat', () => {
       },
       {
         _id: new Types.ObjectId(),
-        spentTimeSeconds: 90,
+        spentSeconds: 90,
         session: {
           _id: new Types.ObjectId(),
           deleted: false,
@@ -46,7 +46,7 @@ describe('analyticsService.getSessionStat', () => {
       },
       {
         _id: new Types.ObjectId(),
-        spentTimeSeconds: 60,
+        spentSeconds: 60,
         session: {
           _id: new Types.ObjectId(),
           deleted: false,
@@ -597,7 +597,7 @@ describe('analyticsService.getActivityDistributions', () => {
           deleted: false,
           activity: { id: readingMeta._id, name: readingMeta.name },
         },
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         createdDate: new Date(),
         paused: true,
         user: new Types.ObjectId(),
@@ -609,7 +609,7 @@ describe('analyticsService.getActivityDistributions', () => {
           deleted: false,
           activity: { id: codingMeta._id, name: codingMeta.name },
         },
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         createdDate: new Date(),
         paused: false,
         user: new Types.ObjectId(),
@@ -621,7 +621,7 @@ describe('analyticsService.getActivityDistributions', () => {
           deleted: false,
           activity: { id: codingMeta._id, name: codingMeta.name },
         },
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         createdDate: new Date(),
         paused: true,
         user: new Types.ObjectId(),
@@ -700,7 +700,7 @@ describe('analyticsService.getActivityDistributions', () => {
           deleted: false,
           activity: { id: readingMeta._id, name: readingMeta.name },
         },
-        spentTimeSeconds: 300,
+        spentSeconds: 300,
         createdDate: new Date(),
         user: new Types.ObjectId(),
       },

@@ -8,7 +8,7 @@ mongoose.connect(MONGO_URL).then(() => {
 });
 
 async function deleteSessionPartsWithZeroTime() {
-  await SessionPart.deleteMany({ spentTimeSeconds: 0 });
+  await SessionPart.deleteMany({ spentSeconds: 0 });
   console.log('Successful');
 }
 
