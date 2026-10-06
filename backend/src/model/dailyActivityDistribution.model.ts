@@ -4,7 +4,7 @@ export interface IDailyAD {
   _id: Types.ObjectId;
   user: Types.ObjectId;
   activity: Types.ObjectId;
-  spentTimeSeconds: number;
+  spentSeconds: number;
   sessionsAmount: number;
   pausedAmount: number;
   date: string;
@@ -21,7 +21,7 @@ const dailyActivityDistributionSchema = new Schema({
     ref: 'Activity',
     required: true,
   },
-  spentTimeSeconds: {
+  spentSeconds: {
     type: Number,
     required: true,
     min: 0,

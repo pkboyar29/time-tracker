@@ -267,7 +267,7 @@ async function isDailyGoalCompleted(
     timezone,
   });
 
-  if (todayAggregate.spentTimeSeconds >= dailyGoalSeconds) {
+  if (todayAggregate.spentSeconds >= dailyGoalSeconds) {
     return true;
   }
 
@@ -285,7 +285,7 @@ async function isDailyGoalCompletedNow(
     timezone,
   });
 
-  let secondsBeforeUpdate = todayAggregate.spentTimeSeconds;
+  let secondsBeforeUpdate = todayAggregate.spentSeconds;
   secondsBeforeUpdate -= newSpentTimeSeconds;
 
   // if goal has reached before

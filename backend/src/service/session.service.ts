@@ -218,7 +218,7 @@ async function updateSession(
       userId,
       timezone,
       date: now,
-      addedSpentTimeSeconds: partSpentSeconds,
+      addedSpentSeconds: partSpentSeconds,
       isPaused: sessionDTO.isPaused,
       isCompleted,
       activityId: session.activity ? session.activity.id.toString() : undefined,

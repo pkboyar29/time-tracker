@@ -139,7 +139,7 @@ interface ApplySessionUpdateToAggregatesOptions {
 
   // event params
   date: Date;
-  addedSpentTimeSeconds: number;
+  addedSpentSeconds: number;
   isPaused: boolean;
   isCompleted: boolean;
   activityId?: string;
@@ -555,7 +555,7 @@ function getSessionsStatisticsAggregates({
   for (let i = 0; i < aggregates.length; i++) {
     const aggregate = aggregates[i];
 
-    sessionStat.spentTimeSeconds += aggregate.spentTimeSeconds;
+    sessionStat.spentTimeSeconds += aggregate.spentSeconds;
     sessionStat.sessionsAmount += aggregate.sessionsAmount;
     sessionStat.pausedAmount += aggregate.pausedAmount;
   }
@@ -587,13 +587,13 @@ function getActivityDistributionsAggregates({
       };
     }
 
-    activityStat.spentTimeSeconds += dailyAd.spentTimeSeconds;
+    activityStat.spentTimeSeconds += dailyAd.spentSeconds;
     activityStat.sessionsAmount += dailyAd.sessionsAmount;
     activityStat.pausedAmount += dailyAd.pausedAmount;
 
     activitiesStatMap.set(activityId, activityStat);
 
-    allActivitiesStat.spentTimeSeconds += dailyAd.spentTimeSeconds;
+    allActivitiesStat.spentTimeSeconds += dailyAd.spentSeconds;
     allActivitiesStat.sessionsAmount += dailyAd.sessionsAmount;
     allActivitiesStat.pausedAmount += dailyAd.pausedAmount;
   }
@@ -622,7 +622,7 @@ async function getTodayAggregate({
     todayAggregate = new DailyAggregate({
       date: dateISO,
       user: userId,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
       sessionsAmount: 0,
       pausedAmount: 0,
     });
@@ -648,7 +648,7 @@ async function calculateStreak({
   if (!todayAggregate) {
     return 0;
   }
-  if (todayAggregate.spentTimeSeconds < dailyGoalSeconds) {
+  if (todayAggregate.spentSeconds < dailyGoalSeconds) {
     return 0;
   }
 
@@ -673,7 +673,7 @@ async function calculateStreak({
       if (!aggr) {
         break;
       }
-      if (aggr.spentTimeSeconds < dailyGoalSeconds) {
+      if (aggr.spentSeconds < dailyGoalSeconds) {
         streakStopped = true;
         break;
       }
@@ -693,12 +693,12 @@ async function applySessionUpdateToAggregates({
   userId,
   timezone,
   date,
-  addedSpentTimeSeconds,
+  addedSpentSeconds,
   isPaused,
   isCompleted,
   activityId,
 }: ApplySessionUpdateToAggregatesOptions) {
-  if (addedSpentTimeSeconds <= 0) {
+  if (addedSpentSeconds <= 0) {
     return;
   }
 
@@ -714,13 +714,13 @@ async function applySessionUpdateToAggregates({
     todayAggregate = new DailyAggregate({
       date: dateISO,
       user: userId,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
       sessionsAmount: 0,
       pausedAmount: 0,
     });
   }
 
-  todayAggregate.spentTimeSeconds += addedSpentTimeSeconds;
+  todayAggregate.spentSeconds += addedSpentSeconds;
   if (isPaused) {
     todayAggregate.pausedAmount += 1;
   }
@@ -745,13 +745,13 @@ async function applySessionUpdateToAggregates({
       date: dateISO,
       user: userId,
       activity: activityId,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
       sessionsAmount: 0,
       pausedAmount: 0,
     });
   }
 
-  todayActivityAggregate.spentTimeSeconds += addedSpentTimeSeconds;
+  todayActivityAggregate.spentSeconds += addedSpentSeconds;
   if (isPaused) {
     todayActivityAggregate.pausedAmount += 1;
   }
@@ -820,7 +820,7 @@ async function applySessionDeleteToAggregates({
       continue;
     }
 
-    aggregate.spentTimeSeconds -= statToDelete.spentTimeSeconds;
+    aggregate.spentSeconds -= statToDelete.spentTimeSeconds;
     aggregate.pausedAmount -= statToDelete.pausedAmount;
 
     if (completedDateISO && aggregate.date === completedDateISO) {
@@ -848,14 +848,14 @@ async function applySessionDeleteToAggregates({
       continue;
     }
 
-    dailyAd.spentTimeSeconds -= statToDelete.spentTimeSeconds;
+    dailyAd.spentSeconds -= statToDelete.spentTimeSeconds;
     dailyAd.pausedAmount -= statToDelete.pausedAmount;
 
     if (completedDateISO && dailyAd.date === completedDateISO) {
       dailyAd.sessionsAmount -= 1;
     }
 
-    if (dailyAd.spentTimeSeconds === 0) {
+    if (dailyAd.spentSeconds === 0) {
       dailyAdsToDelete.push(dailyAd);
     }
   }
@@ -881,7 +881,7 @@ async function applyActivityDeleteToAggregates({
     const ad = dailyAdsToDelete[i];
 
     dailyAdsMap.set(ad.date, {
-      spentTimeSeconds: ad.spentTimeSeconds,
+      spentTimeSeconds: ad.spentSeconds,
       sessionsAmount: ad.sessionsAmount,
       pausedAmount: ad.pausedAmount,
     });
@@ -901,7 +901,7 @@ async function applyActivityDeleteToAggregates({
     }
 
     aggr.sessionsAmount -= adStat.sessionsAmount;
-    aggr.spentTimeSeconds -= adStat.spentTimeSeconds;
+    aggr.spentSeconds -= adStat.spentTimeSeconds;
     aggr.pausedAmount -= adStat.pausedAmount;
   }
 

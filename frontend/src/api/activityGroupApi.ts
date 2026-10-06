@@ -10,8 +10,6 @@ const mapResponseData = (unmappedActivityGroup: any): IActivityGroup => {
   return {
     ...unmappedActivityGroup,
     id: unmappedActivityGroup._id,
-    sessionsAmount: unmappedActivityGroup.sessionsAmount,
-    spentSeconds: unmappedActivityGroup.spentTimeSeconds,
   };
 };
 

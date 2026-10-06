@@ -59,12 +59,12 @@ router.post('/', async (req: Request, res: Response) => {
 
 router.put('/:id', async (req: Request, res: Response) => {
   try {
-    if (req.body.spentTimeSeconds && isNaN(Number(req.body.spentTimeSeconds))) {
-      res.status(400).send('spentTimeSeconds - should be number');
+    if (req.body.spentSeconds && isNaN(Number(req.body.spentSeconds))) {
+      res.status(400).send('spentSeconds - should be number');
       return;
     }
-    if (req.body.totalTimeSeconds && isNaN(Number(req.body.totalTimeSeconds))) {
-      res.status(400).send('totalTimeSeconds - should be number');
+    if (req.body.totalSeconds && isNaN(Number(req.body.totalSeconds))) {
+      res.status(400).send('totalSeconds - should be number');
       return;
     }
 

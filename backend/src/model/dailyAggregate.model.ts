@@ -3,7 +3,7 @@ import { Schema, model, Types } from 'mongoose';
 export interface IDailyAggregate {
   _id: Types.ObjectId;
   user: Types.ObjectId;
-  spentTimeSeconds: number;
+  spentSeconds: number;
   sessionsAmount: number;
   pausedAmount: number;
   date: string;
@@ -15,7 +15,7 @@ const dailyAggregateSchema = new Schema({
     ref: 'User',
     required: true,
   },
-  spentTimeSeconds: {
+  spentSeconds: {
     type: Number,
     required: true,
     min: 0,

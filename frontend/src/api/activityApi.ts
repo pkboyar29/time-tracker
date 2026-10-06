@@ -12,8 +12,6 @@ const mapResponseData = (unmappedActivity: any): IActivity => {
   return {
     ...unmappedActivity,
     id: unmappedActivity._id,
-    sessionsAmount: unmappedActivity.sessionsAmount,
-    spentSeconds: unmappedActivity.spentTimeSeconds,
     activityGroup: {
       id: unmappedActivity.activityGroup._id,
       name: unmappedActivity.activityGroup.name,

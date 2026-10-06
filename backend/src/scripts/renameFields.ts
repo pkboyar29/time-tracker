@@ -3,6 +3,8 @@ import SessionPart from '../model/sessionPart.model';
 import Session from '../model/session.model';
 import Activity from '../model/activity.model';
 import ActivityGroup from '../model/activityGroup.model';
+import DailyAggregate from '../model/dailyAggregate.model';
+import DailyActivityDistribution from '../model/dailyActivityDistribution.model';
 
 const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
 
@@ -45,8 +47,19 @@ async function renameFields() {
   );
   console.log(groupsResult);
 
-  // TODO: переименовать в модели dailyAggregate, одновременно переименовав все в коде
-  // TODO: переименовать в модели dailyActivityDistribution, одновременно переименовав все в коде
+  console.log('renaming spentTimeSeconds to spentSeconds in daily_aggregates...');
+  const aggregatesResult = await DailyAggregate.collection.updateMany(
+    {},
+    { $rename: { spentTimeSeconds: 'spentSeconds' } },
+  );
+  console.log(aggregatesResult);
+
+  console.log('renaming spentTimeSeconds to spentSeconds in daily_ads...');
+  const adsResult = await DailyActivityDistribution.collection.updateMany(
+    {},
+    { $rename: { spentTimeSeconds: 'spentSeconds' } },
+  );
+  console.log(adsResult);
 
   console.log('Successfull');
 }
