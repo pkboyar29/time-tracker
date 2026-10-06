@@ -563,7 +563,7 @@ async function exportUserData(userId: string): Promise<Buffer> {
   const sessionsWithoutActivityAmount: number = sessionsWithoutActivity.length ?? 0;
   let sessionsWithoutActivitySpentTimeSeconds: number = 0;
   sessionsWithoutActivity.forEach((s) => {
-    sessionsWithoutActivitySpentTimeSeconds += s.spentTimeSeconds;
+    sessionsWithoutActivitySpentTimeSeconds += s.spentSeconds;
   });
 
   const withoutActivityLine: string = `# Without activity ${getSessionsInfoInBrackets({

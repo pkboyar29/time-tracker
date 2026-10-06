@@ -9,8 +9,8 @@ const mapResponseData = (unmappedSession: any): ISession => {
     ...unmappedSession,
     id: unmappedSession._id,
     // TODO: remove
-    totalSeconds: unmappedSession.totalTimeSeconds,
-    spentSeconds: unmappedSession.spentTimeSeconds,
+    totalSeconds: unmappedSession.totalSeconds,
+    spentSeconds: unmappedSession.spentSeconds,
     activity: unmappedSession.activity && {
       name: unmappedSession.activity.name,
       color: unmappedSession.activity.color,

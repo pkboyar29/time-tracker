@@ -22,7 +22,7 @@ async function addTimeInfoToActivities() {
       });
       allActivities[i].sessionsAmount = activitySessions.length;
       allActivities[i].spentTimeSeconds = activitySessions.reduce((seconds, session) => {
-        return seconds + session.totalTimeSeconds;
+        return seconds + session.totalSeconds;
       }, 0);
     }
   }

@@ -6,12 +6,13 @@ import Session, { ISession } from '../../../model/session.model';
 import SessionPart from '../../../model/sessionPart.model';
 import { HttpError } from '../../../helpers/HttpError';
 import analyticsService from '../../../service/analytics.service';
+import { SessionCreateDTO } from '../../../dto/session.dto';
 
 describe('sessionService.getSession', () => {
   const mockSession = {
     _id: 'someObjectId',
-    totalTimeSeconds: 3600,
-    spentTimeSeconds: 600,
+    totalSeconds: 3600,
+    spentSeconds: 600,
     deleted: false,
     user: 'userId',
     toObject: () => this,
@@ -89,7 +90,7 @@ describe('sessionService.getSession', () => {
 
 describe('sessionService.createSession', () => {
   const userId = 'user123';
-  const mockSessionDTO = {
+  const mockSessionDTO: SessionCreateDTO = {
     totalTimeSeconds: 60,
     activity: 'activity123',
   };
@@ -108,8 +109,8 @@ describe('sessionService.createSession', () => {
 describe('sessionService.updateSession', () => {
   const mockSession: HydratedDocument<ISession> = {
     _id: new Types.ObjectId('652fcb3f0000000000000001'),
-    totalTimeSeconds: 3600,
-    spentTimeSeconds: 600,
+    totalSeconds: 3600,
+    spentSeconds: 600,
     note: 'Focus session on project A',
     completed: false,
     activity: { name: 'Coding' },
@@ -149,7 +150,7 @@ describe('sessionService.updateSession', () => {
     }
   });
 
-  it('should throw 400 if spentTimeSeconds > totalTimeSeconds', async () => {
+  it('should throw 400 if spentSeconds > totalSeconds', async () => {
     jest.spyOn(sessionService, 'getSession').mockResolvedValue(mockSession);
 
     try {
@@ -198,11 +199,11 @@ describe('sessionService.updateSession', () => {
     }
   });
 
-  it('should throw 400 if trying to reduce spentTimeSeconds', async () => {
+  it('should throw 400 if trying to reduce spentSeconds', async () => {
     jest.spyOn(sessionService, 'getSession').mockResolvedValue({
       ...mockSession,
       completed: false,
-      spentTimeSeconds: 20,
+      spentSeconds: 20,
     } as any);
 
     try {
@@ -220,7 +221,7 @@ describe('sessionService.updateSession', () => {
     } catch (e) {
       if (e instanceof HttpError) {
         expect(e.status).toBe(400);
-        expect(e.message).toBe("You cannot reduce a session's spentTimeSeconds");
+        expect(e.message).toBe("You cannot reduce a session's spentSeconds");
       }
     }
   });
@@ -228,8 +229,8 @@ describe('sessionService.updateSession', () => {
   it('should create a new SessionPart and update session', async () => {
     const sessionMock = {
       completed: false,
-      spentTimeSeconds: 10,
-      totalTimeSeconds: 20,
+      spentSeconds: 10,
+      totalSeconds: 20,
       note: 'old note',
       validateSync: jest.fn().mockReturnValue(undefined),
       save: jest.fn().mockResolvedValue(true),
@@ -256,8 +257,8 @@ describe('sessionService.updateSession', () => {
     );
 
     expect(saveSpy).toHaveBeenCalled();
-    expect(sessionMock.spentTimeSeconds).toBe(15);
-    expect(sessionMock.totalTimeSeconds).toBe(25);
+    expect(sessionMock.spentSeconds).toBe(15);
+    expect(sessionMock.totalSeconds).toBe(25);
     expect(sessionMock.note).toBe('new note');
   });
 });
