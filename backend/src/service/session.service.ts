@@ -115,7 +115,7 @@ async function createSession(sessionDTO: SessionCreateDTO, userId: string): Prom
     }
 
     const newSession = new Session({
-      totalSeconds: sessionDTO.totalTimeSeconds,
+      totalSeconds: sessionDTO.totalSeconds,
       spentSeconds: 0,
       activity: sessionDTO.activity,
       user: userId,
@@ -124,7 +124,6 @@ async function createSession(sessionDTO: SessionCreateDTO, userId: string): Prom
     const validationError = newSession.validateSync();
     if (validationError) {
       if (validationError.errors.totalSeconds) {
-        // TODO: проверить работу
         throw new HttpError(400, validationError.errors.totalSeconds.toString());
       }
     }
@@ -146,23 +145,23 @@ async function updateSession(
   timezone: string,
 ): Promise<ISession> {
   try {
-    if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
-      throw new HttpError(400, 'Total time must be greater or equal spent time');
+    if (sessionDTO.spentSeconds > sessionDTO.totalSeconds) {
+      throw new HttpError(400, 'totalSeconds must be greater or equal spentSeconds');
     }
 
     const session = await sessionService.getSession(sessionId, userId);
     if (session.completed) {
       throw new HttpError(400, 'You cannot update an already completed session');
     }
-    if (sessionDTO.spentTimeSeconds < session.spentSeconds) {
+    if (sessionDTO.spentSeconds < session.spentSeconds) {
       throw new HttpError(400, "You cannot reduce a session's spentSeconds");
     }
 
     const now = new Date();
 
     let partSpentSeconds = 0;
-    if (sessionDTO.spentTimeSeconds > session.spentSeconds) {
-      partSpentSeconds = sessionDTO.spentTimeSeconds - session.spentSeconds;
+    if (sessionDTO.spentSeconds > session.spentSeconds) {
+      partSpentSeconds = sessionDTO.spentSeconds - session.spentSeconds;
       const newSessionPart = new SessionPart({
         spentSeconds: partSpentSeconds,
         session: sessionId,
@@ -173,14 +172,13 @@ async function updateSession(
       await newSessionPart.save();
     }
 
-    session.totalSeconds = sessionDTO.totalTimeSeconds;
-    session.spentSeconds = sessionDTO.spentTimeSeconds;
+    session.totalSeconds = sessionDTO.totalSeconds;
+    session.spentSeconds = sessionDTO.spentSeconds;
     session.note = sessionDTO.note;
     session.updatedDate = now;
 
     const validationError = session.validateSync();
     if (validationError) {
-      // TODO: проверить работу
       const fields = ['totalSeconds', 'spentSeconds', 'note'] as const;
 
       for (const field of fields) {

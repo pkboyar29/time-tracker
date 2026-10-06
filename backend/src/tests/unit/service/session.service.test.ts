@@ -91,7 +91,7 @@ describe('sessionService.getSession', () => {
 describe('sessionService.createSession', () => {
   const userId = 'user123';
   const mockSessionDTO: SessionCreateDTO = {
-    totalTimeSeconds: 60,
+    totalSeconds: 60,
     activity: 'activity123',
   };
 
@@ -135,8 +135,8 @@ describe('sessionService.updateSession', () => {
       await sessionService.updateSession(
         'sessionId',
         {
-          spentTimeSeconds: 10,
-          totalTimeSeconds: 20,
+          spentSeconds: 10,
+          totalSeconds: 20,
           note: 'note',
           isPaused: false,
         },
@@ -157,8 +157,8 @@ describe('sessionService.updateSession', () => {
       await sessionService.updateSession(
         'sessionId',
         {
-          spentTimeSeconds: 30,
-          totalTimeSeconds: 20,
+          spentSeconds: 30,
+          totalSeconds: 20,
           note: 'note',
           isPaused: false,
         },
@@ -168,7 +168,7 @@ describe('sessionService.updateSession', () => {
     } catch (e) {
       if (e instanceof HttpError) {
         expect(e.status).toBe(400);
-        expect(e.message).toBe('Total time must be greater or equal spent time');
+        expect(e.message).toBe('totalSeconds must be greater or equal spentSeconds');
       }
     }
   });
@@ -183,8 +183,8 @@ describe('sessionService.updateSession', () => {
       await sessionService.updateSession(
         'sessionId',
         {
-          spentTimeSeconds: 10,
-          totalTimeSeconds: 20,
+          spentSeconds: 10,
+          totalSeconds: 20,
           note: 'note',
           isPaused: false,
         },
@@ -210,8 +210,8 @@ describe('sessionService.updateSession', () => {
       await sessionService.updateSession(
         'sessionId',
         {
-          spentTimeSeconds: 10,
-          totalTimeSeconds: 30,
+          spentSeconds: 10,
+          totalSeconds: 30,
           note: 'note',
           isPaused: false,
         },
@@ -247,8 +247,8 @@ describe('sessionService.updateSession', () => {
     await sessionService.updateSession(
       'sessionId',
       {
-        spentTimeSeconds: 15,
-        totalTimeSeconds: 25,
+        spentSeconds: 15,
+        totalSeconds: 25,
         note: 'new note',
         isPaused: false,
       },

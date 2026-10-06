@@ -8,14 +8,14 @@ describe('Session controller endpoints', () => {
   test('create session endpoint returns ok', async () => {
     await authorizedRequest(getAccessToken())
       .post('/sessions/')
-      .send({ totalTimeSeconds: 1000 })
+      .send({ totalSeconds: 1000 })
       .expect(200);
   });
 
   test('create session endpoint returns not found if the provided activity does not exist', async () => {
     await authorizedRequest(getAccessToken())
       .post('/sessions/')
-      .send({ totalTimeSeconds: 1000, activity: 'random-id' })
+      .send({ totalSeconds: 1000, activity: 'random-id' })
       .expect(404)
       .then((response) => {
         expect(response.text).toEqual('Activity Not Found');
@@ -25,13 +25,13 @@ describe('Session controller endpoints', () => {
   test('update session endpoint returns ok', async () => {
     const response = await authorizedRequest(getAccessToken())
       .post('/sessions/')
-      .send({ totalTimeSeconds: 1000 });
+      .send({ totalSeconds: 1000 });
 
     await authorizedRequest(getAccessToken())
       .put(`/sessions/${response.body._id}`)
       .send({
-        totalTimeSeconds: 1000,
-        spentTimeSeconds: 200,
+        totalSeconds: 1000,
+        spentSeconds: 200,
         isPaused: false,
         note: 'some notes',
       })
@@ -44,15 +44,15 @@ describe('Session controller endpoints', () => {
 
     const response = await authorizedRequest(getAccessToken())
       .post('/sessions/')
-      .send({ totalTimeSeconds: 1000 });
+      .send({ totalSeconds: 1000 });
 
     await authorizedRequest(getAccessToken()).delete(`/sessions/${response.body._id}`).expect(200);
   });
 
   test('get uncompleted sessions endpoint returns ok with 2 objects', async () => {
-    await authorizedRequest(getAccessToken()).post('/sessions/').send({ totalTimeSeconds: 1000 });
+    await authorizedRequest(getAccessToken()).post('/sessions/').send({ totalSeconds: 1000 });
 
-    await authorizedRequest(getAccessToken()).post('/sessions/').send({ totalTimeSeconds: 1500 });
+    await authorizedRequest(getAccessToken()).post('/sessions/').send({ totalSeconds: 1500 });
 
     await authorizedRequest(getAccessToken())
       .get(`/sessions?completed=false`)

@@ -29,7 +29,7 @@ async function renameFields() {
   );
   console.log(sessionsResult);
 
-  // TODO: переименовать в модели activity, одновременно переименовав все в коде
+  // FOCUS: переименовать в модели activity, одновременно переименовав все в коде
   // TODO: переименовать в модели activityGroup, одновременно переименовав все в коде
   // TODO: переименовать в модели dailyAggregate, одновременно переименовав все в коде
   // TODO: переименовать в модели dailyActivityDistribution, одновременно переименовав все в коде
