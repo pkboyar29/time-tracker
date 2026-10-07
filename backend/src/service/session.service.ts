@@ -115,16 +115,16 @@ async function createSession(sessionDTO: SessionCreateDTO, userId: string): Prom
     }
 
     const newSession = new Session({
-      totalTimeSeconds: sessionDTO.totalTimeSeconds,
-      spentTimeSeconds: 0,
+      totalSeconds: sessionDTO.totalSeconds,
+      spentSeconds: 0,
       activity: sessionDTO.activity,
       user: userId,
     });
 
     const validationError = newSession.validateSync();
     if (validationError) {
-      if (validationError.errors.totalTimeSeconds) {
-        throw new HttpError(400, validationError.errors.totalTimeSeconds.toString());
+      if (validationError.errors.totalSeconds) {
+        throw new HttpError(400, validationError.errors.totalSeconds.toString());
       }
     }
 
@@ -145,25 +145,25 @@ async function updateSession(
   timezone: string,
 ): Promise<ISession> {
   try {
-    if (sessionDTO.spentTimeSeconds > sessionDTO.totalTimeSeconds) {
-      throw new HttpError(400, 'Total time must be greater or equal spent time');
+    if (sessionDTO.spentSeconds > sessionDTO.totalSeconds) {
+      throw new HttpError(400, 'totalSeconds must be greater or equal spentSeconds');
     }
 
     const session = await sessionService.getSession(sessionId, userId);
     if (session.completed) {
       throw new HttpError(400, 'You cannot update an already completed session');
     }
-    if (sessionDTO.spentTimeSeconds < session.spentTimeSeconds) {
-      throw new HttpError(400, "You cannot reduce a session's spentTimeSeconds");
+    if (sessionDTO.spentSeconds < session.spentSeconds) {
+      throw new HttpError(400, "You cannot reduce a session's spentSeconds");
     }
 
     const now = new Date();
 
-    let partSpentTimeSeconds = 0;
-    if (sessionDTO.spentTimeSeconds > session.spentTimeSeconds) {
-      partSpentTimeSeconds = sessionDTO.spentTimeSeconds - session.spentTimeSeconds;
+    let partSpentSeconds = 0;
+    if (sessionDTO.spentSeconds > session.spentSeconds) {
+      partSpentSeconds = sessionDTO.spentSeconds - session.spentSeconds;
       const newSessionPart = new SessionPart({
-        spentTimeSeconds: partSpentTimeSeconds,
+        spentSeconds: partSpentSeconds,
         session: sessionId,
         user: userId,
         paused: sessionDTO.isPaused,
@@ -172,14 +172,14 @@ async function updateSession(
       await newSessionPart.save();
     }
 
-    session.totalTimeSeconds = sessionDTO.totalTimeSeconds;
-    session.spentTimeSeconds = sessionDTO.spentTimeSeconds;
+    session.totalSeconds = sessionDTO.totalSeconds;
+    session.spentSeconds = sessionDTO.spentSeconds;
     session.note = sessionDTO.note;
     session.updatedDate = now;
 
     const validationError = session.validateSync();
     if (validationError) {
-      const fields = ['totalTimeSeconds', 'spentTimeSeconds', 'note'] as const;
+      const fields = ['totalSeconds', 'spentSeconds', 'note'] as const;
 
       for (const field of fields) {
         const err = validationError.errors[field];
@@ -190,7 +190,7 @@ async function updateSession(
     }
 
     let isCompleted = false;
-    if (session.spentTimeSeconds === session.totalTimeSeconds) {
+    if (session.spentSeconds === session.totalSeconds) {
       session.completed = true;
 
       isCompleted = true;
@@ -199,14 +199,14 @@ async function updateSession(
         await activityService.updateActivityStats(
           session.activity.id.toString(),
           1,
-          session.totalTimeSeconds,
+          session.totalSeconds,
           userId,
         );
 
         await activityGroupService.updateActivityGroupStats(
           session.activity.activityGroup.id.toString(),
           1,
-          session.totalTimeSeconds,
+          session.totalSeconds,
           userId,
         );
       }
@@ -218,7 +218,7 @@ async function updateSession(
       userId,
       timezone,
       date: now,
-      addedSpentTimeSeconds: partSpentTimeSeconds,
+      addedSpentSeconds: partSpentSeconds,
       isPaused: sessionDTO.isPaused,
       isCompleted,
       activityId: session.activity ? session.activity.id.toString() : undefined,
@@ -234,7 +234,7 @@ async function updateSession(
       const dailyGoalSeconds = dailyGoalInfo!.dailyGoal;
 
       const isDailyGoalCompletedNow = await userService.isDailyGoalCompletedNow(
-        partSpentTimeSeconds,
+        partSpentSeconds,
         dailyGoalSeconds,
         userId,
         timezone,
@@ -309,7 +309,7 @@ async function deleteSession(
     // TODO: В идеале инвалидировать/частично обновить только те кэш ключи, в которых даты есть в диапазоне созданных deletedParts
     await analyticsService.invalidateCache(userId);
 
-    // TODO: удалять session parts, удалять через deleteMany? а в getSessionPartsInDateRange не фильтровать session parts среди удаленных
+    // TODO: удалять session parts, удалять через deleteMany? а в getSessionPartsInRange не фильтровать session parts среди удаленных
     return {
       message: 'Deleted successfuly',
     };

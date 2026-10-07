@@ -110,7 +110,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
     }
   }, [analytics.timeBars, splitMode]);
 
-  const averageSpentTimeSeconds = useMemo<number>(() => {
+  const averageSpentSeconds = useMemo<number>(() => {
     let timeBarsLength = 0;
     for (let i = 0; i < displayTimeBars.length; i++) {
       if (displayTimeBars[i].startOfRange > new Date()) {
@@ -123,7 +123,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
       }
     }
 
-    return timeBarsLength == 0 ? 0 : analytics.sessionStat.spentTimeSeconds / timeBarsLength;
+    return timeBarsLength == 0 ? 0 : analytics.sessionStat.spentSeconds / timeBarsLength;
   }, [analytics.sessionStat, displayTimeBars]);
 
   const userInfo = useAppSelector((state) => state.users.user);
@@ -175,7 +175,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
           <div>
             {t('pdBox.avg')}{' '}
             <span className="text-primary">
-              {getReadableTime(averageSpentTimeSeconds, t, {
+              {getReadableTime(averageSpentSeconds, t, {
                 short: true,
               })}
             </span>{' '}
@@ -203,7 +203,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
               // }}
             />
 
-            <YAxis dataKey="sessionStat.spentTimeSeconds" />
+            <YAxis dataKey="sessionStat.spentSeconds" />
 
             <Tooltip trigger="click" content={<PeriodTooltip adMode={adMode} />} />
 
@@ -211,13 +211,13 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
               <Bar
                 isAnimationActive={true}
                 cursor="pointer"
-                dataKey="sessionStat.spentTimeSeconds"
+                dataKey="sessionStat.spentSeconds"
                 shape={<CustomBar />}
               >
                 {displayTimeBars.map((bar, index) => {
                   const color =
                     getRangeType(bar.startOfRange, bar.endOfRange) == 'days' &&
-                    bar.sessionStat.spentTimeSeconds >= dailyGoalSeconds
+                    bar.sessionStat.spentSeconds >= dailyGoalSeconds
                       ? colors.primary
                       : themeState === 'dark'
                         ? '#424242'
@@ -236,7 +236,7 @@ const PeriodDistributionBox: FC<PeriodDistributionBoxProps> = ({
                       const barActivityItem = bar.adItems.find(
                         (item: IActivityDistribution) => item.id === ad.id,
                       );
-                      return barActivityItem ? barActivityItem.sessionStat.spentTimeSeconds : '';
+                      return barActivityItem ? barActivityItem.sessionStat.spentSeconds : '';
                     }}
                     fill={ad.fill}
                     stackId="a"

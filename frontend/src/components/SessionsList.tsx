@@ -63,7 +63,7 @@ const SessionsList: FC<SessionsListProps> = ({
     });
   }, [timerState.session?.id]);
 
-  // эффект, изменяющий totalTimeSeconds у текущей сессии
+  // эффект, изменяющий totalSeconds у текущей сессии
   useEffect(() => {
     if (!timerState.session) return;
     const currentSession = timerState.session;
@@ -77,16 +77,14 @@ const SessionsList: FC<SessionsListProps> = ({
         }
       });
     });
-  }, [timerState.session?.totalTimeSeconds]);
+  }, [timerState.session?.totalSeconds]);
 
-  // эффект, изменяющий spentTimeSeconds у текущей сессии в списке
+  // эффект, изменяющий spentSeconds у текущей сессии в списке
   useEffect(() => {
     if (finalSessionId === '') return;
 
     updateSessionsListHandler((prev) =>
-      prev.map((s) =>
-        s.id === finalSessionId ? { ...s, spentTimeSeconds: finalSpentSeconds } : s,
-      ),
+      prev.map((s) => (s.id === finalSessionId ? { ...s, spentSeconds: finalSpentSeconds } : s)),
     );
   }, [finalSpentSeconds, finalSessionId]);
 

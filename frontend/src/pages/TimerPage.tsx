@@ -38,7 +38,7 @@ const TimerPage: FC = () => {
       let sessions = await fetchSessions({ completed: false });
 
       if (unsyncedSessionFromLS) {
-        if (unsyncedSessionFromLS.spentTimeSeconds == unsyncedSessionFromLS.totalTimeSeconds) {
+        if (unsyncedSessionFromLS.spentSeconds == unsyncedSessionFromLS.totalSeconds) {
           sessions = sessions.filter((session) => session.id != unsyncedSessionFromLS.id);
         } else {
           sessions = sessions.map((session) => {

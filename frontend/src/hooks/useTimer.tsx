@@ -29,7 +29,7 @@ interface TimerContextType {
   startTimer: (session: ISession, paused?: boolean) => Promise<void>;
   toggleTimer: () => Promise<void>;
   stopTimer: (shouldUpdateSession?: boolean) => Promise<void>;
-  changeTotalTimeSeconds: (newTotalTimeSeconds: number) => Promise<void>;
+  changeTotalSeconds: (newTotalSeconds: number) => Promise<void>;
   finishTimer: (isEarly: boolean) => Promise<void>;
   timerState: TimerState;
   timerEndDate: Date;
@@ -42,7 +42,7 @@ const defaultContext: TimerContextType = {
   startTimer: async () => {},
   toggleTimer: async () => {},
   stopTimer: async () => {},
-  changeTotalTimeSeconds: async () => {},
+  changeTotalSeconds: async () => {},
   finishTimer: async () => {},
   timerState: { status: 'idle', session: null },
   timerEndDate: new Date(),
@@ -58,7 +58,7 @@ interface TimerProviderProps {
 }
 
 const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
-  // spentTimeSeconds does not change in this state. You can use milliseconds using hook useTimerWithMs
+  // spentSeconds does not change in this state. You can use milliseconds using hook useTimerWithMs
   const [timerState, setTimerState] = useState<TimerState>({
     status: 'idle',
     session: null,
@@ -87,7 +87,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         await updateSession(
           {
             ...timerState.session,
-            spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
+            spentSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
           },
           true,
         );
@@ -104,7 +104,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       setTimerState({ status: 'paused', session });
     } else {
       startTimestampRef.current = Date.now();
-      startSpentMsRef.current = secondsToMs(session.spentTimeSeconds);
+      startSpentMsRef.current = secondsToMs(session.spentSeconds);
 
       lastSavedToLSMsRef.current = 0;
       lastSavedToServerMsRef.current = 0;
@@ -112,7 +112,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       setTimerState({ status: 'running', session });
     }
 
-    timerTickStore.setTick(session.id, secondsToMs(session.spentTimeSeconds));
+    timerTickStore.setTick(session.id, secondsToMs(session.spentSeconds));
   };
 
   const toggleTimer = async () => {
@@ -127,9 +127,9 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
       const sessionToUpdate: ISession = {
         ...timerState.session,
-        spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
+        spentSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
       };
-      setFinalSpentSeconds(sessionToUpdate.spentTimeSeconds);
+      setFinalSpentSeconds(sessionToUpdate.spentSeconds);
       setFinalSessionId(sessionToUpdate.id);
 
       try {
@@ -150,14 +150,14 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
     }
   };
 
-  const changeTotalTimeSeconds = async (newTotalTimeSeconds: number) => {
+  const changeTotalSeconds = async (newTotalSeconds: number) => {
     if (timerState.status === 'idle') return;
 
-    const oldTotalTimeSeconds = timerState.session.totalTimeSeconds; // TODO: если мы к старому состоянию при ошибке возвращаться не будем, то delete
+    const oldTotalSeconds = timerState.session.totalSeconds; // TODO: если мы к старому состоянию при ошибке возвращаться не будем, то delete
     const sessionToUpdate: ISession = {
       ...timerState.session,
-      totalTimeSeconds: newTotalTimeSeconds,
-      spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
+      totalSeconds: newTotalSeconds,
+      spentSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
     };
 
     setTimerState({ session: sessionToUpdate, status: timerState.status });
@@ -174,7 +174,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       });
 
       setTimerState({
-        session: { ...sessionToUpdate, totalTimeSeconds: oldTotalTimeSeconds },
+        session: { ...sessionToUpdate, totalSeconds: oldTotalSeconds },
         status: timerState.status,
       });
     }
@@ -185,9 +185,9 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
     const sessionToUpdate: ISession = {
       ...timerState.session,
-      spentTimeSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
+      spentSeconds: msToSeconds(timerTickStore.getSnapshot().ms),
     };
-    setFinalSpentSeconds(sessionToUpdate.spentTimeSeconds);
+    setFinalSpentSeconds(sessionToUpdate.spentSeconds);
     setFinalSessionId(sessionToUpdate.id);
 
     setTimerState({ status: 'idle', session: null });
@@ -216,12 +216,15 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
     const completedSession: ISession = { ...sessionRef.current };
     if (isEarly) {
-      const spentTimeSeconds = msToSeconds(timerTickStore.getSnapshot().ms);
+      const spentSeconds = msToSeconds(timerTickStore.getSnapshot().ms);
+      if (spentSeconds === 0) {
+        return;
+      }
 
-      completedSession.totalTimeSeconds = spentTimeSeconds;
-      completedSession.spentTimeSeconds = spentTimeSeconds;
+      completedSession.totalSeconds = spentSeconds;
+      completedSession.spentSeconds = spentSeconds;
     } else {
-      completedSession.spentTimeSeconds = completedSession.totalTimeSeconds;
+      completedSession.spentSeconds = completedSession.totalSeconds;
     }
 
     setCompletedSessionId(completedSession.id);
@@ -252,15 +255,15 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
   useEffect(() => {
     if (timerState.status === 'running') {
       let intervalMs = secondsToMs(300); // 5 min
-      if (timerState.session.totalTimeSeconds <= 300) {
-        intervalMs = 0.2 * secondsToMs(timerState.session.totalTimeSeconds);
+      if (timerState.session.totalSeconds <= 300) {
+        intervalMs = 0.2 * secondsToMs(timerState.session.totalSeconds);
       }
 
       syncIntervalMsRef.current = intervalMs;
     } else {
       syncIntervalMsRef.current = 0;
     }
-  }, [timerState.status, timerState.session?.totalTimeSeconds]);
+  }, [timerState.status, timerState.session?.totalSeconds]);
 
   useEffect(() => {
     if (timerState.status === 'running') {
@@ -268,11 +271,11 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         getTimerEndDate(
           Date.now(),
           msToSeconds(timerTickStore.getSnapshot().ms),
-          timerState.session.totalTimeSeconds,
+          timerState.session.totalSeconds,
         ),
       );
     }
-  }, [timerState.status, timerState.session?.totalTimeSeconds]);
+  }, [timerState.status, timerState.session?.totalSeconds]);
 
   useEffect(() => {
     if (timerState.status === 'running') {
@@ -287,7 +290,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
         timerTickStore.setTick(sessionRef.current.id, ev.data);
 
-        if (ev.data >= secondsToMs(sessionRef.current.totalTimeSeconds)) {
+        if (ev.data >= secondsToMs(sessionRef.current.totalSeconds)) {
           finishTimer(false);
           return;
         }
@@ -298,10 +301,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
         if (diff - lastSavedToLSMsRef.current >= 2000) {
           lastSavedToLSMsRef.current += 2000;
 
-          saveSessionToLS(
-            { ...sessionRef.current, spentTimeSeconds: msToSeconds(ev.data) },
-            'session',
-          );
+          saveSessionToLS({ ...sessionRef.current, spentSeconds: msToSeconds(ev.data) }, 'session');
         }
 
         // automatic timer update on server
@@ -310,7 +310,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
 
           updateSession({
             ...sessionRef.current,
-            spentTimeSeconds: msToSeconds(ev.data),
+            spentSeconds: msToSeconds(ev.data),
           });
         }
       };
@@ -325,7 +325,7 @@ const TimerProvider: FC<TimerProviderProps> = ({ children }) => {
       value={{
         startTimer,
         toggleTimer,
-        changeTotalTimeSeconds,
+        changeTotalSeconds,
         stopTimer,
         finishTimer,
         timerState,

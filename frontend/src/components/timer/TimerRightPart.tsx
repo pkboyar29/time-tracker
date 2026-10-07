@@ -79,7 +79,7 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
           <>
             <div className="text-lg font-semibold dark:text-textDark">
               {t('timerPage.session')}{' '}
-              {getReadableTime(timerState.session.totalTimeSeconds, t, {
+              {getReadableTime(timerState.session.totalSeconds, t, {
                 short: false,
               })}
             </div>

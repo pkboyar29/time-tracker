@@ -68,7 +68,7 @@ async function createDailyAggregates() {
     const dailyAds: IDailyAD[] = [];
 
     for (const [dateISO, parts] of datesMap) {
-      const totalSeconds = parts.reduce((seconds, part) => seconds + part.spentTimeSeconds, 0);
+      const totalSeconds = parts.reduce((seconds, part) => seconds + part.spentSeconds, 0);
       const totalPaused = parts.filter((part) => part.paused).length;
 
       const dayStartLuxon = DateTime.fromISO(dateISO, { zone: userTimezone });
@@ -86,7 +86,7 @@ async function createDailyAggregates() {
         new DailyAggregate({
           date: dateISO,
           user: userId,
-          spentTimeSeconds: totalSeconds,
+          spentSeconds: totalSeconds,
           sessionsAmount: filteredSessions.length,
           pausedAmount: totalPaused,
         }),
@@ -109,7 +109,7 @@ async function createDailyAggregates() {
       }
 
       for (const [activityId, parts] of activitiesMap) {
-        const totalSeconds = parts.reduce((seconds, part) => seconds + part.spentTimeSeconds, 0);
+        const totalSeconds = parts.reduce((seconds, part) => seconds + part.spentSeconds, 0);
         const totalPaused = parts.filter((part) => part.paused).length;
 
         const activitySessions = filteredSessions.filter(
@@ -121,7 +121,7 @@ async function createDailyAggregates() {
             date: dateISO,
             user: userId,
             activity: new mongoose.Types.ObjectId(activityId),
-            spentTimeSeconds: totalSeconds,
+            spentSeconds: totalSeconds,
             sessionsAmount: activitySessions.length,
             pausedAmount: totalPaused,
           }),

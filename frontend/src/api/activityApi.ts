@@ -11,8 +11,6 @@ import {
 const mapResponseData = (unmappedActivity: any): IActivity => {
   return {
     ...unmappedActivity,
-    sessionsAmount: unmappedActivity.sessionsAmount ? unmappedActivity.sessionsAmount : 0,
-    spentTimeSeconds: unmappedActivity.spentTimeSeconds ? unmappedActivity.spentTimeSeconds : 0,
     id: unmappedActivity._id,
     activityGroup: {
       id: unmappedActivity.activityGroup._id,

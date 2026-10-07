@@ -1,4 +1,4 @@
-import { ISession } from '../ts/interfaces/Session/ISession';
+import { ISession, ISessionLegacy } from '../ts/interfaces/Session/ISession';
 
 export const saveSessionToLS = (session: ISession, lsKey: 'session' | 'unsyncedSession') => {
   window.localStorage.setItem(lsKey, JSON.stringify(session));
@@ -17,8 +17,15 @@ export const getSessionFromLS = (lsKey: 'session' | 'unsyncedSession'): ISession
   }
 
   try {
-    const session: ISession = JSON.parse(unparsedSession);
-    return session;
+    const session: ISessionLegacy = JSON.parse(unparsedSession);
+    if (session.spentTimeSeconds !== undefined) {
+      session.spentSeconds = session.spentTimeSeconds;
+    }
+    if (session.totalTimeSeconds !== undefined) {
+      session.totalSeconds = session.totalTimeSeconds;
+    }
+
+    return session as ISession;
   } catch (e) {
     removeSessionFromLS(lsKey);
     return null;

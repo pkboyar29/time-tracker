@@ -55,9 +55,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
   const rootRef = useRef<HTMLDivElement>(null);
 
   const sortedItems = useMemo(() => {
-    return adItems.toSorted(
-      (a, b) => b.sessionStat.spentTimeSeconds - a.sessionStat.spentTimeSeconds,
-    );
+    return adItems.toSorted((a, b) => b.sessionStat.spentSeconds - a.sessionStat.spentSeconds);
   }, [adItems]);
 
   const pieItems = useMemo(() => {
@@ -71,7 +69,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
     });
 
     if (lessOnePercentageCount >= 4) {
-      let othersSpentTimeSeconds = 0;
+      let othersSpentSeconds = 0;
       let othersSessionsAmount = 0;
       let othersPausedAmount = 0;
       let othersSpentTimePercentage = 0;
@@ -80,12 +78,10 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
         const deletedLastItem = pieItems.pop();
         othersSessionsAmount += deletedLastItem ? deletedLastItem.sessionStat.sessionsAmount : 0;
         othersPausedAmount += deletedLastItem ? deletedLastItem.sessionStat.pausedAmount : 0;
-        othersSpentTimeSeconds += deletedLastItem
-          ? deletedLastItem.sessionStat.spentTimeSeconds
-          : 0;
+        othersSpentSeconds += deletedLastItem ? deletedLastItem.sessionStat.spentSeconds : 0;
       }
       othersSpentTimePercentage = parseFloat(
-        (othersSpentTimeSeconds / sessionStat.spentTimeSeconds).toFixed(2),
+        (othersSpentSeconds / sessionStat.spentSeconds).toFixed(2),
       );
 
       pieItems = [
@@ -97,7 +93,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
           sessionStat: {
             sessionsAmount: othersSessionsAmount,
             pausedAmount: othersPausedAmount,
-            spentTimeSeconds: othersSpentTimeSeconds,
+            spentSeconds: othersSpentSeconds,
           },
           spentTimePercentage: othersSpentTimePercentage,
         },
@@ -180,7 +176,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   <div className="w-1/2 text-lg font-bold truncate">{item.name}</div>
                   <div className="w-1/5">{item.sessionStat.sessionsAmount}</div>
                   <div className="w-1/5">
-                    {getReadableTime(item.sessionStat.spentTimeSeconds, t, {
+                    {getReadableTime(item.sessionStat.spentSeconds, t, {
                       short: true,
                     })}
                   </div>
@@ -205,7 +201,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                 <Pie
                   animationDuration={750}
                   data={pieItems}
-                  dataKey="sessionStat.spentTimeSeconds"
+                  dataKey="sessionStat.spentSeconds"
                   nameKey="name"
                   cx="50%"
                   cy="50%"
@@ -232,7 +228,7 @@ const ActivityDistributionBox: FC<ActivityDistributionBoxProps> = ({
                   <div className="text-lg truncate dark:text-textDark">{item.name}</div>
                   <div className="text-base text-gray-600 dark:text-textDarkSecondary">
                     (
-                    {getReadableTime(item.sessionStat.spentTimeSeconds, t, {
+                    {getReadableTime(item.sessionStat.spentSeconds, t, {
                       short: true,
                     })}
                     ,{' '}

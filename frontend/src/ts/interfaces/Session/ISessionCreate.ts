@@ -1,4 +1,4 @@
 export interface ISessionCreate {
-  totalTimeSeconds: number;
+  totalSeconds: number;
   activity?: string;
 }

@@ -18,8 +18,8 @@ export const activityPopulateConfig = {
 
 export interface ISession {
   _id: Types.ObjectId;
-  totalTimeSeconds: number;
-  spentTimeSeconds: number;
+  totalSeconds: number;
+  spentSeconds: number;
   note?: string | null;
   completed: boolean;
   activity: PopulatedActivity;
@@ -30,17 +30,17 @@ export interface ISession {
 }
 
 const sessionSchema = new Schema({
-  totalTimeSeconds: {
+  totalSeconds: {
     type: Number,
     required: true,
-    min: [1, 'TotalTimeSeconds should be minimum 1 second'],
-    max: [36000, 'TotalTimeSeconds should be maximum 10 hours'],
+    min: [1, 'totalSeconds should be minimum 1 second'],
+    max: [36000, 'totalSeconds should be maximum 10 hours'],
   },
-  spentTimeSeconds: {
+  spentSeconds: {
     type: Number,
     required: true,
-    min: [0, 'SpentTimeSeconds should be minimum 0 second'],
-    max: [36000, 'SpentTimeSeconds should be maximum 10 hours'],
+    min: [0, 'spentSeconds should be minimum 0 second'],
+    max: [36000, 'spentSeconds should be maximum 10 hours'],
   },
   note: {
     type: String,

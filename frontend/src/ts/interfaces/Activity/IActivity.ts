@@ -5,7 +5,7 @@ export interface IActivity {
   descr?: string;
   archived: boolean;
   sessionsAmount: number;
-  spentTimeSeconds: number;
+  spentSeconds: number;
   activityGroup: {
     id: string;
     name: string;

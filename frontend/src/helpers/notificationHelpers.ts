@@ -19,7 +19,7 @@ export const showSessionCompletedNotification = ({
     if (Notification.permission === 'granted') {
       const activityName = session.activity ? session.activity.name : t('withoutActivity');
 
-      let notificationBody = `${activityName} - ${getReadableTime(session.totalTimeSeconds, t, {
+      let notificationBody = `${activityName} - ${getReadableTime(session.totalSeconds, t, {
         short: false,
       })}`;
       if (dailyGoalCompleted) {

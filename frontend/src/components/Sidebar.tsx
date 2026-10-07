@@ -95,7 +95,7 @@ const Sidebar: FC = () => {
               {timerState.status !== 'idle' && (
                 <div className="px-4 py-2 text-sm shadow-sm rounded-xl bg-primary/10 text-primary dark:bg-surfaceDark dark:text-textDark">
                   {getRemainingTimeHoursMinutesSeconds(
-                    timerState.session.totalTimeSeconds,
+                    timerState.session.totalSeconds,
                     msToSeconds(timerState.ms),
                   )}
                 </div>

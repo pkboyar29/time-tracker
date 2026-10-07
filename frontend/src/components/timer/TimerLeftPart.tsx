@@ -31,12 +31,16 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
 
   const { mutateAsync, isPending } = useMutation({ mutationFn: createSession });
 
-  const { startTimer, toggleTimer, changeTotalTimeSeconds, finishTimer, stopTimer, timerState } =
+  const { startTimer, toggleTimer, changeTotalSeconds, finishTimer, stopTimer, timerState } =
     useTimerWithMs();
   const isTimerStarted = timerState.status != 'idle';
 
   useEffect(() => {
     const handleKeyClick = (event: KeyboardEvent) => {
+      if (document.body.classList.contains('modal-open')) {
+        return;
+      }
+
       const target = event.target as HTMLElement;
       if (
         target.tagName === 'INPUT' ||
@@ -72,7 +76,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
   const handleStartSessionClick = async () => {
     try {
       const newSession = await mutateAsync({
-        totalTimeSeconds: selectedSeconds,
+        totalSeconds: selectedSeconds,
         activity: selectedActivityId !== '' ? selectedActivityId : undefined,
       });
 
@@ -94,7 +98,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
 
   const handleMinusButtonClick = () => {
     if (!timerState.session) return;
-    changeTotalTimeSeconds(timerState.session.totalTimeSeconds - adjustmentSeconds);
+    changeTotalSeconds(timerState.session.totalSeconds - adjustmentSeconds);
   };
 
   const handleFinishEarlyClick = () => {
@@ -103,7 +107,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
 
   const handlePlusButtonClick = () => {
     if (!timerState.session) return;
-    changeTotalTimeSeconds(timerState.session.totalTimeSeconds + adjustmentSeconds);
+    changeTotalSeconds(timerState.session.totalSeconds + adjustmentSeconds);
   };
 
   return (
@@ -116,8 +120,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
             {(ref) => (
               <button
                 disabled={
-                  timerState.session.totalTimeSeconds - adjustmentSeconds <=
-                  msToSeconds(timerState.ms)
+                  timerState.session.totalSeconds - adjustmentSeconds <= msToSeconds(timerState.ms)
                 }
                 ref={ref}
                 tabIndex={-1}
@@ -135,13 +138,13 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
         <CustomCircularProgress
           valuePercent={
             isTimerStarted
-              ? (timerState.ms / secondsToMs(timerState.session.totalTimeSeconds)) * 100
+              ? (timerState.ms / secondsToMs(timerState.session.totalSeconds)) * 100
               : 0
           }
           label={
             isTimerStarted
               ? getRemainingTimeHoursMinutesSeconds(
-                  timerState.session.totalTimeSeconds,
+                  timerState.session.totalSeconds,
                   msToSeconds(timerState.ms),
                 )
               : getRemainingTimeHoursMinutesSeconds(selectedSeconds, 0)
@@ -157,7 +160,7 @@ const TimerLeftPart: FC<TimerLeftPartProps> = ({ selectedSeconds, selectedActivi
               <button
                 ref={ref}
                 tabIndex={-1}
-                disabled={timerState.session.totalTimeSeconds + adjustmentSeconds > 36_000} // 10 hours
+                disabled={timerState.session.totalSeconds + adjustmentSeconds > 36_000} // 10 hours
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-[116%] sm:translate-x-[130%] bg-surfaceLightHover hover:bg-[#B5B5B5] dark:bg-surfaceDark dark:hover:bg-surfaceDarkHover
       w-[31.5px] h-[31.5px] transition duration-300 rounded-full p-1.5 flex justify-center items-center dark:text-textDark 
       opacity-70 hover:opacity-100 disabled:opacity-50 disabled:cursor-not-allowed"

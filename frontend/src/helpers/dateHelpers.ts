@@ -111,13 +111,13 @@ export const getMonthDetailedName = (monthNumber: number, t: TFunction) => {
 
 export const getWeeks = (
   date: Date,
-  full: boolean = true, // true - all month weeks, false - 2 weeks
+  full: boolean = true, // true - all month weeks, false - only 2 weeks
 ): [Date, Date][] => {
   date = new Date(date);
 
   // находим дату понедельника
   let mondayDate: Date = new Date(date);
-  if (date.getDay() == 0) {
+  if (date.getDay() === 0) {
     date.setDate(date.getDate() + 1);
     mondayDate = new Date(date);
   } else if (date.getDay() > 1) {
@@ -130,15 +130,14 @@ export const getWeeks = (
   if (!full) {
     const sunday = new Date(mondayDate);
     sunday.setDate(sunday.getDate() + 7);
-    sunday.setMilliseconds(sunday.getMilliseconds() - 1);
 
-    const prevWeekMonday = new Date(mondayDate);
-    const prevWeekSunday = new Date(sunday);
-    prevWeekMonday.setDate(prevWeekMonday.getDate() - 7);
-    prevWeekSunday.setDate(prevWeekSunday.getDate() - 7);
+    const prevMonday = new Date(mondayDate);
+    const prevSunday = new Date(sunday);
+    prevMonday.setDate(prevMonday.getDate() - 7);
+    prevSunday.setDate(prevSunday.getDate() - 7);
 
     return [
-      [prevWeekMonday, prevWeekSunday],
+      [prevMonday, prevSunday],
       [mondayDate, sunday],
     ];
   }
@@ -181,10 +180,10 @@ export const getWeeks = (
   let prevMonthDaysCount = 0;
   let nextMonthDaysCount = 0;
   for (let i = 1; i <= 7; i++) {
-    if (day.getMonth() == monday.getMonth()) {
+    if (day.getMonth() === monday.getMonth()) {
       prevMonthDaysCount++;
     }
-    if (day.getMonth() == nextMonday.getMonth()) {
+    if (day.getMonth() === nextMonday.getMonth()) {
       nextMonthDaysCount++;
     }
 

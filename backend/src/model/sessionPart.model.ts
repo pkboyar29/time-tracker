@@ -20,7 +20,7 @@ export const sessionPopulateConfig = {
 
 export interface ISessionPart {
   _id: Types.ObjectId;
-  spentTimeSeconds: number;
+  spentSeconds: number;
   session: PopulatedSession;
   user: Types.ObjectId;
   paused: boolean;
@@ -28,11 +28,11 @@ export interface ISessionPart {
 }
 
 const sessionPartSchema = new Schema({
-  spentTimeSeconds: {
+  spentSeconds: {
     type: Number,
     required: true,
-    min: [0, 'SpentTimeSeconds should be minimum 0 second'],
-    max: [36000, 'SpentTimeSeconds should be maximum 10 hours'],
+    min: [0, 'spentSeconds should be minimum 0 second'],
+    max: [36000, 'spentSeconds should be maximum 10 hours'],
   },
   session: {
     type: Schema.Types.ObjectId,

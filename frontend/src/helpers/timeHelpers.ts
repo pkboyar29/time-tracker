@@ -1,11 +1,11 @@
 import { TFunction } from 'i18next';
 
 export const getRemainingTimeHoursMinutesSeconds = (
-  totalTimeSeconds: number,
-  spentTimeSeconds: number,
+  totalSeconds: number,
+  spentSeconds: number,
   short: boolean = false,
 ): string => {
-  const remainingSeconds = totalTimeSeconds - spentTimeSeconds;
+  const remainingSeconds = totalSeconds - spentSeconds;
 
   const hours: number = Math.trunc(remainingSeconds / 3600);
   const formattedHours: string = hours < 10 ? `0${hours.toString()}` : `${hours.toString()}`;
@@ -16,7 +16,7 @@ export const getRemainingTimeHoursMinutesSeconds = (
   const seconds: number = remainingSeconds % 60;
   const formattedSeconds: string = seconds < 10 ? '0' + (seconds % 60) : (seconds % 60).toString();
 
-  if (spentTimeSeconds > totalTimeSeconds) {
+  if (spentSeconds > totalSeconds) {
     return '00:00';
   }
 

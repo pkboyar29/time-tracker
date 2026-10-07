@@ -5,21 +5,20 @@ import i18n from 'i18next';
 import { ITimeBar } from '../ts/interfaces/Statistics/ITimeBar';
 import { IAnalytics } from '../ts/interfaces/Statistics/IAnaltytics';
 import { IActivityDistribution } from '../ts/interfaces/Statistics/IActivityDistribution';
+import { ISessionStat } from '../ts/interfaces/Statistics/ISessionStat';
 
 const mapResponseData = (unmappedData: any): IAnalytics => {
-  const activityDistributionItems: IActivityDistribution[] = unmappedData.activityDistribution.map(
-    (ad: any) => {
-      return {
-        id: ad.id,
-        name: ad.name,
-        fill: ad.color,
-        sessionStat: ad.sessionStat,
-        spentTimePercentage: parseFloat(
-          (ad.sessionStat.spentTimeSeconds / unmappedData.sessionStat.spentTimeSeconds).toFixed(2),
-        ),
-      };
-    },
-  );
+  const sessionStat: ISessionStat = unmappedData.sessionStat;
+
+  const adItems: IActivityDistribution[] = unmappedData.activityDistribution.map((ad: any) => ({
+    id: ad.id,
+    name: ad.name,
+    fill: ad.color,
+    sessionStat: ad.sessionStat,
+    spentTimePercentage: parseFloat(
+      (ad.sessionStat.spentSeconds / sessionStat.spentSeconds).toFixed(2),
+    ),
+  }));
 
   const overallParam = new URLSearchParams(window.location.search).get('overall');
   const overallMode = typeof overallParam === 'string' ? true : false;
@@ -35,7 +34,7 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
         fill: ad.color,
         sessionStat: ad.sessionStat,
         spentTimePercentage: parseFloat(
-          (ad.sessionStat.spentTimeSeconds / unmappedData.sessionStat.spentTimeSeconds).toFixed(2),
+          (ad.sessionStat.spentSeconds / sessionStat.spentSeconds).toFixed(2),
         ),
       };
     });
@@ -53,8 +52,8 @@ const mapResponseData = (unmappedData: any): IAnalytics => {
   });
 
   return {
-    sessionStat: unmappedData.sessionStat,
-    adItems: activityDistributionItems,
+    sessionStat,
+    adItems,
     timeBars,
   };
 };

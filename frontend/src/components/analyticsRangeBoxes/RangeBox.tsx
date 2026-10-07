@@ -205,10 +205,10 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
             rangeItem[0].getTime() === range.fromDate.getTime() &&
             rangeItem[1].getTime() === range.toDate.getTime(),
         );
-        if (index == 0) {
+        if (index === 0) {
           leftArrowClickHandler();
         }
-        if (index == -1) {
+        if (index === -1) {
           setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
         }
       } else if (event.code === 'ArrowRight') {
@@ -223,10 +223,10 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
             rangeItem[0].getTime() === range.fromDate.getTime() &&
             rangeItem[1].getTime() === range.toDate.getTime(),
         );
-        if (index == rangeItems.length - 1) {
+        if (index === rangeItems.length - 1) {
           rightArrowClickHandler();
         }
-        if (index == -1) {
+        if (index === -1) {
           setRangeItems(getRangeItems(rangeType, newFromDate, windowWidth));
         }
       }
@@ -240,9 +240,9 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
   }, [rangeItems, rangeType, range.fromDate, range.toDate]);
 
   function leftArrowClickHandler() {
-    if (rangeType == 'days') {
+    if (rangeType === 'days') {
       setRangeItems((daysOfWeek) => shiftWeekDays(daysOfWeek, false));
-    } else if (rangeType == 'weeks') {
+    } else if (rangeType === 'weeks') {
       setRangeItems((weeks) => {
         const full = windowWidth >= 768;
 
@@ -263,17 +263,17 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
           return getWeeks(prevMonday, full);
         }
       });
-    } else if (rangeType == 'months') {
+    } else if (rangeType === 'months') {
       setRangeItems((months) => shiftMonths(months, false));
-    } else if (rangeType == 'years') {
+    } else if (rangeType === 'years') {
       setRangeItems((years) => shiftYears(years, false));
     }
   }
 
   function rightArrowClickHandler() {
-    if (rangeType == 'days') {
+    if (rangeType === 'days') {
       setRangeItems((daysOfWeek) => shiftWeekDays(daysOfWeek, true));
-    } else if (rangeType == 'weeks') {
+    } else if (rangeType === 'weeks') {
       setRangeItems((weeks) => {
         const full = windowWidth >= 768;
 
@@ -294,9 +294,9 @@ const RangeBox: FC<RangeBoxProps> = ({ range }) => {
           return getWeeks(nextMonday, full);
         }
       });
-    } else if (rangeType == 'months') {
+    } else if (rangeType === 'months') {
       setRangeItems((months) => shiftMonths(months, true));
-    } else if (rangeType == 'years') {
+    } else if (rangeType === 'years') {
       setRangeItems((years) => shiftYears(years, true));
     }
   }

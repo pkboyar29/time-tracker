@@ -15,12 +15,16 @@ const Modal: FC<ModalProps> = ({ children, title, modalClassnames, isOpen, onClo
   const isMouseDownInside = useRef<boolean>(false);
 
   useEffect(() => {
-    document.body.classList.add('modal-open');
+    if (isOpen) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
 
     return () => {
       document.body.classList.remove('modal-open');
     };
-  }, []);
+  }, [isOpen]);
 
   const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (modalRef.current?.contains(event.target as Node)) {

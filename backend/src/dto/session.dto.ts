@@ -1,11 +1,11 @@
 export interface SessionCreateDTO {
-  totalTimeSeconds: number;
+  totalSeconds: number;
   activity?: string;
 }
 
 export interface SessionUpdateDTO {
-  totalTimeSeconds: number;
-  spentTimeSeconds: number;
+  totalSeconds: number;
+  spentSeconds: number;
   note?: string;
   isPaused: boolean;
 }

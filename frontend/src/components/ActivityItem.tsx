@@ -335,7 +335,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
           </div>
           <div className="text-center">
             <div className="font-bold dark:text-textDark">
-              {getTimeHMS(activityCommon.spentTimeSeconds)}
+              {getTimeHMS(activityCommon.spentSeconds)}
             </div>
             <div className="text-[13px] dark:text-textDarkSecondary">
               {t('activityItem.spentTime')}

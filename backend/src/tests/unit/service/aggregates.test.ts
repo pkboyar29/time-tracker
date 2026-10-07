@@ -2,13 +2,13 @@ import analyticsService from '../../../service/analytics.service';
 import { IDailyAggregate } from '../../../model/dailyAggregate.model';
 import { Types } from 'mongoose';
 
-describe('analyticsService.getSessionsStatisticsAggregates', () => {
+describe('analyticsService.getSessionsStatAggregates', () => {
   it('should correctly sum all fields from multiple aggregates', () => {
     const aggregates: IDailyAggregate[] = [
       {
         _id: new Types.ObjectId(),
         user: new Types.ObjectId(),
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         sessionsAmount: 2,
         pausedAmount: 1,
         date: '2025-01-01',
@@ -16,31 +16,31 @@ describe('analyticsService.getSessionsStatisticsAggregates', () => {
       {
         _id: new Types.ObjectId(),
         user: new Types.ObjectId(),
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         sessionsAmount: 3,
         pausedAmount: 2,
         date: '2025-01-02',
       },
     ];
 
-    const result = analyticsService.getSessionsStatisticsAggregates({
+    const result = analyticsService.getSessionsStatAggregates({
       aggregates,
     });
 
     expect(result).toEqual({
-      spentTimeSeconds: 300,
+      spentSeconds: 300,
       sessionsAmount: 5,
       pausedAmount: 3,
     });
   });
 
   it('should return zeros when aggregates array is empty', () => {
-    const result = analyticsService.getSessionsStatisticsAggregates({
+    const result = analyticsService.getSessionsStatAggregates({
       aggregates: [],
     });
 
     expect(result).toEqual({
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
       sessionsAmount: 0,
       pausedAmount: 0,
     });
@@ -53,7 +53,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
 
     const result = analyticsService.getActivityDistributionsAggregates({
       totalStat: {
-        spentTimeSeconds: 100,
+        spentSeconds: 100,
         sessionsAmount: 2,
         pausedAmount: 1,
       },
@@ -62,7 +62,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
           _id: new Types.ObjectId(),
           user: new Types.ObjectId(),
           activity: activityId,
-          spentTimeSeconds: 100,
+          spentSeconds: 100,
           sessionsAmount: 2,
           pausedAmount: 1,
           date: '2025-01-01',
@@ -83,7 +83,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
         name: 'Work',
         color: '#000',
         sessionStat: {
-          spentTimeSeconds: 100,
+          spentSeconds: 100,
           sessionsAmount: 2,
           pausedAmount: 1,
         },
@@ -96,7 +96,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
 
     const result = analyticsService.getActivityDistributionsAggregates({
       totalStat: {
-        spentTimeSeconds: 150,
+        spentSeconds: 150,
         sessionsAmount: 3,
         pausedAmount: 1,
       },
@@ -105,7 +105,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
           _id: new Types.ObjectId(),
           user: new Types.ObjectId(),
           activity: activityId,
-          spentTimeSeconds: 100,
+          spentSeconds: 100,
           sessionsAmount: 2,
           pausedAmount: 1,
           date: '2025-01-01',
@@ -114,7 +114,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
           _id: new Types.ObjectId(),
           user: new Types.ObjectId(),
           activity: activityId,
-          spentTimeSeconds: 50,
+          spentSeconds: 50,
           sessionsAmount: 1,
           pausedAmount: 0,
           date: '2025-01-02',
@@ -130,7 +130,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
     });
 
     expect(result[0].sessionStat).toEqual({
-      spentTimeSeconds: 150,
+      spentSeconds: 150,
       sessionsAmount: 3,
       pausedAmount: 1,
     });
@@ -142,7 +142,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
 
     const result = analyticsService.getActivityDistributionsAggregates({
       totalStat: {
-        spentTimeSeconds: 300,
+        spentSeconds: 300,
         sessionsAmount: 5,
         pausedAmount: 3,
       },
@@ -151,7 +151,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
           _id: new Types.ObjectId(),
           user: new Types.ObjectId(),
           activity: activity1,
-          spentTimeSeconds: 100,
+          spentSeconds: 100,
           sessionsAmount: 2,
           pausedAmount: 1,
           date: '2025-01-01',
@@ -160,7 +160,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
           _id: new Types.ObjectId(),
           user: new Types.ObjectId(),
           activity: activity2,
-          spentTimeSeconds: 200,
+          spentSeconds: 200,
           sessionsAmount: 3,
           pausedAmount: 2,
           date: '2025-01-01',
@@ -180,7 +180,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
 
     const result = analyticsService.getActivityDistributionsAggregates({
       totalStat: {
-        spentTimeSeconds: 200,
+        spentSeconds: 200,
         sessionsAmount: 4,
         pausedAmount: 2,
       },
@@ -189,7 +189,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
           _id: new Types.ObjectId(),
           user: new Types.ObjectId(),
           activity: activityId,
-          spentTimeSeconds: 100,
+          spentSeconds: 100,
           sessionsAmount: 2,
           pausedAmount: 1,
           date: '2025-01-01',
@@ -202,7 +202,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
 
     expect(withoutActivity).toBeDefined();
     expect(withoutActivity?.sessionStat).toEqual({
-      spentTimeSeconds: 100,
+      spentSeconds: 100,
       sessionsAmount: 2,
       pausedAmount: 1,
     });
@@ -211,7 +211,7 @@ describe('analyticsService.getActivityDistributionsAggregates', () => {
   it('should return empty array when no data provided', () => {
     const result = analyticsService.getActivityDistributionsAggregates({
       totalStat: {
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
       },
@@ -237,8 +237,8 @@ describe('analyticsService.getBarStatAndAds', () => {
       { updatedDate: new Date('2024-01-02T00:00:00.000Z') }, // ❌ (lt end)
     ];
 
-    const getSessionsStatisticsSpy = jest
-      .spyOn(analyticsService, 'getSessionsStatistics')
+    const getSessionsStatSpy = jest
+      .spyOn(analyticsService, 'getSessionsStat')
       .mockReturnValue({} as any);
 
     const getActivityDistributionsSpy = jest
@@ -256,7 +256,7 @@ describe('analyticsService.getBarStatAndAds', () => {
       userActivities: [],
     });
 
-    expect(getSessionsStatisticsSpy).toHaveBeenCalledWith({
+    expect(getSessionsStatSpy).toHaveBeenCalledWith({
       sessionParts: [sessionParts[1]],
       completedSessions: [sessions[0]],
     });
@@ -283,7 +283,7 @@ describe('analyticsService.getBarStatAndAds', () => {
     const dailyAds = [...dailyAggregates];
 
     const getStatsSpy = jest
-      .spyOn(analyticsService, 'getSessionsStatisticsAggregates')
+      .spyOn(analyticsService, 'getSessionsStatAggregates')
       .mockReturnValue({} as any);
 
     const getAdsSpy = jest

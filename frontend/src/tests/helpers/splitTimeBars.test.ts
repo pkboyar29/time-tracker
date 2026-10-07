@@ -14,12 +14,12 @@ describe('mergeSessionStat', () => {
     const input: ISessionStat[] = [
       {
         sessionsAmount: 2,
-        spentTimeSeconds: 120,
+        spentSeconds: 120,
         pausedAmount: 1,
       },
       {
         sessionsAmount: 3,
-        spentTimeSeconds: 300,
+        spentSeconds: 300,
         pausedAmount: 2,
       },
     ];
@@ -28,7 +28,7 @@ describe('mergeSessionStat', () => {
 
     expect(result).toEqual({
       sessionsAmount: 5,
-      spentTimeSeconds: 420,
+      spentSeconds: 420,
       pausedAmount: 3,
     });
   });
@@ -38,7 +38,7 @@ describe('mergeSessionStat', () => {
 
     expect(result).toEqual({
       sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
       pausedAmount: 0,
     });
   });
@@ -47,7 +47,7 @@ describe('mergeSessionStat', () => {
     const input: ISessionStat[] = [
       {
         sessionsAmount: 1,
-        spentTimeSeconds: 60,
+        spentSeconds: 60,
         pausedAmount: 0,
       },
     ];
@@ -56,7 +56,7 @@ describe('mergeSessionStat', () => {
 
     expect(result).toEqual({
       sessionsAmount: 1,
-      spentTimeSeconds: 60,
+      spentSeconds: 60,
       pausedAmount: 0,
     });
   });
@@ -65,12 +65,12 @@ describe('mergeSessionStat', () => {
     const input: ISessionStat[] = [
       {
         sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         pausedAmount: 0,
       },
       {
         sessionsAmount: 0,
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         pausedAmount: 0,
       },
     ];
@@ -79,7 +79,7 @@ describe('mergeSessionStat', () => {
 
     expect(result).toEqual({
       sessionsAmount: 0,
-      spentTimeSeconds: 0,
+      spentSeconds: 0,
       pausedAmount: 0,
     });
   });
@@ -108,7 +108,7 @@ describe('mergeActivityDistributions', () => {
         ...codingMeta,
         sessionStat: {
           sessionsAmount: 1,
-          spentTimeSeconds: 600,
+          spentSeconds: 600,
           pausedAmount: 0,
         },
         spentTimePercentage: 0.6,
@@ -127,7 +127,7 @@ describe('mergeActivityDistributions', () => {
           ...codingMeta,
           sessionStat: {
             sessionsAmount: 1,
-            spentTimeSeconds: 300,
+            spentSeconds: 300,
             pausedAmount: 0,
           },
           spentTimePercentage: 0.5,
@@ -136,7 +136,7 @@ describe('mergeActivityDistributions', () => {
           ...readingMeta,
           sessionStat: {
             sessionsAmount: 1,
-            spentTimeSeconds: 300,
+            spentSeconds: 300,
             pausedAmount: 0,
           },
           spentTimePercentage: 0.5,
@@ -147,7 +147,7 @@ describe('mergeActivityDistributions', () => {
           ...codingMeta,
           sessionStat: {
             sessionsAmount: 2,
-            spentTimeSeconds: 600,
+            spentSeconds: 600,
             pausedAmount: 1,
           },
           spentTimePercentage: 1,
@@ -162,7 +162,7 @@ describe('mergeActivityDistributions', () => {
         ...codingMeta,
         sessionStat: {
           sessionsAmount: 3,
-          spentTimeSeconds: 900,
+          spentSeconds: 900,
           pausedAmount: 1,
         },
         spentTimePercentage: 0.75,
@@ -171,7 +171,7 @@ describe('mergeActivityDistributions', () => {
         ...readingMeta,
         sessionStat: {
           sessionsAmount: 1,
-          spentTimeSeconds: 300,
+          spentSeconds: 300,
           pausedAmount: 0,
         },
         spentTimePercentage: 0.25,
@@ -186,7 +186,7 @@ describe('mergeActivityDistributions', () => {
           ...codingMeta,
           sessionStat: {
             sessionsAmount: 1,
-            spentTimeSeconds: 300,
+            spentSeconds: 300,
             pausedAmount: 0,
           },
           spentTimePercentage: 1,
@@ -197,7 +197,7 @@ describe('mergeActivityDistributions', () => {
           ...readingMeta,
           sessionStat: {
             sessionsAmount: 1,
-            spentTimeSeconds: 200,
+            spentSeconds: 200,
             pausedAmount: 0,
           },
           spentTimePercentage: 1,
@@ -212,7 +212,7 @@ describe('mergeActivityDistributions', () => {
         ...codingMeta,
         sessionStat: {
           sessionsAmount: 1,
-          spentTimeSeconds: 300,
+          spentSeconds: 300,
           pausedAmount: 0,
         },
         spentTimePercentage: 0.6,
@@ -221,7 +221,7 @@ describe('mergeActivityDistributions', () => {
         ...readingMeta,
         sessionStat: {
           sessionsAmount: 1,
-          spentTimeSeconds: 200,
+          spentSeconds: 200,
           pausedAmount: 0,
         },
         spentTimePercentage: 0.4,
@@ -273,7 +273,7 @@ describe('splitTimeBars', () => {
       barName: 'Jan',
       barDetailedName: 'January 2025',
       sessionStat: {
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
       },
@@ -285,7 +285,7 @@ describe('splitTimeBars', () => {
       barName: 'Feb',
       barDetailedName: 'February 2025',
       sessionStat: {
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
       },
@@ -297,7 +297,7 @@ describe('splitTimeBars', () => {
       barName: 'Mar',
       barDetailedName: 'March 2025',
       sessionStat: {
-        spentTimeSeconds: 9600,
+        spentSeconds: 9600,
         sessionsAmount: 12,
         pausedAmount: 8,
       },
@@ -309,7 +309,7 @@ describe('splitTimeBars', () => {
       barName: 'Apr',
       barDetailedName: 'April 2025',
       sessionStat: {
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
       },
@@ -321,7 +321,7 @@ describe('splitTimeBars', () => {
       barName: 'May',
       barDetailedName: 'May 2025',
       sessionStat: {
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
       },
@@ -333,7 +333,7 @@ describe('splitTimeBars', () => {
       barName: 'Jun',
       barDetailedName: 'June 2025',
       sessionStat: {
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
       },
@@ -345,7 +345,7 @@ describe('splitTimeBars', () => {
       barName: 'Jul',
       barDetailedName: 'July 2025',
       sessionStat: {
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
       },
@@ -357,7 +357,7 @@ describe('splitTimeBars', () => {
       barName: 'Aug',
       barDetailedName: 'August 2025',
       sessionStat: {
-        spentTimeSeconds: 0,
+        spentSeconds: 0,
         sessionsAmount: 0,
         pausedAmount: 0,
       },
@@ -369,7 +369,7 @@ describe('splitTimeBars', () => {
       barName: 'Sep',
       barDetailedName: 'September 2025',
       sessionStat: {
-        spentTimeSeconds: 17562,
+        spentSeconds: 17562,
         sessionsAmount: 25,
         pausedAmount: 13,
       },
@@ -381,7 +381,7 @@ describe('splitTimeBars', () => {
       barName: 'Oct',
       barDetailedName: 'October 2025',
       sessionStat: {
-        spentTimeSeconds: 19980,
+        spentSeconds: 19980,
         sessionsAmount: 74,
         pausedAmount: 47,
       },
@@ -393,7 +393,7 @@ describe('splitTimeBars', () => {
       barName: 'Nov',
       barDetailedName: 'November 2025',
       sessionStat: {
-        spentTimeSeconds: 5926,
+        spentSeconds: 5926,
         sessionsAmount: 17,
         pausedAmount: 77,
       },
@@ -405,7 +405,7 @@ describe('splitTimeBars', () => {
       barName: 'Dec',
       barDetailedName: 'December 2025',
       sessionStat: {
-        spentTimeSeconds: 6688,
+        spentSeconds: 6688,
         sessionsAmount: 45,
         pausedAmount: 132,
       },

@@ -267,7 +267,7 @@ async function isDailyGoalCompleted(
     timezone,
   });
 
-  if (todayAggregate.spentTimeSeconds >= dailyGoalSeconds) {
+  if (todayAggregate.spentSeconds >= dailyGoalSeconds) {
     return true;
   }
 
@@ -275,7 +275,7 @@ async function isDailyGoalCompleted(
 }
 
 async function isDailyGoalCompletedNow(
-  newSpentTimeSeconds: number,
+  newSpentSeconds: number,
   dailyGoalSeconds: number,
   userId: string,
   timezone: string,
@@ -285,15 +285,15 @@ async function isDailyGoalCompletedNow(
     timezone,
   });
 
-  let secondsBeforeUpdate = todayAggregate.spentTimeSeconds;
-  secondsBeforeUpdate -= newSpentTimeSeconds;
+  let secondsBeforeUpdate = todayAggregate.spentSeconds;
+  secondsBeforeUpdate -= newSpentSeconds;
 
   // if goal has reached before
   if (secondsBeforeUpdate >= dailyGoalSeconds) {
     return false;
   }
   // if goal has reached now
-  if (secondsBeforeUpdate + newSpentTimeSeconds >= dailyGoalSeconds) {
+  if (secondsBeforeUpdate + newSpentSeconds >= dailyGoalSeconds) {
     return true;
   }
   // if goal hasn't reached yet
@@ -513,13 +513,10 @@ async function updateShowTimerInTitle(showTimerInTitle: boolean, userId: string)
 async function exportUserData(userId: string): Promise<Buffer> {
   let fileContent = '';
 
-  const getSessionsInfoInBrackets = (info: {
-    sessionsAmount: number;
-    spentTimeSeconds: number;
-  }) => {
+  const getSessionsInfoInBrackets = (info: { sessionsAmount: number; spentSeconds: number }) => {
     return ` (${info.sessionsAmount} sessions, ${Math.floor(
-      info.spentTimeSeconds / 60,
-    )} minutes, ${Math.floor(info.spentTimeSeconds / 3600)} hours)`;
+      info.spentSeconds / 60,
+    )} minutes, ${Math.floor(info.spentSeconds / 3600)} hours)`;
   };
 
   const activityGroups = await activityGroupService.getActivityGroups({
@@ -531,7 +528,7 @@ async function exportUserData(userId: string): Promise<Buffer> {
       group.name,
       getSessionsInfoInBrackets({
         sessionsAmount: group.sessionsAmount,
-        spentTimeSeconds: group.spentTimeSeconds,
+        spentSeconds: group.spentSeconds,
       }),
       '\n',
     );
@@ -547,7 +544,7 @@ async function exportUserData(userId: string): Promise<Buffer> {
         activity.name,
         getSessionsInfoInBrackets({
           sessionsAmount: activity.sessionsAmount,
-          spentTimeSeconds: activity.spentTimeSeconds,
+          spentSeconds: activity.spentSeconds,
         }),
         '\n',
       );
@@ -561,14 +558,14 @@ async function exportUserData(userId: string): Promise<Buffer> {
     userId,
   });
   const sessionsWithoutActivityAmount: number = sessionsWithoutActivity.length ?? 0;
-  let sessionsWithoutActivitySpentTimeSeconds: number = 0;
+  let sessionsWOActivitySpentSeconds: number = 0;
   sessionsWithoutActivity.forEach((s) => {
-    sessionsWithoutActivitySpentTimeSeconds += s.spentTimeSeconds;
+    sessionsWOActivitySpentSeconds += s.spentSeconds;
   });
 
   const withoutActivityLine: string = `# Without activity ${getSessionsInfoInBrackets({
     sessionsAmount: sessionsWithoutActivityAmount,
-    spentTimeSeconds: sessionsWithoutActivitySpentTimeSeconds,
+    spentSeconds: sessionsWOActivitySpentSeconds,
   })}`;
   fileContent = fileContent.concat(withoutActivityLine);
 
@@ -633,8 +630,8 @@ async function importFile(
 
       sessions.push({
         _id: sessionId,
-        totalTimeSeconds: sessionDuration,
-        spentTimeSeconds: sessionDuration,
+        totalSeconds: sessionDuration,
+        spentSeconds: sessionDuration,
         activity: activity.id,
         completed: true,
         createdDate: activeDate,
@@ -643,7 +640,7 @@ async function importFile(
       });
 
       sessionParts.push({
-        spentTimeSeconds: sessionDuration,
+        spentSeconds: sessionDuration,
         session: sessionId,
         user: userId,
         createdDate: activeDate,
