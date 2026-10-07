@@ -8,7 +8,7 @@
     "docker-start": "vite --host",
     "build": "vite build",
     "preview": "vite preview",
-    "types": "tsc --noEmit --project ./tsconfig.json && tsc --noEmit --project ./tsconfig.node.json",
+    "types": "tsc --noEmit --project ./tsconfig.json",
     "test": "cross-env NODE_OPTIONS=--experimental-vm-modules npx jest"
   },
   "dependencies": {

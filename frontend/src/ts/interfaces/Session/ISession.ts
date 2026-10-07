@@ -8,3 +8,10 @@ export interface ISession {
   completed: boolean;
   note?: string;
 }
+
+export interface ISessionLegacy {
+  spentTimeSeconds?: number;
+  totalTimeSeconds?: number;
+  spentSeconds?: number;
+  totalSeconds?: number;
+}

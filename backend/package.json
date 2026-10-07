@@ -11,7 +11,7 @@
     "build": "tsc -p tsconfig.build.json",
     "start": "npm run build && pm2 start ./build/index.js --name api --no-daemon",
     "startWorker": "npm run build && node build/worker.js",
-    "types": "tsc --noEmit --project ./tsconfig.json && tsc --noEmit --project ./tsconfig.node.json"
+    "types": "tsc --noEmit --project ./tsconfig.json"
   },
   "author": "",
   "license": "ISC",
