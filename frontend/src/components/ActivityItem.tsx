@@ -24,6 +24,7 @@ import KebabHorizontalIcon from '../icons/KebabHorizontalIcon';
 import SessionCreateModal from './modals/SessionCreateModal';
 import Modal from './modals/Modal';
 import DropdownMenu from './common/DropdownMenu';
+import ColorDot from './common/ColorDot';
 
 interface ActivityBoxProps {
   activityCommon: IActivity | IActivityGroup;
@@ -195,12 +196,7 @@ const ActivityItem: FC<ActivityBoxProps> = ({
       <div className="p-5 bg-surfaceLight dark:bg-surfaceDark border border-gray-300/80 dark:border-white/10 border-solid rounded-xl w-[320px] min-h-[150px] flex flex-col">
         <div className="flex items-start justify-between flex-1 gap-4">
           <div className="flex items-center gap-2">
-            {isActivity && (
-              <span
-                className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: activityCommon.color }}
-              />
-            )}
+            {isActivity && <ColorDot color={activityCommon.color} />}
 
             <input
               value={name}
