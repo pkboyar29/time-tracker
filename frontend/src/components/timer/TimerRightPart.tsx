@@ -64,15 +64,17 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
   const [durationMode, setDurationMode] = useState<'rangeSlider' | 'inputs'>('rangeSlider');
 
   useEffect(() => {
-    if (activitiesToChoose) {
-      if (
-        ![...activitiesToChoose.topActivities, ...activitiesToChoose.remainingActivities].find(
-          (a) => a.id === selectedActivityId,
-        )
-      ) {
-        setSelectedActivityId('');
-        setActivityInLS('');
-      }
+    if (!activitiesToChoose) {
+      return;
+    }
+
+    const allActivities = [
+      ...activitiesToChoose.topActivities,
+      ...activitiesToChoose.remainingActivities,
+    ];
+    if (!allActivities.find((a) => a.id === selectedActivityId)) {
+      setSelectedActivityId('');
+      setActivityInLS('');
     }
   }, [activitiesToChoose]);
 
