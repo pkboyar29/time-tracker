@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import SessionPart from '../model/sessionPart.model';
 import Session from '../model/session.model';
 
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker?replicaSet=rs0';
 
 mongoose.connect(MONGO_URL).then(() => {
   console.log('connection with database is successful');

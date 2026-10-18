@@ -6,7 +6,9 @@ import { getReadableTime, getTimeHHmmFromDate } from '../../helpers/timeHelpers'
 import { useTranslation } from 'react-i18next';
 import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { setActivityInLS, setSelectedSecondsInLS } from '../../helpers/localstorageHelpers';
+import { IActivity } from '../../ts/interfaces/Activity/IActivity';
 
+import ColorDot from '../common/ColorDot';
 import PrimaryClipLoader from '../common/PrimaryClipLoader';
 import CustomSelect from '../common/CustomSelect';
 import SegmentedControl from '../common/SegmentedControl';
@@ -23,6 +25,18 @@ interface TimerRightPartProps {
   setSelectedActivityId: (newActivityId: string) => void;
 }
 
+const getActivitiesOptions = (activities: IActivity[]) => {
+  return activities.map((a) => ({
+    id: a.id,
+    name: (
+      <div className="flex w-full gap-1.5 items-center">
+        <ColorDot color={a.color} />
+        {a.name}
+      </div>
+    ),
+  }));
+};
+
 const TimerRightPart: FC<TimerRightPartProps> = ({
   selectedSeconds,
   selectedActivityId,
@@ -35,24 +49,32 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
     queryKey: ['activitiesToChoose'],
     queryFn: () => fetchActivities(),
   });
+  const topActivitiesOptions = activitiesToChoose
+    ? getActivitiesOptions(activitiesToChoose.topActivities)
+    : [];
+  const remainingActivitiesOptions = activitiesToChoose
+    ? getActivitiesOptions(activitiesToChoose.remainingActivities)
+    : [];
 
   const { timerState, timerEndDate } = useTimer();
-  const isTimerStarted = timerState.status != 'idle';
+  const isTimerStarted = timerState.status !== 'idle';
 
   const { currentVolume, updateVolume } = useAudioPlayer();
 
   const [durationMode, setDurationMode] = useState<'rangeSlider' | 'inputs'>('rangeSlider');
 
   useEffect(() => {
-    if (activitiesToChoose) {
-      if (
-        ![...activitiesToChoose.topActivities, ...activitiesToChoose.remainingActivities].find(
-          (a) => a.id === selectedActivityId,
-        )
-      ) {
-        setSelectedActivityId('');
-        setActivityInLS('');
-      }
+    if (!activitiesToChoose) {
+      return;
+    }
+
+    const allActivities = [
+      ...activitiesToChoose.topActivities,
+      ...activitiesToChoose.remainingActivities,
+    ];
+    if (!allActivities.find((a) => a.id === selectedActivityId)) {
+      setSelectedActivityId('');
+      setActivityInLS('');
     }
   }, [activitiesToChoose]);
 
@@ -99,12 +121,13 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
             {isTimerStarted && (
               <span className="text-base dark:text-textDark sm:hidden">
                 :{' '}
-                {timerState.session?.activity
-                  ? timerState.session?.activity.name
+                {timerState.session.activity
+                  ? timerState.session.activity.name
                   : t('withoutActivity')}
               </span>
             )}
           </span>
+
           {!isTimerStarted ? (
             <div className="h-[42px] flex items-center">
               {isLoadingActivities ? (
@@ -123,12 +146,12 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
                       {
                         optGroupName: `${t('timerPage.lastActivities')} ⭐`,
                         color: 'red',
-                        options: activitiesToChoose.topActivities,
+                        options: topActivitiesOptions,
                       },
                       {
                         optGroupName: t('timerPage.allActivities'),
                         color: 'standart',
-                        options: [...activitiesToChoose.remainingActivities],
+                        options: remainingActivitiesOptions,
                       },
                     ]}
                   />
@@ -136,11 +159,9 @@ const TimerRightPart: FC<TimerRightPartProps> = ({
               )}
             </div>
           ) : timerState.session.activity ? (
-            <div className="hidden text-base sm:inline-flex items-center gap-1.5 dark:text-textDark">
-              <span
-                className="w-3 h-3 rounded-full shrink-0"
-                style={{ backgroundColor: timerState.session.activity.color }}
-              />
+            <div className="items-center hidden gap-2 text-base sm:inline-flex dark:text-textDark">
+              <ColorDot color={timerState.session.activity.color} />
+
               {timerState.session.activity.name}
             </div>
           ) : (

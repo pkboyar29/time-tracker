@@ -46,17 +46,20 @@ export const createSession = async (payload: ISessionCreate): Promise<ISession> 
   return mapResponseData(data);
 };
 
-export const updateSession = async (payload: ISession, isPaused?: boolean): Promise<ISession> => {
-  const noteFromLS = getNoteFromLS(payload.id);
-
+export const updateSession = async (payload: {
+  session: ISession;
+  isPaused: boolean;
+}): Promise<ISession> => {
+  const session = payload.session;
+  const noteFromLS = getNoteFromLS(session.id);
   const body = {
-    spentSeconds: payload.spentSeconds,
-    totalSeconds: payload.totalSeconds,
+    spentSeconds: session.spentSeconds,
+    totalSeconds: session.totalSeconds,
     note: noteFromLS,
-    isPaused: isPaused !== undefined ? isPaused : false,
+    isPaused: payload.isPaused,
   };
 
-  const { data } = await axios.put(`/sessions/${payload.id}`, body);
+  const { data } = await axios.put(`/sessions/${session.id}`, body);
 
   return mapResponseData(data);
 };

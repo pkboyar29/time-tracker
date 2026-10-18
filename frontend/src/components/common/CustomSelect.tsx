@@ -1,9 +1,9 @@
-import { FC, useState, useRef, useEffect, useMemo } from 'react';
+import { FC, ReactNode, useState, useRef, useEffect, useMemo } from 'react';
 import CaretIcon from '../../icons/CaretIcon';
 
 interface Option {
   id: string;
-  name: string;
+  name: string | ReactNode;
 }
 
 interface OptionGroup {
@@ -82,9 +82,9 @@ const CustomSelect: FC<CustomSelectProps> = ({
               <div key={i}>
                 <div
                   className={`text-sm font-semibold ${
-                    optGroup.color == 'red'
+                    optGroup.color === 'red'
                       ? 'text-primary'
-                      : optGroup.color == 'grey'
+                      : optGroup.color === 'grey'
                         ? 'text-gray-500'
                         : 'dark:text-textDark'
                   }`}
@@ -101,9 +101,9 @@ const CustomSelect: FC<CustomSelectProps> = ({
                         setDropdown(false);
                       }}
                       className={`py-1.5 pl-4 text-base transition duration-300 rounded-md hover:bg-surfaceLightHover dark:hover:bg-surfaceDark truncate ${
-                        optGroup.color == 'red'
+                        optGroup.color === 'red'
                           ? 'text-primary'
-                          : optGroup.color == 'grey'
+                          : optGroup.color === 'grey'
                             ? 'text-gray-500'
                             : 'dark:text-textDark'
                       }`}
