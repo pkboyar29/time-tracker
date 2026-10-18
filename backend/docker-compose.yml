@@ -1,9 +1,46 @@
 services:
+  # TODO: оставить только одно название (mongo_db/database_container)
   mongo_db:
     container_name: database_container
     image: mongo:8.0.5
+    command: ['mongod', '--replSet', 'rs0', '--bind_ip_all']
     volumes:
       - mongo_db:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mongo_setup:
+    image: mongo:8.0.5
+    depends_on:
+      mongo_db:
+        condition: service_healthy
+    restart: 'no'
+    command:
+      - mongosh
+      - --host
+      - database_container:27017
+      - --quiet
+      - --eval
+      - |
+        try {
+          rs.status();
+          print("Replica set already initialized");
+        } catch (e) {
+          if (e.code === 94) {
+            rs.initiate({
+              _id: "rs0",
+              members: [
+                { _id: 0, host: "database_container:27017" }
+              ]
+            });
+            print("Replica set initialized");
+          } else {
+            throw e;
+          }
+        }
 
   redis:
     image: redis:7.2.8

@@ -7,6 +7,7 @@ import SessionPart from '../../../model/sessionPart.model';
 import { HttpError } from '../../../helpers/HttpError';
 import analyticsService from '../../../service/analytics.service';
 import { SessionCreateDTO } from '../../../dto/session.dto';
+import mongoose from 'mongoose';
 
 describe('sessionService.getSession', () => {
   const mockSession = {
@@ -126,10 +127,17 @@ describe('sessionService.updateSession', () => {
     deleteOne: jest.fn().mockResolvedValue({ deletedCount: 1 }),
   } as unknown as HydratedDocument<ISession>;
 
+  const mockMongoSession = {
+    withTransaction: jest.fn((callback) => callback()),
+    endSession: jest.fn(),
+  };
+
   it('should throw 404 if session does not exist', async () => {
     jest
       .spyOn(sessionService, 'getSession')
       .mockRejectedValue(new HttpError(404, 'Session Not Found'));
+
+    jest.spyOn(mongoose, 'startSession').mockResolvedValue(mockMongoSession as any);
 
     try {
       await sessionService.updateSession(
@@ -179,6 +187,8 @@ describe('sessionService.updateSession', () => {
       completed: true,
     } as any);
 
+    jest.spyOn(mongoose, 'startSession').mockResolvedValue(mockMongoSession as any);
+
     try {
       await sessionService.updateSession(
         'sessionId',
@@ -205,6 +215,8 @@ describe('sessionService.updateSession', () => {
       completed: false,
       spentSeconds: 20,
     } as any);
+
+    jest.spyOn(mongoose, 'startSession').mockResolvedValue(mockMongoSession as any);
 
     try {
       await sessionService.updateSession(
@@ -238,10 +250,11 @@ describe('sessionService.updateSession', () => {
 
     jest.spyOn(sessionService, 'getSession').mockResolvedValue(sessionMock as any);
 
+    jest.spyOn(mongoose, 'startSession').mockResolvedValue(mockMongoSession as any);
+
     const saveSpy = jest.spyOn(SessionPart.prototype, 'save').mockResolvedValue(true);
 
     jest.spyOn(userService, 'isDailyGoalCompletedMarkedToday').mockResolvedValue(true);
-
     jest.spyOn(analyticsService, 'applySessionUpdateToAggregates').mockResolvedValue(undefined);
 
     await sessionService.updateSession(

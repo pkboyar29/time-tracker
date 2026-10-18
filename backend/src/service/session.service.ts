@@ -149,6 +149,18 @@ async function updateSession(
       throw new HttpError(400, 'totalSeconds must be greater or equal spentSeconds');
     }
 
+    const now = new Date();
+    let partSpentSeconds = 0;
+    let isCompleted = false;
+
+    const mongoSession = await mongoose.startSession();
+
+    // TODO: нужно передавать mongoSession. А зачем запросу чтения быть в транзакции впринципе?
+    // TODO: если и делать, то необязательным параметром
+    //     const session = await Session.findOne({
+    //   _id: sessionId,
+    //   user: userId,
+    // }).session(mongoSession);
     const session = await sessionService.getSession(sessionId, userId);
     if (session.completed) {
       throw new HttpError(400, 'You cannot update an already completed session');
@@ -157,62 +169,58 @@ async function updateSession(
       throw new HttpError(400, "You cannot reduce a session's spentSeconds");
     }
 
-    const now = new Date();
+    mongoSession.withTransaction(async () => {
+      if (sessionDTO.spentSeconds > session.spentSeconds) {
+        partSpentSeconds = sessionDTO.spentSeconds - session.spentSeconds;
+        const newSessionPart = new SessionPart({
+          spentSeconds: partSpentSeconds,
+          session: sessionId,
+          user: userId,
+          paused: sessionDTO.isPaused,
+          createdDate: now,
+        });
+        await newSessionPart.save({ session: mongoSession });
+      }
 
-    let partSpentSeconds = 0;
-    if (sessionDTO.spentSeconds > session.spentSeconds) {
-      partSpentSeconds = sessionDTO.spentSeconds - session.spentSeconds;
-      const newSessionPart = new SessionPart({
-        spentSeconds: partSpentSeconds,
-        session: sessionId,
-        user: userId,
-        paused: sessionDTO.isPaused,
-        createdDate: now,
-      });
-      await newSessionPart.save();
-    }
+      session.totalSeconds = sessionDTO.totalSeconds;
+      session.spentSeconds = sessionDTO.spentSeconds;
+      session.note = sessionDTO.note;
+      session.updatedDate = now;
+      const validationError = session.validateSync();
+      if (validationError) {
+        const fields = ['totalSeconds', 'spentSeconds', 'note'] as const;
 
-    session.totalSeconds = sessionDTO.totalSeconds;
-    session.spentSeconds = sessionDTO.spentSeconds;
-    session.note = sessionDTO.note;
-    session.updatedDate = now;
-
-    const validationError = session.validateSync();
-    if (validationError) {
-      const fields = ['totalSeconds', 'spentSeconds', 'note'] as const;
-
-      for (const field of fields) {
-        const err = validationError.errors[field];
-        if (err) {
-          throw new HttpError(400, err.toString());
+        for (const field of fields) {
+          const err = validationError.errors[field];
+          if (err) {
+            throw new HttpError(400, err.toString());
+          }
         }
       }
-    }
 
-    let isCompleted = false;
-    if (session.spentSeconds === session.totalSeconds) {
-      session.completed = true;
+      if (session.spentSeconds === session.totalSeconds) {
+        session.completed = true;
+        isCompleted = true;
 
-      isCompleted = true;
+        if (session.activity) {
+          await activityService.updateActivityStats(
+            session.activity.id.toString(),
+            1,
+            session.totalSeconds,
+            userId,
+          );
 
-      if (session.activity) {
-        await activityService.updateActivityStats(
-          session.activity.id.toString(),
-          1,
-          session.totalSeconds,
-          userId,
-        );
-
-        await activityGroupService.updateActivityGroupStats(
-          session.activity.activityGroup.id.toString(),
-          1,
-          session.totalSeconds,
-          userId,
-        );
+          await activityGroupService.updateActivityGroupStats(
+            session.activity.activityGroup.id.toString(),
+            1,
+            session.totalSeconds,
+            userId,
+          );
+        }
       }
-    }
 
-    await session.save();
+      await session.save({ session: mongoSession });
+    });
 
     await analyticsService.applySessionUpdateToAggregates({
       userId,

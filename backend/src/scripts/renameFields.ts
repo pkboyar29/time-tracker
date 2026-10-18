@@ -6,7 +6,7 @@ import ActivityGroup from '../model/activityGroup.model';
 import DailyAggregate from '../model/dailyAggregate.model';
 import DailyActivityDistribution from '../model/dailyActivityDistribution.model';
 
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker';
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo_db:27017/time_tracker?replicaSet=rs0';
 
 mongoose.connect(MONGO_URL).then(async () => {
   console.log('connection with database is successful');

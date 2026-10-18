@@ -1,13 +1,18 @@
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
 import userService from '../../service/user.service';
 
 export const setupIntegrationHooks = () => {
-  let mongo: MongoMemoryServer;
+  let mongo: MongoMemoryReplSet;
   let accessToken: string = '';
 
   beforeAll(async () => {
-    mongo = await MongoMemoryServer.create();
+    mongo = await MongoMemoryReplSet.create({
+      replSet: {
+        count: 1,
+        storageEngine: 'wiredTiger',
+      },
+    });
     const uri = mongo.getUri();
 
     await mongoose.connect(uri);
