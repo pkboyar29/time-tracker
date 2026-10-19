@@ -39,7 +39,7 @@ export const fetchSessions = async (params: Record<string, unknown>): Promise<IS
 export const createSession = async (payload: ISessionCreate): Promise<ISession> => {
   // const { data } = await axios.post('/sessions', {
   //   ...payload,
-  //   totalSeconds: 20,
+  //   totalSeconds: 15,
   // });
   const { data } = await axios.post('/sessions', payload);
 
