@@ -75,4 +75,7 @@ backend_build_and_deploy:
     - echo "HOST *" > ~/.ssh/config
     - echo "StrictHostKeyChecking no" >> ~/.ssh/config
   script:
-    - ssh root@$VPS_IP "mkdir -p ~/time-tracker && cd ~/time-tracker && git pull --no-rebase && cd backend/ && docker compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"
+    - ssh root@$VPS_IP "mkdir -p ~/time-tracker &&
+      cd ~/time-tracker && git pull --no-rebase &&
+      cd backend/ && docker compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache &&
+      docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d"

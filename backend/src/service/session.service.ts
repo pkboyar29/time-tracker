@@ -169,7 +169,7 @@ async function updateSession(
       throw new HttpError(400, "You cannot reduce a session's spentSeconds");
     }
 
-    mongoSession.withTransaction(async () => {
+    await mongoSession.withTransaction(async () => {
       if (sessionDTO.spentSeconds > session.spentSeconds) {
         partSpentSeconds = sessionDTO.spentSeconds - session.spentSeconds;
         const newSessionPart = new SessionPart({
