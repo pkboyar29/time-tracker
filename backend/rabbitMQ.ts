@@ -9,10 +9,16 @@ export async function getRabbitConnection(): Promise<ChannelModel> {
     return connection;
   }
 
+  const user = process.env.RABBITMQ_DEFAULT_USER;
+  const password = process.env.RABBITMQ_DEFAULT_PASS;
+  if (!user || !password) {
+    throw new Error('RABBITMQ_DEFAULT_USER and RABBITMQ_DEFAULT_PASS must be set');
+  }
+
   while (!connection) {
     try {
-      // TODO: добавить в .env (однако в docker-compose.yml также должно быть обращение к .env файлу)
-      connection = await amqplib.connect('amqp://admin123:admin123@rabbitmq:5672');
+      const url = `amqp://${user}:${password}@rabbitmq:5672`;
+      connection = await amqplib.connect(url);
       connection.on('close', () => {
         logger.error('RabbitMQ connection closed');
         connection = null;
