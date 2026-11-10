@@ -1,5 +1,4 @@
 services:
-  # TODO: оставить только одно название (mongo_db/database_container)
   mongo_db:
     container_name: database_container
     image: mongo:8.0.5
@@ -56,8 +55,8 @@ services:
       - '5672:5672' # AMQP
       - '15672:15672' # Management UI
     environment:
-      RABBITMQ_DEFAULT_USER: admin123
-      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
       RABBITMQ_DEFAULT_VHOST: /
     volumes:
       - ./run/rabbitmq_data:/var/lib/rabbitmq

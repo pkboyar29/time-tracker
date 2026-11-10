@@ -1,3 +1,9 @@
 services:
   node_app:
+    volumes:
+      - uploads:/usr/uploads
     command: npm run start
+
+  worker:
+    volumes: []
+    command: npm run startWorker
